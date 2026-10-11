@@ -1,6 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 
-import 'screens/home_screen.dart';
+import 'screens/main_shell.dart';
 import 'theme/app_theme.dart';
 
 // Point d'entrée : Flutter démarre l'app ici.
@@ -18,7 +18,7 @@ class SentinelApp extends StatelessWidget {
       title: 'Sentinel',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light,
-      home: const HomeScreen(),
+      home: const MainShell(),
     );
   }
 }
