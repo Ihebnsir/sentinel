@@ -5,20 +5,16 @@ import '../theme/app_colors.dart';
 
 /// Une ligne d'action : icône, titre + description, et points à droite.
 class ActionTile extends StatelessWidget {
-  const ActionTile({super.key, required this.action});
+  const ActionTile({super.key, required this.action, this.onTap});
 
   final SecurityAction action;
+  final VoidCallback? onTap; // null : ligne non cliquable
 
   @override
   Widget build(BuildContext context) {
     // InkWell rend la ligne cliquable, avec un effet d'onde au toucher.
     return InkWell(
-      onTap: () {
-        // SnackBar : petit message temporaire en bas de l'écran.
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Bientôt disponible')),
-        );
-      },
+      onTap: onTap,
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 16),
         // Row aligne ses enfants horizontalement, de gauche à droite.

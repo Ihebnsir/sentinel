@@ -4,9 +4,13 @@ import '../theme/app_colors.dart';
 
 /// L'arche du score : elle se remplit de bas en haut selon le score (0 à 100).
 class ScoreArch extends StatelessWidget {
-  const ScoreArch({super.key, required this.score});
+  const ScoreArch({super.key, required this.score}) : message = null;
+
+  /// Arche vide avec un message à la place du chiffre (pendant l'analyse).
+  const ScoreArch.empty({super.key, required String this.message}) : score = 0;
 
   final int score;
+  final String? message;
 
   static const _width = 220.0;
   static const _height = 300.0;
@@ -20,6 +24,22 @@ class ScoreArch extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final message = this.message;
+    if (message != null) {
+      return _frame(
+        background: AppColors.bleu.withValues(alpha: 0.12),
+        children: [
+          Positioned(
+            bottom: 28,
+            child: Text(
+              message,
+              style: TextStyle(color: AppColors.encre.withValues(alpha: 0.6)),
+            ),
+          ),
+        ],
+      );
+    }
+
     final color = colorFor(score);
 
     // TweenAnimationBuilder anime une valeur de 0 jusqu'au score.
@@ -34,53 +54,58 @@ class ScoreArch extends StatelessWidget {
         final onFill = value >= 45;
         final textColor = onFill ? Colors.white : AppColors.encre;
 
-        // ClipRRect découpe le haut en demi-cercle (rayon = moitié de la largeur).
-        return ClipRRect(
-          borderRadius: const BorderRadius.vertical(
-            top: Radius.circular(_width / 2),
-          ),
-          child: Container(
-            width: _width,
-            height: _height,
-            color: color.withValues(alpha: 0.12),
-            // Stack empile les widgets les uns sur les autres.
-            child: Stack(
-              alignment: Alignment.bottomCenter,
-              children: [
-                // Partie remplie : sa hauteur suit la valeur animée.
-                FractionallySizedBox(
-                  heightFactor: value / 100,
-                  widthFactor: 1,
-                  child: Container(color: color),
-                ),
-                // Le chiffre et « sur 100 », placés en bas.
-                Positioned(
-                  bottom: 28,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        '${value.round()}',
-                        style: TextStyle(
-                          fontSize: 72,
-                          fontWeight: FontWeight.w300,
-                          color: textColor,
-                        ),
-                      ),
-                      Text(
-                        'sur 100',
-                        style: TextStyle(
-                          color: textColor.withValues(alpha: 0.8),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
+        return _frame(
+          background: color.withValues(alpha: 0.12),
+          children: [
+            // Partie remplie : sa hauteur suit la valeur animée.
+            FractionallySizedBox(
+              heightFactor: value / 100,
+              widthFactor: 1,
+              child: Container(color: color),
             ),
-          ),
+            // Le chiffre et « sur 100 », placés en bas.
+            Positioned(
+              bottom: 28,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    '${value.round()}',
+                    style: TextStyle(
+                      fontSize: 72,
+                      fontWeight: FontWeight.w300,
+                      color: textColor,
+                    ),
+                  ),
+                  Text(
+                    'sur 100',
+                    style: TextStyle(
+                      color: textColor.withValues(alpha: 0.8),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         );
       },
+    );
+  }
+
+  /// La forme de l'arche : fond coloré, haut arrondi, contenu empilé.
+  Widget _frame({required Color background, required List<Widget> children}) {
+    // ClipRRect découpe le haut en demi-cercle (rayon = moitié de la largeur).
+    return ClipRRect(
+      borderRadius: const BorderRadius.vertical(
+        top: Radius.circular(_width / 2),
+      ),
+      child: Container(
+        width: _width,
+        height: _height,
+        color: background,
+        // Stack empile les widgets les uns sur les autres.
+        child: Stack(alignment: Alignment.bottomCenter, children: children),
+      ),
     );
   }
 }
