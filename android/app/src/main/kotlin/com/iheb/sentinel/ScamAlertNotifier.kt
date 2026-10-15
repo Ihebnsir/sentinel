@@ -71,10 +71,17 @@ object ScamAlertNotifier {
     }
 
     @Suppress("DEPRECATION")
-    private fun builder(context: Context): Notification.Builder =
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+    private fun builder(context: Context): Notification.Builder {
+        val builder = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             Notification.Builder(context, CHANNEL_ID)
         } else {
             Notification.Builder(context).setPriority(Notification.PRIORITY_HIGH)
         }
+        // Sécurité : sinon Android ajoute tout seul un bouton « Ouvrir le
+        // lien » (action intelligente) qui ouvrirait le site de l'arnaque.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            builder.setAllowSystemGeneratedContextualActions(false)
+        }
+        return builder
+    }
 }

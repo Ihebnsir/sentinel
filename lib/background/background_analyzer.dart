@@ -48,13 +48,32 @@ const defaultAlertReason =
 /// La réponse envoyée à Kotlin : verdict, pourcentage, raison principale.
 /// verdict = nom technique stable ("arnaque", "suspect", "rien"),
 /// pas le texte affiché, pour que Kotlin puisse le comparer sans risque.
+/// La raison est affichée dans l'alerte : ses domaines sont neutralisés
+/// (« site[.]xyz ») pour qu'Android n'en fasse pas un lien cliquable.
 Map<String, Object> backgroundResponseFor(MessageAnalysis analysis) => {
   'verdict': analysis.verdict.name,
   'percent': analysis.percent,
   'mainReason': analysis.reasons.isEmpty
       ? defaultAlertReason
-      : analysis.reasons.first,
+      : defangDomains(analysis.reasons.first),
 };
+
+// Un nom de domaine ou une adresse IP : des mots séparés par des points.
+final _domainLike = RegExp(
+  r'[a-z0-9-]+(?:\.[a-z0-9-]+)+',
+  caseSensitive: false,
+);
+final _letter = RegExp(r'[a-z]', caseSensitive: false);
+final _ip = RegExp(r'^\d{1,3}(?:\.\d{1,3}){3}$');
+
+/// Rend les domaines non cliquables, comme les analystes sécurité :
+/// « poste-tn-livraison.xyz » → « poste-tn-livraison[.]xyz ».
+/// Les nombres comme « 3.5 » ne sont pas touchés.
+String defangDomains(String text) => text.replaceAllMapped(_domainLike, (m) {
+  final word = m[0]!;
+  final isDomain = _letter.hasMatch(word.split('.').last) || _ip.hasMatch(word);
+  return isDomain ? word.replaceAll('.', '[.]') : word;
+});
 
 /// Nom affiché des messageries « chat » surveillées.
 const _chatAppNames = {

@@ -55,6 +55,62 @@ void main() {
       expect(response.keys, {'verdict', 'percent', 'mainReason'});
       expect(response['percent'], isA<int>());
     });
+
+    test("la raison de l'alerte a ses domaines neutralisés", () {
+      final response = backgroundResponseFor(
+        fakeAnalysis(Verdict.arnaque, 0.9, [
+          "« poste-tn-livraison.xyz » imite La Poste Tunisienne mais ce n'est "
+              'pas son site officiel',
+        ]),
+      );
+      expect(
+        response['mainReason'],
+        startsWith('« poste-tn-livraison[.]xyz »'),
+      );
+    });
+  });
+
+  group('Neutralisation des domaines', () {
+    test('domaine simple, comme les analystes sécurité', () {
+      expect(
+        defangDomains('poste-tn-livraison.xyz'),
+        'poste-tn-livraison[.]xyz',
+      );
+    });
+
+    test('tous les points du domaine, dans une phrase', () {
+      expect(
+        defangDomains('Lien raccourci (bit.ly) vers www.faux.com.tn'),
+        'Lien raccourci (bit[.]ly) vers www[.]faux[.]com[.]tn',
+      );
+    });
+
+    test('adresse IP', () {
+      expect(
+        defangDomains("Le lien utilise une adresse IP (192.168.1.10) au lieu"),
+        "Le lien utilise une adresse IP (192[.]168[.]1[.]10) au lieu",
+      );
+    });
+
+    test('majuscules', () {
+      expect(defangDomains('PAYPAL-Secure.Click'), 'PAYPAL-Secure[.]Click');
+    });
+
+    test('nombres, extension seule et phrase sans domaine : inchangés', () {
+      const texts = [
+        'Votre colis coûte 3.5 dinars.',
+        "L'extension « .xyz » est souvent utilisée par les arnaques",
+        "Le lien n'est pas sécurisé (http au lieu de https)",
+        defaultAlertReason,
+      ];
+      for (final text in texts) {
+        expect(defangDomains(text), text);
+      }
+    });
+
+    test('déjà neutralisé : pas de double crochet', () {
+      expect(defangDomains('site[.]xyz'), 'site[.]xyz');
+    });
   });
 
   group("Titre de l'alerte", () {
