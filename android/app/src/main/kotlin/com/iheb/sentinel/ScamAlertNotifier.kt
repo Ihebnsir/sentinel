@@ -36,14 +36,14 @@ object ScamAlertNotifier {
 
         // Écran verrouillé : version neutre, sans la raison.
         val publicVersion = builder(context)
-            .setSmallIcon(R.drawable.ic_stat_shield)
+            .setSmallIcon(R.drawable.ic_stat_arch)
             .setColor(RED)
             .setContentTitle("Sentinel")
             .setContentText("Arnaque probable détectée")
             .build()
 
         val notification = builder(context)
-            .setSmallIcon(R.drawable.ic_stat_shield)
+            .setSmallIcon(R.drawable.ic_stat_arch)
             .setColor(RED)
             .setContentTitle(title)
             .setContentText(reason)

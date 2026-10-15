@@ -1,0 +1,22 @@
+# Icônes de l'app, générées depuis assets/branding/ (voir tools/branding/make_icon.py).
+# Commande : dart run flutter_launcher_icons
+flutter_launcher_icons:
+  # Icône classique (anciens Android, avant les icônes adaptatives)
+  android: true
+  image_path_android: "assets/branding/icon_full.png"
+  # Icône adaptative (Android 8+) : fond + premier plan + monochrome (Android 13+)
+  adaptive_icon_background: "assets/branding/icon_background.png"
+  adaptive_icon_foreground: "assets/branding/icon_foreground.png"
+  adaptive_icon_monochrome: "assets/branding/icon_monochrome.png"
+  # 0 : nos images sont déjà dessinées pour la zone de sécurité
+  adaptive_icon_foreground_inset: 0
+  min_sdk_android: 24 # flutter.minSdkVersion
+  ios: false
+  web:
+    generate: false
+  windows:
+    generate: true
+    image_path: "assets/branding/icon_full.png"
+    icon_size: 256
+  macos:
+    generate: false

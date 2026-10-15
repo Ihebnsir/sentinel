@@ -2,6 +2,7 @@ import 'package:material_ui/material_ui.dart';
 
 import '../services/share_service.dart';
 import '../theme/app_theme.dart';
+import '../widgets/arch_icon.dart';
 import 'apps_screen.dart';
 import 'home_screen.dart';
 import 'messages_screen.dart';
@@ -71,8 +72,8 @@ class _MainShellState extends State<MainShell> {
           },
           destinations: const [
             NavigationDestination(
-              icon: Icon(Icons.shield_outlined),
-              selectedIcon: Icon(Icons.shield),
+              icon: ArchIcon(),
+              selectedIcon: ArchIcon(filled: true),
               label: 'Accueil',
             ),
             NavigationDestination(

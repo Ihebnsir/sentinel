@@ -1,0 +1,12 @@
+# Écran de démarrage, généré depuis assets/branding/.
+# Commande : dart run flutter_native_splash:create
+flutter_native_splash:
+  color: "#0E1A33"
+  image: assets/branding/icon_foreground.png
+  # Android 12+ : écran de démarrage du système (icône au centre, pas de texte)
+  android_12:
+    color: "#0E1A33"
+    image: assets/branding/icon_foreground.png
+  android: true
+  ios: false
+  web: false
