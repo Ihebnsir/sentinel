@@ -12,6 +12,9 @@
     <!-- Permission « normale » : ouvrir l'écran de désinstallation d'une app.
          C'est toujours l'utilisateur qui confirme. -->
     <uses-permission android:name="android.permission.REQUEST_DELETE_PACKAGES" />
+    <!-- Android 13+ : afficher les alertes « Arnaque probable ».
+         Demandée seulement quand l'utilisateur active la protection. -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <application
         android:label="sentinel"
         android:name="${applicationName}"
@@ -37,7 +40,38 @@
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
+            <!-- Bouton « Partager » des autres apps (SMS, WhatsApp…) :
+                 Sentinel apparaît dans la liste quand on partage du texte. -->
+            <intent-filter>
+                <action android:name="android.intent.action.SEND"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <data android:mimeType="text/plain"/>
+            </intent-filter>
+            <!-- Menu de sélection de texte (Copier, Coller…) de toutes les apps.
+                 Le label est le texte affiché dans ce menu. -->
+            <intent-filter android:label="Vérifier avec Sentinel">
+                <action android:name="android.intent.action.PROCESS_TEXT"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <data android:mimeType="text/plain"/>
+            </intent-filter>
         </activity>
+        <!-- Protection automatique : lit les notifications des messageries.
+             Seul Android peut s'y connecter (permission BIND_NOTIFICATION_LISTENER_SERVICE),
+             et seulement si l'utilisateur l'a autorisé dans les réglages. -->
+        <service
+            android:name=".SentinelNotificationListener"
+            android:label="Sentinel – protection anti-arnaque"
+            android:exported="true"
+            android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE">
+            <intent-filter>
+                <action android:name="android.service.notification.NotificationListenerService" />
+            </intent-filter>
+            <!-- Android 12+ : ne recevoir que les conversations et les
+                 notifications qui sonnent (pas les permanentes ni les silencieuses). -->
+            <meta-data
+                android:name="android.service.notification.default_filter_types"
+                android:value="conversations|alerting" />
+        </service>
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
         <meta-data

@@ -1,14 +1,20 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../services/phishing/message_analyzer.dart';
 import '../services/phishing/phishing_model.dart';
+import '../services/share_service.dart';
 import '../theme/app_colors.dart';
+import '../widgets/auto_protection_section.dart';
 
 /// Onglet « Messages » : l'utilisateur colle un SMS ou un lien,
 /// l'IA et les règles sur les liens disent s'il s'agit d'une arnaque.
 class MessagesScreen extends StatefulWidget {
-  const MessagesScreen({super.key});
+  const MessagesScreen({super.key, this.sharedText});
+
+  /// Texte reçu d'une autre app : il est collé puis analysé tout seul.
+  final ValueListenable<SharedText?>? sharedText;
 
   @override
   State<MessagesScreen> createState() => _MessagesScreenState();
@@ -24,9 +30,34 @@ class _MessagesScreenState extends State<MessagesScreen> {
   bool get _hasText => _controller.text.trim().isNotEmpty;
 
   @override
+  void initState() {
+    super.initState();
+    widget.sharedText?.addListener(_onShared);
+  }
+
+  @override
+  void didUpdateWidget(MessagesScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.sharedText != widget.sharedText) {
+      oldWidget.sharedText?.removeListener(_onShared);
+      widget.sharedText?.addListener(_onShared);
+    }
+  }
+
+  @override
   void dispose() {
+    widget.sharedText?.removeListener(_onShared);
     _controller.dispose();
     super.dispose();
+  }
+
+  // Un texte arrive d'une autre app : on le met dans le champ et on analyse.
+  void _onShared() {
+    final shared = widget.sharedText?.value;
+    if (shared == null) return;
+    _controller.text = shared.text;
+    _onTextChanged(shared.text);
+    _analyze();
   }
 
   // Le texte a changé : l'ancien résultat ne correspond plus.
@@ -58,7 +89,8 @@ class _MessagesScreenState extends State<MessagesScreen> {
     try {
       final model = await loadPhishingModel();
       final analysis = analyzeMessage(text, model.predict(text));
-      if (!mounted) return;
+      // Le texte a changé entre-temps (nouveau partage) : résultat périmé.
+      if (!mounted || _controller.text != text) return;
       setState(() => _analysis = analysis);
     } catch (_) {
       // Modèle introuvable ou illisible.
@@ -88,6 +120,9 @@ class _MessagesScreenState extends State<MessagesScreen> {
                     color: AppColors.encre,
                   ),
                 ),
+                const SizedBox(height: 16),
+                // Masquée hors Android (rien ne s'affiche).
+                const AutoProtectionSection(),
                 const SizedBox(height: 20),
                 _MessageField(
                   controller: _controller,

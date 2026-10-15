@@ -1,5 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 
+import '../services/share_service.dart';
 import '../theme/app_theme.dart';
 import 'apps_screen.dart';
 import 'home_screen.dart';
@@ -19,13 +20,37 @@ class _MainShellState extends State<MainShell> {
   // Index de l'onglet affiché (0 = Accueil).
   int _selectedIndex = 0;
 
+  static const _messagesIndex = 2;
+
+  // Texte partagé depuis les autres apps.
+  final _share = ShareService();
+
   // Les pages, dans le même ordre que les onglets.
-  static const _pages = [
-    HomeScreen(),
-    AppsScreen(),
-    MessagesScreen(),
-    VaultScreen(),
+  late final List<Widget> _pages = [
+    const HomeScreen(),
+    const AppsScreen(),
+    MessagesScreen(sharedText: _share.received),
+    const VaultScreen(),
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    _share.received.addListener(_showMessages);
+    _share.start();
+  }
+
+  @override
+  void dispose() {
+    _share.received.removeListener(_showMessages);
+    _share.dispose();
+    super.dispose();
+  }
+
+  // Un texte arrive : on affiche l'onglet Messages qui va l'analyser.
+  void _showMessages() {
+    setState(() => _selectedIndex = _messagesIndex);
+  }
 
   @override
   Widget build(BuildContext context) {

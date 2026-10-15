@@ -1,10 +1,13 @@
 package com.iheb.sentinel
 
+import android.Manifest
 import android.content.ActivityNotFoundException
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.hardware.biometrics.BiometricManager
 import android.net.Uri
 import android.os.Build
+import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.provider.Settings
@@ -26,8 +29,54 @@ class MainActivity : FlutterActivity() {
     private val appsExecutor = Executors.newSingleThreadExecutor()
     private val mainHandler = Handler(Looper.getMainLooper())
 
+    // Même nom que dans lib/services/share_service.dart.
+    private val shareChannelName = "com.iheb.sentinel/share"
+    private var shareChannel: MethodChannel? = null
+
+    // Texte reçu au lancement, en attente que Dart le demande.
+    private var initialSharedText: String? = null
+
+    // Même nom que dans lib/services/protection_service.dart.
+    private val protectionChannelName = "com.iheb.sentinel/protection"
+
+    // Réponse à renvoyer à Dart quand l'utilisateur a répondu à la demande
+    // d'autorisation des notifications.
+    private var pendingPermissionResult: MethodChannel.Result? = null
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        // savedInstanceState != null : l'app est recréée (rotation, retour
+        // depuis les apps récentes…) ; le texte a déjà été traité.
+        if (savedInstanceState == null && !launchedFromHistory(intent)) {
+            initialSharedText = sharedTextFrom(intent)
+        }
+    }
+
+    // App déjà ouverte (singleTop) : Android réutilise cette activité
+    // et lui transmet le nouvel Intent ici au lieu de la recréer.
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        val text = sharedTextFrom(intent) ?: return
+        shareChannel?.invokeMethod("onSharedText", text)
+    }
+
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
+
+        shareChannel = MethodChannel(flutterEngine.dartExecutor.binaryMessenger, shareChannelName)
+            .apply {
+                setMethodCallHandler { call, result ->
+                    when (call.method) {
+                        // Rendu une seule fois, puis effacé.
+                        "getInitialSharedText" -> {
+                            result.success(initialSharedText)
+                            initialSharedText = null
+                        }
+                        else -> result.notImplemented()
+                    }
+                }
+            }
 
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, channelName)
             .setMethodCallHandler { call, result ->
@@ -53,6 +102,30 @@ class MainActivity : FlutterActivity() {
                 }
             }
 
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, protectionChannelName)
+            .setMethodCallHandler { call, result ->
+                when (call.method) {
+                    "getStatus" -> result.success(ProtectionSettings.status(this))
+                    "setEnabled" -> {
+                        ProtectionSettings.setEnabled(this, call.argument<Boolean>("enabled") == true)
+                        result.success(null)
+                    }
+                    "openListenerSettings" -> {
+                        openListenerSettings()
+                        result.success(null)
+                    }
+                    "openNotificationSettings" -> {
+                        openOrFallback(
+                            Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS)
+                                .putExtra(Settings.EXTRA_APP_PACKAGE, packageName),
+                        )
+                        result.success(null)
+                    }
+                    "requestNotificationPermission" -> requestNotificationPermission(result)
+                    else -> result.notImplemented()
+                }
+            }
+
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, appsChannelName)
             .setMethodCallHandler { call, result ->
                 when (call.method) {
@@ -71,6 +144,74 @@ class MainActivity : FlutterActivity() {
     override fun onDestroy() {
         appsExecutor.shutdown()
         super.onDestroy()
+    }
+
+    // Texte partagé (SEND), sélectionné (PROCESS_TEXT) ou venant d'une
+    // alerte Sentinel (ACTION_CHECK_ALERT), sinon null.
+    private fun sharedTextFrom(intent: Intent?): String? {
+        if (intent == null) return null
+        val raw = when (intent.action) {
+            Intent.ACTION_SEND, ACTION_CHECK_ALERT -> intent.getCharSequenceExtra(Intent.EXTRA_TEXT)
+            Intent.ACTION_PROCESS_TEXT -> intent.getCharSequenceExtra(Intent.EXTRA_PROCESS_TEXT)
+            else -> null
+        }
+        return cleanMessageText(raw)
+    }
+
+    private fun launchedFromHistory(intent: Intent?): Boolean =
+        (intent?.flags ?: 0) and Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY != 0
+
+    companion object {
+        /** Tap sur une alerte : ouvre l'onglet Messages avec le texte. */
+        const val ACTION_CHECK_ALERT = "com.iheb.sentinel.action.CHECK_ALERT"
+
+        private const val REQUEST_NOTIFICATIONS = 1
+    }
+
+    // Android 13+ : demande l'autorisation d'afficher des notifications.
+    // Avant Android 13, elle est accordée d'office (sauf si l'utilisateur
+    // les a coupées dans les réglages).
+    private fun requestNotificationPermission(result: MethodChannel.Result) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU ||
+            checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) ==
+            PackageManager.PERMISSION_GRANTED
+        ) {
+            result.success(ProtectionSettings.notificationsAllowed(this))
+            return
+        }
+        pendingPermissionResult?.success(false) // demande précédente sans réponse
+        pendingPermissionResult = result
+        requestPermissions(arrayOf(Manifest.permission.POST_NOTIFICATIONS), REQUEST_NOTIFICATIONS)
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray,
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode != REQUEST_NOTIFICATIONS) return
+        pendingPermissionResult?.success(ProtectionSettings.notificationsAllowed(this))
+        pendingPermissionResult = null
+    }
+
+    // Android 11+ : ouvre directement l'interrupteur de Sentinel ;
+    // sinon (ou si le fabricant ne le gère pas) la liste des apps.
+    private fun openListenerSettings() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            try {
+                startActivity(
+                    Intent(Settings.ACTION_NOTIFICATION_LISTENER_DETAIL_SETTINGS).putExtra(
+                        Settings.EXTRA_NOTIFICATION_LISTENER_COMPONENT_NAME,
+                        ProtectionSettings.listenerComponent(this).flattenToString(),
+                    ),
+                )
+                return
+            } catch (e: ActivityNotFoundException) {
+                // On essaie la liste ci-dessous.
+            }
+        }
+        openOrFallback(Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS))
     }
 
     // Le scan tourne sur un autre thread pour ne pas figer l'écran ;
