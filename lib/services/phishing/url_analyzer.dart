@@ -1,0 +1,226 @@
+import 'known_brands.dart';
+
+/// Les signaux qu'on peut trouver dans un lien, du plus grave au moins grave.
+enum LinkSignal {
+  usurpationMarque,
+  adresseIp,
+  punycode,
+  arobase,
+  raccourcisseur,
+  extensionSuspecte,
+  tropDeSousDomaines,
+  sansHttps,
+}
+
+/// Un signal trouvé dans un lien, avec son explication en français.
+class LinkFinding {
+  const LinkFinding(this.signal, this.reason);
+
+  final LinkSignal signal;
+  final String reason;
+}
+
+/// Un lien trouvé dans le message et ce qu'on en pense.
+class AnalyzedLink {
+  const AnalyzedLink({
+    required this.text,
+    required this.host,
+    required this.findings,
+  });
+
+  final String text; // le lien tel qu'écrit dans le message
+  final String host; // le nom de domaine (ou l'adresse IP), en minuscules
+  final List<LinkFinding> findings; // vide si rien de suspect
+
+  bool has(LinkSignal signal) => findings.any((f) => f.signal == signal);
+}
+
+/// Services qui cachent la vraie adresse derrière un lien court.
+const urlShorteners = [
+  'bit.ly',
+  'tinyurl.com',
+  'cutt.ly',
+  'is.gd',
+  't.co',
+  'rb.gy',
+  'shorturl.at',
+];
+
+/// Extensions bon marché, très utilisées par les arnaques.
+const suspiciousTlds = [
+  'xyz', 'top', 'icu', 'click', 'live', 'buzz', 'rest', 'cfd', //
+];
+
+// Extensions reconnues pour un lien écrit sans « http » ni « www ».
+// Sans cette liste, « demain.Merci » serait pris pour un lien.
+const _knownTlds = {
+  ...suspiciousTlds,
+  'tn', 'com', 'net', 'org', 'info', 'fr', 'io', 'co', 'me', 'ly', 'gy', //
+  'at', 'gd', 'biz', 'online', 'site', 'shop', 'app', 'link', 'store', //
+  'club', 'vip', 'pro', 'cc', 'ws', 'tk', 'ml', 'ga', 'cf', 'gq', 'dz', //
+};
+
+// Deuxièmes niveaux du type « com.tn » : le domaine compte alors 3 parties.
+const _secondLevels = {'com', 'org', 'net', 'gov', 'edu', 'ens', 'nat', 'co'};
+
+// Ponctuation de la phrase à retirer autour d'un lien.
+final _edges = RegExp(r'''^["'«»(\[<{]+|["'«»)\]>},;:!?.]+$''');
+final _scheme = RegExp(r'^(https?)://', caseSensitive: false);
+final _port = RegExp(r':\d+$');
+final _hostPattern = RegExp(r'^[a-z0-9-]+(\.[a-z0-9-]+)+$');
+final _ipPattern = RegExp(r'^\d{1,3}(\.\d{1,3}){3}$');
+final _hasLetter = RegExp(r'[a-z]');
+
+/// Trouve les liens d'un message et vérifie chacun avec les règles.
+List<AnalyzedLink> analyzeLinks(String text) => [
+      // « ? » : on n'ajoute que les mots qui sont des liens (pas les null).
+      for (final word in text.split(RegExp(r'\s+'))) ?_parseLink(word),
+    ];
+
+/// Analyse un mot ; null si ce n'est pas un lien.
+AnalyzedLink? _parseLink(String word) {
+  final cleaned = word.replaceAll(_edges, '');
+  if (cleaned.isEmpty) return null;
+
+  final schemeMatch = _scheme.firstMatch(cleaned);
+  final scheme = schemeMatch?.group(1)?.toLowerCase();
+  final rest =
+      schemeMatch == null ? cleaned : cleaned.substring(schemeMatch.end);
+
+  // Partie « adresse » : jusqu'au premier /, ? ou #.
+  final authorityEnd = rest.indexOf(RegExp(r'[/?#]'));
+  final authority = authorityEnd == -1 ? rest : rest.substring(0, authorityEnd);
+  final hasPath = authorityEnd != -1;
+
+  // « @ » : le navigateur ignore tout ce qui est avant.
+  final atIndex = authority.lastIndexOf('@');
+  final hasAt = atIndex != -1;
+  // Sans « http », un « @ » est une adresse e-mail, pas un lien.
+  if (hasAt && scheme == null) return null;
+
+  var host = authority.substring(atIndex + 1).toLowerCase();
+  final hasPort = _port.hasMatch(host);
+  host = host.replaceFirst(_port, '');
+  if (host.endsWith('.')) host = host.substring(0, host.length - 1);
+
+  final isIp = _ipPattern.hasMatch(host);
+  if (!isIp && !_hostPattern.hasMatch(host)) return null;
+  final tld = host.split('.').last;
+  if (!isIp && !_hasLetter.hasMatch(tld)) return null; // ex : « 3.5 »
+
+  // Sans « http », on exige « www. », une extension connue,
+  // ou une IP suivie d'un chemin ou d'un port.
+  if (scheme == null) {
+    final looksLikeLink = isIp
+        ? hasPath || hasPort
+        : host.startsWith('www.') || _knownTlds.contains(tld);
+    if (!looksLikeLink) return null;
+  }
+
+  return AnalyzedLink(
+    text: cleaned,
+    host: host,
+    findings: _rules(host: host, scheme: scheme, isIp: isIp, hasAt: hasAt),
+  );
+}
+
+/// Applique toutes les règles à un lien, de la plus grave à la moins grave.
+List<LinkFinding> _rules({
+  required String host,
+  required String? scheme,
+  required bool isIp,
+  required bool hasAt,
+}) {
+  final findings = <LinkFinding>[];
+  void add(LinkSignal signal, String reason) =>
+      findings.add(LinkFinding(signal, reason));
+  final tld = host.split('.').last;
+
+  if (!isIp) {
+    final brand = impersonatedBrand(host);
+    if (brand != null) {
+      add(
+        LinkSignal.usurpationMarque,
+        "« $host » imite ${brand.name} mais ce n'est pas son site officiel",
+      );
+    }
+  }
+  if (isIp) {
+    add(
+      LinkSignal.adresseIp,
+      "Le lien utilise une adresse IP ($host) au lieu d'un nom de site",
+    );
+  }
+  if (host.split('.').any((label) => label.startsWith('xn--'))) {
+    add(
+      LinkSignal.punycode,
+      '« $host » contient des lettres déguisées (punycode) '
+      'pour ressembler à un vrai site',
+    );
+  }
+  if (hasAt) {
+    add(
+      LinkSignal.arobase,
+      'Le lien contient « @ » : la vraie destination est « $host »',
+    );
+  }
+  if (!isIp && _isShortener(host)) {
+    add(
+      LinkSignal.raccourcisseur,
+      'Lien raccourci ($host) : la vraie adresse est cachée',
+    );
+  }
+  if (!isIp && suspiciousTlds.contains(tld)) {
+    add(
+      LinkSignal.extensionSuspecte,
+      "L'extension « .$tld » est souvent utilisée par les arnaques",
+    );
+  }
+  if (!isIp && subdomainCount(host) > 3) {
+    add(
+      LinkSignal.tropDeSousDomaines,
+      '« $host » a beaucoup de sous-domaines, une technique pour tromper',
+    );
+  }
+  if (scheme == 'http') {
+    add(
+      LinkSignal.sansHttps,
+      "Le lien n'est pas sécurisé (http au lieu de https)",
+    );
+  }
+  return findings;
+}
+
+bool _isShortener(String host) =>
+    urlShorteners.any((s) => host == s || host.endsWith('.$s'));
+
+/// Nombre de sous-domaines : « a.b.exemple.com » → 2, « a.biat.com.tn » → 1.
+int subdomainCount(String host) {
+  final labels = host.split('.');
+  final hasSecondLevel = labels.length >= 3 &&
+      labels.last.length == 2 &&
+      _secondLevels.contains(labels[labels.length - 2]);
+  final domainParts = hasSecondLevel ? 3 : 2;
+  return labels.length > domainParts ? labels.length - domainParts : 0;
+}
+
+/// La marque que ce domaine imite, ou null.
+/// Le domaine officiel et ses sous-domaines ne sont jamais signalés.
+KnownBrand? impersonatedBrand(
+  String host, {
+  List<KnownBrand> brands = knownBrands,
+}) {
+  final parts = host.split(RegExp(r'[.-]'));
+  final compact = host.replaceAll('-', ''); // « la-poste » → « laposte »
+  for (final brand in brands) {
+    final mentioned = brand.keywords.any(
+      (k) => parts.contains(k) || (k.length >= 5 && compact.contains(k)),
+    );
+    if (!mentioned) continue;
+    final official = brand.officialDomains.any(
+      (d) => host == d || host.endsWith('.$d'),
+    );
+    if (!official) return brand;
+  }
+  return null;
+}
