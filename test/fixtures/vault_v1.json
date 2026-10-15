@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "kdf": {
+    "algo": "argon2id",
+    "memoire": 64,
+    "iterations": 2,
+    "parallelisme": 1,
+    "sel": "KMHagnLFLnHREb9FgiR0IQ=="
+  },
+  "wrappedKey": {
+    "nonce": "dwL1Ps3b4lKgCqR/",
+    "chiffre": "2ZNuBf+C76e5rzmPvGlhiL71S5eYl0ygAP8oMeWui2MRSsdGMIW5Py2QjLfx3syQ"
+  },
+  "data": {
+    "nonce": "KYGaBH5VKeP+C30C",
+    "chiffre": "20OOug/8Kjrqr0P2vGX6yCpJWGv+jeYq4U94z2cAb2jwUVie1j0k8qWi84R+IYycIyLyqfnk6cm9aNoSKjrZW3AiwIfNbHbqAZADQtLanROb7RFtX+nEUii8V+D7hjwrvjYqpw9N4Wlub28dXsGIipwaIO76P0qps3MztMINlzZyoAzO70rDqJWa7I73Nv6cUuA8WOpFXEuYiviecSNIdXCTbdVuKMGm2OhALdXTksIqBh6w9ac2lUCEA0iqhPbKvWKqY8JF3kj1I57WedD0DOFs7a0kalID7TyG0carTKW7SFAbYn7UHeVPpED8+eMTtfJRWH3LwMIuBFhSr3hnobw6gpzGd/2iANqfiBjjED9I/PLJ38v/KUvIhvKPoH+B9X6GyOPG6ONOGbdFtwdzgcvRcr3vtr2xqONldeI9YSHbYA865OzGsgllxQB1n91uL8wBhDfugapWcc5rgiT8CjUXn2ikYvGTa78jfz0/syEiAxctgl3qSVs+Wt/tzBoTg8xhAw24zkx6gUyV/e0vPVP2pEPnITqYOPZmcqhWELy5LYaHrjNBlWjIfxuOWedSrFJsjLbyMLOhjKReblqdF7sDe0LSIun9aOn+arZVTAaBN9hvXpLU7CboItKNja/5LJEhjKZm+Fe8Q3Lp9VBr45++LKhFymOmKeQq6GgeaZnljIRNRm8iUxoJHuXlnkeerdbnI6iF/1TUGoQC7HgFgQrhat0="
+  }
+}

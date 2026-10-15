@@ -9,14 +9,14 @@ class EmptyState extends StatelessWidget {
     required this.icon,
     required this.title,
     required this.message,
-    required this.buttonLabel,
+    this.buttonLabel,
     this.onPressed,
   });
 
   final IconData icon;
   final String title;
   final String message;
-  final String buttonLabel;
+  final String? buttonLabel; // si null : pas de bouton
   final VoidCallback? onPressed; // si null : affiche « Bientôt disponible »
 
   void _showComingSoon(BuildContext context) {
@@ -54,12 +54,14 @@ class EmptyState extends StatelessWidget {
                 color: AppColors.encre.withValues(alpha: 0.6),
               ),
             ),
-            const SizedBox(height: 28),
-            FilledButton(
-              style: FilledButton.styleFrom(backgroundColor: AppColors.bleu),
-              onPressed: onPressed ?? () => _showComingSoon(context),
-              child: Text(buttonLabel),
-            ),
+            if (buttonLabel case final label?) ...[
+              const SizedBox(height: 28),
+              FilledButton(
+                style: FilledButton.styleFrom(backgroundColor: AppColors.bleu),
+                onPressed: onPressed ?? () => _showComingSoon(context),
+                child: Text(label),
+              ),
+            ],
           ],
         ),
       ),

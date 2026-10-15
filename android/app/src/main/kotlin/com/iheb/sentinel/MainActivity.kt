@@ -43,6 +43,9 @@ class MainActivity : FlutterActivity() {
     // d'autorisation des notifications.
     private var pendingPermissionResult: MethodChannel.Result? = null
 
+    // Protections du coffre (écran sécurisé, presse-papiers, écran éteint).
+    private var vaultProtection: VaultProtection? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         // savedInstanceState != null : l'app est recréée (rotation, retour
@@ -63,6 +66,8 @@ class MainActivity : FlutterActivity() {
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
+
+        vaultProtection = VaultProtection(this, flutterEngine.dartExecutor.binaryMessenger)
 
         shareChannel = MethodChannel(flutterEngine.dartExecutor.binaryMessenger, shareChannelName)
             .apply {
@@ -139,6 +144,12 @@ class MainActivity : FlutterActivity() {
                     else -> result.notImplemented()
                 }
             }
+    }
+
+    override fun cleanUpFlutterEngine(flutterEngine: FlutterEngine) {
+        vaultProtection?.dispose()
+        vaultProtection = null
+        super.cleanUpFlutterEngine(flutterEngine)
     }
 
     override fun onDestroy() {

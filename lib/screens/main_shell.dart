@@ -22,17 +22,19 @@ class _MainShellState extends State<MainShell> {
   int _selectedIndex = 0;
 
   static const _messagesIndex = 2;
+  static const _vaultIndex = 3;
 
   // Texte partagé depuis les autres apps.
   final _share = ShareService();
 
-  // Les pages, dans le même ordre que les onglets.
-  late final List<Widget> _pages = [
-    const HomeScreen(),
-    const AppsScreen(),
-    MessagesScreen(sharedText: _share.received),
-    const VaultScreen(),
-  ];
+  // Les pages, dans le même ordre que les onglets. Recréées à chaque
+  // affichage (léger) : le Coffre doit savoir s'il est visible.
+  List<Widget> get _pages => [
+        const HomeScreen(),
+        const AppsScreen(),
+        MessagesScreen(sharedText: _share.received),
+        VaultScreen(visible: _selectedIndex == _vaultIndex),
+      ];
 
   @override
   void initState() {
