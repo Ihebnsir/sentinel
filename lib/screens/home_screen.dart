@@ -2,12 +2,16 @@ import 'package:material_ui/material_ui.dart';
 
 import '../models/device_security_status.dart';
 import '../models/security_action.dart';
+import '../models/wifi_status.dart';
 import '../services/device_security_service.dart';
 import '../services/security_score_calculator.dart';
+import '../services/wifi_risk.dart';
+import '../services/wifi_service.dart';
 import '../theme/app_colors.dart';
 import '../utils/french_date.dart';
 import '../widgets/action_tile.dart';
 import '../widgets/score_arch.dart';
+import '../widgets/wifi_section.dart';
 
 /// L'écran d'accueil : salutation, score et actions conseillées.
 /// StatefulWidget car il garde le résultat de l'audit en mémoire.
@@ -28,23 +32,101 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   DeviceSecurityStatus? _status; // null : analyse indisponible (Windows)
   SecurityReport? _report;
 
+  // Wi-Fi : une situation, pas un réglage, donc hors du score.
+  final _wifiService = WifiService();
+  WifiStatus? _wifi; // null : pas encore lu ou indisponible
+  WifiReport? _wifiReport;
+  bool _wifiLoaded = false; // première lecture terminée
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     _runAudit();
+    _refreshWifi();
+    _wifiService.startListening(_onWifiChanged);
   }
 
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    _wifiService.stopListening();
     super.dispose();
   }
 
   // Retour dans l'app (ex : après un passage dans les paramètres) : on relance.
+  // En arrière-plan, on arrête d'écouter le Wi-Fi.
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed) _runAudit();
+    if (state == AppLifecycleState.resumed) {
+      _runAudit();
+      _refreshWifi();
+      _wifiService.startListening(_onWifiChanged);
+    } else if (state == AppLifecycleState.paused) {
+      _wifiService.stopListening();
+    }
+  }
+
+  /// Tirer vers le bas : analyse du téléphone et du Wi-Fi.
+  Future<void> _refreshAll() async {
+    await Future.wait([_runAudit(), _refreshWifi()]);
+  }
+
+  /// Lit l'état du Wi-Fi actuel.
+  Future<void> _refreshWifi() async {
+    WifiStatus? wifi;
+    try {
+      wifi = await _wifiService.getWifiStatus();
+    } on Exception {
+      wifi = null; // affiché « Information indisponible »
+    }
+    if (!mounted) return;
+    setState(() {
+      _wifi = wifi;
+      _wifiReport = wifi == null ? null : assessWifi(wifi);
+      _wifiLoaded = true;
+    });
+  }
+
+  /// Le réseau a changé pendant que l'app est ouverte.
+  void _onWifiChanged(WifiStatus wifi) {
+    if (!mounted) return;
+    final before = _wifiReport?.level;
+    final report = assessWifi(wifi);
+    setState(() {
+      _wifi = wifi;
+      _wifiReport = report;
+      _wifiLoaded = true;
+    });
+    // Alerte seulement quand on passe d'un réseau sûr à un réseau dangereux.
+    if (before != null &&
+        before != WifiLevel.danger &&
+        report.level == WifiLevel.danger) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: AppColors.rommen,
+          content: Text('${report.title} : évitez la banque et les achats.'),
+          action: SnackBarAction(
+            label: 'Détails',
+            textColor: Colors.white,
+            onPressed: _showWifiDetails,
+          ),
+        ),
+      );
+    }
+  }
+
+  /// Ouvre la feuille de détails du Wi-Fi.
+  void _showWifiDetails() {
+    final wifi = _wifi;
+    final report = _wifiReport;
+    if (wifi == null || report == null) return;
+    showWifiDetails(
+      context,
+      status: wifi,
+      report: report,
+      onOpenPrivateDns: _wifiService.openPrivateDnsSettings,
+    );
   }
 
   /// Demande l'état du téléphone à Android puis calcule le score.
@@ -101,7 +183,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         // RefreshIndicator : tirer vers le bas relance l'analyse.
         child: RefreshIndicator(
           color: AppColors.bleu,
-          onRefresh: _runAudit,
+          onRefresh: _refreshAll,
           // AlwaysScrollable : on peut tirer même si l'écran ne déborde pas.
           child: SingleChildScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
@@ -127,6 +209,11 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                 ),
                 const SizedBox(height: 40),
                 ..._content(),
+                // Hors Android (Windows) : section masquée.
+                if (WifiService.isSupported && _wifiLoaded && !_loading) ...[
+                  const SizedBox(height: 32),
+                  WifiSection(report: _wifiReport, onTap: _showWifiDetails),
+                ],
               ],
             ),
           ),

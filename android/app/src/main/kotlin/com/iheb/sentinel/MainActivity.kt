@@ -46,6 +46,9 @@ class MainActivity : FlutterActivity() {
     // Protections du coffre (écran sécurisé, presse-papiers, écran éteint).
     private var vaultProtection: VaultProtection? = null
 
+    // Sécurité du Wi-Fi actuel et écoute des changements de réseau.
+    private var wifiChecker: WifiSecurityChecker? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         // savedInstanceState != null : l'app est recréée (rotation, retour
@@ -68,6 +71,7 @@ class MainActivity : FlutterActivity() {
         super.configureFlutterEngine(flutterEngine)
 
         vaultProtection = VaultProtection(this, flutterEngine.dartExecutor.binaryMessenger)
+        wifiChecker = WifiSecurityChecker(this, flutterEngine.dartExecutor.binaryMessenger)
 
         shareChannel = MethodChannel(flutterEngine.dartExecutor.binaryMessenger, shareChannelName)
             .apply {
@@ -149,6 +153,8 @@ class MainActivity : FlutterActivity() {
     override fun cleanUpFlutterEngine(flutterEngine: FlutterEngine) {
         vaultProtection?.dispose()
         vaultProtection = null
+        wifiChecker?.dispose()
+        wifiChecker = null
         super.cleanUpFlutterEngine(flutterEngine)
     }
 

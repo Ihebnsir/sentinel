@@ -15,6 +15,9 @@
     <!-- Android 13+ : afficher les alertes « Arnaque probable ».
          Demandée seulement quand l'utilisateur active la protection. -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <!-- Permission « normale » : lire l'état du réseau (Wi-Fi, portail captif,
+         DNS privé). Aucune localisation : on ne lit jamais le nom du Wi-Fi. -->
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <application
         android:label="Sentinel"
         android:name="${applicationName}"
