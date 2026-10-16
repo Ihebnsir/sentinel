@@ -45,15 +45,22 @@ EncryptedBlob flipByte(EncryptedBlob blob, int index) {
 
 /// Même fichier, avec un en-tête légèrement différent.
 VaultFile withHeader(VaultFile file, {int? version, int? iterations}) {
+  final slot = file.passwordSlot;
   return VaultFile(
     version: version ?? file.version,
-    kdf: KdfParams(
-      memoryKib: file.kdf.memoryKib,
-      iterations: iterations ?? file.kdf.iterations,
-      parallelism: file.kdf.parallelism,
-      salt: file.kdf.salt,
-    ),
-    wrappedKey: file.wrappedKey,
+    slots: [
+      PasswordSlot(
+        kdf: KdfParams(
+          memoryKib: slot.kdf.memoryKib,
+          iterations: iterations ?? slot.kdf.iterations,
+          parallelism: slot.kdf.parallelism,
+          salt: slot.kdf.salt,
+        ),
+        wrappedKey: slot.wrappedKey,
+      ),
+      ...file.slots.skip(1),
+    ],
+    lastPasswordUnlock: file.lastPasswordUnlock,
     data: file.data,
   );
 }
@@ -148,10 +155,9 @@ void main() {
     test('un octet modifié dans la clé enveloppée est détecté', () async {
       final created = await createVault(password, kdf: fastKdf());
       final file = created.file;
-      final tampered = VaultFile(
-        kdf: file.kdf,
-        wrappedKey: flipByte(file.wrappedKey, 3),
-        data: file.data,
+      final slot = file.passwordSlot;
+      final tampered = file.withSlot(
+        PasswordSlot(kdf: slot.kdf, wrappedKey: flipByte(slot.wrappedKey, 3)),
       );
       await expectLater(
         unwrapKey(password, tampered),
@@ -164,7 +170,7 @@ void main() {
       final file = await sealItems(created.dek, created.file, sample);
       // Même DEK : seule l'AAD change, et GCM le remarque.
       for (final tampered in [
-        withHeader(file, version: 2),
+        withHeader(file, version: 3),
         withHeader(file, iterations: 3),
       ]) {
         await expectLater(
@@ -221,10 +227,11 @@ void main() {
       final text = File('test/fixtures/vault_v1.json').readAsStringSync();
       final file = VaultFile.decode(text);
       expect(file.version, 1);
-      expect(file.kdf.memoryKib, 64);
-      expect(file.kdf.iterations, 2);
-      expect(file.kdf.parallelism, 1);
-      expect(file.kdf.salt.length, 16);
+      final kdf = file.passwordSlot.kdf;
+      expect(kdf.memoryKib, 64);
+      expect(kdf.iterations, 2);
+      expect(kdf.parallelism, 1);
+      expect(kdf.salt.length, 16);
 
       final dek = await unwrapKey(password, file);
       final items = await openItems(dek, file);

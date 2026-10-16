@@ -7,8 +7,11 @@ import '../services/vault/vault_session.dart';
 import '../theme/app_colors.dart';
 import '../widgets/empty_state.dart';
 import 'vault/create_vault_view.dart';
+import 'vault/recover_view.dart';
+import 'vault/recovery_key_view.dart';
 import 'vault/unlock_view.dart';
 import 'vault/vault_list_view.dart';
+import 'vault/vault_settings_screen.dart';
 
 /// Onglet « Coffre » : mots de passe et notes chiffrés sur le téléphone.
 class VaultScreen extends StatefulWidget {
@@ -30,6 +33,7 @@ class _VaultScreenState extends State<VaultScreen> {
   late final AppLifecycleListener _lifecycle;
 
   bool _creating = false; // formulaire de création affiché
+  bool _recovering = false; // « Mot de passe oublié » affiché
   DateTime? _hiddenAt;
   Timer? _autoLock;
 
@@ -70,7 +74,16 @@ class _VaultScreenState extends State<VaultScreen> {
 
   void _onSessionChanged() {
     if (_session.status != VaultStatus.absent) _creating = false;
+    if (_session.status != VaultStatus.verrouille) _recovering = false;
     setState(() {});
+  }
+
+  void _openSettings() {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => VaultSettingsScreen(session: _session),
+      ),
+    );
   }
 
   // L'app passe en arrière-plan : verrouillage dans 30 s.
@@ -113,6 +126,13 @@ class _VaultScreenState extends State<VaultScreen> {
                 ),
                 const Spacer(),
                 if (opened)
+                  IconButton(
+                    tooltip: 'Réglages du coffre',
+                    color: AppColors.bleu,
+                    icon: const Icon(Icons.settings_outlined),
+                    onPressed: _openSettings,
+                  ),
+                if (opened)
                   TextButton.icon(
                     style: TextButton.styleFrom(
                       foregroundColor: AppColors.bleu,
@@ -151,8 +171,34 @@ class _VaultScreenState extends State<VaultScreen> {
           onPressed: () => setState(() => _creating = true),
         );
       case VaultStatus.verrouille:
-        return UnlockView(session: _session);
+        if (_recovering) {
+          return RecoverView(
+            session: _session,
+            onCancel: () => setState(() => _recovering = false),
+          );
+        }
+        return UnlockView(
+          session: _session,
+          onForgotPassword: () => setState(() => _recovering = true),
+          visible: widget.visible,
+        );
       case VaultStatus.ouvert:
+        // Clé de récupération neuve : montrée une fois avant la liste.
+        final recoveryKey = _session.pendingRecoveryKey;
+        if (recoveryKey != null) {
+          return RecoveryKeyView(
+            key: ValueKey(recoveryKey),
+            recoveryKey: recoveryKey,
+            clipboard: _clipboard,
+            onDone: _session.recoveryKeyNoted,
+          );
+        }
+        if (_session.offerRecoveryKey) {
+          return RecoveryKeyOfferView(
+            onCreate: _session.createRecoveryKey,
+            onLater: _session.declineRecoveryKeyOffer,
+          );
+        }
         return VaultListView(session: _session, clipboard: _clipboard);
       case VaultStatus.illisible:
         return const EmptyState(

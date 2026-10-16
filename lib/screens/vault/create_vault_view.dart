@@ -83,7 +83,8 @@ class _CreateVaultViewState extends State<CreateVaultView> {
         const SizedBox(height: 8),
         const Text(
           'Personne, pas même Sentinel, ne peut retrouver ce mot de passe. '
-          "Si vous l'oubliez, le coffre est perdu.",
+          'Vous recevrez ensuite une clé de récupération : notez-la, '
+          "c'est le seul moyen d'ouvrir le coffre si vous l'oubliez.",
           style: TextStyle(
             fontSize: 15,
             fontWeight: FontWeight.w500,

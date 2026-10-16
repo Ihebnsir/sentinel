@@ -36,4 +36,12 @@ class VaultStorage {
     await temp.writeAsString(vault.encode(), flush: true);
     await temp.rename(file.path);
   }
+
+  /// Supprime le coffre (et un éventuel fichier temporaire oublié).
+  Future<void> delete() async {
+    final file = await _file();
+    for (final f in [file, File('${file.path}.tmp')]) {
+      if (await f.exists()) await f.delete();
+    }
+  }
 }

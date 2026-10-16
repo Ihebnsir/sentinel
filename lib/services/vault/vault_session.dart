@@ -1,7 +1,9 @@
+import 'dart:io';
 import 'dart:math';
 
 import 'package:flutter/foundation.dart';
 
+import 'vault_biometrics.dart';
 import 'vault_crypto.dart';
 import 'vault_file.dart';
 import 'vault_item.dart';
@@ -19,17 +21,31 @@ enum VaultStatus {
 /// Résultat d'une tentative d'ouverture.
 enum UnlockResult { ouvert, incorrect, attendre }
 
+/// Résultat d'une tentative d'ouverture par empreinte.
+enum BiometricUnlockResult {
+  ouvert,
+  annule, // l'utilisateur préfère le mot de passe
+  motDePasseExige, // dernière ouverture par mot de passe > 7 jours
+  empreintesChangees, // clé invalidée : réactiver après le mot de passe
+  bloque, // trop d'essais
+  indisponible,
+  echec,
+}
+
 /// L'état du coffre pour toute l'app : verrouillé ou non, les éléments
 /// déchiffrés, la DEK en mémoire, les échecs de mot de passe.
 class VaultSession extends ChangeNotifier {
   VaultSession({
     VaultStorage? storage,
+    VaultBiometrics? biometrics,
     this.kdfForNewVault,
     DateTime Function()? clock,
   }) : _storage = storage ?? VaultStorage(),
+       _biometrics = biometrics ?? const AndroidVaultBiometrics(),
        _clock = clock ?? DateTime.now;
 
   final VaultStorage _storage;
+  final VaultBiometrics _biometrics;
   final DateTime Function() _clock;
 
   /// Paramètres Argon2id imposés (tests) ; sinon ceux par défaut.
@@ -48,6 +64,43 @@ class VaultSession extends ChangeNotifier {
   int _failures = 0;
   DateTime? _retryAt;
 
+  bool _biometricsAvailable = false;
+  bool _biometricBroken = false; // clé Keystore invalidée ou absente
+  String? _pendingRecoveryKey;
+  bool _offerRecoveryKey = false;
+
+  /// Un capteur d'empreinte utilisable (jamais sur Windows).
+  bool get biometricsAvailable => _biometricsAvailable;
+
+  /// L'empreinte est activée et sa clé est encore valable.
+  bool get biometricEnabled =>
+      _file?.biometricSlot != null && !_biometricBroken;
+
+  /// Les empreintes du téléphone ont changé depuis l'activation.
+  bool get biometricBroken => _biometricBroken;
+
+  /// Empreinte activée, mais mot de passe exigé (plus de 7 jours).
+  bool get biometricNeedsPassword =>
+      _biometricsAvailable &&
+      biometricEnabled &&
+      (_file?.needsPassword(_clock()) ?? true);
+
+  /// L'écran de déverrouillage peut proposer l'empreinte.
+  bool get canUnlockWithBiometrics =>
+      _status == VaultStatus.verrouille &&
+      _biometricsAvailable &&
+      biometricEnabled &&
+      !biometricNeedsPassword;
+
+  /// Le coffre a une clé de récupération (pas forcément les vieux coffres).
+  bool get hasRecoveryKey => _file?.recoverySlot != null;
+
+  /// Clé de récupération à montrer UNE fois, puis oubliée.
+  String? get pendingRecoveryKey => _pendingRecoveryKey;
+
+  /// Coffre migré sans clé de récupération : on la propose une fois.
+  bool get offerRecoveryKey => _offerRecoveryKey;
+
   /// Temps restant avant de pouvoir réessayer (zéro si on peut).
   Duration get remainingWait {
     final retryAt = _retryAt;
@@ -64,6 +117,7 @@ class VaultSession extends ChangeNotifier {
 
   /// Regarde si un coffre existe déjà.
   Future<void> load() async {
+    _biometricsAvailable = await _biometrics.isAvailable();
     try {
       _file = await _storage.read();
       _setStatus(_file == null ? VaultStatus.absent : VaultStatus.verrouille);
@@ -72,29 +126,47 @@ class VaultSession extends ChangeNotifier {
     }
   }
 
-  /// Crée un coffre vide et l'ouvre.
+  /// Crée un coffre vide, l'ouvre, et prépare la clé de récupération.
   Future<void> create(String password) async {
-    final opened = await createVault(password, kdf: kdfForNewVault?.call());
-    await _storage.write(opened.file);
-    _file = opened.file;
-    _dek = opened.dek;
+    final created = await createVault(
+      password,
+      kdf: kdfForNewVault?.call(),
+      now: _clock(),
+    );
+    await _storage.write(created.file);
+    _file = created.file;
+    _dek = created.dek;
     _items = const [];
+    _biometricBroken = false;
+    _pendingRecoveryKey = created.recoveryKey;
     _setStatus(VaultStatus.ouvert);
   }
 
   /// Essaie d'ouvrir le coffre. Après un échec, impose un délai croissant.
+  /// Note la date (règle des 7 jours) et migre un coffre v1 en v2.
   Future<UnlockResult> unlock(String password) async {
     final file = _file;
     if (file == null) return UnlockResult.incorrect;
     if (remainingWait > Duration.zero) return UnlockResult.attendre;
     try {
-      final dek = await unwrapKey(password, file);
-      final items = await openItems(dek, file);
-      _failures = 0;
-      _retryAt = null;
-      _dek = dek;
-      _items = _sorted(items);
-      _setStatus(VaultStatus.ouvert);
+      final opening = await openWithPassword(
+        password,
+        file,
+        now: _clock(),
+        dropBiometric: _biometricBroken,
+      );
+      // Écriture atomique : en cas d'échec, l'ancien fichier reste
+      // lisible, et le prochain enregistrement réessaiera.
+      await _tryWrite(opening.file);
+      _file = opening.file;
+      if (_biometricBroken) {
+        _biometricBroken = false;
+        await _biometrics.deleteKey(); // déjà invalidée : on fait le ménage
+      }
+      if (opening.migrated && opening.file.recoverySlot == null) {
+        _offerRecoveryKey = true;
+      }
+      _opened(opening.dek, opening.items);
       return UnlockResult.ouvert;
     } on WrongPasswordException {
       _failures++;
@@ -107,12 +179,180 @@ class VaultSession extends ChangeNotifier {
     }
   }
 
+  /// Ouvre avec l'empreinte (Android). Si la clé est invalidée, l'empreinte
+  /// est désactivée : l'emplacement sera retiré à la prochaine ouverture
+  /// par mot de passe (il faut la DEK pour resceller l'en-tête).
+  Future<BiometricUnlockResult> unlockWithBiometrics() async {
+    final file = _file;
+    final slot = file?.biometricSlot;
+    if (file == null || slot == null || !_biometricsAvailable) {
+      return BiometricUnlockResult.indisponible;
+    }
+    if (_biometricBroken) return BiometricUnlockResult.empreintesChangees;
+    if (file.needsPassword(_clock())) {
+      return BiometricUnlockResult.motDePasseExige;
+    }
+    final Uint8List dek;
+    try {
+      dek = await _biometrics.decrypt(slot.wrappedKey, file.aadOf(slot));
+    } on BiometricException catch (e) {
+      if (e.error == BiometricError.invalidee) {
+        _biometricBroken = true;
+        notifyListeners();
+      }
+      return switch (e.error) {
+        BiometricError.invalidee => BiometricUnlockResult.empreintesChangees,
+        BiometricError.annulee => BiometricUnlockResult.annule,
+        BiometricError.bloquee => BiometricUnlockResult.bloque,
+        BiometricError.indisponible => BiometricUnlockResult.indisponible,
+        BiometricError.echec => BiometricUnlockResult.echec,
+      };
+    }
+    // Verrouillé ou remplacé pendant la fenêtre d'empreinte.
+    if (_file != file || _status != VaultStatus.verrouille) {
+      wipe(dek);
+      return BiometricUnlockResult.annule;
+    }
+    try {
+      _opened(dek, await openItems(dek, file));
+      return BiometricUnlockResult.ouvert;
+    } on VaultCorruptedException {
+      wipe(dek);
+      _setStatus(VaultStatus.illisible);
+      return BiometricUnlockResult.echec;
+    }
+  }
+
+  /// La clé de récupération saisie est-elle la bonne ? (HKDF : instantané)
+  Future<bool> recoveryKeyMatches(String input) async {
+    final file = _file;
+    if (file == null) return false;
+    try {
+      wipe(await unwrapWithRecoveryKey(input, file));
+      return true;
+    } on WrongRecoveryKeyException {
+      return false;
+    }
+  }
+
+  /// « Mot de passe oublié » : ouvre avec la clé de récupération, remplace
+  /// le mot de passe et génère une NOUVELLE clé (l'ancienne ne marche plus).
+  Future<bool> recover(String recoveryInput, String newPassword) async {
+    final file = _file;
+    if (file == null) return false;
+    try {
+      final reset = await resetWithRecoveryKey(
+        recoveryInput,
+        newPassword,
+        file,
+        kdf: kdfForNewVault?.call(),
+        now: _clock(),
+      );
+      await _storage.write(reset.file);
+      _file = reset.file;
+      _pendingRecoveryKey = reset.recoveryKey;
+      _offerRecoveryKey = false;
+      _opened(reset.dek, reset.items);
+      return true;
+    } on WrongRecoveryKeyException {
+      return false;
+    } on VaultCorruptedException {
+      _setStatus(VaultStatus.illisible);
+      return false;
+    }
+  }
+
+  /// Change le mot de passe maître. false si l'ancien est faux.
+  Future<bool> changeMasterPassword(
+    String oldPassword,
+    String newPassword,
+  ) async {
+    try {
+      await _update(
+        (dek, file) => changePassword(
+          oldPassword,
+          newPassword,
+          file,
+          dek,
+          kdf: kdfForNewVault?.call(),
+          now: _clock(),
+        ),
+      );
+      return true;
+    } on WrongPasswordException {
+      return false;
+    }
+  }
+
+  /// Génère une nouvelle clé de récupération (à montrer une fois).
+  Future<void> createRecoveryKey() async {
+    String? key;
+    await _update((dek, file) async {
+      final (next, newKey) = await replaceRecoveryKey(dek, file);
+      key = newKey;
+      return next;
+    });
+    _pendingRecoveryKey = key;
+    _offerRecoveryKey = false;
+    notifyListeners();
+  }
+
+  /// L'utilisateur a noté la clé : on l'oublie.
+  void recoveryKeyNoted() {
+    _pendingRecoveryKey = null;
+    notifyListeners();
+  }
+
+  /// « Plus tard » : la proposition ne revient pas.
+  void declineRecoveryKeyOffer() {
+    _offerRecoveryKey = false;
+    notifyListeners();
+  }
+
+  /// Active (empreinte demandée) ou désactive l'ouverture par empreinte.
+  /// Lève [BiometricException] si l'empreinte n'a pas abouti.
+  Future<void> setBiometricEnabled(bool enabled) async {
+    if (enabled) {
+      await _update((dek, file) async {
+        final aad = KeySlot.aadFor(BiometricSlot.staticParams);
+        final blob = await _biometrics.encrypt(dek, aad);
+        return reseal(
+          dek,
+          file,
+          file.withSlot(BiometricSlot(wrappedKey: blob)),
+        );
+      });
+      _biometricBroken = false;
+    } else {
+      await _update(
+        (dek, file) => reseal(dek, file, file.withoutBiometricSlot()),
+      );
+      _biometricBroken = false;
+      await _biometrics.deleteKey();
+    }
+    notifyListeners();
+  }
+
+  /// Supprime le coffre et la clé Keystore. Irréversible.
+  Future<void> deleteVault() async {
+    lock();
+    await _storage.delete();
+    await _biometrics.deleteKey();
+    _file = null;
+    _biometricBroken = false;
+    _offerRecoveryKey = false;
+    _failures = 0;
+    _retryAt = null;
+    _setStatus(VaultStatus.absent);
+  }
+
   /// Ferme le coffre : la clé est effacée, la liste oubliée.
   void lock() {
     final dek = _dek;
     if (dek != null) wipe(dek);
     _dek = null;
     _items = const [];
+    _pendingRecoveryKey = null; // secret : jamais gardé après verrouillage
     if (_status == VaultStatus.ouvert) _setStatus(VaultStatus.verrouille);
   }
 
@@ -134,6 +374,16 @@ class VaultSession extends ChangeNotifier {
   }
 
   Future<void> _persist(List<VaultItem> items) async {
+    await _update((dek, file) => sealItems(dek, file, items));
+    // Verrouillé entre-temps : on ne remet pas la liste en mémoire.
+    if (_dek != null) _items = _sorted(items);
+    notifyListeners();
+  }
+
+  // Calcule un nouveau fichier avec la DEK, l'écrit, puis le garde.
+  Future<void> _update(
+    Future<VaultFile> Function(Uint8List dek, VaultFile file) change,
+  ) async {
     final dek = _dek;
     final file = _file;
     if (dek == null || file == null) throw StateError('Coffre verrouillé');
@@ -141,15 +391,29 @@ class VaultSession extends ChangeNotifier {
     // chiffrerait alors avec une clé remplie de zéros.
     final key = Uint8List.fromList(dek);
     try {
-      final sealed = await sealItems(key, file, items);
-      await _storage.write(sealed);
-      _file = sealed;
+      final next = await change(key, file);
+      await _storage.write(next);
+      _file = next;
     } finally {
       wipe(key);
     }
-    // Verrouillé entre-temps : on ne remet pas la liste en mémoire.
-    if (_dek != null) _items = _sorted(items);
-    notifyListeners();
+  }
+
+  void _opened(Uint8List dek, List<VaultItem> items) {
+    _failures = 0;
+    _retryAt = null;
+    _dek = dek;
+    _items = _sorted(items);
+    _setStatus(VaultStatus.ouvert);
+  }
+
+  Future<void> _tryWrite(VaultFile file) async {
+    try {
+      await _storage.write(file);
+    } on FileSystemException {
+      // Jamais le contenu ni le chemin dans les journaux.
+      if (kDebugMode) debugPrint('Coffre : écriture reportée');
+    }
   }
 
   static List<VaultItem> _sorted(List<VaultItem> items) => [...items]

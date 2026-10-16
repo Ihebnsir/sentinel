@@ -94,39 +94,213 @@ class EncryptedBlob {
   }
 }
 
+/// Un emplacement de clé (« key slot ») : une façon d'ouvrir le coffre.
+/// Chaque emplacement enveloppe la MÊME DEK avec sa propre KEK.
+sealed class KeySlot {
+  const KeySlot(this.wrappedKey);
+
+  /// La DEK chiffrée par la KEK de cet emplacement.
+  final EncryptedBlob wrappedKey;
+
+  /// Les paramètres publics, sans la clé enveloppée.
+  Map<String, Object> get params;
+
+  Map<String, Object> toJson() => {
+    ...params,
+    'wrappedKey': wrappedKey.toJson(),
+  };
+
+  /// AAD de la clé enveloppée : version + paramètres de l'emplacement.
+  /// Changer le sel ou le type fait échouer le déchiffrement.
+  Uint8List get aad => aadFor(params);
+
+  static Uint8List aadFor(Map<String, Object> params) => utf8.encode(
+    jsonEncode({'version': VaultFile.currentVersion, 'slot': params}),
+  );
+
+  factory KeySlot.fromJson(Object? json) {
+    if (json is! Map<String, Object?>) {
+      throw const VaultFormatException('Emplacement de clé invalide');
+    }
+    final wrapped = EncryptedBlob.fromJson(json['wrappedKey']);
+    switch (json['type']) {
+      case PasswordSlot.type:
+        final kdf = json['kdf'];
+        if (kdf is! Map<String, Object?>) {
+          throw const VaultFormatException(
+            'Paramètres de dérivation manquants',
+          );
+        }
+        return PasswordSlot(kdf: KdfParams.fromJson(kdf), wrappedKey: wrapped);
+      case RecoverySlot.type:
+        final salt = _bytes(json, 'sel');
+        if (salt.length != RecoverySlot.saltLength) {
+          throw const VaultFormatException('Sel de récupération invalide');
+        }
+        return RecoverySlot(salt: salt, wrappedKey: wrapped);
+      case BiometricSlot.type:
+        return BiometricSlot(wrappedKey: wrapped);
+      default:
+        throw const VaultFormatException('Emplacement de clé inconnu');
+    }
+  }
+}
+
+/// Mot de passe maître : KEK = Argon2id(mot de passe, sel).
+class PasswordSlot extends KeySlot {
+  const PasswordSlot({required this.kdf, required EncryptedBlob wrappedKey})
+    : super(wrappedKey);
+
+  static const type = 'password';
+
+  final KdfParams kdf;
+
+  static Map<String, Object> paramsFor(KdfParams kdf) => {
+    'type': type,
+    'kdf': kdf.toJson(),
+  };
+
+  @override
+  Map<String, Object> get params => paramsFor(kdf);
+}
+
+/// Clé de récupération : KEK = HKDF-SHA256(clé, sel).
+class RecoverySlot extends KeySlot {
+  const RecoverySlot({required this.salt, required EncryptedBlob wrappedKey})
+    : super(wrappedKey);
+
+  static const type = 'recovery';
+  static const saltLength = 16;
+
+  final Uint8List salt;
+
+  static Map<String, Object> paramsFor(Uint8List salt) => {
+    'type': type,
+    'sel': base64.encode(salt),
+  };
+
+  @override
+  Map<String, Object> get params => paramsFor(salt);
+}
+
+/// Empreinte (Android) : la DEK chiffrée par une clé du Keystore.
+/// Le fichier ne contient que le chiffré et le nonce (IV).
+class BiometricSlot extends KeySlot {
+  const BiometricSlot({required EncryptedBlob wrappedKey}) : super(wrappedKey);
+
+  static const type = 'biometric';
+  static const Map<String, Object> staticParams = {'type': type};
+
+  @override
+  Map<String, Object> get params => staticParams;
+}
+
 /// Le fichier vault.json, entièrement en base64 sauf l'en-tête.
+///
+/// Version 2 : une liste d'emplacements de clé (`keySlots`) et la date de
+/// la dernière ouverture par mot de passe. La version 1 (un seul mot de
+/// passe) est encore lue, puis migrée à la première ouverture.
 class VaultFile {
   const VaultFile({
-    required this.kdf,
-    required this.wrappedKey,
+    required this.slots,
     required this.data,
+    this.lastPasswordUnlock,
     this.version = currentVersion,
   });
 
-  static const currentVersion = 1;
+  static const currentVersion = 2;
+
+  /// Au-delà, l'empreinte ne suffit plus : le mot de passe est exigé.
+  static const passwordMaxAge = Duration(days: 7);
 
   final int version;
-  final KdfParams kdf;
-  final EncryptedBlob wrappedKey; // la DEK chiffrée par la KEK
+  final List<KeySlot> slots;
+
+  /// Dernière ouverture par mot de passe (UTC, à la seconde). Dans
+  /// l'en-tête, donc protégée par GCM : impossible de la falsifier.
+  final DateTime? lastPasswordUnlock;
+
   final EncryptedBlob data; // les éléments chiffrés par la DEK
 
-  /// L'en-tête (version + paramètres) en octets, utilisé comme données
-  /// associées (AAD) de GCM : s'il change d'un seul octet, le
+  PasswordSlot get passwordSlot => slots.whereType<PasswordSlot>().first;
+  RecoverySlot? get recoverySlot => slots.whereType<RecoverySlot>().firstOrNull;
+  BiometricSlot? get biometricSlot =>
+      slots.whereType<BiometricSlot>().firstOrNull;
+
+  /// L'en-tête (tout sauf les données) en octets, utilisé comme AAD des
+  /// données : si un seul octet change (un emplacement, la date…), le
   /// déchiffrement échoue. Reconstruit toujours dans le même ordre.
-  Uint8List get header => headerBytes(version, kdf);
+  Uint8List get header => version == 1
+      ? utf8.encode(
+          jsonEncode({'version': 1, 'kdf': passwordSlot.kdf.toJson()}),
+        )
+      : utf8.encode(jsonEncode(_headerJson()));
 
-  static Uint8List headerBytes(int version, KdfParams kdf) =>
-      utf8.encode(jsonEncode({'version': version, 'kdf': kdf.toJson()}));
+  /// AAD de la clé enveloppée d'un emplacement (v1 : l'en-tête entier).
+  Uint8List aadOf(KeySlot slot) => version == 1 ? header : slot.aad;
 
-  VaultFile withData(EncryptedBlob data) =>
-      VaultFile(version: version, kdf: kdf, wrappedKey: wrappedKey, data: data);
+  /// Faut-il le mot de passe (et non l'empreinte) ? Oui après 7 jours,
+  /// ou si la date est très en avance (horloge du téléphone reculée).
+  bool needsPassword(DateTime now) {
+    final last = lastPasswordUnlock;
+    if (last == null) return true;
+    final age = now.difference(last);
+    return age > passwordMaxAge || age < const Duration(days: -1);
+  }
 
-  Map<String, Object> toJson() => {
-    'version': version,
-    'kdf': kdf.toJson(),
-    'wrappedKey': wrappedKey.toJson(),
-    'data': data.toJson(),
+  VaultFile withData(EncryptedBlob data) => VaultFile(
+    version: version,
+    slots: slots,
+    lastPasswordUnlock: lastPasswordUnlock,
+    data: data,
+  );
+
+  /// Copie en version 2 avec d'autres emplacements ou une autre date.
+  /// Attention : l'en-tête change, les données doivent être rescellées.
+  VaultFile copyWith({List<KeySlot>? slots, DateTime? lastPasswordUnlock}) =>
+      VaultFile(
+        slots: slots ?? this.slots,
+        lastPasswordUnlock: lastPasswordUnlock ?? this.lastPasswordUnlock,
+        data: data,
+      );
+
+  /// Remplace l'emplacement du même type (ou l'ajoute).
+  VaultFile withSlot(KeySlot slot) => copyWith(
+    slots: [
+      for (final s in slots)
+        if (s.runtimeType != slot.runtimeType) s,
+      slot,
+    ]..sort((a, b) => _order(a).compareTo(_order(b))),
+  );
+
+  VaultFile withoutBiometricSlot() => copyWith(
+    slots: [
+      for (final s in slots)
+        if (s is! BiometricSlot) s,
+    ],
+  );
+
+  // Ordre fixe : mot de passe, récupération, empreinte.
+  static int _order(KeySlot slot) => switch (slot) {
+    PasswordSlot() => 0,
+    RecoverySlot() => 1,
+    BiometricSlot() => 2,
   };
+
+  Map<String, Object> _headerJson() => {
+    'version': version,
+    'derniereOuvertureMdp': lastPasswordUnlock!.toUtc().toIso8601String(),
+    'keySlots': [for (final slot in slots) slot.toJson()],
+  };
+
+  Map<String, Object> toJson() => version == 1
+      ? {
+          'version': 1,
+          'kdf': passwordSlot.kdf.toJson(),
+          'wrappedKey': passwordSlot.wrappedKey.toJson(),
+          'data': data.toJson(),
+        }
+      : {..._headerJson(), 'data': data.toJson()};
 
   String encode() => const JsonEncoder.withIndent('  ').convert(toJson());
 
@@ -137,20 +311,13 @@ class VaultFile {
       if (json is! Map<String, Object?>) {
         throw const VaultFormatException('Fichier de coffre invalide');
       }
-      final version = json['version'];
-      if (version != currentVersion) {
-        throw VaultFormatException('Version de coffre inconnue : $version');
-      }
-      final kdf = json['kdf'];
-      if (kdf is! Map<String, Object?>) {
-        throw const VaultFormatException('Paramètres de dérivation manquants');
-      }
-      return VaultFile(
-        version: version as int,
-        kdf: KdfParams.fromJson(kdf),
-        wrappedKey: EncryptedBlob.fromJson(json['wrappedKey']),
-        data: EncryptedBlob.fromJson(json['data']),
-      );
+      return switch (json['version']) {
+        1 => _decodeV1(json),
+        2 => _decodeV2(json),
+        final version => throw VaultFormatException(
+          'Version de coffre inconnue : $version',
+        ),
+      };
     } on VaultFormatException {
       rethrow;
     } on FormatException {
@@ -158,6 +325,47 @@ class VaultFile {
     } on TypeError {
       throw const VaultFormatException('Fichier de coffre illisible');
     }
+  }
+
+  static VaultFile _decodeV1(Map<String, Object?> json) {
+    final kdf = json['kdf'];
+    if (kdf is! Map<String, Object?>) {
+      throw const VaultFormatException('Paramètres de dérivation manquants');
+    }
+    return VaultFile(
+      version: 1,
+      slots: [
+        PasswordSlot(
+          kdf: KdfParams.fromJson(kdf),
+          wrappedKey: EncryptedBlob.fromJson(json['wrappedKey']),
+        ),
+      ],
+      data: EncryptedBlob.fromJson(json['data']),
+    );
+  }
+
+  static VaultFile _decodeV2(Map<String, Object?> json) {
+    final rawSlots = json['keySlots'];
+    if (rawSlots is! List<Object?>) {
+      throw const VaultFormatException('Emplacements de clé manquants');
+    }
+    final slots = [for (final slot in rawSlots) KeySlot.fromJson(slot)];
+    // Exactement un mot de passe, au plus une clé de chaque autre type.
+    int count<T>() => slots.whereType<T>().length;
+    if (count<PasswordSlot>() != 1 ||
+        count<RecoverySlot>() > 1 ||
+        count<BiometricSlot>() > 1) {
+      throw const VaultFormatException('Emplacements de clé invalides');
+    }
+    final date = json['derniereOuvertureMdp'];
+    if (date is! String) {
+      throw const VaultFormatException('Date de dernière ouverture manquante');
+    }
+    return VaultFile(
+      slots: slots,
+      lastPasswordUnlock: DateTime.parse(date).toUtc(),
+      data: EncryptedBlob.fromJson(json['data']),
+    );
   }
 }
 

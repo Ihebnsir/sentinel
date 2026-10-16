@@ -16,14 +16,17 @@ import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 
 /**
- * Protections du coffre : écran sécurisé, copie sensible, et alerte à
- * Dart quand l'écran s'éteint (pour verrouiller tout de suite).
- * Ne journalise jamais le texte copié.
+ * Protections du coffre : écran sécurisé, copie sensible, alerte à
+ * Dart quand l'écran s'éteint (pour verrouiller tout de suite), et
+ * ouverture par empreinte (VaultBiometric).
+ * Ne journalise jamais le texte copié ni les clés.
  */
 class VaultProtection(private val activity: Activity, messenger: BinaryMessenger) {
 
     // Même nom que dans lib/services/vault/vault_platform.dart.
     private val channel = MethodChannel(messenger, "com.iheb.sentinel/vault")
+
+    private val biometric = VaultBiometric(activity)
 
     // ACTION_SCREEN_OFF ne peut être reçue que par un récepteur
     // enregistré dans le code (pas dans le manifeste).
@@ -46,6 +49,7 @@ class VaultProtection(private val activity: Activity, messenger: BinaryMessenger
     }
 
     fun dispose() {
+        biometric.dispose()
         activity.unregisterReceiver(screenOffReceiver)
         channel.setMethodCallHandler(null)
     }
@@ -62,6 +66,30 @@ class VaultProtection(private val activity: Activity, messenger: BinaryMessenger
             }
             "clearClipboard" -> {
                 clearClipboard()
+                result.success(null)
+            }
+            "biometricAvailable" -> result.success(biometric.isAvailable())
+            "biometricEncrypt" -> {
+                val data = call.argument<ByteArray>("data")
+                val aad = call.argument<ByteArray>("aad")
+                if (data == null || aad == null) {
+                    result.error("ECHEC", null, null)
+                } else {
+                    biometric.encrypt(data, aad, result)
+                }
+            }
+            "biometricDecrypt" -> {
+                val iv = call.argument<ByteArray>("iv")
+                val cipherText = call.argument<ByteArray>("chiffre")
+                val aad = call.argument<ByteArray>("aad")
+                if (iv == null || cipherText == null || aad == null) {
+                    result.error("ECHEC", null, null)
+                } else {
+                    biometric.decrypt(iv, cipherText, aad, result)
+                }
+            }
+            "biometricDeleteKey" -> {
+                biometric.deleteKey()
                 result.success(null)
             }
             else -> result.notImplemented()
