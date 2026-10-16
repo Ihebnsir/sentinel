@@ -1,0 +1,33 @@
+# Dependabot : propose chaque semaine des pull requests de mise à jour.
+version: 2
+
+updates:
+  # Paquets Dart / Flutter (pubspec.yaml)
+  - package-ecosystem: pub
+    directory: /
+    schedule:
+      interval: weekly
+
+  # Plugins Gradle et wrapper (android/)
+  - package-ecosystem: gradle
+    directory: /android
+    schedule:
+      interval: weekly
+
+  # Entraînement du modèle (ml/requirements.txt)
+  - package-ecosystem: pip
+    directory: /ml
+    schedule:
+      interval: weekly
+
+  # Outils de génération d'icônes (tools/requirements.txt)
+  - package-ecosystem: pip
+    directory: /tools
+    schedule:
+      interval: weekly
+
+  # Actions GitHub (met aussi à jour les SHA épinglés)
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly

@@ -21,10 +21,17 @@
     <!-- Internet : utilisé uniquement pour Have I Been Pwned (fuites de mots
          de passe), après accord. Seuls 5 caractères d'empreinte sont envoyés. -->
     <uses-permission android:name="android.permission.INTERNET" />
+    <!-- Pas de sauvegarde Android : le coffre (même chiffré) ne doit pas
+         partir dans le cloud ni vers un autre téléphone.
+         allowBackup="false" suffit jusqu'à Android 11 ; à partir d'Android 12,
+         dataExtractionRules exclut aussi le transfert d'appareil à appareil. -->
     <application
         android:label="Sentinel"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/ic_launcher"
+        android:allowBackup="false"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        tools:targetApi="31">
         <activity
             android:name=".MainActivity"
             android:exported="true"
