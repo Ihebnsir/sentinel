@@ -2,7 +2,9 @@ import 'dart:math';
 
 import 'package:material_ui/material_ui.dart';
 
+import '../../services/breach/breach_checker.dart';
 import '../../services/vault/password_generator.dart';
+import '../../services/vault/password_health.dart';
 import '../../services/vault/vault_item.dart';
 import '../../services/vault/vault_platform.dart';
 import '../../services/vault/vault_session.dart';
@@ -18,12 +20,20 @@ class VaultItemScreen extends StatefulWidget {
     required this.clipboard,
     required this.type,
     this.item,
+    this.breaches,
+    this.showGenerator = false,
   });
 
   final VaultSession session;
   final ClipboardGuard clipboard;
   final VaultItemType type;
   final VaultItem? item;
+
+  /// Résultats des fuites (null : pas d'affichage).
+  final BreachChecker? breaches;
+
+  /// Générateur ouvert dès l'arrivée (depuis « Santé des mots de passe »).
+  final bool showGenerator;
 
   @override
   State<VaultItemScreen> createState() => _VaultItemScreenState();
@@ -39,7 +49,7 @@ class _VaultItemScreenState extends State<VaultItemScreen> {
   late final _note = TextEditingController(text: widget.item?.note);
 
   bool _saving = false;
-  bool _showGenerator = false;
+  late bool _showGenerator = widget.showGenerator;
   bool _revealPassword = false;
   GeneratorOptions _options = const GeneratorOptions();
 
@@ -275,6 +285,26 @@ class _VaultItemScreenState extends State<VaultItemScreen> {
       secret: true,
       revealed: _revealPassword,
     ),
+    // Fuite connue pour le mot de passe affiché (disparaît s'il change).
+    if (widget.breaches case final breaches?)
+      ListenableBuilder(
+        listenable: Listenable.merge([breaches, _motDePasse]),
+        builder: (context, _) {
+          final count = breaches.countFor(_motDePasse.text) ?? 0;
+          if (count == 0) return const SizedBox.shrink();
+          return Padding(
+            padding: const EdgeInsets.only(top: 8),
+            child: Text(
+              breachMessage(count),
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+                color: AppColors.rommen,
+              ),
+            ),
+          );
+        },
+      ),
     Row(
       children: [
         TextButton.icon(

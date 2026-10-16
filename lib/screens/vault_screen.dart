@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:material_ui/material_ui.dart';
 
+import '../services/breach/breach_checker.dart';
 import '../services/vault/vault_platform.dart';
 import '../services/vault/vault_session.dart';
 import '../theme/app_colors.dart';
@@ -30,6 +31,7 @@ class _VaultScreenState extends State<VaultScreen> {
 
   final _session = VaultSession();
   final _clipboard = ClipboardGuard();
+  final _breaches = BreachChecker(); // résultats effacés au verrouillage
   late final AppLifecycleListener _lifecycle;
 
   bool _creating = false; // formulaire de création affiché
@@ -42,6 +44,7 @@ class _VaultScreenState extends State<VaultScreen> {
     super.initState();
     _session.addListener(_onSessionChanged);
     _session.load();
+    _breaches.loadConsent();
     _lifecycle = AppLifecycleListener(
       onHide: _onHide,
       onShow: _onShow,
@@ -67,6 +70,7 @@ class _VaultScreenState extends State<VaultScreen> {
     _lifecycle.dispose();
     _autoLock?.cancel();
     _clipboard.dispose();
+    _breaches.dispose();
     _session.removeListener(_onSessionChanged);
     _session.dispose(); // efface la clé
     super.dispose();
@@ -75,13 +79,15 @@ class _VaultScreenState extends State<VaultScreen> {
   void _onSessionChanged() {
     if (_session.status != VaultStatus.absent) _creating = false;
     if (_session.status != VaultStatus.verrouille) _recovering = false;
+    if (_session.status != VaultStatus.ouvert) _breaches.clear();
     setState(() {});
   }
 
   void _openSettings() {
     Navigator.of(context).push(
       MaterialPageRoute<void>(
-        builder: (_) => VaultSettingsScreen(session: _session),
+        builder: (_) =>
+            VaultSettingsScreen(session: _session, breaches: _breaches),
       ),
     );
   }
@@ -199,7 +205,11 @@ class _VaultScreenState extends State<VaultScreen> {
             onLater: _session.declineRecoveryKeyOffer,
           );
         }
-        return VaultListView(session: _session, clipboard: _clipboard);
+        return VaultListView(
+          session: _session,
+          clipboard: _clipboard,
+          breaches: _breaches,
+        );
       case VaultStatus.illisible:
         return const EmptyState(
           icon: Icons.error_outline,

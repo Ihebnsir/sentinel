@@ -1,9 +1,11 @@
 import 'package:material_ui/material_ui.dart';
 
+import '../../services/breach/breach_checker.dart';
 import '../../services/vault/password_strength.dart';
 import '../../services/vault/vault_biometrics.dart';
 import '../../services/vault/vault_session.dart';
 import '../../theme/app_colors.dart';
+import '../../widgets/breach_consent_sheet.dart';
 import '../../widgets/vault_fields.dart';
 
 const _divider = Divider(height: 1, thickness: 1, color: AppColors.ligne);
@@ -61,9 +63,14 @@ Widget _title(String text) => Text(
 /// Réglages du coffre ouvert : empreinte, mot de passe, clé de
 /// récupération, suppression.
 class VaultSettingsScreen extends StatefulWidget {
-  const VaultSettingsScreen({super.key, required this.session});
+  const VaultSettingsScreen({
+    super.key,
+    required this.session,
+    required this.breaches,
+  });
 
   final VaultSession session;
+  final BreachChecker breaches;
 
   @override
   State<VaultSettingsScreen> createState() => _VaultSettingsScreenState();
@@ -103,6 +110,13 @@ class _VaultSettingsScreenState extends State<VaultSettingsScreen>
     } finally {
       if (mounted) setState(() => _busy = false);
     }
+  }
+
+  // Activer demande l'accord ; désactiver efface aussi les résultats.
+  Future<void> _toggleBreaches(bool enabled) async {
+    if (enabled && !await askBreachConsent(context)) return;
+    await widget.breaches.setConsent(enabled);
+    if (mounted) setState(() {});
   }
 
   void _changePassword() {
@@ -217,6 +231,40 @@ class _VaultSettingsScreenState extends State<VaultSettingsScreen>
                 ),
               ),
             ],
+            _divider,
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              child: Row(
+                children: [
+                  const Icon(Icons.travel_explore, color: AppColors.bleu),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Vérifier les fuites',
+                          style: TextStyle(
+                            fontSize: 15,
+                            color: AppColors.encre,
+                          ),
+                        ),
+                        Text(
+                          "Have I Been Pwned. Seul un début d'empreinte est "
+                          'envoyé, jamais le mot de passe.',
+                          style: TextStyle(fontSize: 13, color: muted),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Switch(
+                    value: widget.breaches.consent,
+                    activeTrackColor: AppColors.bleu,
+                    onChanged: _busy ? null : _toggleBreaches,
+                  ),
+                ],
+              ),
+            ),
             _divider,
             _SettingsRow(
               icon: Icons.password,

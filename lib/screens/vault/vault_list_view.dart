@@ -1,9 +1,12 @@
 import 'package:material_ui/material_ui.dart';
 
+import '../../services/breach/breach_checker.dart';
+import '../../services/vault/password_health.dart';
 import '../../services/vault/vault_item.dart';
 import '../../services/vault/vault_platform.dart';
 import '../../services/vault/vault_session.dart';
 import '../../theme/app_colors.dart';
+import 'password_health_screen.dart';
 import 'vault_item_screen.dart';
 
 /// Coffre ouvert : recherche, bouton « Ajouter », liste triée par titre.
@@ -12,10 +15,12 @@ class VaultListView extends StatefulWidget {
     super.key,
     required this.session,
     required this.clipboard,
+    required this.breaches,
   });
 
   final VaultSession session;
   final ClipboardGuard clipboard;
+  final BreachChecker breaches;
 
   @override
   State<VaultListView> createState() => _VaultListViewState();
@@ -60,8 +65,21 @@ class _VaultListViewState extends State<VaultListView> {
         builder: (_) => VaultItemScreen(
           session: widget.session,
           clipboard: widget.clipboard,
+          breaches: widget.breaches,
           item: item,
           type: item?.type ?? type ?? VaultItemType.motDePasse,
+        ),
+      ),
+    );
+  }
+
+  void _openHealth() {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => PasswordHealthScreen(
+          session: widget.session,
+          clipboard: widget.clipboard,
+          breaches: widget.breaches,
         ),
       ),
     );
@@ -90,7 +108,19 @@ class _VaultListViewState extends State<VaultListView> {
             ),
           ],
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 8),
+        if (!empty)
+          ListenableBuilder(
+            listenable: widget.breaches,
+            builder: (context, _) => _HealthRow(
+              report: analyzePasswordHealth(
+                widget.session.items,
+                breachCount: widget.breaches.countFor,
+              ),
+              onTap: _openHealth,
+            ),
+          ),
+        const SizedBox(height: 8),
         Expanded(
           child: items.isEmpty
               ? Padding(
@@ -129,6 +159,54 @@ class _VaultListViewState extends State<VaultListView> {
   }
 
   void _refresh(String _) => setState(() {});
+}
+
+/// Ligne « Santé des mots de passe » : nombre d'éléments à corriger.
+class _HealthRow extends StatelessWidget {
+  const _HealthRow({required this.report, required this.onTap});
+
+  final PasswordHealthReport report;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final toFix = report.toFix;
+    final color = report.breached.isNotEmpty
+        ? AppColors.rommen
+        : toFix > 0
+        ? AppColors.ocre
+        : AppColors.zitouna;
+    return InkWell(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        child: Row(
+          children: [
+            Icon(Icons.health_and_safety_outlined, color: color),
+            const SizedBox(width: 16),
+            const Expanded(
+              child: Text(
+                'Santé des mots de passe',
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w500,
+                  color: AppColors.encre,
+                ),
+              ),
+            ),
+            Text(
+              toFix == 0 ? 'Tout va bien' : '$toFix à corriger',
+              style: TextStyle(fontWeight: FontWeight.w600, color: color),
+            ),
+            Icon(
+              Icons.chevron_right,
+              color: AppColors.encre.withValues(alpha: 0.3),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }
 
 /// Champ de recherche à bordure fine.

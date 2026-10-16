@@ -18,6 +18,9 @@
     <!-- Permission « normale » : lire l'état du réseau (Wi-Fi, portail captif,
          DNS privé). Aucune localisation : on ne lit jamais le nom du Wi-Fi. -->
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <!-- Internet : utilisé uniquement pour Have I Been Pwned (fuites de mots
+         de passe), après accord. Seuls 5 caractères d'empreinte sont envoyés. -->
+    <uses-permission android:name="android.permission.INTERNET" />
     <application
         android:label="Sentinel"
         android:name="${applicationName}"

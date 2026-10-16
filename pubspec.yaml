@@ -38,6 +38,8 @@ dependencies:
   material_ui: 1.6.0
   cryptography: ^2.9.0
   path_provider: ^2.1.6
+  http: ^1.6.0
+  crypto: ^3.0.7
 
 dev_dependencies:
   flutter_test:
