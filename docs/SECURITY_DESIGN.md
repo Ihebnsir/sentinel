@@ -15,6 +15,7 @@ Sentinel is a personal project. It has **not** had an independent security audit
 | Message content read by automatic protection | Private conversations, verification codes |
 | Device and app inventory | Shows what is installed and how the phone is configured |
 | The user's money and accounts | The final target of scams (phishing SMS, fake bank or postal links) |
+| The user's physical safety | A stalkerware finding can be dangerous if the person who installed it learns about it |
 
 ## 2. Principles
 
@@ -104,6 +105,19 @@ Sentinel is a personal project. It has **not** had an independent security audit
 | Explicit, revocable consent. Revoking it also erases the results | `breach_checker.dart`, `breach_consent_sheet.dart` |
 | Results are kept in memory, keyed by hash, and cleared on lock. The response cache only lasts for one check run | `breach_checker.dart` |
 
+### 3.7 Someone close to the user (stalkerware)
+
+*Who:* a partner, ex-partner or relative who had the phone in hand for a few minutes. *Goal:* install a hidden app that reports messages, location, calls and notifications. Unlike the other attackers, this one may be physically close to the user, and may notice if the spyware stops reporting.
+
+| Measure | Where |
+|---|---|
+| Known stalkerware matched by package name or SHA-1 certificate fingerprint, from the public Stalkerware Indicators list (CC BY 4.0, pinned commit). Applies **even to system apps**, since many stalkerware packages pose as system components (`com.android.core.…`) | `stalkerware_ioc.dart`, `tools/stalkerware/update_ioc.py` |
+| Spy profile: launcher icon hidden (`MAIN/LAUNCHER` activity disabled after install, read with `getComponentEnabledSetting`) **and** at least two of accessibility, background location, SMS, call log, notification access, device admin | `InstalledAppsScanner.kt`, `app_risk_calculator.dart` |
+| Fake and repackaged apps: popular app name with another package, official package with another signing certificate, known WhatsApp mods, test-key signatures | `known_apps.dart`, `app_risk_calculator.dart` |
+| **No notification** for these findings: anyone looking at the lock screen could see it. They only appear when the user opens the Applications tab | `apps_screen.dart` |
+| Safety advice **before** any action: removing the app can alert the person who installed it; contact a help organization or the police first if in danger. The detail screen offers only "Que faire ?" instead of "Désinstaller" | `spyware_advice_screen.dart`, `app_detail_screen.dart` |
+| The help link can be copied and opened in a private tab or on another device, since the browser history may be checked | `spyware_advice_screen.dart` |
+
 ## 4. Known limitations
 
 These are real gaps. Some can't be fixed in this setup; others are on the roadmap.
@@ -125,3 +139,7 @@ These are real gaps. Some can't be fixed in this setup; others are on the roadma
 15. **No certificate pinning.** The HIBP call trusts the system CA store.
 16. **Release builds are signed with the debug key** (`android/app/build.gradle.kts` TODO). Do not distribute them.
 17. **`QUERY_ALL_PACKAGES`.** The app scanner needs this permission. Google Play only allows it for some app categories after a declaration.
+18. **Stalkerware detection is a list, not a guarantee.** The indicators only cover known stalkerware (131 apps at the pinned commit), and a new build with a new package and key escapes them. The spy profile is a heuristic: an app can spy without hiding its icon. No match does not mean no stalkerware.
+19. **Reference fingerprints are not filled in yet.** Every `certSha256` list in `known_apps.dart` is empty until verified with `tools/signatures/extract_cert.py`, so the "repackaged copy" rule is inactive. Packages of Tunisian banking and postal apps are also missing (TODO), so their impersonation is not detected yet.
+20. **Visible scan.** A stalker with access to the phone could open Sentinel and see the warning. Sentinel does not hide itself; it only avoids pushing the finding to the lock screen.
+21. **Generic IOC packages.** A few indicator packages are short (`com.fone`, `com.smart`). A legitimate app with exactly that name would be flagged with score 100.

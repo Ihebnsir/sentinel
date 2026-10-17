@@ -145,6 +145,7 @@ class MainActivity : FlutterActivity() {
                     "uninstallApp" -> openForPackage(call, result) { uri ->
                         Intent(Intent.ACTION_DELETE, uri)
                     }
+                    "openWebPage" -> openWebPage(call, result)
                     else -> result.notImplemented()
                 }
             }
@@ -262,6 +263,21 @@ class MainActivity : FlutterActivity() {
             result.error("NO_ACTIVITY", e.message, null)
         } catch (e: SecurityException) {
             result.error("NOT_ALLOWED", e.message, null)
+        }
+    }
+
+    // Ouvre une page d'aide dans le navigateur (https uniquement).
+    private fun openWebPage(call: MethodCall, result: MethodChannel.Result) {
+        val url = call.argument<String>("url")
+        if (url == null || !url.startsWith("https://")) {
+            result.error("BAD_URL", "Adresse refusée", null)
+            return
+        }
+        try {
+            startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+            result.success(null)
+        } catch (e: ActivityNotFoundException) {
+            result.error("NO_ACTIVITY", e.message, null)
         }
     }
 

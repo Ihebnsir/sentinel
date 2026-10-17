@@ -37,10 +37,17 @@ class AppsScannerService {
   Future<void> uninstallApp(String packageName) =>
       _invoke('uninstallApp', packageName);
 
-  Future<void> _invoke(String method, String packageName) async {
+  /// Ouvre une page d'aide (https) dans le navigateur.
+  Future<void> openWebPage(String url) => _invoke('openWebPage', url, 'url');
+
+  Future<void> _invoke(
+    String method,
+    String value, [
+    String argument = 'packageName',
+  ]) async {
     if (!_isAndroid) return;
     try {
-      await _channel.invokeMethod<void>(method, {'packageName': packageName});
+      await _channel.invokeMethod<void>(method, {argument: value});
     } on PlatformException catch (e) {
       debugPrint('Action « $method » impossible : ${e.message}');
     } on MissingPluginException {

@@ -1,4 +1,6 @@
 import '../models/installed_app.dart';
+import 'apps/known_apps.dart';
+import 'apps/stalkerware_ioc.dart';
 
 /// Les niveaux de risque, avec leur libellé affiché.
 /// « Système » : app d'Android ou du fabricant, permissions non évaluées.
@@ -19,11 +21,20 @@ class AppRiskReport {
     required this.score,
     required this.level,
     required this.reasons,
+    this.identity = AppIdentity.unknown,
+    this.stalkerwareName,
+    this.spyProfile = false,
   });
 
   final int score; // de 0 à 100
   final RiskLevel level;
   final List<String> reasons; // de la plus grave à la moins grave
+  final AppIdentity identity; // comparaison avec les apps officielles
+  final String? stalkerwareName; // nom du stalkerware connu, sinon null
+  final bool spyProfile; // icône cachée + accès typiques d'un espion
+
+  /// Logiciel espion connu ou probable : conseils spécifiques à afficher.
+  bool get spywareSuspected => stalkerwareName != null || spyProfile;
 
   /// Une app « à vérifier » : niveau modéré ou élevé (jamais « Système »).
   bool get needsReview =>
@@ -46,11 +57,60 @@ RiskLevel riskLevelFor(int score) {
   return RiskLevel.faible;
 }
 
+/// Raison affichée pour un stalkerware connu.
+const stalkerwareReason = 'Logiciel espion connu (stalkerware)';
+
+/// Nombre minimal d'accès d'espion, en plus de l'icône cachée.
+const minSpyAccesses = 2;
+
+/// Icône cachée ET au moins [minSpyAccesses] accès typiques d'un espion.
+bool hasSpyProfile(InstalledApp app) {
+  if (app.hasLauncherIcon) return false;
+  bool has(String p) => app.hasPermission('android.permission.$p');
+  final accesses = [
+    app.accessibilityServiceEnabled,
+    has('ACCESS_BACKGROUND_LOCATION'),
+    has('READ_SMS') || has('RECEIVE_SMS'),
+    has('READ_CALL_LOG'),
+    app.notificationListenerEnabled,
+    app.isDeviceAdmin,
+  ];
+  return accesses.where((a) => a).length >= minSpyAccesses;
+}
+
 /// Calcule le risque d'une app à partir de règles simples et explicables.
 /// Fonction « pure » : mêmes entrées = même résultat, aucun appel à Android.
-/// Les règles sont rangées de la plus grave à la moins grave,
-/// la combinaison accessibilité + source inconnue en tête.
-AppRiskReport calculateAppRisk(InstalledApp app) {
+/// [ioc] : indicateurs de stalkerware (null = pas encore chargés).
+/// [known] / [mods] : remplaçables dans les tests.
+AppRiskReport calculateAppRisk(
+  InstalledApp app, {
+  StalkerwareIoc? ioc,
+  List<KnownApp> known = knownApps,
+  List<ModdedApp> mods = knownModdedApps,
+}) {
+  final report = _rulesReport(app, known, mods);
+  // Stalkerware connu : score maximal, même pour une app système
+  // (certains se déguisent en composant du système).
+  final stalkerware = ioc?.match(app);
+  if (stalkerware == null) return report;
+  return AppRiskReport(
+    score: maxAppRiskScore,
+    level: RiskLevel.eleve,
+    reasons: List.unmodifiable([stalkerwareReason, ...report.reasons]),
+    identity: report.identity,
+    stalkerwareName: stalkerware,
+    spyProfile: report.spyProfile,
+  );
+}
+
+/// Les règles rangées de la plus grave à la moins grave : identité de l'app
+/// et profil espion d'abord, puis la combinaison accessibilité + source
+/// inconnue.
+AppRiskReport _rulesReport(
+  InstalledApp app,
+  List<KnownApp> known,
+  List<ModdedApp> mods,
+) {
   var score = 0;
   final reasons = <String>[];
 
@@ -99,6 +159,27 @@ AppRiskReport calculateAppRisk(InstalledApp app) {
 
   final unknownSource = !app.isFromOfficialStore;
   final otherStore = app.isFromOfficialStore && !app.isFromPlayStore;
+  final identity = identifyApp(app, known: known, mods: mods);
+  final brand = identity.brand;
+  final spyProfile = hasSpyProfile(app);
+
+  // Identité : copie repackagée, usurpation de nom, mod connu.
+  rule(
+    identity.verdict == IdentityVerdict.modifiedCopy,
+    80,
+    "Copie modifiée de $brand (signature différente de l'éditeur officiel)",
+  );
+  rule(
+    identity.verdict == IdentityVerdict.impersonation,
+    60,
+    "Se fait passer pour $brand, mais ce n'est pas l'application officielle",
+  );
+  rule(
+    identity.verdict == IdentityVerdict.knownMod,
+    45,
+    'Version modifiée non officielle de $brand : elle peut lire vos messages',
+  );
+  rule(spyProfile, 40, "Icône cachée et accès typiques d'un logiciel espion");
 
   // Règle de combinaison, toujours affichée en premier :
   // c'est le schéma des chevaux de Troie bancaires.
@@ -110,6 +191,7 @@ AppRiskReport calculateAppRisk(InstalledApp app) {
   accessibilityRule();
   rule(unknownSource, 25, 'Installée en dehors du Play Store');
   deviceAdminRule();
+  rule(app.debugCert, 15, 'Signée avec un certificat de test');
   rule(
     has('READ_SMS') || has('RECEIVE_SMS'),
     15,
@@ -153,6 +235,8 @@ AppRiskReport calculateAppRisk(InstalledApp app) {
     score: capped,
     level: riskLevelFor(capped),
     reasons: List.unmodifiable(reasons),
+    identity: identity,
+    spyProfile: spyProfile,
   );
 }
 

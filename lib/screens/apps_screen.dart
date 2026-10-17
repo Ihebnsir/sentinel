@@ -2,12 +2,14 @@ import 'package:material_ui/material_ui.dart';
 
 import '../models/installed_app.dart';
 import '../services/app_risk_calculator.dart';
+import '../services/apps/stalkerware_ioc.dart';
 import '../services/apps_scanner_service.dart';
 import '../theme/app_colors.dart';
 import '../widgets/app_icon.dart';
 import '../widgets/empty_state.dart';
 import '../widgets/risk_level_text.dart';
 import 'app_detail_screen.dart';
+import 'spyware_advice_screen.dart';
 
 /// Onglet « Applications » : analyse des applications installées.
 /// StatefulWidget car il garde le résultat de l'analyse en mémoire.
@@ -70,10 +72,11 @@ class _AppsScreenState extends State<AppsScreen> with WidgetsBindingObserver {
     _scanRunning = true;
     try {
       final apps = await _service.scanApps();
+      final ioc = apps == null ? null : await _loadIoc();
       // L'écran a pu être fermé pendant l'attente.
       if (!mounted) return;
       setState(() {
-        _apps = apps == null ? null : _sortedByRisk(apps);
+        _apps = apps == null ? null : _sortedByRisk(apps, ioc);
         _failed = false;
         _loading = false;
       });
@@ -88,11 +91,25 @@ class _AppsScreenState extends State<AppsScreen> with WidgetsBindingObserver {
     }
   }
 
+  /// Indicateurs de stalkerware ; null si le fichier est illisible
+  /// (l'analyse continue avec les autres règles).
+  static Future<StalkerwareIoc?> _loadIoc() async {
+    try {
+      return await StalkerwareIoc.load();
+    } on Exception catch (e) {
+      debugPrint('Indicateurs de stalkerware illisibles : $e');
+      return null;
+    }
+  }
+
   /// Apps évaluées d'abord, par score décroissant (à score égal, ordre
   /// alphabétique) ; puis les apps « Système », par ordre alphabétique.
-  static List<_ScannedApp> _sortedByRisk(List<InstalledApp> apps) {
+  static List<_ScannedApp> _sortedByRisk(
+    List<InstalledApp> apps,
+    StalkerwareIoc? ioc,
+  ) {
     final scanned = [
-      for (final app in apps) _ScannedApp(app, calculateAppRisk(app)),
+      for (final app in apps) _ScannedApp(app, calculateAppRisk(app, ioc: ioc)),
     ];
     scanned.sort((a, b) {
       final aSystem = a.report.level == RiskLevel.systeme;
@@ -112,6 +129,17 @@ class _AppsScreenState extends State<AppsScreen> with WidgetsBindingObserver {
           app: scanned.app,
           report: scanned.report,
         ),
+      ),
+    );
+  }
+
+  // Pas de notification pour ce résultat : seulement ce bloc, visible
+  // quand l'utilisateur ouvre lui-même l'onglet.
+  void _openAdvice(_ScannedApp scanned) {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) =>
+            SpywareAdviceScreen(app: scanned.app, report: scanned.report),
       ),
     );
   }
@@ -181,8 +209,11 @@ class _AppsScreenState extends State<AppsScreen> with WidgetsBindingObserver {
     final visible = _showSystemApps
         ? apps
         : apps.where((s) => !s.app.isSystemApp).toList();
+    // Toujours affichés, même cachés parmi les apps système.
+    final spyware = apps.where((s) => s.report.spywareSuspected).toList();
 
     return [
+      if (spyware.isNotEmpty) _SpywareBlock(apps: spyware, onTap: _openAdvice),
       const SizedBox(height: 8),
       Text(
         appsScanSummary([for (final s in visible) s.report]),
@@ -231,6 +262,75 @@ class _PageTitle extends StatelessWidget {
         fontSize: 28,
         fontWeight: FontWeight.w600,
         color: AppColors.encre,
+      ),
+    );
+  }
+}
+
+/// Bloc sobre en haut de la liste : logiciel espion possible.
+/// Chaque ligne mène aux conseils, jamais directement à la désinstallation.
+class _SpywareBlock extends StatelessWidget {
+  const _SpywareBlock({required this.apps, required this.onTap});
+
+  final List<_ScannedApp> apps;
+  final void Function(_ScannedApp) onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 16, bottom: 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Divider(height: 1, thickness: 1, color: AppColors.rommen),
+          const SizedBox(height: 14),
+          const Text(
+            'Un logiciel espion possible a été trouvé',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: AppColors.rommen,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            'Lisez les conseils avant de le supprimer.',
+            style: TextStyle(
+              fontSize: 14,
+              color: AppColors.encre.withValues(alpha: 0.7),
+            ),
+          ),
+          for (final scanned in apps)
+            InkWell(
+              onTap: () => onTap(scanned),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 10),
+                child: Row(
+                  children: [
+                    AppIcon(app: scanned.app, size: 32),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        scanned.app.label,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 15,
+                          color: AppColors.encre,
+                        ),
+                      ),
+                    ),
+                    const Text(
+                      'Voir les conseils',
+                      style: TextStyle(fontSize: 14, color: AppColors.rommen),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          const SizedBox(height: 4),
+          const Divider(height: 1, thickness: 1, color: AppColors.rommen),
+        ],
       ),
     );
   }

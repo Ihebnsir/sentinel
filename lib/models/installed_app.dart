@@ -18,6 +18,9 @@ class InstalledApp {
     required this.accessibilityServiceEnabled,
     required this.notificationListenerEnabled,
     required this.isDeviceAdmin,
+    this.signingCerts = const [],
+    this.debugCert = false,
+    this.hasLauncherIcon = true,
   });
 
   /// Le package du Play Store.
@@ -37,6 +40,7 @@ class InstalledApp {
   factory InstalledApp.fromMap(Map<Object?, Object?> map) {
     final icon = map['icon'];
     final permissions = map['grantedPermissions'];
+    final certs = map['signingCerts'];
     final packageName = map['packageName'] as String? ?? '';
     return InstalledApp(
       packageName: packageName,
@@ -57,6 +61,14 @@ class InstalledApp {
       accessibilityServiceEnabled: map['accessibilityServiceEnabled'] == true,
       notificationListenerEnabled: map['notificationListenerEnabled'] == true,
       isDeviceAdmin: map['isDeviceAdmin'] == true,
+      signingCerts: List.unmodifiable([
+        if (certs is List)
+          for (final cert in certs)
+            if (cert is Map) SigningCert.fromMap(cert.cast()),
+      ]),
+      debugCert: map['debugCert'] == true,
+      // Valeur absente : on suppose l'icône visible (pas d'alerte).
+      hasLauncherIcon: map['hasLauncherIcon'] != false,
     );
   }
 
@@ -74,6 +86,12 @@ class InstalledApp {
   final bool accessibilityServiceEnabled; // service d'accessibilité activé
   final bool notificationListenerEnabled; // lit les notifications
   final bool isDeviceAdmin; // administrateur de l'appareil
+  final List<SigningCert> signingCerts; // actuels d'abord, puis anciens
+  final bool debugCert; // signée avec une clé de test (debug, AOSP)
+  final bool hasLauncherIcon; // icône visible dans la liste des apps
+
+  /// Le certificat actuel principal, null s'il est illisible.
+  SigningCert? get mainCert => signingCerts.isEmpty ? null : signingCerts.first;
 
   /// Installée depuis le Play Store.
   bool get isFromPlayStore => installerPackage == playStorePackage;
@@ -88,6 +106,58 @@ class InstalledApp {
   bool hasPermission(String permission) =>
       grantedPermissions.contains(permission);
 }
+
+/// Un certificat de signature de l'app : il identifie l'éditeur.
+class SigningCert {
+  const SigningCert({
+    required this.sha256,
+    required this.sha1,
+    this.subjectCn,
+    this.subjectO,
+    this.current = true,
+  });
+
+  /// Empreintes en majuscules, sans « : », pour comparer facilement.
+  factory SigningCert.fromMap(Map<Object?, Object?> map) {
+    return SigningCert(
+      sha256: normalizeFingerprint(map['sha256'] as String? ?? ''),
+      sha1: normalizeFingerprint(map['sha1'] as String? ?? ''),
+      subjectCn: map['subjectCn'] as String?,
+      subjectO: map['subjectO'] as String?,
+      current: map['current'] != false,
+    );
+  }
+
+  final String sha256; // 64 caractères hexadécimaux
+  final String sha1; // 40 caractères, format des indicateurs de stalkerware
+  final String? subjectCn; // nom déclaré, ex : « WhatsApp Inc. »
+  final String? subjectO; // organisation déclarée
+  final bool current; // faux : ancien certificat (rotation de clé)
+
+  /// Empreinte abrégée, ex : « 3A:F1:09:C2…7C:2E:11:B0 ».
+  String get shortSha256 {
+    if (sha256.length < 16) return sha256;
+    String pairs(String hex) =>
+        [for (var i = 0; i < hex.length; i += 2) hex.substring(i, i + 2)]
+            .join(':');
+    return '${pairs(sha256.substring(0, 8))}…'
+        '${pairs(sha256.substring(sha256.length - 8))}';
+  }
+
+  /// Sujet lisible, ex : « WhatsApp Inc. (WhatsApp) », null si vide.
+  String? get subject {
+    final cn = subjectCn?.trim() ?? '';
+    final org = subjectO?.trim() ?? '';
+    if (cn.isEmpty && org.isEmpty) return null;
+    if (org.isEmpty || org == cn) return cn.isEmpty ? org : cn;
+    if (cn.isEmpty) return org;
+    return '$cn ($org)';
+  }
+}
+
+/// « 3a:f1 09 » → « 3AF109 » : majuscules, sans séparateur.
+String normalizeFingerprint(String value) =>
+    value.replaceAll(RegExp('[^0-9a-fA-F]'), '').toUpperCase();
 
 /// Android envoie les dates en millisecondes depuis 1970 ; 0 = inconnue.
 DateTime? _dateFrom(Object? value) {

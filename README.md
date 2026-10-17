@@ -35,6 +35,7 @@ The app's interface is in French. Everything runs on the phone. The only network
 
 - **Device audit.** Security score out of 100 from 7 checks: screen lock, root indicators, security patch age (< 90 days), strong biometrics, developer options, USB debugging and storage encryption. Failed checks link to the matching Android settings screen (except root, which can't be fixed from settings).
 - **App scanner.** Lists installed apps and gives each a 0–100 risk score from explainable rules: accessibility service, install source, device admin, SMS access, notification listener, overlay, microphone, background location, old `targetSdk`, and more. Pre-installed system apps are only flagged for accessibility or device admin.
+- **Fake apps and stalkerware.** Reads each app's signing certificate (SHA-256/SHA-1, subject) and whether its launcher icon was hidden. Flags apps that use the name of a popular app (WhatsApp, Facebook, Instagram, TikTok…) with another package, official packages signed by someone else (once reference fingerprints are filled in), known WhatsApp mods (GB WhatsApp, FM WhatsApp…), test-key signatures, and known stalkerware from the public [Stalkerware Indicators](https://github.com/AssoEchap/stalkerware-indicators) list, even when disguised as a system app. When spyware is suspected, Sentinel shows safety advice **before** offering to uninstall, and never sends a notification about it.
 - **Scam message detection.** Paste a message, share it from another app, or select text and choose "Vérifier avec Sentinel". An on-device model (TF-IDF over character n-grams + logistic regression) is combined with link rules: brand impersonation, raw IP address, punycode, `@` in the URL, URL shorteners, suspicious TLDs, too many subdomains, plain `http`. The verdict comes with the reasons.
 - **Automatic protection (opt-in).** A notification listener reads incoming messages from SMS apps, WhatsApp, WhatsApp Business, Messenger, Telegram and Viber. They are analyzed by the same Dart model in a headless Flutter engine, and a "likely scam" alert is shown when the verdict is a scam.
 - **Wi-Fi check.** Shows the encryption type (open, WEP, WPA2, WPA3, OWE, enterprise), captive portal and Private DNS status, without the location permission and without reading the network name.
@@ -134,10 +135,16 @@ These items come from the known limitations in the code and docs. **TODO:** revi
 - [ ] Persist the failed-unlock counter across app restarts.
 - [ ] Encrypted vault export/import, to move the vault to a new phone (Android backup is disabled on purpose).
 - [ ] Add screenshots.
+- [ ] Fill in the reference certificate fingerprints in `lib/services/apps/known_apps.dart` with `tools/signatures/extract_cert.py`, and the packages of Tunisian banking and postal apps (TODO in the code).
+- [ ] Add verified Tunisian help contacts to the stalkerware advice screen (TODO in `spyware_advice_screen.dart`).
 
 ## Security
 
 Please report vulnerabilities privately. See [SECURITY.md](SECURITY.md).
+
+## Third-party data
+
+`assets/data/stalkerware_ioc.json` is derived from [Stalkerware Indicators of Compromise](https://github.com/AssoEchap/stalkerware-indicators) by [Echap](https://echap.eu.org/) (Julien Voisin, Tek and contributors), licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Changes: only app names, package names and SHA-1 certificate fingerprints are kept, converted to JSON by `tools/stalkerware/update_ioc.py` at a pinned commit. The list is not exhaustive: no match does not mean no stalkerware.
 
 ## License
 

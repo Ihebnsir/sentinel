@@ -86,4 +86,38 @@ void main() {
       throwsUnsupportedError,
     );
   });
+
+  test("fromMap lit les certificats, le debug et l'icône", () {
+    final app = InstalledApp.fromMap({
+      'packageName': 'com.exemple',
+      'signingCerts': [
+        {
+          'sha256': 'ab:cd${'0' * 60}',
+          'sha1': 'ef${'0' * 38}',
+          'subjectCn': 'Exemple Inc.',
+          'subjectO': 'Exemple',
+          'current': true,
+        },
+        {'sha256': 'ff', 'sha1': 'ff', 'current': false},
+        'pas une map', // ignoré
+      ],
+      'debugCert': true,
+      'hasLauncherIcon': false,
+    });
+    expect(app.signingCerts, hasLength(2));
+    expect(app.mainCert!.sha256, 'ABCD${'0' * 60}'); // normalisée
+    expect(app.mainCert!.sha1, 'EF${'0' * 38}');
+    expect(app.mainCert!.subject, 'Exemple Inc. (Exemple)');
+    expect(app.signingCerts[1].current, isFalse);
+    expect(app.debugCert, isTrue);
+    expect(app.hasLauncherIcon, isFalse);
+  });
+
+  test('fromMap : sans données de signature, valeurs neutres', () {
+    final app = InstalledApp.fromMap({'packageName': 'com.exemple'});
+    expect(app.signingCerts, isEmpty);
+    expect(app.mainCert, isNull);
+    expect(app.debugCert, isFalse);
+    expect(app.hasLauncherIcon, isTrue); // pas d'alerte par défaut
+  });
 }

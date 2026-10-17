@@ -20,6 +20,7 @@ flowchart LR
       phishing["phishing/<br/>phishing_model, message_analyzer,<br/>url_analyzer, known_brands"]
       vault["vault/<br/>vault_crypto, vault_file,<br/>vault_session, vault_storage,<br/>vault_biometrics, vault_platform…"]
       breach["breach/<br/>pwned_passwords,<br/>breach_checker, breach_consent"]
+      appsdb["apps/<br/>known_apps, stalkerware_ioc"]
       bridges["device_security_service<br/>apps_scanner_service<br/>wifi_service, share_service<br/>protection_service"]
     end
     background["background/<br/>background_analyzer.dart"]
@@ -56,7 +57,7 @@ The app has four tabs (`main_shell.dart`): **Accueil** (device audit and Wi-Fi),
 | Channel | Kotlin side | Dart → Kotlin | Kotlin → Dart |
 |---|---|---|---|
 | `com.iheb.sentinel/device_security` | `MainActivity` → `DeviceSecurityChecker` | `getSecurityStatus`, `openSettings` | — |
-| `com.iheb.sentinel/apps` | `MainActivity` → `InstalledAppsScanner` (background executor) | `scanApps`, `openAppSettings`, `uninstallApp` | — |
+| `com.iheb.sentinel/apps` | `MainActivity` → `InstalledAppsScanner` (background executor) | `scanApps`, `openAppSettings`, `uninstallApp`, `openWebPage` | — |
 | `com.iheb.sentinel/share` | `MainActivity` | `getInitialSharedText` | `onSharedText` |
 | `com.iheb.sentinel/protection` | `MainActivity` → `ProtectionSettings` | `getStatus`, `setEnabled`, `openListenerSettings`, `openNotificationSettings`, `requestNotificationPermission` | — |
 | `com.iheb.sentinel/wifi` | `WifiSecurityChecker` | `getWifiStatus`, `startListening`, `stopListening`, `openPrivateDnsSettings` | `onWifiChanged` (debounced 400 ms) |
@@ -70,9 +71,9 @@ sequenceDiagram
   participant OS as Android
   UI->>MA: scanApps (apps channel)
   MA->>OS: PackageManager on a background thread
-  OS-->>MA: packages, granted permissions, installer
+  OS-->>MA: packages, permissions, installer, signing certificates, launcher state
   MA-->>UI: list of maps (posted back on the main thread)
-  UI->>UI: calculateAppRisk() for each app
+  UI->>UI: StalkerwareIoc.load() once, then calculateAppRisk() for each app
   OS-->>MA: ACTION_SCREEN_OFF broadcast
   MA-->>UI: onScreenOff (vault channel)
   UI->>UI: VaultSession.lock()
