@@ -163,7 +163,12 @@ class AppDetailScreen extends StatelessWidget {
               child: ListView(
                 padding: const EdgeInsets.fromLTRB(28, 8, 28, 24),
                 children: [
-                  AppIcon(app: app, size: 64),
+                  // Align : sinon la ListView étire l'icône sur toute la
+                  // largeur, et l'image agrandie devient floue.
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: AppIcon(app: app, size: 64),
+                  ),
                   const SizedBox(height: 16),
                   Text(
                     app.label,
