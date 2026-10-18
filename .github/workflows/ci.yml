@@ -58,3 +58,8 @@ jobs:
 
       - name: Build debug APK
         run: flutter build apk --debug
+
+      # Après le build : Flutter a créé android/gradlew et local.properties.
+      - name: Android unit tests
+        working-directory: android
+        run: ./gradlew testDebugUnitTest

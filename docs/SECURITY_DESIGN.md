@@ -15,13 +15,14 @@ Sentinel is a personal project. It has **not** had an independent security audit
 | Message content read by automatic protection | Private conversations, verification codes |
 | Device and app inventory | Shows what is installed and how the phone is configured |
 | The user's money and accounts | The final target of scams (phishing SMS, fake bank or postal links) |
+| DNS queries (domain names asked by apps) | Amount to the user's browsing history |
 | The user's physical safety | A stalkerware finding can be dangerous if the person who installed it learns about it |
 
 ## 2. Principles
 
 - **Local first.** No backend, no account, no analytics. Every analysis runs on the device.
-- **Least data.** Message text is never logged or stored. Wi-Fi checks never read the SSID/BSSID and never ask for the location permission.
-- **Explicit consent** for the only network feature (breach check) and for the notification listener.
+- **Least data.** Message text is never logged or stored. Wi-Fi checks never read the SSID/BSSID and never ask for the location permission. The DNS firewall keeps two counters, never a domain name.
+- **Explicit consent** for the network features (breach check; DNS firewall, which forwards DNS queries to Quad9) and for the notification listener.
 - **Fail closed.** Wrong key, modified header or modified ciphertext all lead to an authentication error, never to partially decrypted data.
 - **Explainability.** Every risk score and verdict lists its reasons, so users can judge for themselves.
 
@@ -65,7 +66,7 @@ Sentinel is a personal project. It has **not** had an independent security audit
 | Reports open, WEP and WPA networks as dangerous or weak, with advice (avoid banking, use mobile data) | `wifi_risk.dart` |
 | Detects captive portals, caps them at "weak" and warns against reusing passwords on the login page | `wifi_risk.dart` |
 | Detects when Private DNS is off and links to the setting | `WifiSecurityChecker.kt` |
-| The only network call (HIBP) uses HTTPS with a 10 s timeout. Even a full MITM only sees a 5-character hash prefix | `pwned_passwords.dart` |
+| The HIBP call uses HTTPS with a 10 s timeout. Even a full MITM only sees a 5-character hash prefix | `pwned_passwords.dart` |
 
 ### 3.4 Someone who gets the vault file
 
@@ -118,6 +119,24 @@ Sentinel is a personal project. It has **not** had an independent security audit
 | Safety advice **before** any action: removing the app can alert the person who installed it; contact a help organization or the police first if in danger. The detail screen offers only "Que faire ?" instead of "Désinstaller" | `spyware_advice_screen.dart`, `app_detail_screen.dart` |
 | The help link can be copied and opened in a private tab or on another device, since the browser history may be checked | `spyware_advice_screen.dart` |
 
+### 3.8 Trackers and dangerous domains (DNS firewall)
+
+*Goal:* an app or a web page contacts an ad network, a tracker or a known malicious domain.
+
+The DNS firewall is a local `VpnService` that **only** captures DNS. The VPN routes contain nothing but the two virtual DNS addresses (`10.111.222.2` and `fdc5:3a71:9e04::2`), so the rest of the traffic never goes through Sentinel. There is no remote server.
+
+| Measure | Where |
+|---|---|
+| Blocked domain (or one of its parents: `ad.doubleclick.net` matches `doubleclick.net`, `notdoubleclick.net` does not) gets an immediate local `NXDOMAIN` answer | `DomainBlocklist.kt`, `DnsFilter.kt` |
+| Allowed queries are forwarded to Quad9 (`9.9.9.9`, then `149.112.112.112`) from a `protect()`ed socket, so they leave through the real network instead of looping into the VPN | `SentinelVpnService.kt` |
+| The upstream answer is accepted only if it comes from the socket's connected address, has the same ID and the same question. One fresh socket (random source port) per query | `DnsPacket.isResponseTo`, `SentinelVpnService.kt` |
+| Malformed, truncated, fragmented or non-DNS packets are ignored without crashing; compression pointers may only point backwards and names are capped at 255 bytes, so a crafted packet cannot loop | `DnsPacket.kt`, `IpPacket.kt` |
+| **No browsing history**: domain names are never logged, stored or sent to Dart. Only two in-memory counters exist (queries, blocked), reset at each start | `SentinelVpnService.kt`, `FirewallChannel.kt` |
+| The app itself is **not** excluded with `addDisallowedApplication`: excluding it would also exempt everything else Sentinel's process does. Only the forwarding sockets bypass the VPN, one by one, with `protect()` | `SentinelVpnService.kt` |
+| Visible and easy to stop: Android's key icon, a low-importance permanent notification with an "Arrêter" button, and the switch in the app | `SentinelVpnService.kt`, `firewall_screen.dart` |
+
+**Why NXDOMAIN rather than `0.0.0.0` / `::`.** Answering `0.0.0.0` for A and `::` for AAAA makes apps connect to an unspecified address, which Linux and Android treat as *this device*: a blocked domain could then reach a local server listening on the phone. It also only covers A/AAAA, while newer record types (`HTTPS`/`SVCB`, type 65) carry addresses too. `NXDOMAIN` ("this name does not exist") works the same way for every query type and never triggers a connection. The trade-off: a few apps log an error or retry a little more, and an `NXDOMAIN` without SOA is not cached for long, so a domain removed from the list works again almost at once.
+
 ## 4. Known limitations
 
 These are real gaps. Some can't be fixed in this setup; others are on the roadmap.
@@ -143,3 +162,10 @@ These are real gaps. Some can't be fixed in this setup; others are on the roadma
 19. **Reference fingerprints are not filled in yet.** Every `certSha256` list in `known_apps.dart` is empty until verified with `tools/signatures/extract_cert.py`, so the "repackaged copy" rule is inactive. Packages of Tunisian banking and postal apps are also missing (TODO), so their impersonation is not detected yet.
 20. **Visible scan.** A stalker with access to the phone could open Sentinel and see the warning. Sentinel does not hide itself; it only avoids pushing the finding to the lock screen.
 21. **Generic IOC packages.** A few indicator packages are short (`com.fone`, `com.smart`). A legitimate app with exactly that name would be flagged with score 100.
+22. **One VPN at a time.** Android allows a single active VPN. Turning on another VPN (or an always-on VPN set by a work profile) revokes Sentinel's: the firewall stops (`onRevoke`). While the firewall is on, the user can't use another VPN.
+23. **Apps with their own DNS escape the filter.** Only queries sent to the system resolver reach the virtual DNS server. Browsers with "Secure DNS" (DNS over HTTPS) turned on, and apps that hard-code a resolver (`8.8.8.8:53`, DoH, DoT), are not filtered, because only the virtual DNS addresses are routed into the VPN.
+24. **Android Private DNS in strict mode.** With a Private DNS hostname set (e.g. `dns.quad9.net`), Android sends DNS over TLS straight to that server and the firewall sees nothing (counters stay at 0). In automatic mode, Android tries DNS over TLS to the virtual server, gets no answer, then falls back to plain DNS, which is filtered.
+25. **Plain-text upstream.** Forwarded queries go to Quad9 over unencrypted UDP. The network operator can see them, as without Sentinel, and an on-path attacker can still forge answers (the ID and question check only stops off-path guessing). No DNSSEC validation is done on the device. When the network offered opportunistic DNS over TLS, turning the firewall on replaces it with plain DNS to Quad9. Quad9 sees the queries under its own privacy policy.
+26. **Browsing history in memory.** Domain names pass through the process memory while they are filtered. They are never logged, kept in a list or sent to Dart, but root access or a debugger could read them, like any VPN app.
+27. **UDP only, small packets.** DNS over TCP to the virtual server is not answered. Answers larger than the 1500-byte MTU are replaced by `SERVFAIL`. IPv4 fragments and IPv6 extension headers are ignored.
+28. **Tiny built-in list.** The starter list has seven ad and tracker domains. There is no user-editable list or allowlist yet, and blocking `taboola.com` or `outbrain.com` also blocks those companies' own sites. Debug builds also block `example.com` to make testing easy.

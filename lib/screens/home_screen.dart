@@ -4,12 +4,14 @@ import '../models/device_security_status.dart';
 import '../models/security_action.dart';
 import '../models/wifi_status.dart';
 import '../services/device_security_service.dart';
+import '../services/firewall_service.dart';
 import '../services/security_score_calculator.dart';
 import '../services/wifi_risk.dart';
 import '../services/wifi_service.dart';
 import '../theme/app_colors.dart';
 import '../utils/french_date.dart';
 import '../widgets/action_tile.dart';
+import '../widgets/network_protection_section.dart';
 import '../widgets/score_arch.dart';
 import '../widgets/wifi_section.dart';
 
@@ -213,6 +215,10 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                 if (WifiService.isSupported && _wifiLoaded && !_loading) ...[
                   const SizedBox(height: 32),
                   WifiSection(report: _wifiReport, onTap: _showWifiDetails),
+                ],
+                if (FirewallService.isSupported && !_loading) ...[
+                  const SizedBox(height: 32),
+                  const NetworkProtectionSection(),
                 ],
               ],
             ),

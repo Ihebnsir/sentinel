@@ -47,3 +47,8 @@ kotlin {
 flutter {
     source = "../.."
 }
+
+dependencies {
+    // Tests unitaires JVM du pare-feu DNS (./gradlew testDebugUnitTest).
+    testImplementation("junit:junit:4.13.2")
+}

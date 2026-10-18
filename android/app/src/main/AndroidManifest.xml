@@ -21,6 +21,10 @@
     <!-- Internet : utilisé uniquement pour Have I Been Pwned (fuites de mots
          de passe), après accord. Seuls 5 caractères d'empreinte sont envoyés. -->
     <uses-permission android:name="android.permission.INTERNET" />
+    <!-- Pare-feu DNS : service au premier plan (notification permanente).
+         Android 14+ : type « systemExempted », celui prévu pour les VPN. -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SYSTEM_EXEMPTED" />
     <!-- Pas de sauvegarde Android : le coffre (même chiffré) ne doit pas
          partir dans le cloud ni vers un autre téléphone.
          allowBackup="false" suffit jusqu'à Android 11 ; à partir d'Android 12,
@@ -84,6 +88,18 @@
             <meta-data
                 android:name="android.service.notification.default_filter_types"
                 android:value="conversations|alerting" />
+        </service>
+        <!-- Pare-feu DNS local. BIND_VPN_SERVICE : seul Android peut s'y
+             connecter. exported="true" est obligatoire pour un VpnService
+             (le système le démarre, ex : VPN permanent). -->
+        <service
+            android:name=".firewall.SentinelVpnService"
+            android:exported="true"
+            android:foregroundServiceType="systemExempted"
+            android:permission="android.permission.BIND_VPN_SERVICE">
+            <intent-filter>
+                <action android:name="android.net.VpnService" />
+            </intent-filter>
         </service>
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->

@@ -11,6 +11,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.provider.Settings
+import com.iheb.sentinel.firewall.FirewallChannel
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodCall
@@ -49,6 +50,9 @@ class MainActivity : FlutterActivity() {
     // Sécurité du Wi-Fi actuel et écoute des changements de réseau.
     private var wifiChecker: WifiSecurityChecker? = null
 
+    // Pare-feu DNS (VpnService).
+    private var firewall: FirewallChannel? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         // savedInstanceState != null : l'app est recréée (rotation, retour
@@ -72,6 +76,7 @@ class MainActivity : FlutterActivity() {
 
         vaultProtection = VaultProtection(this, flutterEngine.dartExecutor.binaryMessenger)
         wifiChecker = WifiSecurityChecker(this, flutterEngine.dartExecutor.binaryMessenger)
+        firewall = FirewallChannel(this, flutterEngine.dartExecutor.binaryMessenger)
 
         shareChannel = MethodChannel(flutterEngine.dartExecutor.binaryMessenger, shareChannelName)
             .apply {
@@ -156,7 +161,15 @@ class MainActivity : FlutterActivity() {
         vaultProtection = null
         wifiChecker?.dispose()
         wifiChecker = null
+        firewall?.dispose()
+        firewall = null
         super.cleanUpFlutterEngine(flutterEngine)
+    }
+
+    // Réponse de l'écran de consentement VPN d'Android.
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        if (firewall?.onActivityResult(requestCode, resultCode) == true) return
+        super.onActivityResult(requestCode, resultCode, data)
     }
 
     override fun onDestroy() {

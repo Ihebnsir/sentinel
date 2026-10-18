@@ -21,7 +21,7 @@ flowchart LR
       vault["vault/<br/>vault_crypto, vault_file,<br/>vault_session, vault_storage,<br/>vault_biometrics, vault_platform…"]
       breach["breach/<br/>pwned_passwords,<br/>breach_checker, breach_consent"]
       appsdb["apps/<br/>known_apps, stalkerware_ioc"]
-      bridges["device_security_service<br/>apps_scanner_service<br/>wifi_service, share_service<br/>protection_service"]
+      bridges["device_security_service<br/>apps_scanner_service<br/>wifi_service, share_service<br/>protection_service, firewall_service"]
     end
     background["background/<br/>background_analyzer.dart"]
   end
@@ -37,20 +37,21 @@ flowchart LR
     bg["BackgroundAnalyzer"]
     notif["ScamAlertNotifier"]
     prefs["ProtectionSettings"]
+    fw["firewall/<br/>FirewallChannel, SentinelVpnService,<br/>DnsFilter, DnsPacket, IpPacket"]
   end
 
   main --> screens --> widgets
   screens --> services
   bridges <-->|MethodChannel| activity
   vault <-->|MethodChannel| vp
-  activity --> dev & apps & wifi & vp & prefs
+  activity --> dev & apps & wifi & vp & prefs & fw
   vp --> bio
   listener --> bg --> notif
   bg <-->|MethodChannel| background
   background --> phishing
 ```
 
-The app has four tabs (`main_shell.dart`): **Accueil** (device audit and Wi-Fi), **Applications**, **Messages** (message check and the automatic protection switch) and **Coffre** (vault).
+The app has four tabs (`main_shell.dart`): **Accueil** (device audit, Wi-Fi and the DNS firewall), **Applications**, **Messages** (message check and the automatic protection switch) and **Coffre** (vault).
 
 ## Method channels
 
@@ -62,6 +63,7 @@ The app has four tabs (`main_shell.dart`): **Accueil** (device audit and Wi-Fi),
 | `com.iheb.sentinel/protection` | `MainActivity` → `ProtectionSettings` | `getStatus`, `setEnabled`, `openListenerSettings`, `openNotificationSettings`, `requestNotificationPermission` | — |
 | `com.iheb.sentinel/wifi` | `WifiSecurityChecker` | `getWifiStatus`, `startListening`, `stopListening`, `openPrivateDnsSettings` | `onWifiChanged` (debounced 400 ms) |
 | `com.iheb.sentinel/vault` | `VaultProtection` → `VaultBiometric` | `setSecure`, `copySensitive`, `clearClipboard`, `biometricAvailable`, `biometricEncrypt`, `biometricDecrypt`, `biometricDeleteKey` | `onScreenOff` |
+| `com.iheb.sentinel/firewall` | `FirewallChannel` → `SentinelVpnService` | `prepare`, `start`, `stop`, `status` | — |
 | `com.iheb.sentinel/background_analysis` | `BackgroundAnalyzer` (headless engine) | `ready` | `analyze` |
 
 ```mermaid
@@ -111,6 +113,52 @@ sequenceDiagram
 ```
 
 Only scams trigger an alert. "Suspect" never does, to avoid alert fatigue. Tapping the alert opens the Messages tab with the text, through the same `EXTRA_TEXT` path as the Android share sheet.
+
+## DNS firewall
+
+The DNS firewall (`android/…/firewall/`) is a local `VpnService`. The TUN interface gets private addresses (`10.111.222.1/32`, `fdc5:3a71:9e04::1/128`), a virtual DNS server (`10.111.222.2`, `fdc5:3a71:9e04::2`) and **routes to those two DNS addresses only**. Android then sends every app's system DNS queries into the TUN, while the rest of the traffic keeps using the real network directly.
+
+```mermaid
+flowchart TD
+  app["App asks for ads.example.net"] --> resolver["Android resolver<br/>(VPN DNS = 10.111.222.2)"]
+  resolver -->|"IPv4/IPv6 + UDP → port 53<br/>only route into the TUN"| tun["TUN interface"]
+  tun --> loop["Reader thread<br/>Os.poll(TUN, stop pipe)"]
+  loop --> parse["IpPacket.parseUdp()<br/>DnsPacket.parseQuery()"]
+  parse -->|"malformed, fragment, TCP, not port 53"| drop["Ignored"]
+  parse --> check{"DomainBlocklist.isBlocked()<br/>name or a parent domain"}
+  check -->|blocked| nx["DnsPacket.buildEmptyResponse(NXDOMAIN)<br/>blocked + 1"]
+  check -->|allowed| pool["Forwarding pool (4 threads, queue 64)"]
+  pool --> sock["DatagramSocket + protect()<br/>connect 9.9.9.9:53, 2 s timeout<br/>(then 149.112.112.112)"]
+  sock -->|"same ID + same question"| answer["Upstream answer<br/>(SERVFAIL if &gt; MTU)"]
+  nx --> build["IpPacket.buildUdp()<br/>addresses and ports swapped,<br/>IPv4 header + UDP checksums"]
+  answer --> build
+  build -->|"write (synchronized)"| tun
+  tun --> resolver --> app
+```
+
+Every query adds 1 to the "total" counter. The domain name is never logged or stored (see [Security design](SECURITY_DESIGN.md#38-trackers-and-dangerous-domains-dns-firewall)).
+
+Packet layout handled by `IpPacket` and `DnsPacket`:
+
+```text
+IPv4 header (20 bytes)          IPv6 header (40 bytes)
+  version/IHL, total length       version, payload length
+  flags/fragment (DF only)        next header = 17 (UDP), hop limit
+  TTL, protocol = 17, checksum    source (16), destination (16)
+  source (4), destination (4)
+UDP header (8 bytes)
+  source port, destination port = 53, length, checksum (pseudo-header + data)
+DNS message
+  header (12): ID, flags (QR, opcode, RD, RA, RCODE), 4 counts
+  question: name as labels (3www7example3com0, or a 0xC0 pointer), type, class
+```
+
+Life cycle:
+
+- **prepare.** `VpnService.prepare()` returns an `Intent` the first time: `FirewallChannel` opens Android's consent screen and answers Dart from `MainActivity.onActivityResult`.
+- **start.** `startForegroundService` → `startForeground` (type `systemExempted` on Android 14+, the type Android documents for VPN apps) → `establish()` → reader thread.
+- **stop.** "Arrêter" in the notification, the switch, `onRevoke` (another VPN) or `onDestroy`. Closing the write end of a pipe wakes `Os.poll`, the reader thread ends, the pool is shut down (each socket times out after 2 s at most), then the TUN is closed.
+- **Unit tests.** `DnsPacket`, `IpPacket`, `DomainBlocklist` and `DnsFilter` do not use Android APIs. JUnit tests in `android/app/src/test` run with `./gradlew testDebugUnitTest` (also in CI).
 
 ## Scam detection flow
 
@@ -177,6 +225,7 @@ Key points:
 | Vault | `vault.json` in the application support directory | Encrypted (see above) |
 | Breach-check consent | `breach_consent.json` in the same directory | `{"accepted": true/false}` |
 | Automatic protection switch | `SharedPreferences` `sentinel_protection` | One boolean |
+| DNS firewall counters | Memory of `SentinelVpnService` only | Two numbers, reset at each start |
 | Fingerprint key | Android Keystore, alias `sentinel_vault_bio` | Non-exportable AES key |
 
 Message text, breach results and scan results are never written to disk. None of the data above is included in Android backups or device-to-device transfers (`allowBackup="false"` and `res/xml/data_extraction_rules.xml`).
