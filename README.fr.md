@@ -146,6 +146,15 @@ Merci de signaler les vulnérabilités en privé. Voir [SECURITY.md](SECURITY.md
 
 `assets/data/stalkerware_ioc.json` est dérivé de [Stalkerware Indicators of Compromise](https://github.com/AssoEchap/stalkerware-indicators) par [Echap](https://echap.eu.org/) (Julien Voisin, Tek et contributeurs), sous licence [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/deed.fr). Modifications : seuls les noms d'applications, les noms de packages et les empreintes SHA-1 des certificats sont conservés, convertis en JSON par `tools/stalkerware/update_ioc.py` à un commit épinglé. La liste n'est pas exhaustive : aucune correspondance ne veut pas dire aucun stalkerware.
 
+Les listes du pare-feu DNS (`assets/blocklists/`) sont générées par `tools/blocklists/update_lists.py` à des commits épinglés, converties en liste de domaines, fusionnées et dédoublonnées (les domaines protégés sont retirés) :
+
+- [Phishing.Database](https://github.com/Phishing-Database/Phishing.Database), sous licence [MIT](https://github.com/Phishing-Database/Phishing.Database/blob/master/LICENSE). Copyright (c) 2018-2025 Mitchell Krog, Copyright (c) 2018-2025 Nissar Chababy, Copyright (c) 2018-2025 Phishing.Database Contributors.
+- [BlockLists](https://github.com/ShadowWhisperer/BlockLists) par ShadowWhisperer, dans le domaine public ([The Unlicense](https://github.com/ShadowWhisperer/BlockLists/blob/master/LICENSE)).
+- [AdGuard CNAME disguised trackers list](https://github.com/AdguardTeam/cname-trackers), sous licence [MIT](https://github.com/AdguardTeam/cname-trackers/blob/master/LICENSE). Copyright 2021 Adguard Software Ltd.
+- [AdAway default blocklist](https://github.com/AdAway/adaway.github.io) par Kicelo, Dominik Schuermann et contributeurs, sous licence [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/deed.fr).
+
+Détails, textes des licences MIT et sources écartées : [tools/blocklists/README.md](tools/blocklists/README.md).
+
 ## Licence
 
 [MIT](LICENSE) © 2026 Iheb

@@ -1,0 +1,119 @@
+# Domaines protégés : jamais bloqués, quelle que soit la liste.
+# Toute entrée qui bloquerait l'un d'eux est retirée, à la génération
+# (tools/blocklists/update_lists.py) comme à la mise à jour sur le téléphone
+# (BlocklistUpdater.kt). Exemple : « docs.google.com » apparaît dans des
+# listes d'hameçonnage parce que des pirates y hébergent de faux formulaires,
+# mais le bloquer casserait Google Docs pour tout le monde.
+#
+# Une ligne protège CE nom précis. « github.io » interdit « *.github.io »
+# (qui bloquerait tous les sites GitHub Pages) mais laisse passer une entrée
+# exacte comme « faux-site.github.io ».
+
+# Vérifications de connexion d'Android et d'Apple (sinon « pas d'Internet »)
+connectivitycheck.gstatic.com
+connectivitycheck.android.com
+clients3.google.com
+www.google.com
+captive.apple.com
+www.msftconnecttest.com
+
+# Notifications push (Firebase Cloud Messaging) : sans eux, les apps ne
+# reçoivent plus leurs notifications. fcm.googleapis.com était dans une
+# liste de publicités lors de la première génération.
+fcm.googleapis.com
+mtalk.google.com
+android.clients.google.com
+firebaseinstallations.googleapis.com
+play.googleapis.com
+
+# Services essentiels
+google.com
+accounts.google.com
+docs.google.com
+drive.google.com
+sites.google.com
+forms.gle
+mail.google.com
+play.google.com
+android.com
+gstatic.com
+www.gstatic.com
+googleapis.com
+www.googleapis.com
+android.googleapis.com
+fonts.googleapis.com
+storage.googleapis.com
+googleusercontent.com
+youtube.com
+www.youtube.com
+m.youtube.com
+ytimg.com
+googlevideo.com
+apple.com
+www.apple.com
+icloud.com
+microsoft.com
+www.microsoft.com
+login.microsoftonline.com
+live.com
+login.live.com
+outlook.com
+office.com
+sharepoint.com
+onedrive.live.com
+facebook.com
+www.facebook.com
+m.facebook.com
+instagram.com
+www.instagram.com
+whatsapp.com
+www.whatsapp.com
+web.whatsapp.com
+whatsapp.net
+messenger.com
+signal.org
+telegram.org
+amazon.com
+www.amazon.com
+amazon.fr
+www.amazon.fr
+wikipedia.org
+fr.wikipedia.org
+en.wikipedia.org
+dropbox.com
+www.dropbox.com
+cloudflare.com
+
+# Mises à jour des listes et résolveur DNS de Sentinel
+github.com
+raw.githubusercontent.com
+githubusercontent.com
+quad9.net
+dns.quad9.net
+
+# Hébergeurs partagés : on peut bloquer un site précis, jamais l'hébergeur
+000webhostapp.com
+appspot.com
+azurewebsites.net
+blogspot.com
+cloudfront.net
+amazonaws.com
+s3.amazonaws.com
+blob.core.windows.net
+duckdns.org
+dweb.link
+firebaseapp.com
+github.io
+glitch.me
+herokuapp.com
+ipfs.io
+netlify.app
+pages.dev
+r2.dev
+vercel.app
+web.app
+webflow.io
+weebly.com
+weeblysite.com
+wixsite.com
+workers.dev

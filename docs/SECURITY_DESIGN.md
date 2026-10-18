@@ -127,15 +127,36 @@ The DNS firewall is a local `VpnService` that **only** captures DNS. The VPN rou
 
 | Measure | Where |
 |---|---|
-| Blocked domain (or one of its parents: `ad.doubleclick.net` matches `doubleclick.net`, `notdoubleclick.net` does not) gets an immediate local `NXDOMAIN` answer | `DomainBlocklist.kt`, `DnsFilter.kt` |
+| Blocked domain gets an immediate local `NXDOMAIN` answer. An exact entry blocks that name only; a `*.` entry also blocks its subdomains (`*.doubleclick.net` matches `ad.doubleclick.net`, not `notdoubleclick.net`) | `CategoryList.kt`, `DnsFilter.kt` |
+| Three categories (Malware et hameçonnage, Traqueurs on by default; Publicités off) built from permissively licensed lists; every block knows its category, counted in memory | `BlockPolicy.kt`, `FirewallEngine.kt` |
+| The user's allowlist wins over every list, subdomains included | `BlockPolicy.check` |
+| Malware blocks raise a rate-limited alert (1 per domain per hour, 10 per hour), defanged and hidden on the lock screen | `FirewallAlertNotifier.kt`, `AlertLimiter.kt` |
 | Allowed queries are forwarded to Quad9 (`9.9.9.9`, then `149.112.112.112`) from a `protect()`ed socket, so they leave through the real network instead of looping into the VPN | `SentinelVpnService.kt` |
 | The upstream answer is accepted only if it comes from the socket's connected address, has the same ID and the same question. One fresh socket (random source port) per query | `DnsPacket.isResponseTo`, `SentinelVpnService.kt` |
 | Malformed, truncated, fragmented or non-DNS packets are ignored without crashing; compression pointers may only point backwards and names are capped at 255 bytes, so a crafted packet cannot loop | `DnsPacket.kt`, `IpPacket.kt` |
-| **No browsing history**: domain names are never logged, stored or sent to Dart. Only two in-memory counters exist (queries, blocked), reset at each start | `SentinelVpnService.kt`, `FirewallChannel.kt` |
+| **No browsing history**: domain names are never logged, stored or sent to Dart. Only in-memory counters exist (queries, blocked, blocked per category), reset at each start. The alert limiter keeps alerted malware domains in memory for one hour at most | `SentinelVpnService.kt`, `FirewallChannel.kt`, `AlertLimiter.kt` |
 | The app itself is **not** excluded with `addDisallowedApplication`: excluding it would also exempt everything else Sentinel's process does. Only the forwarding sockets bypass the VPN, one by one, with `protect()` | `SentinelVpnService.kt` |
 | Visible and easy to stop: Android's key icon, a low-importance permanent notification with an "Arrêter" button, and the switch in the app | `SentinelVpnService.kt`, `firewall_screen.dart` |
 
 **Why NXDOMAIN rather than `0.0.0.0` / `::`.** Answering `0.0.0.0` for A and `::` for AAAA makes apps connect to an unspecified address, which Linux and Android treat as *this device*: a blocked domain could then reach a local server listening on the phone. It also only covers A/AAAA, while newer record types (`HTTPS`/`SVCB`, type 65) carry addresses too. `NXDOMAIN` ("this name does not exist") works the same way for every query type and never triggers a connection. The trade-off: a few apps log an error or retry a little more, and an `NXDOMAIN` without SOA is not cached for long, so a domain removed from the list works again almost at once.
+
+### 3.9 Blocklist integrity, poisoned lists and false positives
+
+*Goal:* someone who controls an upstream list (or the download path) tries to make Sentinel block legitimate sites, or to stop it blocking dangerous ones. Blocking is a denial of service on the user's own phone: a poisoned list containing `whatsapp.com` or `*.googleapis.com` would cut services or push notifications for every user.
+
+| Measure | Where |
+|---|---|
+| Lists bundled in the APK are generated from **pinned commits** and reviewed in the Git diff before release; the manifest stores the SHA-256 of every file, checked at each load (corrupted or modified file → fallback to the asset) | `update_lists.py`, `CategoryList.read`, `FirewallEngine.kt` |
+| Updates are **off by default** and need an explicit consent sheet. Download URLs come from the manifest **inside the signed APK**, never from a downloaded file; HTTPS only (Java never follows an HTTPS → HTTP redirect); no cookie, no parameter, generic User-Agent | `BlocklistUpdater.kt`, `HttpsFetcher` |
+| Size cap (32 MiB per source, 2 million entries per category); format check (at most 10 % invalid lines, so an HTML error page is rejected); consistency with the bundled version (at least half, at most 5× the reference count, so an emptied, truncated or inflated list is rejected) | `BlocklistUpdater.isConsistent`, `LimitedInputStream` |
+| **Protected domains**: entries that would block one of the 97 names in `protected.txt` (connectivity checks, Firebase Cloud Messaging, Google, Apple, Microsoft, Meta, GitHub, Quad9, shared-hosting apexes such as `github.io`) are removed at generation and at every update. Found on the first run: `docs.google.com` and `sites.google.com` in Phishing.Database, `fcm.googleapis.com` in ShadowWhisperer Ads | `protected.txt`, `CategoryBuilder` |
+| Strict validation of every entry (labels, length, punycode); manifest file names limited to `[a-z0-9-]+.txt`, so a manifest cannot point outside the lists folder | `DomainNames.kt`, `BlocklistManifest.kt` |
+| Atomic writes (temporary file, `fsync`, rename; manifest last). Any failure keeps the previous version, category by category | `BlocklistUpdater.writeAtomically` |
+| Exact vs subdomain semantics follow each upstream list, so an exact hosts entry such as `faux-site.github.io` never blocks all of `github.io` | `ListParser.kt` |
+
+**False positives.** Lists are made by people and scripts and do contain mistakes. The user can add any domain to the allowlist (it wins over everything, subdomains included), turn a whole category off, and the ad category, the most likely to break apps, is off by default. Malware lists target names that host phishing pages, often on shared platforms; an exact entry blocks only that subdomain.
+
+**What this does not protect against.** Updates are not signed by Sentinel: a compromise of an upstream repository, of GitHub, or of the TLS chain can still push a list that passes the checks (e.g. a few hundred well-chosen extra entries, or the removal of a few). The consistency checks and the protected list limit the damage, they do not prove authenticity. Possible next step: publish reviewed lists from Sentinel's own repository with a detached signature verified against a key embedded in the APK.
 
 ## 4. Known limitations
 
@@ -168,4 +189,8 @@ These are real gaps. Some can't be fixed in this setup; others are on the roadma
 25. **Plain-text upstream.** Forwarded queries go to Quad9 over unencrypted UDP. The network operator can see them, as without Sentinel, and an on-path attacker can still forge answers (the ID and question check only stops off-path guessing). No DNSSEC validation is done on the device. When the network offered opportunistic DNS over TLS, turning the firewall on replaces it with plain DNS to Quad9. Quad9 sees the queries under its own privacy policy.
 26. **Browsing history in memory.** Domain names pass through the process memory while they are filtered. They are never logged, kept in a list or sent to Dart, but root access or a debugger could read them, like any VPN app.
 27. **UDP only, small packets.** DNS over TCP to the virtual server is not answered. Answers larger than the 1500-byte MTU are replaced by `SERVFAIL`. IPv4 fragments and IPv6 extension headers are ignored.
-28. **Tiny built-in list.** The starter list has seven ad and tracker domains. There is no user-editable list or allowlist yet, and blocking `taboola.com` or `outbrain.com` also blocks those companies' own sites. Debug builds also block `example.com` to make testing easy.
+28. **Lists are not perfect.** Bundled lists date from the last generation (19 Oct 2026): without updates, new phishing domains are missed, and Phishing.Database's GitHub copy lags behind its own site by up to a few weeks. Every list has false positives and false negatives (see 3.9). Debug builds also block `example.com`, filed under "Malware et hameçonnage", to test blocking and the alert.
+29. **Unsigned updates.** Downloaded lists are checked (HTTPS, size, format, consistency, protected domains) but not signed (see 3.9). The download itself reveals to GitHub that the phone uses these lists, from its IP address.
+30. **No "site blocked" page.** A DNS firewall can only say "this name does not exist": browsers show their own connection error, and Sentinel cannot replace it with an explanation page without intercepting HTTPS, which it will not do. The malware alert is the only explanation the user gets.
+31. **Unfiltered at start-up.** Queries pass unfiltered for the second or so it takes to load the lists after the VPN starts.
+32. **Alert shows the domain on the unlocked screen.** The alert text includes the defanged blocked domain, so someone looking at the unlocked phone can see a dangerous site was requested.

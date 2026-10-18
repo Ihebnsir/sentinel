@@ -1,0 +1,3 @@
+# Listes de blocage : octets exacts, sans conversion CRLF
+# (leur SHA-256 est vérifié avec assets/blocklists/manifest.json).
+assets/blocklists/*.txt -text

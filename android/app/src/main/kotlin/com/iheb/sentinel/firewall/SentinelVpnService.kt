@@ -5,7 +5,6 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Intent
-import android.content.pm.ApplicationInfo
 import android.content.pm.ServiceInfo
 import android.graphics.drawable.Icon
 import android.net.VpnService
@@ -34,7 +33,7 @@ import java.util.concurrent.atomic.AtomicLong
 /**
  * Pare-feu DNS local. Le VPN ne capte QUE les paquets envoyés au serveur
  * DNS virtuel : le reste du trafic ne passe jamais par Sentinel.
- * Aucun domaine demandé n'est journalisé, seuls deux compteurs existent.
+ * Aucun domaine demandé n'est journalisé : seuls des compteurs existent.
  */
 class SentinelVpnService : VpnService() {
 
@@ -139,10 +138,13 @@ class SentinelVpnService : VpnService() {
             ThreadPoolExecutor.DiscardPolicy(),
         ).apply { allowCoreThreadTimeOut(true) }
 
-        val filter = DnsFilter(DomainBlocklist.builtIn(includeTestDomain = isDebugBuild()))
+        // Les listes se chargent en arrière-plan (FirewallEngine) : le VPN
+        // démarre tout de suite et filtre dès qu'elles sont prêtes.
+        val filter = DnsFilter { name -> FirewallEngine.policy.check(name) }
         readerThread = Thread({ readLoop(pfd.fileDescriptor, pipe[0], filter) }, "sentinel-dns")
             .apply { start() }
         isRunning = true
+        FirewallEngine.onVpnStarted(this)
     }
 
     private fun establishTun(): ParcelFileDescriptor? {
@@ -218,13 +220,24 @@ class SentinelVpnService : VpnService() {
             is FilterDecision.Blocked -> {
                 totalQueries.incrementAndGet()
                 blockedQueries.incrementAndGet()
+                FirewallEngine.blockedByCategory[decision.category]?.incrementAndGet()
                 writeToTun(decision.packet)
+                maybeAlert(decision)
             }
             is FilterDecision.Forward -> {
                 totalQueries.incrementAndGet()
                 forwarders?.execute { forward(filter, decision) }
             }
         }
+    }
+
+    // Malware et hameçonnage seulement, une fois par domaine et par heure.
+    // Le nom passe en mémoire jusqu'à la notification, sans être enregistré.
+    private fun maybeAlert(decision: FilterDecision.Blocked) {
+        if (!decision.category.alerts) return
+        if (!FirewallEngine.alertLimiter.tryAcquire(decision.name)) return
+        val name = decision.name
+        mainHandler.post { FirewallAlertNotifier.show(this, name) }
     }
 
     /** Envoie la requête à Quad9 et réécrit sa réponse dans le TUN. */
@@ -281,7 +294,9 @@ class SentinelVpnService : VpnService() {
 
     /** Arrêt idempotent : peut être appelé plusieurs fois sans risque. */
     private fun stopFirewall() {
+        val wasRunning = isRunning
         isRunning = false
+        if (wasRunning) FirewallEngine.onVpnStopped()
         closeQuietly(stopWrite) // réveille la boucle de lecture
         stopWrite = null
         readerThread?.let { thread ->
@@ -318,9 +333,6 @@ class SentinelVpnService : VpnService() {
             // Déjà fermé.
         }
     }
-
-    private fun isDebugBuild(): Boolean =
-        applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE != 0
 
     // Notification permanente, discrète, avec un bouton « Arrêter ».
     private fun showForegroundNotification() {

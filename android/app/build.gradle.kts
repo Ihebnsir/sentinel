@@ -51,4 +51,6 @@ flutter {
 dependencies {
     // Tests unitaires JVM du pare-feu DNS (./gradlew testDebugUnitTest).
     testImplementation("junit:junit:4.13.2")
+    // Vrai org.json pour les tests JVM (celui d'Android n'y existe pas).
+    testImplementation("org.json:json:20250517")
 }

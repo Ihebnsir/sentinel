@@ -37,7 +37,7 @@ flowchart LR
     bg["BackgroundAnalyzer"]
     notif["ScamAlertNotifier"]
     prefs["ProtectionSettings"]
-    fw["firewall/<br/>FirewallChannel, SentinelVpnService,<br/>DnsFilter, DnsPacket, IpPacket"]
+    fw["firewall/<br/>FirewallChannel, SentinelVpnService, FirewallEngine,<br/>DnsFilter, DnsPacket, IpPacket,<br/>BlockPolicy, CategoryList, DomainSet,<br/>ListParser, BlocklistUpdater, FirewallAlertNotifier"]
   end
 
   main --> screens --> widgets
@@ -63,7 +63,7 @@ The app has four tabs (`main_shell.dart`): **Accueil** (device audit, Wi-Fi and 
 | `com.iheb.sentinel/protection` | `MainActivity` → `ProtectionSettings` | `getStatus`, `setEnabled`, `openListenerSettings`, `openNotificationSettings`, `requestNotificationPermission` | — |
 | `com.iheb.sentinel/wifi` | `WifiSecurityChecker` | `getWifiStatus`, `startListening`, `stopListening`, `openPrivateDnsSettings` | `onWifiChanged` (debounced 400 ms) |
 | `com.iheb.sentinel/vault` | `VaultProtection` → `VaultBiometric` | `setSecure`, `copySensitive`, `clearClipboard`, `biometricAvailable`, `biometricEncrypt`, `biometricDecrypt`, `biometricDeleteKey` | `onScreenOff` |
-| `com.iheb.sentinel/firewall` | `FirewallChannel` → `SentinelVpnService` | `prepare`, `start`, `stop`, `status` | — |
+| `com.iheb.sentinel/firewall` | `FirewallChannel` → `SentinelVpnService`, `FirewallEngine` | `prepare`, `start`, `stop`, `status`, `config`, `setCategoryEnabled`, `addAllowed`, `removeAllowed`, `setAutoUpdate`, `updateNow` | — |
 | `com.iheb.sentinel/background_analysis` | `BackgroundAnalyzer` (headless engine) | `ready` | `analyze` |
 
 ```mermaid
@@ -125,8 +125,8 @@ flowchart TD
   tun --> loop["Reader thread<br/>Os.poll(TUN, stop pipe)"]
   loop --> parse["IpPacket.parseUdp()<br/>DnsPacket.parseQuery()"]
   parse -->|"malformed, fragment, TCP, not port 53"| drop["Ignored"]
-  parse --> check{"DomainBlocklist.isBlocked()<br/>name or a parent domain"}
-  check -->|blocked| nx["DnsPacket.buildEmptyResponse(NXDOMAIN)<br/>blocked + 1"]
+  parse --> check{"FirewallEngine.policy.check()<br/>allowlist, then malware,<br/>trackers, ads"}
+  check -->|"blocked (category)"| nx["DnsPacket.buildEmptyResponse(NXDOMAIN)<br/>blocked + 1, category + 1<br/>malware: alert (rate-limited)"]
   check -->|allowed| pool["Forwarding pool (4 threads, queue 64)"]
   pool --> sock["DatagramSocket + protect()<br/>connect 9.9.9.9:53, 2 s timeout<br/>(then 149.112.112.112)"]
   sock -->|"same ID + same question"| answer["Upstream answer<br/>(SERVFAIL if &gt; MTU)"]
@@ -158,7 +158,52 @@ Life cycle:
 - **prepare.** `VpnService.prepare()` returns an `Intent` the first time: `FirewallChannel` opens Android's consent screen and answers Dart from `MainActivity.onActivityResult`.
 - **start.** `startForegroundService` → `startForeground` (type `systemExempted` on Android 14+, the type Android documents for VPN apps) → `establish()` → reader thread.
 - **stop.** "Arrêter" in the notification, the switch, `onRevoke` (another VPN) or `onDestroy`. Closing the write end of a pipe wakes `Os.poll`, the reader thread ends, the pool is shut down (each socket times out after 2 s at most), then the TUN is closed.
-- **Unit tests.** `DnsPacket`, `IpPacket`, `DomainBlocklist` and `DnsFilter` do not use Android APIs. JUnit tests in `android/app/src/test` run with `./gradlew testDebugUnitTest` (also in CI).
+- **Unit tests.** Everything except `SentinelVpnService`, `FirewallChannel`, `FirewallEngine`, `FirewallSettings` and `FirewallAlertNotifier` is plain Kotlin without Android APIs. JUnit tests in `android/app/src/test` run with `./gradlew testDebugUnitTest` (also in CI). The real `org.json` is added as a test dependency, because Android's copy only exists on a device.
+
+### Blocklists
+
+`tools/blocklists/update_lists.py` builds `assets/blocklists/` from public lists at pinned commits (sources, licenses and attributions: [tools/blocklists/README.md](../tools/blocklists/README.md)):
+
+| File | Category | Default | Entries (19 Oct 2026) |
+|---|---|---|---|
+| `malware.txt` | Malware et hameçonnage (alerts) | on | 430,961 |
+| `trackers.txt` | Traqueurs | on | 119,217 |
+| `ads.txt` | Publicités | off (may break some apps) | 31,799 |
+| `protected.txt` | Domains that must never be blocked | — | 97 |
+| `manifest.json` | Sources, licenses, attributions, date, entry count and SHA-256 of each file | — | — |
+
+**Format.** One entry per line, sorted by byte value, LF endings: `ads.example.com` blocks that exact name, `*.example.com` blocks the name and all its subdomains. Hosts-file sources (`0.0.0.0 name`) and plain lists are exact unless the upstream list is meant to cover subdomains (ShadowWhisperer `Wild_*`, `Malware`, `Scam`); Adblock rules (`||name^`) always cover subdomains. Entries are lowercased, converted to punycode (IDNA 2003 on both sides), stripped of the final dot; IPs, single labels and invalid labels are dropped; duplicates and entries already covered by a `*.` parent are removed. `.gitattributes` marks the files `-text` so Git never converts them to CRLF (that would change their SHA-256).
+
+**Data structure.** Each category is a `CategoryList` = two `DomainSet`s (exact, `*.`). A `DomainSet` is one `ByteArray` holding every name back to back in sorted order, plus an `IntArray` of start offsets; lookup is a binary search comparing bytes in place, with no allocation. A query checks the exact set once, then the `*.` set for the name and each parent (`a.b.c`, `b.c`, `c`). Measured on the real `malware.txt` with `DomainSetTest.benchmark` (JVM 17, 431k entries):
+
+| Structure | Memory per entry | Total for malware | Lookup (name + parents) | Build |
+|---|---|---|---|---|
+| `HashSet<String>` | 114 bytes (measured) | ~49 MB | 277 ns | 60 ms (lines already in memory) |
+| Sorted `ByteArray` + offsets | 32 bytes measured, 30 computed | ~14 MB | 492 ns | 160 ms (read + parse + SHA-256) |
+
+The sorted array uses about 3.5× less memory for a lookup that stays under a microsecond (a forwarded DNS query takes 10–100 ms), which matters in a service that runs all day next to other apps. ART numbers differ from the JVM, but the ratio comes from object headers and table nodes that ART also has. With the default categories (malware + trackers) about 17 MB are used; a disabled category is not loaded at all.
+
+**Loading.** `FirewallEngine` owns one background thread (`sentinel-lists`). When the VPN starts, the reader thread starts at once with an empty policy, and the lists are loaded in the background (about a second): queries pass unfiltered until then (`listsLoading` in the status). For each enabled category the engine reads the private copy from `filesDir/blocklists/` if its manifest is newer than the bundled one and its SHA-256 matches, otherwise the asset (`flutter_assets/assets/blocklists/`). A mismatch or a parse error falls back to the asset; if that fails too, the category is empty. The result is an immutable `BlockPolicy` stored in a `@Volatile` field: changing a category or the allowlist builds a new one and swaps it, without restarting the VPN and without any lock on the DNS path. Stopping the VPN frees the lists.
+
+**Updates** (off by default, explicit consent sheet in the app):
+
+```mermaid
+flowchart TD
+  trigger["VPN running: check every 6 h<br/>(auto-update on, last attempt &gt; 24 h)<br/>or the &quot;Mettre à jour&quot; button"] --> urls["updateUrl of each source,<br/>read from the BUNDLED manifest"]
+  urls --> get["HTTPS GET, no cookies, no parameters<br/>max 32 MiB per source"]
+  get --> parse["ListParser (hosts, domains, adblock)<br/>streamed into CategoryBuilder"]
+  parse --> checks{"&ge; 50 % and &le; 5× the reference count?<br/>&le; 10 % invalid lines?"}
+  checks -->|no| keep["Category kept as before"]
+  checks -->|yes| protect["Drop entries that would block a protected domain,<br/>remove duplicates, sort"]
+  protect --> write["Write malware-&lt;time&gt;.txt.tmp, fsync, rename"]
+  write --> manifest["Write manifest.json.tmp (SHA-256 of each file),<br/>fsync, rename = commit"]
+  manifest --> clean["Delete files no longer referenced"]
+  clean --> reload["Reload lists if the VPN runs"]
+```
+
+Each category succeeds or fails on its own. New data files get a new name, and the private manifest is replaced last in one rename, so a crash at any point leaves either the old version or the new one, never a mix.
+
+**Alerts.** A block in the "Malware et hameçonnage" category posts "Site dangereux bloqué" (`FirewallAlertNotifier`): domain defanged (`site[.]xyz`), `VISIBILITY_PRIVATE` with a neutral public version, no system-generated actions, tapping only opens the app. `AlertLimiter` allows one alert per domain per hour and 10 per hour in total; the names it remembers live in memory for one hour at most. Trackers and ads never alert.
 
 ## Scam detection flow
 
@@ -225,7 +270,10 @@ Key points:
 | Vault | `vault.json` in the application support directory | Encrypted (see above) |
 | Breach-check consent | `breach_consent.json` in the same directory | `{"accepted": true/false}` |
 | Automatic protection switch | `SharedPreferences` `sentinel_protection` | One boolean |
-| DNS firewall counters | Memory of `SentinelVpnService` only | Two numbers, reset at each start |
+| DNS firewall counters | Memory of `SentinelVpnService` / `FirewallEngine` only | Total, blocked, blocked per category; reset at each start |
+| DNS firewall settings | `SharedPreferences` `sentinel_firewall` | Category switches, allowlist (domains the user typed), auto-update switch, dates of the last update and attempt |
+| Updated blocklists | `filesDir/blocklists/` | Public lists and their manifest, nothing about the user |
+| Recent malware alerts | Memory of `AlertLimiter` only | Blocked domains alerted in the last hour, to rate-limit alerts |
 | Fingerprint key | Android Keystore, alias `sentinel_vault_bio` | Non-exportable AES key |
 
 Message text, breach results and scan results are never written to disk. None of the data above is included in Android backups or device-to-device transfers (`allowBackup="false"` and `res/xml/data_extraction_rules.xml`).

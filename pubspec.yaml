@@ -68,6 +68,8 @@ flutter:
   assets:
     - assets/models/
     - assets/data/
+    # Listes du pare-feu DNS, lues par Kotlin (FirewallEngine.kt).
+    - assets/blocklists/
 
   # To add assets to your application, add an assets section, like this:
   # assets:

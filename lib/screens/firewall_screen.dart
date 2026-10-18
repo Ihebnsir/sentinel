@@ -6,8 +6,10 @@ import '../services/firewall_service.dart';
 import '../services/protection_service.dart';
 import '../theme/app_colors.dart';
 import '../utils/french_number.dart';
+import '../widgets/blocklist_sections.dart';
 
-/// Écran du pare-feu DNS : interrupteur, explication et compteurs.
+/// Écran du pare-feu DNS : interrupteur, compteurs, listes de blocage,
+/// mises à jour, liste blanche et sources.
 class FirewallScreen extends StatefulWidget {
   const FirewallScreen({super.key});
 
@@ -21,7 +23,11 @@ class _FirewallScreenState extends State<FirewallScreen> {
   Timer? _timer;
 
   FirewallStatus? _status;
+  FirewallConfig? _config;
   bool _busy = false; // démarrage ou arrêt en cours
+  bool _updating = false; // téléchargement des listes en cours
+  final _allowController = TextEditingController();
+  String? _allowError;
 
   @override
   void initState() {
@@ -31,13 +37,92 @@ class _FirewallScreenState extends State<FirewallScreen> {
     _lifecycle = AppLifecycleListener(onResume: _refresh);
     _timer = Timer.periodic(const Duration(seconds: 2), (_) => _refresh());
     _refresh();
+    _loadConfig();
   }
 
   @override
   void dispose() {
     _timer?.cancel();
     _lifecycle.dispose();
+    _allowController.dispose();
     super.dispose();
+  }
+
+  Future<void> _loadConfig() async {
+    final config = await _service.getConfig();
+    if (!mounted) return;
+    setState(() => _config = config);
+  }
+
+  // Appliqué tout de suite par Android, sans redémarrer le VPN.
+  Future<void> _onCategoryChanged(
+    BlocklistCategory category,
+    bool enabled,
+  ) async {
+    final config = await _service.setCategoryEnabled(category.id, enabled);
+    if (!mounted || config == null) return;
+    setState(() => _config = config);
+  }
+
+  Future<void> _onAutoUpdateChanged(bool enabled) async {
+    if (enabled && !await _askUpdateConsent()) return;
+    await _service.setAutoUpdate(enabled);
+    await _loadConfig();
+  }
+
+  Future<void> _onUpdateNow() async {
+    // Sans l'option automatique, on redemande l'accord à chaque fois.
+    if (_config?.autoUpdate != true && !await _askUpdateConsent()) return;
+    setState(() => _updating = true);
+    final ok = await _service.updateNow();
+    if (!mounted) return;
+    setState(() => _updating = false);
+    await _loadConfig();
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          ok ? 'Listes mises à jour.' : 'Mise à jour impossible : les listes actuelles sont conservées.',
+        ),
+      ),
+    );
+  }
+
+  Future<bool> _askUpdateConsent() async {
+    final accepted = await showModalBottomSheet<bool>(
+      context: context,
+      isScrollControlled: true,
+      showDragHandle: true,
+      backgroundColor: AppColors.chaux,
+      builder: (_) => const _UpdateConsentSheet(),
+    );
+    return accepted == true && mounted;
+  }
+
+  Future<void> _onAddAllowed() async {
+    final domain = normalizeDomainInput(_allowController.text);
+    if (domain == null) {
+      setState(
+        () => _allowError = 'Domaine invalide, par exemple : exemple.fr',
+      );
+      return;
+    }
+    final saved = await _service.addAllowed(domain);
+    if (!mounted) return;
+    if (saved == null) {
+      setState(
+        () => _allowError = 'Domaine refusé (format invalide ou liste pleine)',
+      );
+      return;
+    }
+    _allowController.clear();
+    setState(() => _allowError = null);
+    await _loadConfig();
+  }
+
+  Future<void> _onRemoveAllowed(String domain) async {
+    await _service.removeAllowed(domain);
+    await _loadConfig();
   }
 
   Future<void> _refresh() async {
@@ -78,6 +163,7 @@ class _FirewallScreenState extends State<FirewallScreen> {
   @override
   Widget build(BuildContext context) {
     final status = _status;
+    final config = _config;
     final muted = AppColors.encre.withValues(alpha: 0.6);
     final active = status?.active ?? false;
 
@@ -165,6 +251,48 @@ class _FirewallScreenState extends State<FirewallScreen> {
                 label: 'Requêtes bloquées',
                 value: status.blockedQueries,
               ),
+              // Détail par catégorie (une requête compte pour une seule).
+              for (final category
+                  in config?.categories ?? const <BlocklistCategory>[])
+                if (category.enabled ||
+                    (status.blockedByCategory[category.id] ?? 0) > 0) ...[
+                  const Divider(
+                    height: 1,
+                    thickness: 1,
+                    color: AppColors.ligne,
+                  ),
+                  _CountRow(
+                    label: category.name,
+                    value: status.blockedByCategory[category.id] ?? 0,
+                  ),
+                ],
+              if (status.listsLoading)
+                Padding(
+                  padding: const EdgeInsets.only(top: 8),
+                  child: Text(
+                    'Chargement des listes…',
+                    style: TextStyle(fontSize: 13, color: muted),
+                  ),
+                ),
+            ],
+            if (config != null) ...[
+              BlocklistCategoriesSection(
+                categories: config.categories,
+                onChanged: _onCategoryChanged,
+              ),
+              AutoUpdateSection(
+                config: config,
+                busy: _updating || config.updating,
+                onAutoUpdateChanged: _onAutoUpdateChanged,
+                onUpdateNow: _onUpdateNow,
+              ),
+              AllowlistSection(
+                domains: config.allowlist,
+                controller: _allowController,
+                error: _allowError,
+                onAdd: _onAddAllowed,
+                onRemove: _onRemoveAllowed,
+              ),
             ],
             const SizedBox(height: 24),
             Text(
@@ -172,6 +300,8 @@ class _FirewallScreenState extends State<FirewallScreen> {
               "activez un autre, le pare-feu s'arrête.",
               style: TextStyle(fontSize: 13, color: muted),
             ),
+            if (config != null && config.sources.isNotEmpty)
+              BlocklistSourcesSection(sources: config.sources),
           ],
         ),
       ),
@@ -225,7 +355,7 @@ class _ExplanationSheet extends StatelessWidget {
         "c'est ainsi que Sentinel voit les noms de sites demandés.",
     'Seules les demandes de noms de sites (DNS) passent par Sentinel, '
         'le reste de votre trafic ne change pas.',
-    "Aucun site visité n'est enregistré : seuls deux compteurs existent.",
+    "Aucun site visité n'est enregistré : seuls des compteurs existent.",
     'Une notification discrète reste affichée tant que le pare-feu est actif.',
   ];
 
@@ -274,6 +404,75 @@ class _ExplanationSheet extends StatelessWidget {
                   ),
                   onPressed: () => Navigator.of(context).pop(true),
                   child: const Text('Continuer'),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Accord avant de télécharger les listes. Retourne true (Accepter).
+class _UpdateConsentSheet extends StatelessWidget {
+  const _UpdateConsentSheet();
+
+  static const _lines = [
+    'Sentinel télécharge les listes de blocage depuis GitHub '
+        '(raw.githubusercontent.com), en HTTPS, au plus une fois par jour.',
+    "Aucune information vous concernant n'est envoyée : ni sites visités, "
+        'ni identifiant. Comme pour toute connexion, GitHub voit '
+        "l'adresse IP de votre téléphone.",
+    'Chaque liste est vérifiée (taille, format, cohérence) avant usage. '
+        "En cas de problème, l'ancienne version est conservée.",
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.fromLTRB(28, 0, 28, 16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text(
+              'Mise à jour des listes',
+              style: TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.w600,
+                color: AppColors.encre,
+              ),
+            ),
+            const SizedBox(height: 12),
+            for (final line in _lines) ...[
+              const Divider(height: 1, thickness: 1, color: AppColors.ligne),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 10),
+                child: Text(
+                  line,
+                  style: const TextStyle(fontSize: 15, color: AppColors.encre),
+                ),
+              ),
+            ],
+            const SizedBox(height: 24),
+            Row(
+              children: [
+                TextButton(
+                  style: TextButton.styleFrom(
+                    foregroundColor: AppColors.encre.withValues(alpha: 0.6),
+                  ),
+                  onPressed: () => Navigator.of(context).pop(false),
+                  child: const Text('Plus tard'),
+                ),
+                const Spacer(),
+                FilledButton(
+                  style: FilledButton.styleFrom(
+                    backgroundColor: AppColors.bleu,
+                  ),
+                  onPressed: () => Navigator.of(context).pop(true),
+                  child: const Text('Accepter'),
                 ),
               ],
             ),
