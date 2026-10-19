@@ -1,6 +1,7 @@
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
+import '../services/phishing/known_brands.dart';
 import '../services/phishing/message_analyzer.dart';
 import '../services/phishing/phishing_model.dart';
 
@@ -30,6 +31,7 @@ Future<Map<String, Object>> _onNativeCall(MethodCall call) async {
   final isSms = args['isSms'] as bool? ?? false;
   try {
     final model = await loadPhishingModel();
+    await loadKnownBrands();
     final analysis = analyzeMessage(text, model.predict(text));
     return {
       ...backgroundResponseFor(analysis),

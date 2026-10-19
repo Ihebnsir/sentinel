@@ -11,7 +11,8 @@ import com.iheb.sentinel.MainActivity
 import com.iheb.sentinel.R
 
 /**
- * Alerte « Site dangereux bloqué » (catégorie Malware et hameçonnage).
+ * Alerte « Site dangereux bloqué » (Malware et hameçonnage) ou « Site
+ * imitant <marque> bloqué » (Imitations de marques).
  * Même principes que ScamAlertNotifier : domaine neutralisé (site[.]xyz),
  * masqué sur l'écran verrouillé, aucune action proposée par Android.
  */
@@ -23,13 +24,20 @@ object FirewallAlertNotifier {
     private const val ID_BASE = 3000
     private const val ID_RANGE = 1000
 
-    fun show(context: Context, domain: String) {
+    /** [brand] : nom de la marque imitée, ou null pour un site de la liste Malware. */
+    fun show(context: Context, domain: String, brand: String? = null) {
         val manager = context.getSystemService(NotificationManager::class.java)
         if (!manager.areNotificationsEnabled()) return
         createChannel(manager)
 
-        val text = "Sentinel a empêché une connexion vers ${DomainNames.defang(domain)}, " +
-            "un site connu pour du hameçonnage ou des logiciels malveillants."
+        val title = if (brand == null) "Site dangereux bloqué" else "Site imitant $brand bloqué"
+        val text = if (brand == null) {
+            "Sentinel a empêché une connexion vers ${DomainNames.defang(domain)}, " +
+                "un site connu pour du hameçonnage ou des logiciels malveillants."
+        } else {
+            "Sentinel a empêché une connexion vers ${DomainNames.defang(domain)}, " +
+                "qui imite $brand sans être son site officiel."
+        }
 
         // Ouvre simplement l'app : le domaine n'est transmis à personne.
         val tap = PendingIntent.getActivity(
@@ -51,7 +59,7 @@ object FirewallAlertNotifier {
         val notification = builder(context)
             .setSmallIcon(R.drawable.ic_stat_arch)
             .setColor(RED)
-            .setContentTitle("Site dangereux bloqué")
+            .setContentTitle(title)
             .setContentText(text)
             .setStyle(Notification.BigTextStyle().bigText(text))
             .setCategory(Notification.CATEGORY_STATUS)

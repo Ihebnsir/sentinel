@@ -9,6 +9,23 @@ const _divider = Divider(height: 1, thickness: 1, color: AppColors.ligne);
 TextStyle get _muted =>
     TextStyle(fontSize: 13, color: AppColors.encre.withValues(alpha: 0.6));
 
+/// Phrase discrète sous les catégories et la liste blanche.
+class _CacheNote extends StatelessWidget {
+  const _CacheNote();
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 8),
+      child: Text(
+        'Les changements peuvent prendre quelques minutes à '
+        "s'appliquer (cache DNS du navigateur).",
+        style: _muted,
+      ),
+    );
+  }
+}
+
 /// Titre de section, même style que « Depuis l'activation ».
 class BlocklistSectionTitle extends StatelessWidget {
   const BlocklistSectionTitle(this.text, {super.key});
@@ -106,9 +123,13 @@ class BlocklistCategoriesSection extends StatelessWidget {
           _SwitchRow(
             title: category.name,
             subtitle: category.subtitle,
-            warning: category.id == 'ads'
-                ? 'Peut empêcher certaines applications de fonctionner.'
-                : null,
+            warning: switch (category.id) {
+              'ads' => 'Peut empêcher certaines applications de fonctionner.',
+              'impersonation' =>
+                'Peut bloquer un vrai site non répertorié : '
+                    'ajoutez-le alors à la liste blanche.',
+              _ => null,
+            },
             value: category.enabled,
             onChanged: onChanged == null
                 ? null
@@ -116,6 +137,7 @@ class BlocklistCategoriesSection extends StatelessWidget {
           ),
           _divider,
         ],
+        const _CacheNote(),
       ],
     );
   }
@@ -268,6 +290,7 @@ class AllowlistSection extends StatelessWidget {
           ),
           _divider,
         ],
+        const _CacheNote(),
       ],
     );
   }

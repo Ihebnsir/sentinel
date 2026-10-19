@@ -1,6 +1,6 @@
 {
  "formatVersion": 1,
- "generatedAt": "2026-10-18T23:38:00Z",
+ "generatedAt": "2026-10-19T22:20:01Z",
  "categories": [
   {
    "id": "malware",
@@ -8,12 +8,12 @@
    "defaultEnabled": true,
    "alerts": true,
    "file": "malware.txt",
-   "entries": 430961,
-   "exact": 377170,
-   "wildcard": 53791,
-   "removedProtected": 2,
-   "bytes": 11755213,
-   "sha256": "b52a5998817dcd9f56d63206ccdf70ec721c9889842aebef0fe696b9898146fd"
+   "entries": 431303,
+   "exact": 377513,
+   "wildcard": 53790,
+   "removedProtected": 8,
+   "bytes": 11771698,
+   "sha256": "60969bc2c98962aceebe67c166be72d0c6d56d2df5d609aa8d48cf7e24c6d075"
   },
   {
    "id": "trackers",
@@ -217,7 +217,7 @@
  ],
  "protected": {
   "file": "protected.txt",
-  "domains": 97,
-  "sha256": "e7cbc44518ba46f4c1c0d7346d2e261713e91c9204281492ff19acc2cef31894"
+  "domains": 103,
+  "sha256": "39e39898281a862fed8f401ee5d57f9510717963dacbd921be5d584067270cfd"
  }
 }

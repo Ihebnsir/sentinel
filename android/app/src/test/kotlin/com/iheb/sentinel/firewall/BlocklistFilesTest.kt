@@ -94,7 +94,9 @@ class BlocklistFilesTest {
     fun `manifeste livre - SHA-256 et nombres conformes aux fichiers`() {
         val dir = assetsDir()
         val manifest = BlocklistManifest.parse(File(dir, "manifest.json").readText())
-        assertEquals(BlockCategory.entries.toSet(), manifest.categories.keys)
+        // « Imitations de marques » est une règle : pas de fichier de liste.
+        val withList = BlockCategory.entries.filter { it.hasList }
+        assertEquals(withList.toSet(), manifest.categories.keys)
         assertTrue(manifest.sources.isNotEmpty())
         for (file in manifest.categories.values) {
             val list = File(dir, file.file).inputStream().use { CategoryList.read(it, file.sha256) }
@@ -102,7 +104,7 @@ class BlocklistFilesTest {
             assertTrue(file.file, list.size > 1000)
         }
         // Chaque catégorie a au moins une source, avec licence et attribution.
-        for (category in BlockCategory.entries) {
+        for (category in withList) {
             val sources = manifest.sources.filter { it.category == category }
             assertTrue(category.id, sources.isNotEmpty())
             assertTrue(sources.all { it.license.isNotBlank() && it.attribution.isNotBlank() })
@@ -114,16 +116,36 @@ class BlocklistFilesTest {
         val dir = assetsDir()
         val protected = File(dir, "protected.txt").readLines()
             .map { it.substringBefore('#').trim() }.filter { it.isNotEmpty() }
+        val policy = shippedPolicy()
+        for (name in protected) assertEquals(name, null, policy.check(name))
+        assertFalse(protected.isEmpty())
+    }
+
+    @Test
+    fun `listes livrees - infrastructure protegee, sites pieges dessus toujours bloques`() {
+        val policy = shippedPolicy()
+        // Faux positif constaté : cache AMP de Google, classé hameçonnage.
+        assertEquals(null, policy.check("cdn.ampproject.org"))
+        assertEquals(null, policy.check("bit.ly"))
+        assertEquals(null, policy.check("l.instagram.com"))
+        // L'hébergeur entier n'est plus bloqué (ancien « *.amplifyapp.com »)…
+        assertEquals(null, policy.check("amplifyapp.com"))
+        assertEquals(null, policy.check("mon-vrai-site.amplifyapp.com"))
+        // … mais les sites piégés connus, eux, restent bloqués un par un.
+        assertEquals(BlockCategory.MALWARE, policy.check("0utlook-owa.d1n3vfe0lukbep.amplifyapp.com"))
+        assertEquals(BlockCategory.MALWARE, policy.check("0ffice-servr-0utl00k-i6tr8.firebaseapp.com"))
+    }
+
+    private fun shippedPolicy(): BlockPolicy {
+        val dir = assetsDir()
         val manifest = BlocklistManifest.parse(File(dir, "manifest.json").readText())
-        val policy = BlockPolicy(
+        return BlockPolicy(
             manifest.categories.mapValues { (_, f) ->
                 File(dir, f.file).inputStream().use { CategoryList.read(it, f.sha256) }
             },
             BlockCategory.entries.toSet(),
             DomainSet.EMPTY,
         )
-        for (name in protected) assertEquals(name, null, policy.check(name))
-        assertFalse(protected.isEmpty())
     }
 
     companion object {

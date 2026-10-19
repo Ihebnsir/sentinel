@@ -1,3 +1,7 @@
+import 'dart:convert';
+
+import 'package:flutter/services.dart';
+
 /// Une marque souvent imitée par les arnaqueurs, et ses vrais sites.
 class KnownBrand {
   const KnownBrand({
@@ -6,136 +10,58 @@ class KnownBrand {
     required this.officialDomains,
   });
 
+  factory KnownBrand.fromJson(Map<String, Object?> json) => KnownBrand(
+    name: json['name'] as String,
+    keywords: _strings(json['keywords']),
+    officialDomains: _strings(json['officialDomains']),
+  );
+
   final String name; // nom affiché à l'utilisateur
-  final List<String> keywords; // mots cherchés dans le nom de domaine (minuscules)
-  final List<String> officialDomains; // le domaine et ses sous-domaines sont sûrs
+
+  /// Mots cherchés dans le nom de domaine (minuscules).
+  final List<String> keywords;
+
+  /// Le domaine et ses sous-domaines sont sûrs.
+  final List<String> officialDomains;
 }
 
-// TODO(avant publication) : vérifier à la main chaque domaine officiel
-// ci-dessous sur le site ou l'appli de l'organisme. Un domaine officiel
-// oublié = fausse alerte ; un domaine faux = arnaque non détectée.
-//
-// Pour ajouter une marque : copier un bloc KnownBrand et l'adapter.
-// Les mots-clés de moins de 5 lettres doivent apparaître seuls dans le
-// domaine (« stb-tn.xyz ») pour éviter les fausses alertes (« bestbuy »).
-const knownBrands = [
-  // La Poste et ses services de paiement
-  KnownBrand(
-    name: 'La Poste Tunisienne',
-    keywords: ['poste', 'laposte'],
-    officialDomains: ['poste.tn'],
-  ),
-  KnownBrand(
-    name: 'e-Dinar (La Poste)',
-    keywords: ['edinar'],
-    officialDomains: ['poste.tn'],
-  ),
-  KnownBrand(
-    name: 'D17 (La Poste)',
-    keywords: ['d17'],
-    officialDomains: ['poste.tn', 'd17.tn'],
-  ),
+/// Fichier partagé avec Kotlin (BrandRules.kt) : une seule source.
+/// Pour ajouter une marque, c'est ce fichier qu'il faut modifier.
+const knownBrandsAsset = 'assets/data/known_brands.json';
 
-  // Banques
-  KnownBrand(
-    name: 'BIAT',
-    keywords: ['biat'],
-    officialDomains: ['biat.com.tn'],
-  ),
-  KnownBrand(
-    name: 'STB',
-    keywords: ['stb', 'stbbank'],
-    officialDomains: ['stb.com.tn'],
-  ),
-  KnownBrand(
-    name: 'BNA',
-    keywords: ['bna'],
-    officialDomains: ['bna.tn'],
-  ),
-  KnownBrand(
-    name: 'Attijari Bank',
-    keywords: ['attijari', 'attijaribank'],
-    officialDomains: ['attijaribank.com.tn'],
-  ),
-  KnownBrand(
-    name: 'Amen Bank',
-    keywords: ['amenbank'],
-    officialDomains: ['amenbank.com.tn'],
-  ),
-  KnownBrand(
-    name: 'BH Bank',
-    keywords: ['bhbank'],
-    officialDomains: ['bhbank.tn'],
-  ),
-  KnownBrand(
-    name: 'UIB',
-    keywords: ['uib'],
-    officialDomains: ['uib.com.tn'],
-  ),
-  KnownBrand(
-    name: 'UBCI',
-    keywords: ['ubci'],
-    officialDomains: ['ubci.tn'],
-  ),
-  KnownBrand(
-    name: 'ATB',
-    keywords: ['atb'],
-    officialDomains: ['atb.com.tn'],
-  ),
-  KnownBrand(
-    name: 'Banque Zitouna',
-    keywords: ['zitouna', 'banquezitouna'],
-    officialDomains: ['banquezitouna.com'],
-  ),
+/// Lit le contenu de known_brands.json (lève une exception si invalide).
+List<KnownBrand> parseKnownBrands(String source) {
+  final json = jsonDecode(source) as Map<String, Object?>;
+  if (json['formatVersion'] != 1) {
+    throw const FormatException('known_brands.json : version inconnue');
+  }
+  return List.unmodifiable([
+    for (final item in json['brands'] as List)
+      KnownBrand.fromJson((item as Map).cast<String, Object?>()),
+  ]);
+}
 
-  // Opérateurs
-  KnownBrand(
-    name: 'Ooredoo',
-    keywords: ['ooredoo'],
-    officialDomains: ['ooredoo.tn', 'ooredoo.com'],
-  ),
-  KnownBrand(
-    name: 'Orange',
-    keywords: ['orange'],
-    officialDomains: ['orange.tn', 'orange.com', 'orange.fr'],
-  ),
-  KnownBrand(
-    name: 'Tunisie Telecom',
-    keywords: ['tunisietelecom', 'tunisietelecome'],
-    officialDomains: ['tunisietelecom.tn'],
-  ),
+List<KnownBrand>? _brands;
+Future<List<KnownBrand>>? _loading;
 
-  // Organismes sociaux
-  KnownBrand(
-    name: 'CNSS',
-    keywords: ['cnss'],
-    officialDomains: ['cnss.tn'],
-  ),
-  KnownBrand(
-    name: 'CNAM',
-    keywords: ['cnam'],
-    officialDomains: ['cnam.nat.tn'],
-  ),
+/// Les marques chargées par [loadKnownBrands].
+/// Lève une StateError si on oublie de les charger avant l'analyse.
+List<KnownBrand> get knownBrands =>
+    _brands ?? (throw StateError('Appeler loadKnownBrands() avant'));
 
-  // Paiement en ligne
-  KnownBrand(
-    name: 'Flouci',
-    keywords: ['flouci'],
-    officialDomains: ['flouci.com'],
-  ),
-  KnownBrand(
-    name: 'Sobflous',
-    keywords: ['sobflous'],
-    officialDomains: ['sobflous.tn'],
-  ),
-  KnownBrand(
-    name: 'ClicToPay',
-    keywords: ['clictopay'],
-    officialDomains: ['clictopay.com.tn'],
-  ),
-  KnownBrand(
-    name: 'Monétique Tunisie',
-    keywords: ['monetique', 'monetiquetunisie'],
-    officialDomains: ['monetiquetunisie.com'],
-  ),
-];
+/// Charge les marques une seule fois. [bundle] sert aux tests.
+Future<List<KnownBrand>> loadKnownBrands([AssetBundle? bundle]) {
+  final loaded = _brands;
+  if (loaded != null) return Future.value(loaded);
+  return _loading ??= (bundle ?? rootBundle)
+      .loadString(knownBrandsAsset)
+      .then((text) => _brands = parseKnownBrands(text))
+      .catchError((Object e) {
+        // Échec : on permettra un nouvel essai au prochain appel.
+        _loading = null;
+        throw e;
+      });
+}
+
+List<String> _strings(Object? value) =>
+    List.unmodifiable((value as List).cast<String>());

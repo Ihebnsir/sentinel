@@ -84,6 +84,25 @@ dropbox.com
 www.dropbox.com
 cloudflare.com
 
+# Infrastructure partagée de grands acteurs. Ces noms ont été listés comme
+# hameçonnage parce que des pirates s'en servent (une page piégée derrière
+# un chemin, une redirection), mais le DNS ne voit que le nom, pas le chemin :
+# bloquer le nom casse le service pour tout le monde.
+# - Cache AMP de Google : les pages d'actualité « rapides » viennent de là.
+cdn.ampproject.org
+# - Stockage Firebase : images et fichiers de très nombreuses applications.
+firebasestorage.googleapis.com
+# - Téléchargements Google Cloud Storage (liens partagés).
+storage.cloud.google.com
+# - Redirecteur des liens sortants d'Instagram : sans lui, aucun lien d'une
+#   bio ou d'un message Instagram ne s'ouvre. Instagram vérifie lui-même la
+#   destination avant de rediriger.
+l.instagram.com
+# - Liens courts bit.ly : utilisés par des arnaques, mais surtout par des
+#   millions de liens normaux (banques, opérateurs, publicités). L'analyse
+#   des SMS signale déjà tout lien raccourci comme suspect.
+bit.ly
+
 # Mises à jour des listes et résolveur DNS de Sentinel
 github.com
 raw.githubusercontent.com
@@ -93,6 +112,7 @@ dns.quad9.net
 
 # Hébergeurs partagés : on peut bloquer un site précis, jamais l'hébergeur
 000webhostapp.com
+amplifyapp.com
 appspot.com
 azurewebsites.net
 blogspot.com

@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:sentinel/services/phishing/known_brands.dart';
 import 'package:sentinel/services/phishing/message_analyzer.dart';
 import 'package:sentinel/services/phishing/phishing_model.dart';
 import 'package:sentinel/services/phishing/url_analyzer.dart';
@@ -19,6 +20,10 @@ PhishingPrediction fakePrediction(double p, [List<String> words = const []]) =>
     );
 
 void main() {
+  // Les marques viennent de assets/data/known_brands.json.
+  TestWidgetsFlutterBinding.ensureInitialized();
+  setUpAll(loadKnownBrands);
+
   group('Extraction des liens', () {
     test('avec et sans http', () {
       final links = analyzeLinks(
@@ -63,6 +68,35 @@ void main() {
     test('mot-clé court seulement s\'il est isolé', () {
       expect(impersonatedBrand('stb-paiement.com')?.name, 'STB');
       expect(impersonatedBrand('bestbuy.com'), isNull);
+    });
+
+    test('même marque dans un autre pays : rien à signaler', () {
+      expect(signalsOf('https://www.laposte.fr/suivi'), isEmpty);
+      expect(signalsOf('https://orange.be'), isEmpty);
+      expect(signalsOf('https://orange.com'), isEmpty);
+    });
+
+    test('mot-clé combiné ou en sous-domaine : toujours signalé', () {
+      for (final s in [
+        'laposte-tn-livraison.xyz',
+        'orange-recharge.top',
+        'https://biat-secure.com',
+        'https://laposte.fr.colis-suivi.xyz',
+      ]) {
+        expect(signalsOf(s), contains(LinkSignal.usurpationMarque), reason: s);
+      }
+    });
+
+    test('mot-clé seul mais extension suspecte ou tunisienne : signalé', () {
+      expect(impersonatedBrand('biat.xyz')?.name, 'BIAT');
+      expect(impersonatedBrand('cnam.tn')?.name, 'CNAM');
+      expect(impersonatedBrand('laposte.com.tn')?.name, 'La Poste Tunisienne');
+    });
+
+    test('mot-clé long au bord d\'un morceau seulement', () {
+      expect(impersonatedBrand('monlaposte.com')?.name, 'La Poste Tunisienne');
+      expect(impersonatedBrand('laposte2.com')?.name, 'La Poste Tunisienne');
+      expect(impersonatedBrand('imposter.com'), isNull);
     });
 
     test('raccourcisseurs', () {
@@ -119,6 +153,14 @@ void main() {
     test('usurpation de marque → Arnaque probable, même si l\'IA doute', () {
       final a = analyzeMessage('Voir poste-tn.com', fakePrediction(0.1));
       expect(a.verdict, Verdict.arnaque);
+    });
+
+    test('vrai site de la marque dans un autre pays → pas d\'arnaque', () {
+      final a = analyzeMessage(
+        'Suivi : https://www.laposte.fr',
+        fakePrediction(0.1),
+      );
+      expect(a.verdict, Verdict.rien);
     });
 
     test('adresse IP → Arnaque probable', () {

@@ -3,6 +3,7 @@ package com.iheb.sentinel.firewall
 import android.app.Activity
 import android.content.ActivityNotFoundException
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.VpnService
 import android.os.Build
 import android.os.Handler
@@ -12,8 +13,9 @@ import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 
 /**
- * Pilote le pare-feu DNS depuis Dart : prepare, start, stop, status, et
- * les réglages des listes (catégories, liste blanche, mises à jour).
+ * Pilote le pare-feu DNS depuis Dart : prepare, start, stop, status, les
+ * réglages des listes (catégories, liste blanche, mises à jour) et
+ * l'analyse d'une application (rapports).
  */
 class FirewallChannel(private val activity: Activity, messenger: BinaryMessenger) {
 
@@ -28,6 +30,9 @@ class FirewallChannel(private val activity: Activity, messenger: BinaryMessenger
 
     init {
         channel.setMethodCallHandler(::onMethodCall)
+        // Rapports de plus de 24 h : supprimés dès l'ouverture de l'app.
+        ReportCleanupReceiver.store(activity).purgeExpired()
+        ReportCleanupReceiver.schedule(activity)
     }
 
     fun dispose() {
@@ -56,8 +61,30 @@ class FirewallChannel(private val activity: Activity, messenger: BinaryMessenger
                         .mapKeys { it.key.id }
                         .mapValues { it.value.get() },
                     "listsLoading" to FirewallEngine.loading,
+                    "analysis" to SentinelVpnService.analysis?.let { session ->
+                        mapOf(
+                            "packageName" to session.packageName,
+                            "appLabel" to session.appLabel,
+                            "startedAt" to session.startedAt,
+                            "endsAt" to session.endsAt,
+                            "domains" to session.recorder.size,
+                        )
+                    },
                 ),
             )
+            "startAnalysis" -> startAnalysis(call, result)
+            "stopAnalysis" -> {
+                if (SentinelVpnService.analysis != null) sendToService(SentinelVpnService.ACTION_STOP_ANALYSIS)
+                result.success(null)
+            }
+            "reports" -> result.success(ReportCleanupReceiver.store(activity).list())
+            "deleteReport" -> {
+                val store = ReportCleanupReceiver.store(activity)
+                store.delete(call.argument<String>("id").orEmpty())
+                ReportCleanupReceiver.schedule(activity, store)
+                result.success(null)
+            }
+            "openApp" -> openApp(call.argument<String>("packageName").orEmpty(), result)
             "config" -> result.success(config())
             "setCategoryEnabled" -> {
                 val category = BlockCategory.fromId(call.argument<String>("id"))
@@ -169,10 +196,57 @@ class FirewallChannel(private val activity: Activity, messenger: BinaryMessenger
 
     private fun stop() {
         if (!SentinelVpnService.isRunning) return
+        sendToService(SentinelVpnService.ACTION_STOP)
+    }
+
+    // Le service tourne déjà (premier plan) : startService suffit.
+    private fun sendToService(action: String, extras: Intent.() -> Unit = {}) {
         activity.startService(
-            Intent(activity, SentinelVpnService::class.java)
-                .setAction(SentinelVpnService.ACTION_STOP),
+            Intent(activity, SentinelVpnService::class.java).setAction(action).apply(extras),
         )
+    }
+
+    // Vérifications ici pour répondre une erreur claire à Dart ; le service
+    // les refait (il peut aussi être appelé par la notification).
+    private fun startAnalysis(call: MethodCall, result: MethodChannel.Result) {
+        val packageName = call.argument<String>("packageName").orEmpty()
+        val minutes = call.argument<Int>("minutes") ?: 0
+        when {
+            !SentinelVpnService.isRunning -> result.error("NOT_RUNNING", null, null)
+            SentinelVpnService.analysis != null -> result.error("ALREADY_RUNNING", null, null)
+            minutes !in AnalysisSession.ALLOWED_MINUTES -> result.error("BAD_DURATION", null, null)
+            packageName.isEmpty() || packageName == activity.packageName ||
+                !isInstalled(packageName) -> result.error("UNKNOWN_APP", null, null)
+            else -> {
+                sendToService(SentinelVpnService.ACTION_START_ANALYSIS) {
+                    putExtra(SentinelVpnService.EXTRA_PACKAGE, packageName)
+                    putExtra(SentinelVpnService.EXTRA_MINUTES, minutes)
+                }
+                result.success(null)
+            }
+        }
+    }
+
+    private fun isInstalled(packageName: String): Boolean = try {
+        activity.packageManager.getApplicationInfo(packageName, 0)
+        true
+    } catch (e: PackageManager.NameNotFoundException) {
+        false
+    }
+
+    // Ouvre l'app analysée, pour l'utiliser pendant l'analyse.
+    private fun openApp(packageName: String, result: MethodChannel.Result) {
+        val intent = activity.packageManager.getLaunchIntentForPackage(packageName)
+        if (intent == null) {
+            result.success(false)
+            return
+        }
+        try {
+            activity.startActivity(intent)
+            result.success(true)
+        } catch (e: ActivityNotFoundException) {
+            result.success(false)
+        }
     }
 
     companion object {

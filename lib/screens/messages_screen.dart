@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
 
+import '../services/phishing/known_brands.dart';
 import '../services/phishing/message_analyzer.dart';
 import '../services/phishing/phishing_model.dart';
 import '../services/share_service.dart';
@@ -88,6 +89,7 @@ class _MessagesScreenState extends State<MessagesScreen> {
     setState(() => _analyzing = true);
     try {
       final model = await loadPhishingModel();
+      await loadKnownBrands();
       final analysis = analyzeMessage(text, model.predict(text));
       // Le texte a changé entre-temps (nouveau partage) : résultat périmé.
       if (!mounted || _controller.text != text) return;

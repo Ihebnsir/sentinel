@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 
 import '../utils/french_date.dart';
 import '../utils/french_number.dart';
+import 'app_analysis.dart';
 
 /// L'état du pare-feu DNS, lu côté Android.
 class FirewallStatus {
@@ -12,6 +13,7 @@ class FirewallStatus {
     required this.blockedQueries,
     this.blockedByCategory = const {},
     this.listsLoading = false,
+    this.analysis,
   });
 
   factory FirewallStatus.fromMap(Map<Object?, Object?> map) => FirewallStatus(
@@ -23,6 +25,7 @@ class FirewallStatus {
         if (entry.key is String) entry.key as String: _int(entry.value),
     },
     listsLoading: map['listsLoading'] == true,
+    analysis: AnalysisStatus.fromMap(map['analysis']),
   );
 
   final bool active; // le filtrage tourne ?
@@ -30,6 +33,7 @@ class FirewallStatus {
   final int blockedQueries; // dont bloquées
   final Map<String, int> blockedByCategory; // « malware » → 12
   final bool listsLoading; // listes en cours de chargement
+  final AnalysisStatus? analysis; // analyse d'une app en cours, sinon null
 
   /// Ligne courte pour l'accueil, ex : « Activé · 12 requêtes bloquées ».
   String get summary {
@@ -41,7 +45,8 @@ class FirewallStatus {
   }
 }
 
-/// Une catégorie de listes (Malware et hameçonnage, Traqueurs, Publicités).
+/// Une catégorie du pare-feu (Malware et hameçonnage, Traqueurs, Publicités,
+/// Imitations de marques).
 class BlocklistCategory {
   const BlocklistCategory({
     required this.id,
@@ -66,8 +71,17 @@ class BlocklistCategory {
   final int domains;
   final List<String> sources; // noms courts, ex : « ShadowWhisperer »
 
+  /// Catégorie sans liste : une règle sur les marques connues.
+  bool get isBrandRule => id == 'impersonation';
+
   /// Ex : « 430 961 domaines · Phishing.Database, ShadowWhisperer ».
   String get subtitle {
+    if (isBrandRule) {
+      // Pour cette catégorie, Android envoie le nombre de marques.
+      final marques = domains > 1 ? 'marques surveillées' : 'marque surveillée';
+      return '${formatFrenchNumber(domains)} $marques · '
+          'sites qui les imitent';
+    }
     final n = formatFrenchNumber(domains);
     final count = domains > 1 ? '$n domaines' : '$n domaine';
     return sources.isEmpty ? count : '$count · ${sources.join(', ')}';
@@ -275,6 +289,69 @@ class FirewallService {
   }
 
   Future<void> start() => _call('start');
+
+  /// Lance l'analyse de [packageName] pendant [minutes] (2, 5 ou 15).
+  /// Renvoie null si c'est parti, sinon un message d'erreur en français.
+  Future<String?> startAnalysis(String packageName, int minutes) async {
+    if (!isSupported) return 'Disponible sur Android';
+    try {
+      await _channel.invokeMethod<void>('startAnalysis', {
+        'packageName': packageName,
+        'minutes': minutes,
+      });
+      return null;
+    } on MissingPluginException {
+      return 'Disponible sur Android';
+    } on PlatformException catch (e) {
+      return switch (e.code) {
+        'NOT_RUNNING' => "Activez d'abord le pare-feu DNS.",
+        'ALREADY_RUNNING' => 'Une analyse est déjà en cours.',
+        'UNKNOWN_APP' => "Cette application n'est plus installée.",
+        _ => "Impossible de lancer l'analyse.",
+      };
+    }
+  }
+
+  /// Arrête l'analyse : le rapport est créé, le pare-feu normal revient.
+  Future<void> stopAnalysis() => _call('stopAnalysis');
+
+  /// Rapports de moins de 24 h, les plus récents d'abord.
+  Future<List<AppReport>> getReports() async {
+    if (!isSupported) return const [];
+    try {
+      final list = await _channel.invokeListMethod<Object?>('reports');
+      final now = DateTime.now();
+      final reports = <AppReport>[];
+      for (final item in list ?? const []) {
+        final report = item is String ? AppReport.tryParse(item) : null;
+        // Double sécurité : un rapport expiré n'est jamais affiché.
+        if (report != null && !report.isExpiredAt(now)) reports.add(report);
+      }
+      return reports;
+    } on MissingPluginException {
+      return const [];
+    } on PlatformException catch (e) {
+      debugPrint('Pare-feu : rapports illisibles (${e.message})');
+      return const [];
+    }
+  }
+
+  Future<void> deleteReport(String id) => _call('deleteReport', {'id': id});
+
+  /// Ouvre l'application analysée. false si elle ne peut pas s'ouvrir.
+  Future<bool> openApp(String packageName) async {
+    if (!isSupported) return false;
+    try {
+      return await _channel.invokeMethod<bool>('openApp', {
+            'packageName': packageName,
+          }) ??
+          false;
+    } on MissingPluginException {
+      return false;
+    } on PlatformException {
+      return false;
+    }
+  }
 
   Future<void> stop() => _call('stop');
 

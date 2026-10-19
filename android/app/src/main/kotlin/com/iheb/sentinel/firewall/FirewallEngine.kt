@@ -22,6 +22,7 @@ import java.util.concurrent.atomic.AtomicLong
 object FirewallEngine {
 
     private const val ASSETS_DIR = "flutter_assets/assets/blocklists"
+    private const val BRANDS_ASSET = "flutter_assets/assets/data/known_brands.json"
     private const val PRIVATE_DIR = "blocklists"
     private const val DAY_MS = 24 * 60 * 60 * 1000L
     private const val AUTO_CHECK_HOURS = 6L
@@ -54,6 +55,7 @@ object FirewallEngine {
     private val loaded = EnumMap<BlockCategory, CategoryList>(BlockCategory::class.java)
     private var bundledCache: BlocklistManifest? = null
     private var protectedCache: Set<String>? = null
+    private var brandsCache: List<KnownBrand>? = null
 
     /** Le VPN démarre : remise à zéro et chargement en arrière-plan. */
     fun onVpnStarted(context: Context) {
@@ -93,9 +95,16 @@ object FirewallEngine {
         if (!SentinelVpnService.isRunning) return // rien à filtrer
         val settings = FirewallSettings(context)
         val enabled = settings.enabledCategories()
+        // Pendant une analyse, TOUTES les listes servent à classer les
+        // domaines du rapport (même celles qui ne bloquent pas).
+        val needed = if (SentinelVpnService.analysis != null) {
+            BlockCategory.entries.filter { it.hasList }.toSet()
+        } else {
+            enabled.filter { it.hasList }.toSet()
+        }
         if (reloadFiles) loaded.clear()
-        loaded.keys.retainAll(enabled) // catégorie coupée : mémoire libérée
-        val missing = enabled - loaded.keys
+        loaded.keys.retainAll(needed) // catégorie coupée : mémoire libérée
+        val missing = needed - loaded.keys
         if (missing.isNotEmpty()) {
             loading = true
             try {
@@ -110,6 +119,7 @@ object FirewallEngine {
             enabled = enabled,
             allowlist = DomainSet.of(settings.allowlist()),
             testDomain = if (isDebug(context)) TEST_DOMAIN else null,
+            brands = brands(context),
         )
     }
 
@@ -167,7 +177,8 @@ object FirewallEngine {
         updating = true
         try {
             settings.lastUpdateAttempt = System.currentTimeMillis()
-            val result = updater.update(settings.enabledCategories())
+            // « Imitations de marques » est une règle, sans liste à télécharger.
+            val result = updater.update(settings.enabledCategories().filter { it.hasList }.toSet())
             settings.lastUpdateFailed = !result.success
             if (result.updated.isNotEmpty()) {
                 settings.lastUpdateSuccess = System.currentTimeMillis()
@@ -198,6 +209,19 @@ object FirewallEngine {
         }
     }
 
+    /** Marques de known_brands.json (même fichier que Dart). Vide si illisible. */
+    @Synchronized
+    fun brands(context: Context): List<KnownBrand> {
+        brandsCache?.let { return it }
+        return try {
+            val json = context.assets.open(BRANDS_ASSET)
+                .use { it.readBytes().toString(Charsets.UTF_8) }
+            BrandRules.parse(json).also { brandsCache = it }
+        } catch (e: Exception) {
+            emptyList()
+        }
+    }
+
     @Synchronized
     private fun protectedDomains(context: Context): Set<String> {
         protectedCache?.let { return it }
@@ -221,6 +245,7 @@ object FirewallEngine {
         val local = updater(context)?.readLocalManifest()
             ?.takeIf { bundled != null && it.generatedAt > bundled.generatedAt }
         return BlockCategory.entries.associateWith { category ->
+            if (!category.hasList) return@associateWith brands(context).size // marques surveillées
             currentPolicy.size(category)
                 ?: local?.categories?.get(category)?.entries
                 ?: bundled?.categories?.get(category)?.entries

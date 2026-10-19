@@ -2,14 +2,18 @@ import 'dart:async';
 
 import 'package:material_ui/material_ui.dart';
 
+import '../services/app_analysis.dart';
 import '../services/firewall_service.dart';
 import '../services/protection_service.dart';
 import '../theme/app_colors.dart';
 import '../utils/french_number.dart';
+import '../widgets/app_analysis_section.dart';
 import '../widgets/blocklist_sections.dart';
+import 'app_analysis_screen.dart';
+import 'app_report_screen.dart';
 
-/// Écran du pare-feu DNS : interrupteur, compteurs, listes de blocage,
-/// mises à jour, liste blanche et sources.
+/// Écran du pare-feu DNS : interrupteur, compteurs, analyse d'une app,
+/// listes de blocage, mises à jour, liste blanche et sources.
 class FirewallScreen extends StatefulWidget {
   const FirewallScreen({super.key});
 
@@ -24,6 +28,7 @@ class _FirewallScreenState extends State<FirewallScreen> {
 
   FirewallStatus? _status;
   FirewallConfig? _config;
+  List<AppReport> _reports = const [];
   bool _busy = false; // démarrage ou arrêt en cours
   bool _updating = false; // téléchargement des listes en cours
   final _allowController = TextEditingController();
@@ -38,6 +43,7 @@ class _FirewallScreenState extends State<FirewallScreen> {
     _timer = Timer.periodic(const Duration(seconds: 2), (_) => _refresh());
     _refresh();
     _loadConfig();
+    _loadReports();
   }
 
   @override
@@ -128,7 +134,38 @@ class _FirewallScreenState extends State<FirewallScreen> {
   Future<void> _refresh() async {
     final status = await _service.getStatus();
     if (!mounted) return;
+    // Fin d'analyse (durée écoulée, arrêt) : un nouveau rapport existe.
+    final analysisEnded = _status?.analysis != null && status?.analysis == null;
     setState(() => _status = status);
+    if (analysisEnded) await _loadReports();
+  }
+
+  // Rapports de moins de 24 h (Android supprime les plus anciens).
+  Future<void> _loadReports() async {
+    final reports = await _service.getReports();
+    if (!mounted) return;
+    setState(() => _reports = reports);
+  }
+
+  Future<void> _onChooseApp() async {
+    final started = await Navigator.of(context).push<bool>(
+      MaterialPageRoute(builder: (_) => const AppAnalysisScreen()),
+    );
+    if (started == true) await _refresh();
+  }
+
+  Future<void> _onStopAnalysis() async {
+    await _service.stopAnalysis();
+    await Future<void>.delayed(const Duration(milliseconds: 400));
+    await _refresh();
+    await _loadReports(); // au cas où l'état aurait déjà été relu
+  }
+
+  Future<void> _onOpenReport(AppReport report) async {
+    final deleted = await Navigator.of(context).push<bool>(
+      MaterialPageRoute(builder: (_) => AppReportScreen(report: report)),
+    );
+    if (deleted == true) await _loadReports();
   }
 
   Future<void> _onSwitch(bool value) async {
@@ -275,6 +312,15 @@ class _FirewallScreenState extends State<FirewallScreen> {
                   ),
                 ),
             ],
+            if (status != null)
+              AppAnalysisSection(
+                firewallActive: active,
+                analysis: status.analysis,
+                reports: _reports,
+                onChoose: _onChooseApp,
+                onStop: _onStopAnalysis,
+                onOpenReport: _onOpenReport,
+              ),
             if (config != null) ...[
               BlocklistCategoriesSection(
                 categories: config.categories,
@@ -355,7 +401,8 @@ class _ExplanationSheet extends StatelessWidget {
         "c'est ainsi que Sentinel voit les noms de sites demandés.",
     'Seules les demandes de noms de sites (DNS) passent par Sentinel, '
         'le reste de votre trafic ne change pas.',
-    "Aucun site visité n'est enregistré : seuls des compteurs existent.",
+    "Aucun site visité n'est enregistré : seuls des compteurs existent "
+        "(sauf pendant une analyse d'application que vous lancez vous-même).",
     'Une notification discrète reste affichée tant que le pare-feu est actif.',
   ];
 

@@ -18,7 +18,7 @@ Vérifiées le 19 octobre 2026. Tailles = entrées valides à la génération.
 | [AdAway](https://github.com/AdAway/adaway.github.io) `hosts.txt` | Publicités | CC BY 3.0 (en-tête du fichier ; le site lui-même est GPL) | 6 540 | Rare (dernier commit : déc. 2025) | Oui, avec attribution et mention des modifications |
 | ShadowWhisperer `Ads` + `Wild_Ads` | Publicités | Unlicense | 28 234 + 19 571 | Quotidienne | Oui |
 
-Résultat après fusion : 430 961 entrées malware, 119 217 traqueurs, 31 799
+Résultat après fusion : 431 303 entrées malware, 119 217 traqueurs, 31 799
 publicités. ShadowWhisperer précise qu'il ne fusionne pas d'autres listes
 (script et ajouts manuels), donc pas de licence amont cachée.
 
@@ -71,6 +71,17 @@ Toute entrée qui bloquerait un nom de `protected.txt` est retirée (exacte
 identique, ou `*.` qui le couvrirait), ici comme sur le téléphone. Premier
 lancement : `docs.google.com` et `sites.google.com` (Phishing.Database) et
 `fcm.googleapis.com` (ShadowWhisperer Ads, notifications push) ont été retirés.
+
+Deuxième passe (faux positif vu en analysant Chrome) : `cdn.ampproject.org`
+(cache AMP de Google), `firebasestorage.googleapis.com`,
+`storage.cloud.google.com`, `l.instagram.com`, `bit.ly` et le joker
+`*.amplifyapp.com` (Phishing.Database). Une ligne protège un NOM, pas ses
+sous-domaines : protéger `amplifyapp.com` retire le joker, mais les 348 sites
+piégés précis (`0utlook-owa.d1n3vfe0lukbep.amplifyapp.com`…) restent bloqués.
+Règle de choix : on protège un nom partagé par tout le monde (CDN, stockage,
+redirecteur, raccourcisseur) quand le piège est dans le chemin de l'adresse,
+invisible pour le DNS. On ne protège pas une passerelle surtout utilisée
+par les arnaques (`cloudflare-ipfs.com`) ni un site ordinaire (`gravatar.com`).
 
 ## Fins de ligne
 

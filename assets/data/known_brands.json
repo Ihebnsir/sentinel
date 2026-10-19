@@ -1,0 +1,30 @@
+{
+ "formatVersion": 1,
+ "description": "Marques souvent imitées par les arnaqueurs et leurs vrais sites. Source unique, lue par Dart (known_brands.dart) et Kotlin (BrandRules.kt).",
+ "rules": "Mots-clés en minuscules. Un mot-clé de moins de 5 lettres doit apparaître seul dans le domaine (« stb-tn.xyz ») ; à partir de 5 lettres, il peut être collé au début ou à la fin d'un morceau (« laposte-colis », « monlaposte »), pas au milieu d'un autre mot (« imposter »). Jamais signalés : le domaine officiel et ses sous-domaines, et le mot-clé seul suivi d'une extension étrangère (« laposte.fr », « orange.be » : la même marque dans un autre pays). Pas d'exemption pour une extension suspecte (« biat.xyz ») ou tunisienne (« cnam.tn »).",
+ "todo": "Avant publication : vérifier à la main chaque domaine officiel sur le site ou l'appli de l'organisme. Un domaine officiel oublié = fausse alerte ; un domaine faux = arnaque non détectée.",
+ "brands": [
+  {"group": "La Poste", "name": "La Poste Tunisienne", "keywords": ["poste", "laposte"], "officialDomains": ["poste.tn"]},
+  {"group": "La Poste", "name": "e-Dinar (La Poste)", "keywords": ["edinar"], "officialDomains": ["poste.tn"]},
+  {"group": "La Poste", "name": "D17 (La Poste)", "keywords": ["d17"], "officialDomains": ["poste.tn", "d17.tn"]},
+  {"group": "Banques", "name": "BIAT", "keywords": ["biat"], "officialDomains": ["biat.com.tn"]},
+  {"group": "Banques", "name": "STB", "keywords": ["stb", "stbbank"], "officialDomains": ["stb.com.tn"]},
+  {"group": "Banques", "name": "BNA", "keywords": ["bna"], "officialDomains": ["bna.tn"]},
+  {"group": "Banques", "name": "Attijari Bank", "keywords": ["attijari", "attijaribank"], "officialDomains": ["attijaribank.com.tn"]},
+  {"group": "Banques", "name": "Amen Bank", "keywords": ["amenbank"], "officialDomains": ["amenbank.com.tn"]},
+  {"group": "Banques", "name": "BH Bank", "keywords": ["bhbank"], "officialDomains": ["bhbank.tn"]},
+  {"group": "Banques", "name": "UIB", "keywords": ["uib"], "officialDomains": ["uib.com.tn"]},
+  {"group": "Banques", "name": "UBCI", "keywords": ["ubci"], "officialDomains": ["ubci.tn"]},
+  {"group": "Banques", "name": "ATB", "keywords": ["atb"], "officialDomains": ["atb.com.tn"]},
+  {"group": "Banques", "name": "Banque Zitouna", "keywords": ["zitouna", "banquezitouna"], "officialDomains": ["banquezitouna.com"]},
+  {"group": "Opérateurs", "name": "Ooredoo", "keywords": ["ooredoo"], "officialDomains": ["ooredoo.tn", "ooredoo.com"]},
+  {"group": "Opérateurs", "name": "Orange", "keywords": ["orange"], "officialDomains": ["orange.tn", "orange.com", "orange.fr"]},
+  {"group": "Opérateurs", "name": "Tunisie Telecom", "keywords": ["tunisietelecom", "tunisietelecome"], "officialDomains": ["tunisietelecom.tn"]},
+  {"group": "Organismes sociaux", "name": "CNSS", "keywords": ["cnss"], "officialDomains": ["cnss.tn"]},
+  {"group": "Organismes sociaux", "name": "CNAM", "keywords": ["cnam"], "officialDomains": ["cnam.nat.tn"]},
+  {"group": "Paiement en ligne", "name": "Flouci", "keywords": ["flouci"], "officialDomains": ["flouci.com"]},
+  {"group": "Paiement en ligne", "name": "Sobflous", "keywords": ["sobflous"], "officialDomains": ["sobflous.tn"]},
+  {"group": "Paiement en ligne", "name": "ClicToPay", "keywords": ["clictopay"], "officialDomains": ["clictopay.com.tn"]},
+  {"group": "Paiement en ligne", "name": "Monétique Tunisie", "keywords": ["monetique", "monetiquetunisie"], "officialDomains": ["monetiquetunisie.com"]}
+ ]
+}

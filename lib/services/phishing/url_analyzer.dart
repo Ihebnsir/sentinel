@@ -194,29 +194,62 @@ List<LinkFinding> _rules({
 bool _isShortener(String host) =>
     urlShorteners.any((s) => host == s || host.endsWith('.$s'));
 
-/// Nombre de sous-domaines : « a.b.exemple.com » → 2, « a.biat.com.tn » → 1.
-int subdomainCount(String host) {
-  final labels = host.split('.');
+// Morceaux du domaine enregistrable : 3 pour « biat.com.tn », sinon 2.
+int _domainParts(List<String> labels) {
   final hasSecondLevel = labels.length >= 3 &&
       labels.last.length == 2 &&
       _secondLevels.contains(labels[labels.length - 2]);
-  final domainParts = hasSecondLevel ? 3 : 2;
+  return hasSecondLevel ? 3 : 2;
+}
+
+/// Nombre de sous-domaines : « a.b.exemple.com » → 2, « a.biat.com.tn » → 1.
+int subdomainCount(String host) {
+  final labels = host.split('.');
+  final domainParts = _domainParts(labels);
   return labels.length > domainParts ? labels.length - domainParts : 0;
 }
 
+/// Nom du domaine enregistrable : « laposte » pour « www.laposte.fr »,
+/// « biat » pour « biat.com.tn ». null pour un nom sans extension.
+String? registrableName(String host) {
+  final labels = host.split('.');
+  final domainParts = _domainParts(labels);
+  return labels.length >= domainParts
+      ? labels[labels.length - domainParts]
+      : null;
+}
+
 /// La marque que ce domaine imite, ou null.
-/// Le domaine officiel et ses sous-domaines ne sont jamais signalés.
-KnownBrand? impersonatedBrand(
-  String host, {
-  List<KnownBrand> brands = knownBrands,
-}) {
+/// Le domaine officiel et ses sous-domaines ne sont jamais signalés, ni
+/// le mot-clé seul suivi d'une extension étrangère (« laposte.fr », « orange.be »).
+/// Même règle en Kotlin (BrandRules.kt), vérifiée par test/fixtures/brand_parity.json.
+KnownBrand? impersonatedBrand(String host, {List<KnownBrand>? brands}) {
   final parts = host.split(RegExp(r'[.-]'));
-  final compact = host.replaceAll('-', ''); // « la-poste » → « laposte »
-  for (final brand in brands) {
+  // Morceaux où chercher un mot-clé long : chaque partie, et chaque
+  // étiquette sans ses tirets (« la-poste-tn » → « lapostetn »).
+  final pieces = {
+    ...parts,
+    for (final label in host.split('.')) label.replaceAll('-', ''),
+  };
+  final tld = host.split('.').last;
+  // Pas d'exemption pour une extension d'arnaque (« biat.xyz ») ni
+  // tunisienne : une marque tunisienne n'a pas d'« autre pays » en .tn.
+  final exemptable = !suspiciousTlds.contains(tld) && tld != 'tn';
+  final name = exemptable ? registrableName(host) : null;
+  for (final brand in brands ?? knownBrands) {
+    // Mot-clé long : au début ou à la fin d'un morceau (« laposte2 »,
+    // « monlaposte »), pas au milieu d'un autre mot (« imposter »).
     final mentioned = brand.keywords.any(
-      (k) => parts.contains(k) || (k.length >= 5 && compact.contains(k)),
+      (k) =>
+          parts.contains(k) ||
+          (k.length >= 5 &&
+              pieces.any((p) => p.startsWith(k) || p.endsWith(k))),
     );
     if (!mentioned) continue;
+    // Mot-clé seul + extension : sans doute le vrai site de la même
+    // marque dans un autre pays. Signalé seulement s'il est combiné à
+    // d'autres mots (« laposte-colis.xyz ») ou en sous-domaine d'un autre site.
+    if (brand.keywords.contains(name)) continue;
     final official = brand.officialDomains.any(
       (d) => host == d || host.endsWith('.$d'),
     );

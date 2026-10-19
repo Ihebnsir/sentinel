@@ -7,10 +7,18 @@ enum class BlockCategory(
     val defaultEnabled: Boolean,
     /** Une notification est-elle affichée quand elle bloque un domaine ? */
     val alerts: Boolean,
+    /** Faux : pas de fichier de liste, une règle (imitation de marque). */
+    val hasList: Boolean = true,
 ) {
     MALWARE("malware", "Malware et hameçonnage", defaultEnabled = true, alerts = true),
     TRACKERS("trackers", "Traqueurs", defaultEnabled = true, alerts = false),
-    ADS("ads", "Publicités", defaultEnabled = false, alerts = false);
+    ADS("ads", "Publicités", defaultEnabled = false, alerts = false),
+
+    /** Domaine absent des listes mais qui imite une marque connue (BrandRules). */
+    IMPERSONATION(
+        "impersonation", "Imitations de marques",
+        defaultEnabled = true, alerts = true, hasList = false,
+    );
 
     companion object {
         fun fromId(id: String?): BlockCategory? = entries.firstOrNull { it.id == id }
@@ -29,11 +37,13 @@ class BlockPolicy(
     private val allowlist: DomainSet,
     /** Domaine de test (build debug) : rangé dans « Malware » pour tester l'alerte. */
     private val testDomain: String? = null,
+    /** Marques de known_brands.json, pour la catégorie « Imitations de marques ». */
+    private val brands: List<KnownBrand> = emptyList(),
 ) {
 
     /**
      * La catégorie qui bloque [name], ou null s'il est autorisé.
-     * La liste blanche passe avant tout.
+     * Ordre : liste blanche (avant tout), listes, puis imitation de marque.
      */
     fun check(name: String): BlockCategory? {
         val normalized = normalizeQuery(name) ?: return null
@@ -47,8 +57,37 @@ class BlockPolicy(
             if (category !in enabled) continue
             if (lists[category]?.matches(normalized) == true) return category
         }
+        if (BlockCategory.IMPERSONATION in enabled &&
+            BrandRules.impersonatedBrand(normalized, brands) != null
+        ) {
+            return BlockCategory.IMPERSONATION
+        }
         return null
     }
+
+    /**
+     * Catégorie de [name] pour le rapport d'analyse, que la catégorie soit
+     * active ou non et sans tenir compte de la liste blanche. null : « autre ».
+     */
+    fun classify(name: String): BlockCategory? {
+        val normalized = normalizeQuery(name) ?: return null
+        for (category in BlockCategory.entries) {
+            if (lists[category]?.matches(normalized) == true) return category
+        }
+        if (BrandRules.impersonatedBrand(normalized, brands) != null) {
+            return BlockCategory.IMPERSONATION
+        }
+        return null
+    }
+
+    /** La marque imitée par [name] (texte de l'alerte), ou null. */
+    fun impersonatedBrand(name: String): KnownBrand? {
+        val normalized = normalizeQuery(name) ?: return null
+        return BrandRules.impersonatedBrand(normalized, brands)
+    }
+
+    /** Nom normalisé, ou null s'il est invalide (enregistré tel quel dans le rapport). */
+    fun normalized(name: String): String? = normalizeQuery(name)
 
     /** Nombre d'entrées de [category] si elle est chargée, sinon null. */
     fun size(category: BlockCategory): Int? = lists[category]?.size
