@@ -6,6 +6,7 @@ import 'package:cryptography/cryptography.dart';
 import 'package:cryptography/dart.dart';
 import 'package:flutter/foundation.dart';
 
+import '../../utils/debug_log.dart';
 import 'recovery_key.dart';
 import 'vault_file.dart';
 import 'vault_item.dart';
@@ -92,9 +93,7 @@ Future<Uint8List> deriveKek(String password, KdfParams kdf) async {
     return Uint8List.fromList(await key.extractBytes());
   });
   // Seulement la durée, jamais le mot de passe ni la clé.
-  if (kDebugMode) {
-    debugPrint('Argon2id : ${stopwatch.elapsedMilliseconds} ms');
-  }
+  debugLog(() => 'Argon2id : ${stopwatch.elapsedMilliseconds} ms');
   return kek;
 }
 

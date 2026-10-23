@@ -10,6 +10,7 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.os.Build
 import android.os.PersistableBundle
+import android.view.View
 import android.view.WindowManager
 import io.flutter.plugin.common.BinaryMessenger
 import io.flutter.plugin.common.MethodCall
@@ -68,6 +69,7 @@ class VaultProtection(private val activity: Activity, messenger: BinaryMessenger
                 clearClipboard()
                 result.success(null)
             }
+            "isClipboardShared" -> result.success(isClipboardShared(Build.VERSION.SDK_INT))
             "biometricAvailable" -> result.success(biometric.isAvailable())
             "biometricEncrypt" -> {
                 val data = call.argument<ByteArray>("data")
@@ -103,6 +105,23 @@ class VaultProtection(private val activity: Activity, messenger: BinaryMessenger
         } else {
             activity.window.clearFlags(WindowManager.LayoutParams.FLAG_SECURE)
         }
+        setAccessibilitySensitive(secure)
+    }
+
+    // SEN-13, Android 14+ : seuls les vrais outils d'accessibilité
+    // (isAccessibilityTool : TalkBack, Switch Access…) lisent le coffre ;
+    // un logiciel espion qui lit l'écran ne voit plus la clé de récupération.
+    // Appliqué à la vue racine : Android le propage à la FlutterView et à
+    // tous ses nœuds. Avant Android 14, aucun moyen équivalent n'existe.
+    private fun setAccessibilitySensitive(sensitive: Boolean) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.UPSIDE_DOWN_CAKE) return
+        activity.window.decorView.setAccessibilityDataSensitive(
+            if (sensitive) {
+                View.ACCESSIBILITY_DATA_SENSITIVE_YES
+            } else {
+                View.ACCESSIBILITY_DATA_SENSITIVE_AUTO
+            },
+        )
     }
 
     private val clipboard: ClipboardManager

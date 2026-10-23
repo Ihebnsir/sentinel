@@ -13,7 +13,11 @@ import '../utils/french_date.dart';
 import '../widgets/action_tile.dart';
 import '../widgets/network_protection_section.dart';
 import '../widgets/score_arch.dart';
+import '../widgets/wifi_alert.dart';
 import '../widgets/wifi_section.dart';
+
+/// Salutation neutre : l'app ne stocke aucun prénom (SEN-16).
+const homeGreeting = 'Bonjour';
 
 /// L'écran d'accueil : salutation, score et actions conseillées.
 /// StatefulWidget car il garde le résultat de l'audit en mémoire.
@@ -104,16 +108,10 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     if (before != null &&
         before != WifiLevel.danger &&
         report.level == WifiLevel.danger) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          backgroundColor: AppColors.rommen,
-          content: Text('${report.title} : évitez la banque et les achats.'),
-          action: SnackBarAction(
-            label: 'Détails',
-            textColor: Colors.white,
-            onPressed: _showWifiDetails,
-          ),
-        ),
+      showWifiAlert(
+        context,
+        message: '${report.title} : évitez la banque et les achats.',
+        onDetails: _showWifiDetails,
       );
     }
   }
@@ -194,7 +192,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Bonjour, Iheb',
+                  homeGreeting,
                   style: TextStyle(
                     fontSize: 16,
                     color: AppColors.encre.withValues(alpha: 0.6),

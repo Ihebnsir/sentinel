@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:material_ui/material_ui.dart';
 
 import '../models/installed_app.dart';
@@ -19,11 +21,18 @@ TextStyle get _muted =>
     TextStyle(fontSize: 13, color: AppColors.encre.withValues(alpha: 0.6));
 
 /// Rapport d'une analyse : résumé, compteurs, domaines par catégorie.
-/// Renvoie true (Navigator.pop) si le rapport a été supprimé.
+/// Renvoie true (Navigator.pop) si le rapport a été supprimé ou a expiré.
 class AppReportScreen extends StatefulWidget {
-  const AppReportScreen({super.key, required this.report});
+  const AppReportScreen({
+    super.key,
+    required this.report,
+    this.now = DateTime.now,
+  });
 
   final AppReport report;
+
+  /// Horloge (remplacée dans les tests).
+  final DateTime Function() now;
 
   @override
   State<AppReportScreen> createState() => _AppReportScreenState();
@@ -33,9 +42,16 @@ class _AppReportScreenState extends State<AppReportScreen> {
   InstalledApp? _app; // null : app introuvable (désinstallée) ou hors Android
   AppRiskReport? _risk;
 
+  Timer? _expiry; // ferme l'écran à l'expiration du rapport (SEN-14)
+
   @override
   void initState() {
     super.initState();
+    final now = widget.now();
+    final left = widget.report.isExpiredAt(now)
+        ? Duration.zero
+        : widget.report.expiresAt.difference(now);
+    _expiry = Timer(left, _onExpired);
     _loadApp();
   }
 
@@ -61,6 +77,18 @@ class _AppReportScreenState extends State<AppReportScreen> {
     } on Exception {
       // Liste indisponible : le rapport s'affiche sans icône.
     }
+  }
+
+  @override
+  void dispose() {
+    _expiry?.cancel();
+    super.dispose();
+  }
+
+  // Un rapport expiré n'est jamais affiché : on ferme l'écran, la liste
+  // se recharge (le fichier est déjà supprimé ou le sera à la lecture).
+  void _onExpired() {
+    if (mounted) Navigator.of(context).pop(true);
   }
 
   void _openDetail() {

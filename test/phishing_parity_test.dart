@@ -84,13 +84,24 @@ void main() {
 
     test('la fixture correspond à cette version du modèle', () {
       expect(fixture['model_version'], model.version);
-      expect(cases, hasLength(30));
+      expect(cases, hasLength(38));
+    });
+
+    test('étape 0 : mêmes caractères retirés que ml/train.py (SEN-12)', () {
+      final json = readJson('assets/models/phishing_model.json');
+      expect(json['format_version'], 2);
+      final pre = json['preprocessing'] as Map<String, dynamic>;
+      expect((pre['hidden_codepoints'] as List).cast<int>().toSet(),
+          hiddenCodePoints);
+      expect(deceptiveCodePoints.difference(hiddenCodePoints), isEmpty);
     });
 
     for (final (i, c) in cases.indexed) {
       final text = c['text'] as String;
       final expected = (c['proba'] as num).toDouble();
       test('cas ${i + 1} (${c['langue']}) : ${jsonEncode(text)}', () {
+        // Même texte nettoyé que Python, puis même probabilité.
+        expect(normalizeMessage(text), c['normalise']);
         final proba = model.predict(text).probability;
         expect((proba - expected).abs(), lessThan(tolerance));
       });

@@ -1,6 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
+import '../utils/debug_log.dart';
+
 /// L'état réel de la protection automatique, lu côté Android.
 class ProtectionStatus {
   const ProtectionStatus({
@@ -41,7 +43,7 @@ class ProtectionService {
     } on MissingPluginException {
       return null;
     } on PlatformException catch (e) {
-      debugPrint('État de la protection illisible : ${e.message}');
+      debugLog(() => 'État de la protection illisible : ${e.message}');
       return null;
     }
   }
@@ -78,7 +80,7 @@ class ProtectionService {
     } on MissingPluginException {
       // Aucun code natif n'écoute ce canal.
     } on PlatformException catch (e) {
-      debugPrint('Protection : $method a échoué (${e.message})');
+      debugLog(() => 'Protection : $method a échoué (${e.message})');
     }
   }
 }

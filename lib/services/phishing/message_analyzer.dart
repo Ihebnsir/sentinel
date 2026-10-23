@@ -38,11 +38,17 @@ class MessageAnalysis {
   int get percent => (probability * 100).round();
 }
 
+/// Raison affichée quand le message cache des caractères (SEN-12).
+const hiddenCharactersReason =
+    "Caractères invisibles ou d'inversion de texte (technique d'arnaque)";
+
 /// Combine la prédiction de l'IA et l'analyse des liens en un verdict.
 MessageAnalysis analyzeMessage(String text, PhishingPrediction prediction) {
-  final links = analyzeLinks(text);
+  // Les liens sont lus comme ils s'affichent (caractères cachés retirés).
+  final links = analyzeLinks(normalizeMessage(text));
   final findings = [for (final link in links) ...link.findings];
   final p = prediction.probability;
+  final deceptive = hasDeceptiveCharacters(text);
 
   bool found(LinkSignal s) => findings.any((f) => f.signal == s);
   final Verdict verdict;
@@ -50,13 +56,13 @@ MessageAnalysis analyzeMessage(String text, PhishingPrediction prediction) {
       found(LinkSignal.usurpationMarque) ||
       found(LinkSignal.adresseIp)) {
     verdict = Verdict.arnaque;
-  } else if (p >= suspectThreshold || findings.isNotEmpty) {
-    verdict = Verdict.suspect; // n'importe quel autre signal de lien
+  } else if (p >= suspectThreshold || findings.isNotEmpty || deceptive) {
+    verdict = Verdict.suspect; // autre signal de lien, ou texte piégé
   } else {
     verdict = Verdict.rien;
   }
 
-  final reasons = <String>[];
+  final reasons = <String>[if (deceptive) hiddenCharactersReason];
   for (final finding in findings) {
     if (!reasons.contains(finding.reason)) reasons.add(finding.reason);
   }

@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
+import '../utils/debug_log.dart';
 import '../utils/french_date.dart';
 import '../utils/french_number.dart';
 import 'app_analysis.dart';
@@ -269,7 +270,7 @@ class FirewallService {
     } on MissingPluginException {
       return false;
     } on PlatformException catch (e) {
-      debugPrint('Pare-feu : mise à jour impossible (${e.message})');
+      debugLog(() => 'Pare-feu : mise à jour impossible (${e.message})');
       return false;
     }
   }
@@ -283,7 +284,7 @@ class FirewallService {
     } on MissingPluginException {
       return false;
     } on PlatformException catch (e) {
-      debugPrint('Pare-feu : prepare a échoué (${e.message})');
+      debugLog(() => 'Pare-feu : prepare a échoué (${e.message})');
       return false;
     }
   }
@@ -331,7 +332,7 @@ class FirewallService {
     } on MissingPluginException {
       return const [];
     } on PlatformException catch (e) {
-      debugPrint('Pare-feu : rapports illisibles (${e.message})');
+      debugLog(() => 'Pare-feu : rapports illisibles (${e.message})');
       return const [];
     }
   }
@@ -368,7 +369,7 @@ class FirewallService {
     } on MissingPluginException {
       return null;
     } on PlatformException catch (e) {
-      debugPrint('Pare-feu : $method a échoué (${e.message})');
+      debugLog(() => 'Pare-feu : $method a échoué (${e.message})');
       return null;
     }
   }
@@ -383,7 +384,7 @@ class FirewallService {
     } on MissingPluginException {
       // Pas de code natif.
     } on PlatformException catch (e) {
-      debugPrint('Pare-feu : $method a échoué (${e.message})');
+      debugLog(() => 'Pare-feu : $method a échoué (${e.message})');
     }
   }
 }

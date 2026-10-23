@@ -1,4 +1,3 @@
-import 'package:google_fonts/google_fonts.dart';
 import 'package:material_ui/material_ui.dart';
 
 import 'app_colors.dart';
@@ -6,6 +5,9 @@ import 'app_colors.dart';
 /// Le thème visuel de l'app (couleurs de base et police).
 class AppTheme {
   AppTheme._();
+
+  /// Police Readex Pro, embarquée dans l'app (voir pubspec.yaml).
+  static const fontFamily = 'ReadexPro';
 
   /// Ligne fine au-dessus de la barre de navigation (utilisée par MainShell).
   static const navigationBarBorder = BorderSide(color: AppColors.ligne);
@@ -16,7 +18,7 @@ class AppTheme {
         // Flutter génère toute une palette harmonieuse à partir du bleu.
         colorScheme: ColorScheme.fromSeed(seedColor: AppColors.bleu),
         // Police Readex Pro pour tous les textes de l'app.
-        textTheme: GoogleFonts.readexProTextTheme(),
+        fontFamily: fontFamily,
         navigationBarTheme: _navigationBar,
       );
 
@@ -33,7 +35,8 @@ class AppTheme {
           (states) => IconThemeData(color: _navColor(states)),
         ),
         labelTextStyle: WidgetStateProperty.resolveWith(
-          (states) => GoogleFonts.readexPro(
+          (states) => TextStyle(
+            fontFamily: fontFamily,
             fontSize: 12,
             color: _navColor(states),
           ),

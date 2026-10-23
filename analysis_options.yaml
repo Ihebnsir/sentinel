@@ -28,7 +28,10 @@ linter:
   # `// ignore_for_file: name_of_lint` syntax on the line or in the file
   # producing the lint.
   rules:
-    # avoid_print: false  # Uncomment to disable the `avoid_print` rule
+    # SEN-05 : aucun log en release. avoid_print ne voit que print() ;
+    # debugPrint est interdit hors lib/utils/debug_log.dart par
+    # test/no_release_logs_test.dart.
+    avoid_print: true
     # prefer_single_quotes: true  # Uncomment to enable the `prefer_single_quotes` rule
 
 # Additional information about this file can be found at

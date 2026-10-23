@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:flutter/foundation.dart';
 
+import '../../utils/debug_log.dart';
 import 'vault_biometrics.dart';
 import 'vault_crypto.dart';
 import 'vault_file.dart';
@@ -412,7 +413,7 @@ class VaultSession extends ChangeNotifier {
       await _storage.write(file);
     } on FileSystemException {
       // Jamais le contenu ni le chemin dans les journaux.
-      if (kDebugMode) debugPrint('Coffre : écriture reportée');
+      debugLog(() => 'Coffre : écriture reportée');
     }
   }
 

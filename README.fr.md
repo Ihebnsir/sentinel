@@ -19,7 +19,7 @@
 
 ---
 
-L'interface de l'application est en français. Tout se passe sur le téléphone. Le seul appel réseau est une vérification de fuites facultative, faite après accord explicite auprès de Have I Been Pwned : elle n'envoie que 5 caractères hexadécimaux d'une empreinte SHA-1 (k-anonymity).
+L'interface de l'application est en français. Tout se passe sur le téléphone. Rien ne passe par le réseau sans votre accord : les seuls appels réseau viennent de trois fonctions facultatives, la vérification des fuites auprès de Have I Been Pwned (5 caractères hexadécimaux d'une empreinte SHA-1, k-anonymity), le pare-feu DNS (transmet les requêtes DNS à Quad9, pas encore chiffrées) et la mise à jour des listes de blocage (téléchargées depuis GitHub).
 
 ## Captures d'écran
 
@@ -45,7 +45,7 @@ L'interface de l'application est en français. Tout se passe sur le téléphone.
 ## Points forts en sécurité
 
 - **Respect de la vie privée dès la conception.** Pas de compte, pas de statistiques d'usage, pas de serveur. Le texte des messages n'est jamais journalisé ni enregistré. Kotlin ne garde que des valeurs `hashCode()` pour ignorer les doublons.
-- **Un seul appel réseau, sur accord.** La vérification des fuites demande un consentement explicite. Elle utilise l'API « range » de Pwned Passwords (k-anonymity) : seuls les 5 premiers caractères hexadécimaux de l'empreinte SHA-1 quittent le téléphone, et l'en-tête `Add-Padding: true` masque la taille de la réponse. Les résultats restent en mémoire et sont effacés au verrouillage du coffre.
+- **Appels réseau sur accord uniquement.** Aucun appel réseau au démarrage (la police est embarquée). La vérification des fuites demande un consentement explicite. Elle utilise l'API « range » de Pwned Passwords (k-anonymity) : seuls les 5 premiers caractères hexadécimaux de l'empreinte SHA-1 quittent le téléphone, et l'en-tête `Add-Padding: true` masque la taille de la réponse. Les résultats restent en mémoire et sont effacés au verrouillage du coffre.
 - **Cryptographie du coffre.** Une clé de données (DEK) aléatoire de 256 bits chiffre les éléments en AES-256-GCM, avec un nonce neuf de 12 octets à chaque écriture. La DEK est enveloppée par une clé de chiffrement de clé (KEK) pour chaque *emplacement de clé* (key slot) :
   - mot de passe : Argon2id, 46 Mio, 2 passes, parallélisme 1, sel aléatoire de 16 octets, calculé dans un isolate séparé ;
   - clé de récupération : 28 caractères parmi 32 symboles (140 bits), HKDF-SHA256 ;

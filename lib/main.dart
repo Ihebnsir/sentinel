@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
 
 import 'screens/main_shell.dart';
@@ -9,7 +11,14 @@ export 'background/background_analyzer.dart' show backgroundAnalyzerMain;
 
 // Point d'entrée : Flutter démarre l'app ici.
 void main() {
+  LicenseRegistry.addLicense(readexProLicense);
   runApp(const SentinelApp());
+}
+
+/// Licence OFL de la police embarquée (lue seulement si on l'affiche).
+Stream<LicenseEntry> readexProLicense() async* {
+  final text = await rootBundle.loadString('assets/fonts/ReadexPro-OFL.txt');
+  yield LicenseEntryWithLineBreaks(['Readex Pro'], text);
 }
 
 /// Le widget racine : il configure le thème et l'écran de départ.

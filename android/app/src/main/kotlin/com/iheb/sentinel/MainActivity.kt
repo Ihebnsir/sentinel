@@ -178,24 +178,23 @@ class MainActivity : FlutterActivity() {
     }
 
     // Texte partagé (SEND), sélectionné (PROCESS_TEXT) ou venant d'une
-    // alerte Sentinel (ACTION_CHECK_ALERT), sinon null.
+    // alerte Sentinel (OPEN_ALERT, via AlertRelayActivity), sinon null.
+    // MainActivity est exportée : le texte d'une alerte ne vient jamais de
+    // l'Intent, seulement de alertInbox (SEN-06).
     private fun sharedTextFrom(intent: Intent?): String? {
         if (intent == null) return null
-        val raw = when (intent.action) {
-            Intent.ACTION_SEND, ACTION_CHECK_ALERT -> intent.getCharSequenceExtra(Intent.EXTRA_TEXT)
-            Intent.ACTION_PROCESS_TEXT -> intent.getCharSequenceExtra(Intent.EXTRA_PROCESS_TEXT)
-            else -> null
-        }
-        return cleanMessageText(raw)
+        return incomingText(
+            action = intent.action,
+            sendText = intent.getCharSequenceExtra(Intent.EXTRA_TEXT),
+            processText = intent.getCharSequenceExtra(Intent.EXTRA_PROCESS_TEXT),
+            inbox = alertInbox,
+        )
     }
 
     private fun launchedFromHistory(intent: Intent?): Boolean =
         (intent?.flags ?: 0) and Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY != 0
 
     companion object {
-        /** Tap sur une alerte : ouvre l'onglet Messages avec le texte. */
-        const val ACTION_CHECK_ALERT = "com.iheb.sentinel.action.CHECK_ALERT"
-
         private const val REQUEST_NOTIFICATIONS = 1
     }
 

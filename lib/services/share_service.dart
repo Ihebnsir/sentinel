@@ -1,6 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
+import '../utils/debug_log.dart';
+
 /// Un texte reçu d'une autre app.
 /// Pas de == personnalisé : deux envois du même texte restent deux
 /// objets différents, donc le ValueNotifier prévient à chaque fois.
@@ -32,7 +34,7 @@ class ShareService {
     } on MissingPluginException {
       // Aucun code natif n'écoute ce canal.
     } on PlatformException catch (e) {
-      debugPrint('Texte partagé illisible : ${e.message}');
+      debugLog(() => 'Texte partagé illisible : ${e.message}');
     }
   }
 

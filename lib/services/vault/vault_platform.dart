@@ -43,6 +43,19 @@ class VaultPlatform {
     await Clipboard.setData(const ClipboardData(text: ''));
   }
 
+  /// Vrai sur Android 9 et avant : toutes les apps peuvent y lire
+  /// le presse-papiers, même en arrière-plan (SEN-03).
+  static Future<bool> isClipboardShared() async {
+    if (!_isAndroid) return false;
+    try {
+      return await _channel.invokeMethod<bool>('isClipboardShared') ?? false;
+    } on MissingPluginException {
+      return false;
+    } on PlatformException {
+      return false;
+    }
+  }
+
   // true si le code natif a répondu.
   static Future<bool> _invoke(String method, [Object? arguments]) async {
     try {
@@ -57,21 +70,47 @@ class VaultPlatform {
   }
 }
 
-/// Vide le presse-papiers 30 s après une copie, s'il contient toujours
-/// ce qu'on a copié (on n'efface pas ce que l'utilisateur a copié après).
+/// Vide le presse-papiers 30 s après une copie (10 s sur Android 9 et
+/// avant), s'il contient toujours ce qu'on a copié (on n'efface pas ce que
+/// l'utilisateur a copié après).
 class ClipboardGuard {
+  ClipboardGuard({Future<bool> Function()? isClipboardShared})
+      : _isClipboardShared =
+            isClipboardShared ?? VaultPlatform.isClipboardShared;
+
   static const delay = Duration(seconds: 30);
+
+  /// Android 9 et avant : délai raccourci, toutes les apps lisent le
+  /// presse-papiers.
+  static const sharedDelay = Duration(seconds: 10);
+
+  final Future<bool> Function() _isClipboardShared;
+  bool? _shared; // demandé une seule fois à Android
+  bool _warningAccepted = false; // « Copier quand même » déjà choisi
 
   Timer? _timer;
   String? _copied; // gardé en mémoire 30 s au plus
   bool _pending = false; // délai passé mais presse-papiers illisible
 
-  Future<void> copy(String text) async {
+  Future<bool> _isShared() async => _shared ??= await _isClipboardShared();
+
+  /// Vrai s'il faut prévenir l'utilisateur avant de copier (première
+  /// copie, sur Android 9 et avant).
+  Future<bool> needsWarning() async =>
+      !_warningAccepted && await _isShared();
+
+  /// L'utilisateur a choisi « Copier quand même ».
+  void acceptWarning() => _warningAccepted = true;
+
+  /// Copie [text] et renvoie le délai avant effacement.
+  Future<Duration> copy(String text) async {
+    final wait = await _isShared() ? sharedDelay : delay;
     await VaultPlatform.copySensitive(text);
     _copied = text;
     _pending = false;
     _timer?.cancel();
-    _timer = Timer(delay, _tryClear);
+    _timer = Timer(wait, _tryClear);
+    return wait;
   }
 
   /// À appeler au retour dans l'app : Android interdit de lire le

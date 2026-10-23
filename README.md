@@ -19,7 +19,7 @@
 
 ---
 
-The app's interface is in French. Everything runs on the phone. The only network call is an optional, opt-in breach check against Have I Been Pwned, and it sends 5 hex characters of a SHA-1 hash (k-anonymity).
+The app's interface is in French. Everything runs on the phone. Nothing goes over the network without your consent: the only network calls are three opt-in features, the breach check against Have I Been Pwned (5 hex characters of a SHA-1 hash, k-anonymity), the DNS firewall (forwards DNS queries to Quad9, not encrypted yet) and the blocklist updates (downloads from GitHub).
 
 ## Screenshots
 
@@ -45,7 +45,7 @@ The app's interface is in French. Everything runs on the phone. The only network
 ## Security highlights
 
 - **Privacy by design.** No account, no analytics, no backend. Message text is never logged or stored. Kotlin keeps only `hashCode()` values to skip duplicates.
-- **One opt-in network call.** The breach check needs explicit consent. It uses the Pwned Passwords range API (k-anonymity): only the first 5 hex characters of the SHA-1 hash leave the device, and `Add-Padding: true` hides the response size. Results stay in memory and are cleared when the vault locks.
+- **Opt-in network calls only.** No network call at startup (the font is bundled). The breach check needs explicit consent. It uses the Pwned Passwords range API (k-anonymity): only the first 5 hex characters of the SHA-1 hash leave the device, and `Add-Padding: true` hides the response size. Results stay in memory and are cleared when the vault locks.
 - **Vault cryptography.** A random 256-bit data key (DEK) encrypts the items with AES-256-GCM, using a fresh 12-byte nonce on every write. The DEK is wrapped by one key-encryption key (KEK) per *key slot*:
   - password: Argon2id, 46 MiB, 2 iterations, parallelism 1, 16-byte random salt, run in a separate isolate;
   - recovery key: 28 characters from a 32-symbol alphabet (140 bits), HKDF-SHA256;

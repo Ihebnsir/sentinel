@@ -31,6 +31,9 @@
          (la fenêtre sans protection ne s'allonge pas). Accordée d'office
          sur Android 12-13 ; Android 14+ : réveil inexact si refusée. -->
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+    <!-- Permission « normale » : après un redémarrage, reprogrammer la
+         suppression des rapports d'analyse à 24 h (BootReceiver). -->
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <!-- Pas de sauvegarde Android : le coffre (même chiffré) ne doit pas
          partir dans le cloud ni vers un autre téléphone.
          allowBackup="false" suffit jusqu'à Android 11 ; à partir d'Android 12,
@@ -78,6 +81,17 @@
                 <data android:mimeType="text/plain"/>
             </intent-filter>
         </activity>
+        <!-- Tap sur une alerte « Arnaque probable » (SEN-06).
+             exported="false" : seule la notification de Sentinel peut l'ouvrir.
+             Elle transmet le texte à MainActivity par la mémoire, puis se ferme
+             sans rien afficher (Theme.NoDisplay). -->
+        <activity
+            android:name=".AlertRelayActivity"
+            android:exported="false"
+            android:excludeFromRecents="true"
+            android:noHistory="true"
+            android:taskAffinity=""
+            android:theme="@android:style/Theme.NoDisplay" />
         <!-- Protection automatique : lit les notifications des messageries.
              Seul Android peut s'y connecter (permission BIND_NOTIFICATION_LISTENER_SERVICE),
              et seulement si l'utilisateur l'a autorisé dans les réglages. -->
@@ -112,6 +126,17 @@
         <receiver
             android:name=".firewall.ReportCleanupReceiver"
             android:exported="false" />
+        <!-- Reprogramme ce nettoyage après un redémarrage ou une mise à jour
+             (Android efface alors les alarmes). Ces deux diffusions sont
+             protégées : seul le système peut les envoyer. -->
+        <receiver
+            android:name=".firewall.BootReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+            </intent-filter>
+        </receiver>
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
         <meta-data

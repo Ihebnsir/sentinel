@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
 import '../models/wifi_status.dart';
+import '../utils/debug_log.dart';
 
 /// Fait le lien avec WifiSecurityChecker.kt via un MethodChannel.
 class WifiService {
@@ -54,7 +55,7 @@ class WifiService {
     try {
       await _channel.invokeMethod<void>(method);
     } on PlatformException catch (e) {
-      debugPrint('Wi-Fi : $method a échoué (${e.message})');
+      debugLog(() => 'Wi-Fi : $method a échoué (${e.message})');
     } on MissingPluginException {
       // Pas de code natif.
     }

@@ -22,11 +22,11 @@ object ScamAlertNotifier {
         if (!manager.areNotificationsEnabled()) return
         createChannel(context, manager)
 
-        // Même mécanisme que le partage : MainActivity lit EXTRA_TEXT.
-        val intent = Intent(context, MainActivity::class.java)
-            .setAction(MainActivity.ACTION_CHECK_ALERT)
+        // SEN-06 : relais non exporté, qui transmet le texte à MainActivity
+        // par la mémoire (alertInbox), jamais par un Intent forgeable.
+        val intent = Intent(context, AlertRelayActivity::class.java)
             .putExtra(Intent.EXTRA_TEXT, text)
-            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP)
+            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         val tap = PendingIntent.getActivity(
             context,
             id, // un code par alerte, sinon les textes se mélangent

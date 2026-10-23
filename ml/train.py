@@ -50,15 +50,77 @@ C_GRID = [0.1, 0.3, 1.0, 3.0, 10.0, 30.0]
 VECTORIZER_PARAMS = dict(
     analyzer="char_wb",
     ngram_range=(2, 5),
-    lowercase=True,
+    lowercase=False,  # fait par preprocess() (étape 1), après l'étape 0
     sublinear_tf=True,
     min_df=2,
     max_features=8000,
 )
+
+# --- Étape 0 : nettoyage (SEN-12) ---------------------------------------------
+# Identique à normalizeMessage() de lib/services/phishing/phishing_model.dart.
+# Caractères retirés : contrôles de direction du texte et invisibles.
+HIDDEN_CODEPOINTS = [
+    0x00AD,  # trait d'union conditionnel
+    0x061C,  # marque de lettre arabe
+    0x180E,  # séparateur de voyelles mongol
+    0x200B, 0x200C, 0x200D,  # espace, anti-liant, liant sans largeur
+    0x200E, 0x200F,  # marques gauche-à-droite, droite-à-gauche
+    0x202A, 0x202B, 0x202C, 0x202D, 0x202E,  # enchâssements et forçages
+    0x2060, 0x2061, 0x2062, 0x2063, 0x2064,  # gluon, opérateurs invisibles
+    0x2066, 0x2067, 0x2068, 0x2069,  # isolats
+    0xFEFF,  # espace insécable sans largeur (BOM)
+]
+RLO = 0x202E  # force l'affichage à l'envers
+PDF = 0x202C  # ferme la dernière ouverture
+EMBEDDING_OPENERS = [0x202A, 0x202B, 0x202D, 0x202E]
+PARAGRAPH_SEPARATORS = [0x0A, 0x0D, 0x1C, 0x1D, 0x1E, 0x85, 0x2029]
+
+
+def normalize_text(text: str, hidden=frozenset(HIDDEN_CODEPOINTS),
+                   openers=frozenset(EMBEDDING_OPENERS),
+                   paragraphs=frozenset(PARAGRAPH_SEPARATORS),
+                   rlo=RLO, pdf=PDF) -> str:
+    """Le texte tel que l'utilisateur le voit : ce qui suit un RLO (jusqu'au PDF
+    ou à la fin du paragraphe) est remis à l'endroit, puis les caractères
+    cachés sont retirés."""
+    out: list[str] = []
+    opened: list[int] = []
+    reversed_part: list[str] = []
+
+    def flush() -> None:
+        out.extend(reversed(reversed_part))
+        reversed_part.clear()
+
+    for ch in text:
+        cp = ord(ch)
+        if cp in paragraphs:
+            flush()
+            opened.clear()
+            out.append(ch)
+        elif cp in openers:
+            flush()
+            opened.append(cp)
+        elif cp == pdf:
+            flush()
+            if opened:
+                opened.pop()
+        elif cp in hidden:
+            pass  # retiré
+        elif opened and opened[-1] == rlo:
+            reversed_part.append(ch)
+        else:
+            out.append(ch)
+    flush()
+    return "".join(out)
+
+
+def preprocess(text: str) -> str:
+    """Étapes 0 et 1 de ml/README.md : nettoyage, puis minuscules."""
+    return normalize_text(text).lower()
 LANGUES = ["fr", "ar", "derja_latin", "derja_arabe", "en"]
 REQUIRED_COLUMNS = ["text", "label", "langue", "source"]
 
-# 30 textes pour le test de parité Python <-> Dart : toutes les langues
+# 38 textes pour le test de parité Python <-> Dart : toutes les langues
 # + des cas limites (vide, espaces Unicode, emojis, majuscules, accents...).
 PARITY_TEXTS = [
     ("fr", "Votre code est 482913, ne le communiquez à personne."),
@@ -90,7 +152,16 @@ PARITY_TEXTS = [
     ("mixte", "Salut 3andek code? Your code is 4821 — رمز"),
     ("special", "café CAFÉ Café café"),
     ("special", "Ligne1\r\nLigne2 insécable cadratin"),
-    ("special", "zero​width ne sépare pas les mots"),
+    ("special", "zero\u200Bwidth ne sépare pas les mots"),
+    # SEN-12 : caractères invisibles et inversion de texte (écrits en \u).
+    ("sen12", "Payez ici https://\u202Ezyx.euqanra-elpmaxe.ivius-siloc-etsopal\u202C sinon blocage"),
+    ("sen12", "Payez ici https://laposte-colis-suivi.example-arnaque.xyz sinon blocage"),
+    ("sen12", "pay\u00ADpal se\u200Bcu\u2060rité : vé\uFEFFrifiez votre compte"),
+    ("sen12", "\u200Fمرحبا\u200E Salut \u061Cاهلا"),
+    ("sen12", "Famille \U0001F468\u200D\U0001F469\u200D\U0001F467 au parc"),
+    ("sen12", "\u2067arnaque\u2069 isolat \u202Bembed\u202C fin"),
+    ("sen12", "\u202Edébut\nligne2 suite"),
+    ("sen12", "\u202EAB\u202ACD\u202CEF\u202C GH"),
 ]
 
 
@@ -158,6 +229,16 @@ def reference_predict(model: dict, text: str) -> float:
     whitespace = {chr(cp) for cp in pre["whitespace_codepoints"]}
     min_n, max_n = pre["ngram_range"]
 
+    # Étape 0, uniquement à partir des valeurs du JSON exporté.
+    bidi = pre["bidi"]
+    text = normalize_text(
+        text,
+        hidden=frozenset(pre["hidden_codepoints"]),
+        openers=frozenset(bidi["openers"]),
+        paragraphs=frozenset(bidi["paragraph_separators"]),
+        rlo=bidi["rlo"],
+        pdf=bidi["pdf"],
+    )
     text = text.lower()
     # Découpage en mots sur les caractères d'espacement Unicode.
     words, current = [], []
@@ -223,7 +304,7 @@ def main() -> None:
 
     title("2. Choix de C par validation croisée (5 plis, score = F1)")
     pipe = Pipeline([
-        ("tfidf", TfidfVectorizer(**VECTORIZER_PARAMS)),
+        ("tfidf", TfidfVectorizer(**VECTORIZER_PARAMS, preprocessor=preprocess)),
         ("clf", LogisticRegression(class_weight="balanced", max_iter=5000)),
     ])
     search = GridSearchCV(
@@ -299,12 +380,19 @@ def main() -> None:
     now = datetime.now()
     vocab = {g: int(j) for g, j in sorted(vec.vocabulary_.items(), key=lambda kv: kv[1])}
     export = {
-        "format_version": 1,
+        "format_version": 2,  # 2 : étape 0 (SEN-12)
         "version": now.strftime("%Y%m%d-%H%M%S"),
         "date": now.isoformat(timespec="seconds"),
         "sklearn_version": sklearn.__version__,
         "labels": {"0": "normal", "1": "arnaque"},
         "preprocessing": {
+            "hidden_codepoints": HIDDEN_CODEPOINTS,
+            "bidi": {
+                "rlo": RLO,
+                "pdf": PDF,
+                "openers": EMBEDDING_OPENERS,
+                "paragraph_separators": PARAGRAPH_SEPARATORS,
+            },
             "lowercase": True,
             "analyzer": "char_wb",
             "ngram_range": list(VECTORIZER_PARAMS["ngram_range"]),
@@ -353,8 +441,8 @@ def main() -> None:
     cases = []
     for (langue, text), p, z, k in zip(PARITY_TEXTS, p_parity, z_parity, nnz):
         max_gap = max(max_gap, abs(reference_predict(export, text) - float(p)))
-        cases.append({"langue": langue, "text": text, "n_ngrammes_connus": int(k),
-                      "decision": float(z), "proba": float(p)})
+        cases.append({"langue": langue, "text": text, "normalise": normalize_text(text),
+                      "n_ngrammes_connus": int(k), "decision": float(z), "proba": float(p)})
     parity = {
         "model_version": export["version"],
         "tolerance": 1e-9,

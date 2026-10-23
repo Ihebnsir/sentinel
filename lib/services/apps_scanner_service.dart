@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
 import '../models/installed_app.dart';
+import '../utils/debug_log.dart';
 
 /// Fait le lien avec le scanner Kotlin (InstalledAppsScanner.kt).
 class AppsScannerService {
@@ -49,7 +50,7 @@ class AppsScannerService {
     try {
       await _channel.invokeMethod<void>(method, {argument: value});
     } on PlatformException catch (e) {
-      debugPrint('Action « $method » impossible : ${e.message}');
+      debugLog(() => 'Action « $method » impossible : ${e.message}');
     } on MissingPluginException {
       // Rien à faire : pas de code natif.
     }

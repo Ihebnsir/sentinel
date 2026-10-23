@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 
 import '../models/device_security_status.dart';
 import '../models/security_action.dart';
+import '../utils/debug_log.dart';
 
 /// Fait le lien avec le code Kotlin (MainActivity.kt) via un MethodChannel.
 class DeviceSecurityService {
@@ -31,7 +32,7 @@ class DeviceSecurityService {
     try {
       await _channel.invokeMethod<void>('openSettings', {'target': target.name});
     } on PlatformException catch (e) {
-      debugPrint('Impossible d\'ouvrir les paramètres : ${e.message}');
+      debugLog(() => 'Impossible d\'ouvrir les paramètres : ${e.message}');
     } on MissingPluginException {
       // Rien à faire : pas de code natif.
     }

@@ -17,7 +17,7 @@ donc on peut toujours montrer « quels morceaux du message ont fait monter le sc
 | `train.py` | Entraîne, évalue, exporte le modèle et les fixtures de parité |
 | `requirements.txt` | Versions exactes des bibliothèques |
 | `../assets/models/phishing_model.json` | Modèle exporté (lu par Flutter) |
-| `../test/fixtures/phishing_parity.json` | 30 textes + probabilités exactes (test Dart) |
+| `../test/fixtures/phishing_parity.json` | 38 textes + probabilités exactes (test Dart) |
 
 Format CSV : `text,label,langue,source` avec `label` = `0` (normal) ou `1` (arnaque) et
 `langue` parmi `fr`, `ar`, `derja_latin`, `derja_arabe`, `en`. Mets le texte entre
@@ -49,7 +49,7 @@ ci-dessous. Si elle échoue, la spécification n'est plus valable.
 ## Format de `phishing_model.json`
 
 ```text
-format_version   1
+format_version   2 (2 : étape 0 de nettoyage, SEN-12)
 version          "AAAAMMJJ-HHMMSS" (identifiant du modèle)
 date             date d'entraînement (ISO 8601)
 preprocessing    paramètres exacts (voir spécification)
@@ -67,7 +67,8 @@ retrouve exactement le même `double` que Python.
 ## Spécification exacte du prétraitement (à reproduire en Dart)
 
 C'est ce que fait `TfidfVectorizer(analyzer="char_wb", ngram_range=(2, 5),
-lowercase=True, sublinear_tf=True)` de scikit-learn 1.9.1, suivi de la régression
+sublinear_tf=True, preprocessor=preprocess)` de scikit-learn 1.9.1
+(`preprocess` = étape 0 puis minuscules), suivi de la régression
 logistique. Les étapes sont à appliquer **dans cet ordre**.
 
 ### Règle n° 0 : on compte en points de code Unicode, pas en unités UTF-16
@@ -79,7 +80,42 @@ un emoji comme 😀 vaut 2 unités (`'😀'.length == 2`) mais 1 point de code.
 
 Aucune normalisation Unicode n'est faite (ni NFC, ni NFD), et les accents sont gardés :
 `"café"` (é précomposé, U+00E9) et `"café"` (e + accent combinant) donnent des
-n-grammes différents. Ne pas « nettoyer » le texte en Dart.
+n-grammes différents. En dehors de l'étape 0, ne pas « nettoyer » le texte en Dart.
+
+### Étape 0 : texte tel qu'il s'affiche (format 2, SEN-12)
+
+Les escrocs cachent des mots avec des caractères invisibles (`pay` + U+200B + `pal`)
+ou écrivent un lien à l'envers après un U+202E (RLO), qui l'affiche à l'endroit.
+On analyse donc ce que l'utilisateur **voit**. En parcourant les points de code,
+avec une pile d'ouvertures (vide au départ) :
+
+1. séparateur de paragraphe (`preprocessing.bidi.paragraph_separators` :
+   U+000A, U+000D, U+001C..U+001E, U+0085, U+2029) : on vide la pile et on garde
+   le caractère ;
+2. ouverture (`bidi.openers` : U+202A, U+202B, U+202D, U+202E) : on l'empile ;
+3. U+202C (`bidi.pdf`) : on dépile (si la pile n'est pas vide) ;
+4. caractère de `preprocessing.hidden_codepoints` : on le retire ;
+5. sinon : si le haut de la pile est U+202E (`bidi.rlo`), le caractère va dans
+   un segment qui sera **retourné** ; sinon il est gardé tel quel.
+
+Un segment retourné est écrit (à l'envers) dès qu'on rencontre l'un des cas 1 à 3,
+ou à la fin du texte. Caractères retirés :
+
+```text
+U+00AD           trait d'union conditionnel
+U+061C           marque de lettre arabe
+U+180E           séparateur de voyelles mongol
+U+200B..U+200F   espace, anti-liant, liant sans largeur, marques LTR/RTL
+U+202A..U+202E   enchâssements et forçages de direction
+U+2060..U+2064   gluon, opérateurs invisibles
+U+2066..U+2069   isolats de direction
+U+FEFF           espace insécable sans largeur (BOM)
+```
+
+Exemple : `"https://" + U+202E + "zyx.etsop" + U+202C` donne `"https://poste.xyz"`.
+Python : `normalize_text()` de `train.py` (passée à `TfidfVectorizer(preprocessor=...)`,
+suivie de `.lower()`) ; Dart : `normalizeMessage()`. La fixture de parité contient,
+pour chaque cas, le texte normalisé attendu (`normalise`).
 
 ### Étape 1 : minuscules
 
@@ -205,7 +241,7 @@ L'implémentation Python de référence est `reference_predict()` dans `train.py
 
 ### Parité exacte
 
-`test/fixtures/phishing_parity.json` contient 30 textes (5 langues + cas limites :
+`test/fixtures/phishing_parity.json` contient 38 textes (5 langues + cas limites + caractères cachés :
 texte vide, espaces seuls, emojis, tabulations, espace insécable, U+200B,
 accent combinant…) avec, pour chacun, `proba` et `decision` (= `z`) calculés par
 scikit-learn, et `n_ngrammes_connus` (nombre de n-grammes distincts du vocabulaire

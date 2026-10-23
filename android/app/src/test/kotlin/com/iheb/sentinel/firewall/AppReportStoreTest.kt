@@ -8,8 +8,9 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
 import java.io.File
+import javax.crypto.KeyGenerator
 
-/** Rapports d'analyse : stockage privé, suppression après 24 h. */
+/** Rapports d'analyse : stockage privé chiffré, suppression après 24 h (SEN-14). */
 class AppReportStoreTest {
 
     @get:Rule
@@ -18,7 +19,11 @@ class AppReportStoreTest {
     private val hour = 60 * 60 * 1000L
     private var now = 100 * hour
 
-    private fun store(dir: File = File(folder.root, "app_reports")) = AppReportStore(dir) { now }
+    // Vrai AES-256-GCM (JVM) ; dans l'app, la clé vient du Keystore Android.
+    private val key = KeyGenerator.getInstance("AES").apply { init(256) }.generateKey()
+    private val cipher = AesGcmReportCipher { key }
+
+    private fun store(dir: File = File(folder.root, "app_reports")) = AppReportStore(dir, cipher) { now }
 
     @Test
     fun `rapport visible pendant 24 h puis supprime`() {
@@ -87,5 +92,66 @@ class AppReportStoreTest {
         store.purgeExpired()
         assertFalse(File(dir, "intrus.txt").exists())
         assertEquals(2, store.list().size)
+    }
+
+    @Test
+    fun `chiffre sur le disque - aucun domaine en clair`() {
+        val dir = File(folder.root, "app_reports")
+        store(dir).save("1", now, """{"domains":["domaine-secret.example"]}""")
+        val bytes = dir.listFiles()!!.single().readBytes()
+        assertFalse(String(bytes, Charsets.ISO_8859_1).contains("domaine-secret"))
+        assertEquals(1.toByte(), bytes[0]) // version du format
+    }
+
+    @Test
+    fun `fichier modifie - refuse et supprime`() {
+        val dir = File(folder.root, "app_reports")
+        val store = store(dir)
+        store.save("1", now, "un")
+        val file = dir.listFiles()!!.single()
+        val bytes = file.readBytes()
+        bytes[bytes.size - 1] = (bytes[bytes.size - 1].toInt() xor 1).toByte()
+        file.writeBytes(bytes)
+        assertEquals(emptyList<String>(), store.list())
+        assertFalse(file.exists())
+    }
+
+    @Test
+    fun `fichier renomme pour repousser l'expiration - refuse`() {
+        val dir = File(folder.root, "app_reports")
+        val store = store(dir)
+        store.save("1", now, "un")
+        val file = dir.listFiles()!!.single()
+        assertTrue(file.renameTo(File(dir, "${now + 20 * hour}-1.json")))
+        now += 23 * hour
+        assertEquals(emptyList<String>(), store.list())
+    }
+
+    @Test
+    fun `ancien rapport en clair (version precedente) - supprime`() {
+        val dir = File(folder.root, "app_reports").apply { mkdirs() }
+        val old = File(dir, "$now-1.json").apply { writeText("""{"id":"1"}""") }
+        assertEquals(emptyList<String>(), store(dir).list())
+        assertFalse(old.exists())
+    }
+
+    @Test
+    fun `jamais relu apres 24 h, meme sans passage du nettoyage`() {
+        val dir = File(folder.root, "app_reports")
+        val store = store(dir)
+        store.save("1", now, "un")
+        now += 24 * hour + 1
+        // Pas de purgeExpired() ni d'alarme : la lecture seule suffit.
+        assertEquals(emptyList<String>(), store.list())
+        assertEquals(0, dir.listFiles()!!.size)
+    }
+
+    @Test
+    fun `cles differentes - illisible`() {
+        val dir = File(folder.root, "app_reports")
+        store(dir).save("1", now, "un")
+        val otherKey = KeyGenerator.getInstance("AES").apply { init(256) }.generateKey()
+        val other = AppReportStore(dir, AesGcmReportCipher { otherKey }) { now }
+        assertEquals(emptyList<String>(), other.list())
     }
 }

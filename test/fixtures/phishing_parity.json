@@ -1,11 +1,12 @@
 {
-  "model_version": "20261013-183023",
+  "model_version": "20261023-214528",
   "tolerance": 1e-09,
   "description": "Probabilités exactes de scikit-learn ; la version Dart doit donner les mêmes à la tolérance près.",
   "cases": [
     {
       "langue": "fr",
       "text": "Votre code est 482913, ne le communiquez à personne.",
+      "normalise": "Votre code est 482913, ne le communiquez à personne.",
       "n_ngrammes_connus": 132,
       "decision": -2.744460663883198,
       "proba": 0.060400254473526954
@@ -13,6 +14,7 @@
     {
       "langue": "fr",
       "text": "La Poste : colis en attente, payez 1,900 DT ici : poste-colis.xyz/p",
+      "normalise": "La Poste : colis en attente, payez 1,900 DT ici : poste-colis.xyz/p",
       "n_ngrammes_connus": 133,
       "decision": 1.2587755879516922,
       "proba": 0.7788152600559375
@@ -20,6 +22,7 @@
     {
       "langue": "fr",
       "text": "MAMAN J'AI CHANGÉ DE NUMÉRO, ENVOIE-MOI 200 DT",
+      "normalise": "MAMAN J'AI CHANGÉ DE NUMÉRO, ENVOIE-MOI 200 DT",
       "n_ngrammes_connus": 117,
       "decision": 1.1705759775575761,
       "proba": 0.7632491105978021
@@ -27,6 +30,7 @@
     {
       "langue": "fr",
       "text": "Rendez-vous   confirmé\tdemain à 9h.\nMerci !",
+      "normalise": "Rendez-vous   confirmé\tdemain à 9h.\nMerci !",
       "n_ngrammes_connus": 117,
       "decision": -3.358907658468933,
       "proba": 0.03360467944793662
@@ -34,6 +38,7 @@
     {
       "langue": "fr",
       "text": "Ça va ? On se voit à l'École ce soir.",
+      "normalise": "Ça va ? On se voit à l'École ce soir.",
       "n_ngrammes_connus": 63,
       "decision": -1.9476999263001193,
       "proba": 0.12480437446337024
@@ -41,6 +46,7 @@
     {
       "langue": "ar",
       "text": "رمز التحقق الخاص بك هو 553201. لا تشاركه مع أحد.",
+      "normalise": "رمز التحقق الخاص بك هو 553201. لا تشاركه مع أحد.",
       "n_ngrammes_connus": 94,
       "decision": -2.3061334450982973,
       "proba": 0.09061626404337865
@@ -48,6 +54,7 @@
     {
       "langue": "ar",
       "text": "تم تجميد حسابك، اضغط هنا لتفعيله: bank-ar.top",
+      "normalise": "تم تجميد حسابك، اضغط هنا لتفعيله: bank-ar.top",
       "n_ngrammes_connus": 91,
       "decision": 3.004956167932484,
       "proba": 0.9527975283802429
@@ -55,6 +62,7 @@
     {
       "langue": "ar",
       "text": "مبروك! ربحت جائزة قيمة 🎁 اتصل بنا الآن",
+      "normalise": "مبروك! ربحت جائزة قيمة 🎁 اتصل بنا الآن",
       "n_ngrammes_connus": 80,
       "decision": -1.89982908133594,
       "proba": 0.1301278202047323
@@ -62,6 +70,7 @@
     {
       "langue": "derja_latin",
       "text": "ya5i ab3athli el code elli jek taw 3afek",
+      "normalise": "ya5i ab3athli el code elli jek taw 3afek",
       "n_ngrammes_connus": 85,
       "decision": 0.8915098083027102,
       "proba": 0.7092016457063459
@@ -69,6 +78,7 @@
     {
       "langue": "derja_latin",
       "text": "Rodbalek mel messaget hedhom, rahom arnaque",
+      "normalise": "Rodbalek mel messaget hedhom, rahom arnaque",
       "n_ngrammes_connus": 81,
       "decision": -0.04853470256422199,
       "proba": 0.4878687056560782
@@ -76,6 +86,7 @@
     {
       "langue": "derja_latin",
       "text": "Colis mte3ek wsel, khalles 2 dt houni: colis-dl.top",
+      "normalise": "Colis mte3ek wsel, khalles 2 dt houni: colis-dl.top",
       "n_ngrammes_connus": 120,
       "decision": 2.531009080248576,
       "proba": 0.9262872821866893
@@ -83,6 +94,7 @@
     {
       "langue": "derja_latin",
       "text": "Nchallah labes, nkalmek ghodwa",
+      "normalise": "Nchallah labes, nkalmek ghodwa",
       "n_ngrammes_connus": 88,
       "decision": -3.78320290484569,
       "proba": 0.02224367237198861
@@ -90,6 +102,7 @@
     {
       "langue": "derja_arabe",
       "text": "ابعثلي الكود اللي جاك توا عافاك",
+      "normalise": "ابعثلي الكود اللي جاك توا عافاك",
       "n_ngrammes_connus": 72,
       "decision": 1.059134352561649,
       "proba": 0.742525084202078
@@ -97,6 +110,7 @@
     {
       "langue": "derja_arabe",
       "text": "مبروك عليك الدار الجديدة، ربي يهنيك",
+      "normalise": "مبروك عليك الدار الجديدة، ربي يهنيك",
       "n_ngrammes_connus": 75,
       "decision": -2.4213680842227383,
       "proba": 0.08155771898372044
@@ -104,6 +118,7 @@
     {
       "langue": "derja_arabe",
       "text": "الكونت متاعك تبلوكا، إكبس هنا: kont-tn.xyz",
+      "normalise": "الكونت متاعك تبلوكا، إكبس هنا: kont-tn.xyz",
       "n_ngrammes_connus": 110,
       "decision": 4.1259404207588,
       "proba": 0.9841083223505057
@@ -111,6 +126,7 @@
     {
       "langue": "en",
       "text": "Your OTP is 120934. Never share it.",
+      "normalise": "Your OTP is 120934. Never share it.",
       "n_ngrammes_connus": 57,
       "decision": -1.938939099402648,
       "proba": 0.12576445385216944
@@ -118,6 +134,7 @@
     {
       "langue": "en",
       "text": "You WON a FREE iPhone!!! Click: free-phone.top 🎉",
+      "normalise": "You WON a FREE iPhone!!! Click: free-phone.top 🎉",
       "n_ngrammes_connus": 80,
       "decision": 4.018434260723554,
       "proba": 0.9823365122601595
@@ -125,6 +142,7 @@
     {
       "langue": "en",
       "text": "Hey mum it's me, new number, need money urgently",
+      "normalise": "Hey mum it's me, new number, need money urgently",
       "n_ngrammes_connus": 98,
       "decision": 1.899912941796153,
       "proba": 0.86988167204962
@@ -132,6 +150,7 @@
     {
       "langue": "en",
       "text": "See you at 6, bring the charger",
+      "normalise": "See you at 6, bring the charger",
       "n_ngrammes_connus": 63,
       "decision": -1.8765235409400365,
       "proba": 0.13278869735633891
@@ -139,6 +158,7 @@
     {
       "langue": "special",
       "text": "",
+      "normalise": "",
       "n_ngrammes_connus": 0,
       "decision": -1.7736476909676107,
       "proba": 0.1450892892267301
@@ -146,6 +166,7 @@
     {
       "langue": "special",
       "text": "   ",
+      "normalise": "   ",
       "n_ngrammes_connus": 0,
       "decision": -1.7736476909676107,
       "proba": 0.1450892892267301
@@ -153,6 +174,7 @@
     {
       "langue": "special",
       "text": "a",
+      "normalise": "a",
       "n_ngrammes_connus": 3,
       "decision": -0.15696649919920658,
       "proba": 0.46083874835053223
@@ -160,6 +182,7 @@
     {
       "langue": "special",
       "text": "ok",
+      "normalise": "ok",
       "n_ngrammes_connus": 4,
       "decision": -1.2639839553757661,
       "proba": 0.220288838918414
@@ -167,6 +190,7 @@
     {
       "langue": "special",
       "text": "😀😀😀",
+      "normalise": "😀😀😀",
       "n_ngrammes_connus": 0,
       "decision": -1.7736476909676107,
       "proba": 0.1450892892267301
@@ -174,6 +198,7 @@
     {
       "langue": "special",
       "text": "bit.ly/xxxx",
+      "normalise": "bit.ly/xxxx",
       "n_ngrammes_connus": 39,
       "decision": 1.6568020654342455,
       "proba": 0.8398082511631071
@@ -181,6 +206,7 @@
     {
       "langue": "special",
       "text": "XX XXX XXX",
+      "normalise": "XX XXX XXX",
       "n_ngrammes_connus": 10,
       "decision": 2.4004030333303072,
       "proba": 0.9168580316496985
@@ -188,6 +214,7 @@
     {
       "langue": "mixte",
       "text": "Salut 3andek code? Your code is 4821 — رمز",
+      "normalise": "Salut 3andek code? Your code is 4821 — رمز",
       "n_ngrammes_connus": 88,
       "decision": -1.3529604783119784,
       "proba": 0.20538679126571846
@@ -195,6 +222,7 @@
     {
       "langue": "special",
       "text": "café CAFÉ Café café",
+      "normalise": "café CAFÉ Café café",
       "n_ngrammes_connus": 14,
       "decision": -2.807251752079933,
       "proba": 0.05693356054336772
@@ -202,6 +230,7 @@
     {
       "langue": "special",
       "text": "Ligne1\r\nLigne2 insécable cadratin",
+      "normalise": "Ligne1\r\nLigne2 insécable cadratin",
       "n_ngrammes_connus": 48,
       "decision": 0.05699003614997866,
       "proba": 0.5142436541249438
@@ -209,9 +238,74 @@
     {
       "langue": "special",
       "text": "zero​width ne sépare pas les mots",
-      "n_ngrammes_connus": 46,
-      "decision": -1.9485307871844173,
-      "proba": 0.12471364927662018
+      "normalise": "zerowidth ne sépare pas les mots",
+      "n_ngrammes_connus": 48,
+      "decision": -1.95718314494386,
+      "proba": 0.12377221936417662
+    },
+    {
+      "langue": "sen12",
+      "text": "Payez ici https://‮zyx.euqanra-elpmaxe.ivius-siloc-etsopal‬ sinon blocage",
+      "normalise": "Payez ici https://laposte-colis-suivi.example-arnaque.xyz sinon blocage",
+      "n_ngrammes_connus": 128,
+      "decision": 3.1749974783298605,
+      "proba": 0.9598824709373084
+    },
+    {
+      "langue": "sen12",
+      "text": "Payez ici https://laposte-colis-suivi.example-arnaque.xyz sinon blocage",
+      "normalise": "Payez ici https://laposte-colis-suivi.example-arnaque.xyz sinon blocage",
+      "n_ngrammes_connus": 128,
+      "decision": 3.1749974783298605,
+      "proba": 0.9598824709373084
+    },
+    {
+      "langue": "sen12",
+      "text": "pay­pal se​cu⁠rité : vé﻿rifiez votre compte",
+      "normalise": "paypal securité : vérifiez votre compte",
+      "n_ngrammes_connus": 98,
+      "decision": 0.0372427638686057,
+      "proba": 0.5093096149374986
+    },
+    {
+      "langue": "sen12",
+      "text": "‏مرحبا‎ Salut ؜اهلا",
+      "normalise": "مرحبا Salut اهلا",
+      "n_ngrammes_connus": 38,
+      "decision": -1.3245827716371605,
+      "proba": 0.2100568501398013
+    },
+    {
+      "langue": "sen12",
+      "text": "Famille 👨‍👩‍👧 au parc",
+      "normalise": "Famille 👨👩👧 au parc",
+      "n_ngrammes_connus": 38,
+      "decision": -2.1694849500787967,
+      "proba": 0.10252441511359403
+    },
+    {
+      "langue": "sen12",
+      "text": "⁧arnaque⁩ isolat ‫embed‬ fin",
+      "normalise": "arnaque isolat embed fin",
+      "n_ngrammes_connus": 41,
+      "decision": -1.0847638735105551,
+      "proba": 0.25260555690978687
+    },
+    {
+      "langue": "sen12",
+      "text": "‮début\nligne2 suite",
+      "normalise": "tubéd\nligne2 suite",
+      "n_ngrammes_connus": 36,
+      "decision": 0.27882951898904684,
+      "proba": 0.569259241597059
+    },
+    {
+      "langue": "sen12",
+      "text": "‮AB‪CD‬EF‬ GH",
+      "normalise": "BACDFE GH",
+      "n_ngrammes_connus": 10,
+      "decision": -1.0734833912655297,
+      "proba": 0.25474120408270173
     }
   ]
 }

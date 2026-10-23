@@ -3,6 +3,7 @@ import 'package:material_ui/material_ui.dart';
 import '../../services/vault/recovery_key.dart';
 import '../../services/vault/vault_platform.dart';
 import '../../theme/app_colors.dart';
+import '../../widgets/vault_copy.dart';
 import '../../widgets/vault_fields.dart';
 
 /// « Votre clé de récupération » : affichée UNE seule fois. Pour
@@ -37,12 +38,17 @@ class _RecoveryKeyViewState extends State<RecoveryKeyView> {
   }
 
   Future<void> _copy() async {
-    await widget.clipboard.copy(widget.recoveryKey);
-    if (!mounted) return;
+    final wait = await copyFromVault(
+      context,
+      widget.clipboard,
+      widget.recoveryKey,
+    );
+    if (wait == null || !mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
+      SnackBar(
         content: Text(
-          'Clé copiée. Elle sera effacée du presse-papiers dans 30 s.',
+          'Clé copiée. Elle sera effacée du presse-papiers dans '
+          '${wait.inSeconds} s.',
         ),
       ),
     );

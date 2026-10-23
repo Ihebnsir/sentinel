@@ -34,7 +34,6 @@ dependencies:
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
-  google_fonts: ^9.0.0
   material_ui: 1.6.0
   cryptography: ^2.9.0
   path_provider: ^2.1.6
@@ -70,6 +69,25 @@ flutter:
     - assets/data/
     # Listes du pare-feu DNS, lues par Kotlin (FirewallEngine.kt).
     - assets/blocklists/
+    # Licence de la police (affichée par LicenseRegistry, voir main.dart).
+    - assets/fonts/ReadexPro-OFL.txt
+
+  # Readex Pro embarquée : plus aucun téléchargement de police (SEN-02).
+  # Mêmes fichiers que ceux que servait fonts.gstatic.com (SHA-256 vérifiés
+  # dans test/font_assets_test.dart).
+  fonts:
+    - family: ReadexPro
+      fonts:
+        - asset: assets/fonts/ReadexPro-Light.ttf
+          weight: 300
+        - asset: assets/fonts/ReadexPro-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/ReadexPro-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/ReadexPro-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/ReadexPro-Bold.ttf
+          weight: 700
 
   # To add assets to your application, add an assets section, like this:
   # assets:

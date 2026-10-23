@@ -2,15 +2,18 @@ package com.iheb.sentinel.firewall
 
 import java.io.File
 import java.io.IOException
+import java.security.GeneralSecurityException
 
 /**
  * Rapports d'analyse dans le stockage privé de l'app (exclu des
- * sauvegardes Android : allowBackup="false"). Chaque rapport est supprimé
- * 24 h après la fin de l'analyse. Jamais envoyé nulle part.
- * Sans Android : testable avec JUnit (dossier et horloge injectés).
+ * sauvegardes Android : allowBackup="false"), chiffrés en AES-GCM avec
+ * une clé du Keystore (SEN-14). Chaque rapport est supprimé 24 h après la
+ * fin de l'analyse, et n'est jamais relu au-delà. Jamais envoyé nulle part.
+ * Sans Android : testable avec JUnit (dossier, chiffrement, horloge injectés).
  */
 class AppReportStore(
     private val dir: File,
+    private val cipher: ReportCipher,
     private val clock: () -> Long = System::currentTimeMillis,
 ) {
 
@@ -22,7 +25,8 @@ class AppReportStore(
         // Nom = « fin d'analyse - identifiant » : l'expiration se lit sans ouvrir le fichier.
         val file = File(dir, "$endedAt-$id$SUFFIX")
         val tmp = File(dir, file.name + ".tmp")
-        tmp.writeText(json, Charsets.UTF_8)
+        // Le nom final est lié au chiffré : impossible de le renommer.
+        tmp.writeBytes(cipher.encrypt(json.toByteArray(Charsets.UTF_8), aadFor(file)))
         if (!tmp.renameTo(file)) {
             tmp.delete()
             throw IOException("Écriture impossible")
@@ -32,19 +36,34 @@ class AppReportStore(
         all.drop(MAX_REPORTS).forEach { it.file.delete() }
     }
 
-    /** Rapports encore valides (JSON), les plus récents d'abord. */
+    /**
+     * Rapports encore valides (JSON), les plus récents d'abord.
+     * L'expiration est revérifiée pour chaque fichier au moment de le lire.
+     * Un fichier illisible (modifié, renommé, ancien format en clair) est
+     * supprimé.
+     */
     fun list(): List<String> {
         purgeExpired()
         return reportFiles()
             .sortedByDescending { it.endedAt }
             .mapNotNull { entry ->
+                if (isExpired(entry.endedAt, clock())) {
+                    entry.file.delete()
+                    return@mapNotNull null
+                }
                 try {
-                    entry.file.readText(Charsets.UTF_8)
+                    val plain = cipher.decrypt(entry.file.readBytes(), aadFor(entry.file))
+                    String(plain, Charsets.UTF_8)
+                } catch (e: GeneralSecurityException) {
+                    entry.file.delete()
+                    null
                 } catch (e: IOException) {
                     null
                 }
             }
     }
+
+    private fun aadFor(file: File) = file.name.toByteArray(Charsets.UTF_8)
 
     fun delete(id: String) {
         if (!ID.matches(id)) return // pas de « ../ »

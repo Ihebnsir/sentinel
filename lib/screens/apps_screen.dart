@@ -5,6 +5,7 @@ import '../services/app_risk_calculator.dart';
 import '../services/apps/stalkerware_ioc.dart';
 import '../services/apps_scanner_service.dart';
 import '../theme/app_colors.dart';
+import '../utils/debug_log.dart';
 import '../widgets/app_icon.dart';
 import '../widgets/empty_state.dart';
 import '../widgets/risk_level_text.dart';
@@ -97,7 +98,7 @@ class _AppsScreenState extends State<AppsScreen> with WidgetsBindingObserver {
     try {
       return await StalkerwareIoc.load();
     } on Exception catch (e) {
-      debugPrint('Indicateurs de stalkerware illisibles : $e');
+      debugLog(() => 'Indicateurs de stalkerware illisibles : $e');
       return null;
     }
   }

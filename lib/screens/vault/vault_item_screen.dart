@@ -9,6 +9,7 @@ import '../../services/vault/vault_item.dart';
 import '../../services/vault/vault_platform.dart';
 import '../../services/vault/vault_session.dart';
 import '../../theme/app_colors.dart';
+import '../../widgets/vault_copy.dart';
 import '../../widgets/vault_fields.dart';
 
 /// Détail et modification d'un élément ([item] null : nouvel élément).
@@ -103,12 +104,17 @@ class _VaultItemScreenState extends State<VaultItemScreen> {
 
   Future<void> _copyPassword() async {
     if (_motDePasse.text.isEmpty) return;
-    await widget.clipboard.copy(_motDePasse.text);
-    if (!mounted) return;
+    final wait = await copyFromVault(
+      context,
+      widget.clipboard,
+      _motDePasse.text,
+    );
+    if (wait == null || !mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
+      SnackBar(
         content: Text(
-          'Mot de passe copié. Il sera effacé du presse-papiers dans 30 s.',
+          'Mot de passe copié. Il sera effacé du presse-papiers dans '
+          '${wait.inSeconds} s.',
         ),
       ),
     );
