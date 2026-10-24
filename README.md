@@ -19,7 +19,7 @@
 
 ---
 
-The app's interface is in French. Everything runs on the phone. Nothing goes over the network without your consent: the only network calls are three opt-in features, the breach check against Have I Been Pwned (5 hex characters of a SHA-1 hash, k-anonymity), the DNS firewall (forwards DNS queries to Quad9, not encrypted yet) and the blocklist updates (downloads from GitHub).
+The app's interface is in French. Everything runs on the phone. Nothing goes over the network without your consent: the only network calls are three opt-in features, the breach check against Have I Been Pwned (5 hex characters of a SHA-1 hash, k-anonymity), the DNS firewall (forwards DNS queries to Quad9, encrypted with DNS over TLS or HTTPS) and the blocklist updates (downloads from GitHub).
 
 ## Screenshots
 
@@ -141,6 +141,8 @@ These items come from the known limitations in the code and docs. **TODO:** revi
 ## Security
 
 Please report vulnerabilities privately. See [SECURITY.md](SECURITY.md).
+
+The app was audited against OWASP MASVS v2 (static and dynamic analysis, 17 findings and their fixes): see the [audit report](docs/audit/RAPPORT_AUDIT.md) (in French). Release builds are documented in [docs/RELEASE.md](docs/RELEASE.md).
 
 ## Third-party data
 

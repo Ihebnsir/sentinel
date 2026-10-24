@@ -19,7 +19,7 @@
 
 ---
 
-L'interface de l'application est en français. Tout se passe sur le téléphone. Rien ne passe par le réseau sans votre accord : les seuls appels réseau viennent de trois fonctions facultatives, la vérification des fuites auprès de Have I Been Pwned (5 caractères hexadécimaux d'une empreinte SHA-1, k-anonymity), le pare-feu DNS (transmet les requêtes DNS à Quad9, pas encore chiffrées) et la mise à jour des listes de blocage (téléchargées depuis GitHub).
+L'interface de l'application est en français. Tout se passe sur le téléphone. Rien ne passe par le réseau sans votre accord : les seuls appels réseau viennent de trois fonctions facultatives, la vérification des fuites auprès de Have I Been Pwned (5 caractères hexadécimaux d'une empreinte SHA-1, k-anonymity), le pare-feu DNS (transmet les requêtes DNS à Quad9, chiffrées en DNS-over-TLS ou HTTPS) et la mise à jour des listes de blocage (téléchargées depuis GitHub).
 
 ## Captures d'écran
 
@@ -141,6 +141,8 @@ Ces points viennent des limites connues relevées dans le code et la documentati
 ## Sécurité
 
 Merci de signaler les vulnérabilités en privé. Voir [SECURITY.md](SECURITY.md).
+
+L'application a été auditée selon l'OWASP MASVS v2 (analyse statique et dynamique, 17 constats et leurs corrections) : voir le [rapport d'audit](docs/audit/RAPPORT_AUDIT.md). La publication d'une version est décrite dans [docs/RELEASE.md](docs/RELEASE.md).
 
 ## Données tierces
 
