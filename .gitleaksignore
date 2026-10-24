@@ -1,3 +1,6 @@
 # Faux positifs vérifiés à la main (gitleaks git).
 # Clé de récupération inventée pour un test de normalisation, pas un secret.
 e97662db1ec661a0f76b971cd3e7280117178d92:test/vault_slots_test.dart:generic-api-key:222
+# Rapport MobSF (audit P1) : liste des chaînes extraites du moteur Flutter
+# (noms BoringSSL « TRUST_TOKEN », « CAMELLIA-256-CFB1 », symboles C++), pas des secrets.
+311e66ad70aca3d12bc83c96225fedab5f517705:docs/audit/mobsf/mobsf_report.json:generic-api-key:1
