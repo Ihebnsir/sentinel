@@ -7,6 +7,18 @@ import '../utils/french_number.dart';
 import 'app_analysis.dart';
 
 /// L'état du pare-feu DNS, lu côté Android.
+/// Comment partent les requêtes DNS vers Quad9 (SEN-10).
+enum UpstreamMode {
+  idle, // pas encore de requête
+  dot, // DNS-over-TLS
+  doh, // DNS-over-HTTPS
+  plain, // en clair, autorisé par l'utilisateur pour ce réseau
+  failing; // aucun transport chiffré ne répond
+
+  static UpstreamMode fromId(Object? id) =>
+      values.firstWhere((m) => m.name == id, orElse: () => idle);
+}
+
 class FirewallStatus {
   const FirewallStatus({
     required this.active,
@@ -15,6 +27,9 @@ class FirewallStatus {
     this.blockedByCategory = const {},
     this.listsLoading = false,
     this.analysis,
+    this.upstream = UpstreamMode.idle,
+    this.plainDnsAllowed = false,
+    this.strictPrivateDns,
   });
 
   factory FirewallStatus.fromMap(Map<Object?, Object?> map) => FirewallStatus(
@@ -27,6 +42,12 @@ class FirewallStatus {
     },
     listsLoading: map['listsLoading'] == true,
     analysis: AnalysisStatus.fromMap(map['analysis']),
+    upstream: UpstreamMode.fromId(map['upstream']),
+    plainDnsAllowed: map['plainDnsAllowed'] == true,
+    strictPrivateDns: switch (map['strictPrivateDns']) {
+      final String name when name.isNotEmpty => name,
+      _ => null,
+    },
   );
 
   final bool active; // le filtrage tourne ?
@@ -35,6 +56,9 @@ class FirewallStatus {
   final Map<String, int> blockedByCategory; // « malware » → 12
   final bool listsLoading; // listes en cours de chargement
   final AnalysisStatus? analysis; // analyse d'une app en cours, sinon null
+  final UpstreamMode upstream; // transport vers Quad9 (SEN-10)
+  final bool plainDnsAllowed; // DNS en clair autorisé sur ce réseau
+  final String? strictPrivateDns; // DNS privé strict (SEN-11), sinon null
 
   /// Ligne courte pour l'accueil, ex : « Activé · 12 requêtes bloquées ».
   String get summary {
@@ -277,6 +301,10 @@ class FirewallService {
 
   /// Affiche si besoin l'écran de consentement VPN d'Android.
   /// Retourne true si l'autorisation est accordée.
+  /// « Autoriser le DNS non chiffré sur ce réseau » (SEN-10).
+  Future<void> setPlainDnsAllowed(bool allowed) =>
+      _call('setPlainDnsAllowed', {'allowed': allowed});
+
   Future<bool> prepare() async {
     if (!isSupported) return false;
     try {

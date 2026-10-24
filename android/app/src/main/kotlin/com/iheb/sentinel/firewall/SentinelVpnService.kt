@@ -25,9 +25,6 @@ import java.io.FileDescriptor
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.io.IOException
-import java.net.DatagramPacket
-import java.net.DatagramSocket
-import java.net.InetAddress
 import java.text.DateFormat
 import java.util.Date
 import java.util.concurrent.ArrayBlockingQueue
@@ -52,9 +49,6 @@ class SentinelVpnService : VpnService() {
         const val EXTRA_PACKAGE = "packageName"
         const val EXTRA_MINUTES = "minutes"
 
-        // Quad9, puis son adresse de secours.
-        private val UPSTREAMS = listOf("9.9.9.9", "149.112.112.112")
-        private const val UPSTREAM_TIMEOUT_MS = 2000
         private const val MTU = 1500
         private const val IP_UDP_HEADERS = 48 // IPv6 (40) + UDP (8), le pire cas
 
@@ -76,6 +70,14 @@ class SentinelVpnService : VpnService() {
         // Compteurs en mémoire, remis à zéro à chaque démarrage.
         val totalQueries = AtomicLong()
         val blockedQueries = AtomicLong()
+
+        /** Transport vers Quad9 (SEN-10). Lu par FirewallChannel. */
+        @Volatile
+        var upstream: UpstreamMode = UpstreamMode.IDLE
+            private set
+
+        /** « Autoriser le DNS non chiffré sur ce réseau », désactivé par défaut. */
+        val plainDns = PlainDnsPermission()
     }
 
     /**
@@ -104,6 +106,9 @@ class SentinelVpnService : VpnService() {
 
     @Volatile
     private var forwarders: ThreadPoolExecutor? = null
+
+    @Volatile
+    private var resolver: UpstreamResolver? = null
 
     // Filet de sécurité : vérifie la fin toutes les 10 s. postDelayed compte
     // le temps ACTIF (arrêté en veille) : c'est l'alarme qui réveille le
@@ -190,6 +195,21 @@ class SentinelVpnService : VpnService() {
             ArrayBlockingQueue(64),
             ThreadPoolExecutor.DiscardPolicy(),
         ).apply { allowCoreThreadTimeOut(true) }
+
+        // SEN-10 : DNS-over-TLS, puis DNS-over-HTTPS ; en clair seulement si
+        // l'utilisateur l'a autorisé pour ce réseau. Sockets protégés : ils
+        // sortent par le vrai réseau, sans repasser dans le VPN.
+        val connector = TlsConnector(protect = { socket -> protect(socket) })
+        resolver = UpstreamResolver(
+            encrypted = listOf(
+                DotTransport(connector),
+                // ALPN « h2 » : Android 10 et plus.
+                DohTransport(connector, available = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q),
+            ),
+            plain = PlainUdpTransport(protect = { socket -> protect(socket) }),
+            plainAllowed = { plainDns.isAllowedFor(UnderlyingNetworks.currentKey(this)) },
+        )
+        upstream = UpstreamMode.IDLE
 
         current = session
         startReader(session)
@@ -462,46 +482,23 @@ class SentinelVpnService : VpnService() {
         mainHandler.post { FirewallAlertNotifier.show(this, name, brand) }
     }
 
-    /** Envoie la requête à Quad9 et réécrit sa réponse dans le TUN. */
+    /**
+     * Envoie la requête à Quad9, chiffrée (SEN-10), et réécrit sa réponse
+     * dans le TUN. Échec : SERVFAIL tout de suite, jamais de repli en clair
+     * sans l'accord de l'utilisateur.
+     */
     private fun forward(session: TunSession, filter: DnsFilter, decision: FilterDecision.Forward) {
         val request = decision.udp.payload
-        for (upstream in UPSTREAMS) {
-            val response = askUpstream(upstream, request, decision.query) ?: continue
-            // Trop grande pour un seul paquet : échec plutôt qu'un paquet perdu.
-            val message = if (response.size + IP_UDP_HEADERS > MTU) {
-                DnsPacket.buildEmptyResponse(request, decision.query, DnsPacket.RCODE_SERVFAIL)
-            } else {
-                response
-            }
-            writeToTun(session, filter.replyTo(decision.udp, message))
-            return
+        val dns = resolver ?: return
+        val response = dns.resolve(request) { DnsPacket.isResponseTo(request, decision.query, it) }
+        upstream = dns.mode
+        // Trop grande pour un seul paquet : échec plutôt qu'un paquet perdu.
+        val message = if (response == null || response.size + IP_UDP_HEADERS > MTU) {
+            DnsPacket.buildEmptyResponse(request, decision.query, DnsPacket.RCODE_SERVFAIL)
+        } else {
+            response
         }
-        // Aucune réponse : pas de paquet, le téléphone réessaiera.
-    }
-
-    private fun askUpstream(upstream: String, request: ByteArray, query: DnsQuery): ByteArray? {
-        try {
-            DatagramSocket().use { socket ->
-                // protect() : ce socket sort par le vrai réseau, sans repasser
-                // dans le VPN (sinon la requête tournerait en boucle).
-                if (!protect(socket)) return null
-                socket.soTimeout = UPSTREAM_TIMEOUT_MS
-                // Adresse écrite en chiffres : aucune résolution DNS ici.
-                socket.connect(InetAddress.getByName(upstream), DnsFilter.DNS_PORT)
-                socket.send(DatagramPacket(request, request.size))
-                val buffer = ByteArray(4096)
-                // Quelques essais : un paquet étranger ne doit pas tout bloquer.
-                repeat(3) {
-                    val packet = DatagramPacket(buffer, buffer.size)
-                    socket.receive(packet) // SocketTimeoutException après 2 s
-                    val response = buffer.copyOf(packet.length)
-                    if (DnsPacket.isResponseTo(request, query, response)) return response
-                }
-            }
-        } catch (e: IOException) {
-            // Délai dépassé, réseau absent…
-        }
-        return null
+        writeToTun(session, filter.replyTo(decision.udp, message))
     }
 
     // Réponse écrite dans la session qui a reçu la question ; si elle a
@@ -548,6 +545,9 @@ class SentinelVpnService : VpnService() {
         if (wasRunning) FirewallEngine.onVpnStopped()
         forwarders?.shutdownNow()
         forwarders = null
+        resolver?.close()
+        resolver = null
+        upstream = UpstreamMode.IDLE
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             stopForeground(STOP_FOREGROUND_REMOVE)
         } else {

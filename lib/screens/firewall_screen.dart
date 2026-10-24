@@ -5,10 +5,12 @@ import 'package:material_ui/material_ui.dart';
 import '../services/app_analysis.dart';
 import '../services/firewall_service.dart';
 import '../services/protection_service.dart';
+import '../services/wifi_service.dart';
 import '../theme/app_colors.dart';
 import '../utils/french_number.dart';
 import '../widgets/app_analysis_section.dart';
 import '../widgets/blocklist_sections.dart';
+import '../widgets/dns_privacy_section.dart';
 import 'app_analysis_screen.dart';
 import 'app_report_screen.dart';
 
@@ -23,6 +25,7 @@ class FirewallScreen extends StatefulWidget {
 
 class _FirewallScreenState extends State<FirewallScreen> {
   final _service = FirewallService();
+  final _wifiService = WifiService();
   late final AppLifecycleListener _lifecycle;
   Timer? _timer;
 
@@ -168,8 +171,43 @@ class _FirewallScreenState extends State<FirewallScreen> {
     if (deleted == true) await _loadReports();
   }
 
+  // SEN-11 : avec un DNS privé strict, le pare-feu couperait tous les
+  // sites. On explique et on propose les réglages, sans activer.
+  Future<void> _explainStrictPrivateDns(String server) async {
+    final open = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('DNS privé incompatible'),
+        content: Text(strictPrivateDnsMessage(server)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Annuler'),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(backgroundColor: AppColors.bleu),
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Ouvrir les réglages'),
+          ),
+        ],
+      ),
+    );
+    if (open == true) await _wifiService.openPrivateDnsSettings();
+  }
+
+  // SEN-10 : accord explicite pour le DNS en clair, sur ce réseau seulement.
+  Future<void> _onPlainDnsChanged(bool allowed) async {
+    await _service.setPlainDnsAllowed(allowed);
+    await _refresh();
+  }
+
   Future<void> _onSwitch(bool value) async {
     if (_busy) return;
+    final strict = _status?.strictPrivateDns;
+    if (value && strict != null) {
+      await _explainStrictPrivateDns(strict);
+      return;
+    }
     if (value) {
       final accepted = await showModalBottomSheet<bool>(
         context: context,
@@ -268,7 +306,20 @@ class _FirewallScreenState extends State<FirewallScreen> {
               ),
             ),
             const Divider(height: 1, thickness: 1, color: AppColors.ligne),
+            if (status?.strictPrivateDns case final server?) ...[
+              StrictPrivateDnsWarning(
+                server: server,
+                onOpenSettings: _wifiService.openPrivateDnsSettings,
+              ),
+              const Divider(height: 1, thickness: 1, color: AppColors.ligne),
+            ],
             if (active && status != null) ...[
+              UpstreamSection(
+                mode: status.upstream,
+                plainAllowed: status.plainDnsAllowed,
+                onPlainChanged: _busy ? null : _onPlainDnsChanged,
+              ),
+              const Divider(height: 1, thickness: 1, color: AppColors.ligne),
               const SizedBox(height: 24),
               const Text(
                 "Depuis l'activation",
@@ -401,6 +452,8 @@ class _ExplanationSheet extends StatelessWidget {
         "c'est ainsi que Sentinel voit les noms de sites demandés.",
     'Seules les demandes de noms de sites (DNS) passent par Sentinel, '
         'le reste de votre trafic ne change pas.',
+    'Les sites autorisés sont demandés à Quad9 (résolveur suisse), de façon '
+        'chiffrée : votre réseau ne voit plus les noms des sites.',
     "Aucun site visité n'est enregistré : seuls des compteurs existent "
         "(sauf pendant une analyse d'application que vous lancez vous-même).",
     'Une notification discrète reste affichée tant que le pare-feu est actif.',

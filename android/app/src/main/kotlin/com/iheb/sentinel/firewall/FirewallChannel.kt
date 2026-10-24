@@ -61,6 +61,13 @@ class FirewallChannel(private val activity: Activity, messenger: BinaryMessenger
                         .mapKeys { it.key.id }
                         .mapValues { it.value.get() },
                     "listsLoading" to FirewallEngine.loading,
+                    // SEN-10 : transport vers Quad9, accord pour le DNS en clair.
+                    "upstream" to SentinelVpnService.upstream.id,
+                    "plainDnsAllowed" to SentinelVpnService.plainDns.isAllowedFor(
+                        UnderlyingNetworks.currentKey(activity),
+                    ),
+                    // SEN-11 : DNS privé en mode strict (incompatible avec le pare-feu).
+                    "strictPrivateDns" to UnderlyingNetworks.strictPrivateDnsServer(activity),
                     "analysis" to SentinelVpnService.analysis?.let { session ->
                         mapOf(
                             "packageName" to session.packageName,
@@ -72,6 +79,14 @@ class FirewallChannel(private val activity: Activity, messenger: BinaryMessenger
                     },
                 ),
             )
+            "setPlainDnsAllowed" -> {
+                if (call.argument<Boolean>("allowed") == true) {
+                    SentinelVpnService.plainDns.allow(UnderlyingNetworks.currentKey(activity))
+                } else {
+                    SentinelVpnService.plainDns.revoke()
+                }
+                result.success(null)
+            }
             "startAnalysis" -> startAnalysis(call, result)
             "stopAnalysis" -> {
                 if (SentinelVpnService.analysis != null) sendToService(SentinelVpnService.ACTION_STOP_ANALYSIS)
