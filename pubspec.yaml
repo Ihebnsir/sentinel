@@ -73,21 +73,13 @@ flutter:
     - assets/fonts/ReadexPro-OFL.txt
 
   # Readex Pro embarquée : plus aucun téléchargement de police (SEN-02).
-  # Mêmes fichiers que ceux que servait fonts.gstatic.com (SHA-256 vérifiés
-  # dans test/font_assets_test.dart).
+  # Même fichier que celui que servait fonts.gstatic.com (SHA-256 vérifié
+  # dans test/font_assets_test.dart). Seulement la graisse Regular, comme
+  # l'ancien paquet de polices : le gras est simulé, rendu identique.
   fonts:
     - family: ReadexPro
       fonts:
-        - asset: assets/fonts/ReadexPro-Light.ttf
-          weight: 300
         - asset: assets/fonts/ReadexPro-Regular.ttf
-          weight: 400
-        - asset: assets/fonts/ReadexPro-Medium.ttf
-          weight: 500
-        - asset: assets/fonts/ReadexPro-SemiBold.ttf
-          weight: 600
-        - asset: assets/fonts/ReadexPro-Bold.ttf
-          weight: 700
 
   # To add assets to your application, add an assets section, like this:
   # assets:

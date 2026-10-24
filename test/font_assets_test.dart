@@ -6,32 +6,26 @@ import 'package:sentinel/theme/app_theme.dart';
 
 // SEN-02 : la police est embarquée, rien n'est téléchargé à l'exécution.
 void main() {
-  // Mêmes fichiers que ceux que servait fonts.gstatic.com (nom = SHA-256).
+  // Le seul fichier que google_fonts téléchargeait (nom = SHA-256) : les
+  // autres graisses étaient simulées. Le garder seul = rendu identique.
   const expected = {
-    'ReadexPro-Light.ttf':
-        '5fdd397f7c5e4db7672e46b4b7b15f6f5d4a7af92457e713f8dc4b14538c916d',
     'ReadexPro-Regular.ttf':
         'd01db080f4e540c5eb64f567df67d82e951bd72b739e26ccbe55fc9c1ea03f4c',
-    'ReadexPro-Medium.ttf':
-        'ed47cb984d1f274788ab1d7e5e435d25e9facc7adbdf87168f71dda4b1d24b2c',
-    'ReadexPro-SemiBold.ttf':
-        '54840850d336e22dca0bd8224a6dc294721e62642eab203f8acbe35a7ea402b8',
-    'ReadexPro-Bold.ttf':
-        '711c43d85e02884b5bc74994b87fab1fe84c9f9548495a1c2f0b779b7995f861',
   };
 
-  test('les 5 fichiers de police sont présents et intacts', () {
+  test('le fichier de police est présent et intact', () {
     for (final entry in expected.entries) {
       final bytes = File('assets/fonts/${entry.key}').readAsBytesSync();
       expect(sha256.convert(bytes).toString(), entry.value, reason: entry.key);
     }
   });
 
-  test('pubspec déclare chaque fichier, sans google_fonts', () {
+  test('pubspec déclare ce seul fichier, sans google_fonts', () {
     final pubspec = File('pubspec.yaml').readAsStringSync();
-    for (final name in expected.keys) {
-      expect(pubspec, contains('assets/fonts/$name'));
-    }
+    final declared = RegExp(r'assets/fonts/\S+\.ttf').allMatches(pubspec);
+    expect([for (final m in declared) m[0]], [
+      for (final name in expected.keys) 'assets/fonts/$name',
+    ]);
     expect(pubspec, isNot(contains('google_fonts')));
     expect(
       File('pubspec.lock').readAsStringSync(),
