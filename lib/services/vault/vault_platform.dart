@@ -56,6 +56,31 @@ class VaultPlatform {
     }
   }
 
+  /// Le sélecteur de fichiers d'Android (Storage Access Framework) est
+  /// disponible : aucune permission de stockage, l'utilisateur choisit.
+  static bool get supportsDocuments => _isAndroid;
+
+  /// Fait choisir à l'utilisateur où enregistrer [bytes].
+  /// true : enregistré ; false : annulé. Lève [PlatformException] si
+  /// l'écriture échoue.
+  static Future<bool> saveDocument(String fileName, Uint8List bytes) async {
+    if (!_isAndroid) throw MissingPluginException();
+    final saved = await _channel.invokeMethod<bool>('saveDocument', {
+      'name': fileName,
+      'data': bytes,
+    });
+    return saved == true;
+  }
+
+  /// Fait choisir un fichier et renvoie son contenu ; null si annulé.
+  /// Lève [PlatformException] s'il est illisible ou trop gros.
+  static Future<Uint8List?> openDocument({required int maxBytes}) async {
+    if (!_isAndroid) throw MissingPluginException();
+    return _channel.invokeMethod<Uint8List>('openDocument', {
+      'maxBytes': maxBytes,
+    });
+  }
+
   // true si le code natif a répondu.
   static Future<bool> _invoke(String method, [Object? arguments]) async {
     try {

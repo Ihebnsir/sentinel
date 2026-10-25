@@ -62,7 +62,7 @@ The app has four tabs (`main_shell.dart`): **Accueil** (device audit, Wi-Fi and 
 | `com.iheb.sentinel/share` | `MainActivity` | `getInitialSharedText` | `onSharedText` |
 | `com.iheb.sentinel/protection` | `MainActivity` → `ProtectionSettings` | `getStatus`, `setEnabled`, `openListenerSettings`, `openNotificationSettings`, `requestNotificationPermission` | — |
 | `com.iheb.sentinel/wifi` | `WifiSecurityChecker` | `getWifiStatus`, `startListening`, `stopListening`, `openPrivateDnsSettings` | `onWifiChanged` (debounced 400 ms) |
-| `com.iheb.sentinel/vault` | `VaultProtection` → `VaultBiometric` | `setSecure`, `copySensitive`, `clearClipboard`, `biometricAvailable`, `biometricEncrypt`, `biometricDecrypt`, `biometricDeleteKey` | `onScreenOff` |
+| `com.iheb.sentinel/vault` | `VaultProtection` → `VaultBiometric`, `VaultDocuments` | `setSecure`, `copySensitive`, `clearClipboard`, `biometricAvailable`, `biometricEncrypt`, `biometricDecrypt`, `biometricDeleteKey`, `saveDocument`, `openDocument` | `onScreenOff` |
 | `com.iheb.sentinel/firewall` | `FirewallChannel` → `SentinelVpnService`, `FirewallEngine` | `prepare`, `start`, `stop`, `status`, `config`, `setCategoryEnabled`, `addAllowed`, `removeAllowed`, `setAutoUpdate`, `updateNow`, `startAnalysis`, `stopAnalysis`, `reports`, `deleteReport`, `openApp` | — |
 | `com.iheb.sentinel/background_analysis` | `BackgroundAnalyzer` (headless engine) | `ready` | `analyze` |
 
@@ -306,6 +306,7 @@ Key points:
 - **Fingerprint.** `biometricEncrypt` generates a fresh Keystore key and encrypts the DEK after a `BiometricPrompt` with a `CryptoObject`. If fingerprints change, the key becomes invalid. The biometric slot is then dropped at the next password unlock.
 - **7-day rule.** `derniereOuvertureMdp` is inside the authenticated header. Once it is more than 7 days old (or more than one day in the future), the fingerprint is refused and the password is required.
 - **Migration.** Version 1 files (a single password, no slots) are still read. They are upgraded to version 2 on the first successful password unlock, reusing the same KEK.
+- **Encrypted backup.** `exportBackup` writes a `.sentinel` file (`vault_backup.dart`): its own Argon2id key from an export password, AES-256-GCM, header as AAD. `VaultDocuments.kt` saves and opens it with the Storage Access Framework. `VaultSession.restore` turns a decrypted backup into a new vault (new DEK, master password and recovery key).
 - **Session.** `VaultSession` holds the DEK in memory only while the vault is open. `lock()` overwrites it with zeros. Every change copies the DEK first, so a lock during a write cannot encrypt with a zeroed key.
 
 ## Other data stored on the device

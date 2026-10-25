@@ -39,7 +39,7 @@ L'interface de l'application est en français. Tout se passe sur le téléphone.
 - **Détection des arnaques.** On colle un message, on le partage depuis une autre application, ou on sélectionne du texte puis « Vérifier avec Sentinel ». Un modèle embarqué (TF-IDF sur n-grammes de caractères + régression logistique) est combiné à des règles sur les liens : usurpation de marque, adresse IP, punycode, `@` dans l'URL, raccourcisseurs, extensions suspectes, trop de sous-domaines, `http` sans chiffrement. Le verdict est accompagné de ses raisons.
 - **Protection automatique (facultative).** Un service d'écoute des notifications lit les messages reçus dans les applications SMS, WhatsApp, WhatsApp Business, Messenger, Telegram et Viber. Ils sont analysés par le même modèle Dart, dans un moteur Flutter sans écran (headless), et une alerte « Arnaque probable » s'affiche quand le verdict est une arnaque.
 - **Analyse du Wi-Fi.** Affiche le type de chiffrement (ouvert, WEP, WPA2, WPA3, OWE, entreprise), la présence d'un portail captif et l'état du DNS privé, sans permission de localisation et sans lire le nom du réseau.
-- **Coffre chiffré.** Range des mots de passe et des notes secrètes, chiffrés avec Argon2id + AES-256-GCM. On l'ouvre avec le mot de passe maître, une clé de récupération ou l'empreinte digitale (Android Keystore).
+- **Coffre chiffré.** Range des mots de passe et des notes secrètes, chiffrés avec Argon2id + AES-256-GCM. On l'ouvre avec le mot de passe maître, une clé de récupération ou l'empreinte digitale (Android Keystore). Une sauvegarde chiffrée (fichier `.sentinel`) permet de le transférer sur un nouveau téléphone.
 - **Outils mots de passe.** Générateur aléatoire (12 à 64 caractères), estimation de la force et bilan de santé des mots de passe : fuites (Have I Been Pwned), réutilisés et faibles.
 
 ## Points forts en sécurité
@@ -55,7 +55,8 @@ L'interface de l'application est en français. Tout se passe sur le téléphone.
 - **Protection à l'écran.** `FLAG_SECURE` sur l'onglet Coffre (pas de capture d'écran, aperçu masqué dans les applications récentes). Le coffre se verrouille quand l'écran s'éteint et après 30 s en arrière-plan. Les secrets copiés sont marqués sensibles (Android 13+) et effacés du presse-papiers après 30 s.
 - **Alertes sûres.** Les alertes d'arnaque affichent un texte neutre sur l'écran verrouillé. Les domaines cités dans l'alerte sont neutralisés (`site[.]xyz`), et les actions automatiques « Ouvrir le lien » d'Android sont désactivées.
 - **Écriture atomique.** Le coffre est écrit dans un fichier temporaire puis renommé : un plantage ne peut pas l'abîmer.
-- **Pas de sauvegarde Android.** `allowBackup="false"`, complété par des `dataExtractionRules` sur Android 12+, empêche les données de l'application de partir dans les sauvegardes cloud ou lors d'un transfert vers un autre téléphone. Contrepartie : le coffre ne suit pas l'utilisateur sur un nouveau téléphone (voir Feuille de route).
+- **Pas de sauvegarde Android.** `allowBackup="false"`, complété par des `dataExtractionRules` sur Android 12+, empêche les données de l'application de partir dans les sauvegardes cloud ou lors d'un transfert vers un autre téléphone. Pour changer de téléphone, on exporte le coffre à la place (point suivant).
+- **Export / import chiffré.** « Exporter une sauvegarde chiffrée » (réglages du coffre) écrit un fichier `.sentinel` versionné : Argon2id d'un mot de passe d'export distinct (mêmes règles de force que le mot de passe maître) + AES-256-GCM, avec l'en-tête en données associées. Il est enregistré et ouvert via le sélecteur de fichiers d'Android (Storage Access Framework) : aucune permission de stockage. « Restaurer une sauvegarde » (écran de création du coffre) demande le fichier, son mot de passe, puis un nouveau mot de passe maître, et crée un coffre neuf avec une nouvelle clé de récupération. Mauvais mot de passe ou fichier modifié : message clair, jamais de plantage.
 
 Modèle de menaces complet et limites connues : [docs/SECURITY_DESIGN.md](docs/SECURITY_DESIGN.md) (en anglais).
 
@@ -78,9 +79,10 @@ Schémas et détails : [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) (en anglais)
 
 ## Tests
 
-**228 tests** répartis dans 14 fichiers (`flutter test`). Ils couvrent :
+**447 tests** répartis dans 29 fichiers (`flutter test`). Ils couvrent :
 
 - le coffre : vecteur de test Argon2id de la RFC 9106, chiffrement, emplacements de clé, migration v1 → v2, détection des modifications (chiffré, clé enveloppée, en-tête), session et verrouillage ;
+- la sauvegarde chiffrée : aller-retour export/import, mauvais mot de passe, fichier altéré, version inconnue, fichier vide, restauration dans un coffre neuf ;
 - la **parité exacte** entre le modèle Dart et scikit-learn sur 30 textes de référence (5 langues et cas limites Unicode, tolérance 1e-9) ;
 - le client k-anonymity, avec un faux client HTTP ;
 - les règles de risque des applications, du téléphone et du Wi-Fi ;
@@ -133,7 +135,7 @@ Ces points viennent des limites connues relevées dans le code et la documentati
 - [ ] Vérifier à la main les domaines officiels de `lib/services/phishing/known_brands.dart` (TODO dans le code).
 - [ ] Configurer la signature release (clés de debug actuellement).
 - [ ] Conserver le compteur d'échecs d'ouverture après un redémarrage de l'application.
-- [ ] Export / import chiffré du coffre, pour le transférer sur un nouveau téléphone (la sauvegarde Android est volontairement désactivée).
+- [x] Export / import chiffré du coffre, pour le transférer sur un nouveau téléphone (la sauvegarde Android est volontairement désactivée).
 - [ ] Ajouter les captures d'écran.
 - [ ] Remplir les empreintes de certificat de référence dans `lib/services/apps/known_apps.dart` avec `tools/signatures/extract_cert.py`, ainsi que les packages des applications bancaires et postales tunisiennes (TODO dans le code).
 - [ ] Ajouter des contacts d'aide tunisiens vérifiés à l'écran de conseils (TODO dans `spyware_advice_screen.dart`).

@@ -29,6 +29,9 @@ class VaultProtection(private val activity: Activity, messenger: BinaryMessenger
 
     private val biometric = VaultBiometric(activity)
 
+    // Sauvegarde chiffrée : sélecteur de fichiers d'Android.
+    private val documents = VaultDocuments(activity)
+
     // ACTION_SCREEN_OFF ne peut être reçue que par un récepteur
     // enregistré dans le code (pas dans le manifeste).
     private val screenOffReceiver = object : BroadcastReceiver() {
@@ -51,6 +54,7 @@ class VaultProtection(private val activity: Activity, messenger: BinaryMessenger
 
     fun dispose() {
         biometric.dispose()
+        documents.dispose()
         activity.unregisterReceiver(screenOffReceiver)
         channel.setMethodCallHandler(null)
     }
@@ -90,6 +94,16 @@ class VaultProtection(private val activity: Activity, messenger: BinaryMessenger
                     biometric.decrypt(iv, cipherText, aad, result)
                 }
             }
+            "saveDocument" -> {
+                val name = call.argument<String>("name")
+                val data = call.argument<ByteArray>("data")
+                if (name == null || data == null) {
+                    result.error("ECHEC", null, null)
+                } else {
+                    documents.save(name, data, result)
+                }
+            }
+            "openDocument" -> documents.open(call.argument<Int>("maxBytes") ?: 0, result)
             "biometricDeleteKey" -> {
                 biometric.deleteKey()
                 result.success(null)
@@ -97,6 +111,10 @@ class VaultProtection(private val activity: Activity, messenger: BinaryMessenger
             else -> result.notImplemented()
         }
     }
+
+    /** Réponse du sélecteur de fichiers ; true si elle était pour le coffre. */
+    fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?): Boolean =
+        documents.onActivityResult(requestCode, resultCode, data)
 
     // FLAG_SECURE : écran noir sur les captures et dans les apps récentes.
     private fun setSecure(secure: Boolean) {

@@ -1,6 +1,7 @@
 import 'package:material_ui/material_ui.dart';
 
 import '../../services/vault/password_strength.dart';
+import '../../services/vault/vault_platform.dart';
 import '../../services/vault/vault_session.dart';
 import '../../theme/app_colors.dart';
 import '../../widgets/vault_fields.dart';
@@ -11,10 +12,14 @@ class CreateVaultView extends StatefulWidget {
     super.key,
     required this.session,
     required this.onCancel,
+    this.onRestore,
   });
 
   final VaultSession session;
   final VoidCallback onCancel;
+
+  /// « Restaurer une sauvegarde » (Android seulement).
+  final VoidCallback? onRestore;
 
   @override
   State<CreateVaultView> createState() => _CreateVaultViewState();
@@ -168,6 +173,18 @@ class _CreateVaultViewState extends State<CreateVaultView> {
             ),
           ],
         ),
+        // Nouveau téléphone : reprendre un coffre exporté.
+        if (widget.onRestore != null && VaultPlatform.supportsDocuments) ...[
+          const SizedBox(height: 24),
+          const Divider(height: 1, thickness: 1, color: AppColors.ligne),
+          const SizedBox(height: 8),
+          TextButton.icon(
+            style: TextButton.styleFrom(foregroundColor: AppColors.bleu),
+            onPressed: _creating ? null : widget.onRestore,
+            icon: const Icon(Icons.restore, size: 18),
+            label: const Text('Restaurer une sauvegarde'),
+          ),
+        ],
       ],
     );
   }

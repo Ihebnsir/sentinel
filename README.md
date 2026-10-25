@@ -39,7 +39,7 @@ The app's interface is in French. Everything runs on the phone. Nothing goes ove
 - **Scam message detection.** Paste a message, share it from another app, or select text and choose "Vérifier avec Sentinel". An on-device model (TF-IDF over character n-grams + logistic regression) is combined with link rules: brand impersonation, raw IP address, punycode, `@` in the URL, URL shorteners, suspicious TLDs, too many subdomains, plain `http`. The verdict comes with the reasons.
 - **Automatic protection (opt-in).** A notification listener reads incoming messages from SMS apps, WhatsApp, WhatsApp Business, Messenger, Telegram and Viber. They are analyzed by the same Dart model in a headless Flutter engine, and a "likely scam" alert is shown when the verdict is a scam.
 - **Wi-Fi check.** Shows the encryption type (open, WEP, WPA2, WPA3, OWE, enterprise), captive portal and Private DNS status, without the location permission and without reading the network name.
-- **Encrypted vault.** Stores passwords and secure notes, encrypted with Argon2id + AES-256-GCM. You can unlock it with the master password, a recovery key, or a fingerprint (Android Keystore).
+- **Encrypted vault.** Stores passwords and secure notes, encrypted with Argon2id + AES-256-GCM. You can unlock it with the master password, a recovery key, or a fingerprint (Android Keystore). An encrypted backup file (`.sentinel`) moves it to a new phone.
 - **Password tools.** Random password generator (12–64 characters), strength estimate, and a password health report: breached (Have I Been Pwned), reused and weak passwords.
 
 ## Security highlights
@@ -55,7 +55,8 @@ The app's interface is in French. Everything runs on the phone. Nothing goes ove
 - **On-screen protection.** `FLAG_SECURE` on the vault tab (no screenshots, hidden in recent apps). The vault locks when the screen turns off and after 30 s in the background. Copied secrets are marked sensitive (Android 13+) and cleared from the clipboard after 30 s.
 - **Safe alerts.** Scam alerts show a neutral text on the lock screen. Domains in the alert are defanged (`site[.]xyz`), and Android's automatic "open link" actions are disabled.
 - **Atomic writes.** The vault is written to a temporary file and then renamed, so a crash cannot corrupt it.
-- **No Android backup.** `allowBackup="false"`, plus `dataExtractionRules` on Android 12+, keep app data out of cloud backups and device-to-device transfers. Trade-off: the vault is not carried over to a new phone (see Roadmap).
+- **No Android backup.** `allowBackup="false"`, plus `dataExtractionRules` on Android 12+, keep app data out of cloud backups and device-to-device transfers. To change phones, the user exports the vault instead (next point).
+- **Encrypted export / import.** "Exporter une sauvegarde chiffrée" (vault settings) writes a versioned `.sentinel` file: Argon2id of a separate export password (same strength rules as the master password) + AES-256-GCM, with the header as associated data. It is saved and opened through the Android file picker (Storage Access Framework), so the app needs no storage permission. "Restaurer une sauvegarde" (vault creation screen) asks for the file, its password, then a new master password, and creates a new vault with a new recovery key. A wrong password or a modified file gets a clear message, never a crash.
 
 Full threat model and known limitations: [docs/SECURITY_DESIGN.md](docs/SECURITY_DESIGN.md).
 
@@ -78,9 +79,10 @@ Diagrams and details: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
 ## Tests
 
-**228 tests** in 14 test files (`flutter test`). They cover:
+**447 tests** in 29 test files (`flutter test`). They cover:
 
 - the vault: the Argon2id RFC 9106 test vector, encryption, key slots, v1 → v2 migration, tamper detection (ciphertext, wrapped key, header), session and lock behavior;
+- the encrypted backup: export/import round trip, wrong password, tampered file, unknown version, empty file, restore into a new vault;
 - **bit-for-bit parity** between the Dart and scikit-learn models on 30 fixtures (5 languages plus Unicode edge cases, tolerance 1e-9);
 - the k-anonymity client, using a fake HTTP client;
 - the app, device and Wi-Fi risk rules;
@@ -133,7 +135,7 @@ These items come from the known limitations in the code and docs. **TODO:** revi
 - [ ] Manually verify the official domains in `lib/services/phishing/known_brands.dart` (TODO in the code).
 - [ ] Release signing configuration (currently debug keys).
 - [ ] Persist the failed-unlock counter across app restarts.
-- [ ] Encrypted vault export/import, to move the vault to a new phone (Android backup is disabled on purpose).
+- [x] Encrypted vault export/import, to move the vault to a new phone (Android backup is disabled on purpose).
 - [ ] Add screenshots.
 - [ ] Fill in the reference certificate fingerprints in `lib/services/apps/known_apps.dart` with `tools/signatures/extract_cert.py`, and the packages of Tunisian banking and postal apps (TODO in the code).
 - [ ] Add verified Tunisian help contacts to the stalkerware advice screen (TODO in `spyware_advice_screen.dart`).

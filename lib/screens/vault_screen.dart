@@ -10,6 +10,7 @@ import '../widgets/empty_state.dart';
 import 'vault/create_vault_view.dart';
 import 'vault/recover_view.dart';
 import 'vault/recovery_key_view.dart';
+import 'vault/restore_backup_view.dart';
 import 'vault/unlock_view.dart';
 import 'vault/vault_list_view.dart';
 import 'vault/vault_settings_screen.dart';
@@ -36,6 +37,7 @@ class _VaultScreenState extends State<VaultScreen> {
 
   bool _creating = false; // formulaire de création affiché
   bool _recovering = false; // « Mot de passe oublié » affiché
+  bool _restoring = false; // « Restaurer une sauvegarde » affiché
   DateTime? _hiddenAt;
   Timer? _autoLock;
 
@@ -77,7 +79,10 @@ class _VaultScreenState extends State<VaultScreen> {
   }
 
   void _onSessionChanged() {
-    if (_session.status != VaultStatus.absent) _creating = false;
+    if (_session.status != VaultStatus.absent) {
+      _creating = false;
+      _restoring = false;
+    }
     if (_session.status != VaultStatus.verrouille) _recovering = false;
     if (_session.status != VaultStatus.ouvert) _breaches.clear();
     setState(() {});
@@ -161,10 +166,17 @@ class _VaultScreenState extends State<VaultScreen> {
       case VaultStatus.chargement:
         return const SizedBox.shrink();
       case VaultStatus.absent:
+        if (_restoring) {
+          return RestoreBackupView(
+            session: _session,
+            onCancel: () => setState(() => _restoring = false),
+          );
+        }
         if (_creating) {
           return CreateVaultView(
             session: _session,
             onCancel: () => setState(() => _creating = false),
+            onRestore: () => setState(() => _restoring = true),
           );
         }
         return EmptyState(

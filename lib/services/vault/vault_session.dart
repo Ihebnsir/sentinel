@@ -143,6 +143,34 @@ class VaultSession extends ChangeNotifier {
     _setStatus(VaultStatus.ouvert);
   }
 
+  /// Restaure une sauvegarde lue par [readBackup] : coffre neuf (nouvelle
+  /// DEK, nouveau mot de passe maître, nouvelle clé de récupération).
+  Future<void> restore(List<VaultItem> items, String newPassword) async {
+    if (_status != VaultStatus.absent) throw StateError('Coffre existant');
+    final created = await createVault(
+      newPassword,
+      items: items,
+      kdf: kdfForNewVault?.call(),
+      now: _clock(),
+    );
+    await _storage.write(created.file);
+    _file = created.file;
+    _biometricBroken = false;
+    _pendingRecoveryKey = created.recoveryKey;
+    _opened(created.dek, items);
+  }
+
+  /// Déchiffre une sauvegarde (Argon2, dans un isolate). Lève
+  /// [BackupFormatException] ou [WrongPasswordException].
+  Future<List<VaultItem>> readBackup(Uint8List bytes, String password) =>
+      importBackup(bytes, password);
+
+  /// Le contenu du coffre ouvert, chiffré par [password] (fichier .sentinel).
+  Future<Uint8List> createBackup(String password) async {
+    if (_status != VaultStatus.ouvert) throw StateError('Coffre verrouillé');
+    return exportBackup(_items, password, kdf: kdfForNewVault?.call());
+  }
+
   /// Essaie d'ouvrir le coffre. Après un échec, impose un délai croissant.
   /// Note la date (règle des 7 jours) et migre un coffre v1 en v2.
   Future<UnlockResult> unlock(String password) async {

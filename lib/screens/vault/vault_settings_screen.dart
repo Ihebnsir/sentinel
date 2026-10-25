@@ -1,8 +1,11 @@
+import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../../services/breach/breach_checker.dart';
 import '../../services/vault/password_strength.dart';
+import '../../services/vault/vault_backup.dart';
 import '../../services/vault/vault_biometrics.dart';
+import '../../services/vault/vault_platform.dart';
 import '../../services/vault/vault_session.dart';
 import '../../theme/app_colors.dart';
 import '../../widgets/breach_consent_sheet.dart';
@@ -61,7 +64,7 @@ Widget _title(String text) => Text(
 );
 
 /// Réglages du coffre ouvert : empreinte, mot de passe, clé de
-/// récupération, suppression.
+/// récupération, sauvegarde chiffrée, suppression.
 class VaultSettingsScreen extends StatefulWidget {
   const VaultSettingsScreen({
     super.key,
@@ -123,6 +126,14 @@ class _VaultSettingsScreenState extends State<VaultSettingsScreen>
     Navigator.of(context).push(
       MaterialPageRoute<void>(
         builder: (_) => _ChangePasswordScreen(session: session),
+      ),
+    );
+  }
+
+  void _exportBackup() {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => _ExportBackupScreen(session: session),
       ),
     );
   }
@@ -278,6 +289,15 @@ class _VaultSettingsScreenState extends State<VaultSettingsScreen>
               onTap: _busy ? null : _newRecoveryKey,
             ),
             _divider,
+            // Sélecteur de fichiers d'Android : masqué sur Windows.
+            if (VaultPlatform.supportsDocuments) ...[
+              _SettingsRow(
+                icon: Icons.save_alt,
+                label: 'Exporter une sauvegarde chiffrée',
+                onTap: _busy ? null : _exportBackup,
+              ),
+              _divider,
+            ],
             _SettingsRow(
               icon: Icons.delete_outline,
               label: 'Supprimer le coffre',
@@ -531,6 +551,150 @@ class _ChangePasswordScreenState extends State<_ChangePasswordScreen>
                 style: FilledButton.styleFrom(backgroundColor: AppColors.bleu),
                 onPressed: _canSave ? _save : null,
                 child: Text(_saving ? 'Enregistrement…' : 'Changer'),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Sauvegarde chiffrée : un mot de passe d'export (mêmes règles que le
+/// mot de passe maître), puis le sélecteur de fichiers d'Android.
+class _ExportBackupScreen extends StatefulWidget {
+  const _ExportBackupScreen({required this.session});
+
+  final VaultSession session;
+
+  @override
+  State<_ExportBackupScreen> createState() => _ExportBackupScreenState();
+}
+
+class _ExportBackupScreenState extends State<_ExportBackupScreen>
+    with _ClosesWhenLocked {
+  @override
+  VaultSession get session => widget.session;
+
+  final _password = TextEditingController();
+  final _confirmation = TextEditingController();
+  bool _saving = false;
+
+  bool get _matches => _password.text == _confirmation.text;
+
+  bool get _canExport =>
+      isMasterPasswordAcceptable(_password.text) && _matches && !_saving;
+
+  @override
+  void dispose() {
+    _password.dispose();
+    _confirmation.dispose();
+    super.dispose();
+  }
+
+  // Ex. sentinel-coffre-2026-10-25.sentinel
+  static String _fileName(DateTime now) {
+    String two(int n) => n.toString().padLeft(2, '0');
+    return 'sentinel-coffre-${now.year}-${two(now.month)}-${two(now.day)}'
+        '.${VaultBackup.extension}';
+  }
+
+  Future<void> _export() async {
+    FocusScope.of(context).unfocus();
+    setState(() => _saving = true);
+    String message;
+    var done = false;
+    try {
+      // Argon2 d'abord : le fichier est prêt avant d'ouvrir le sélecteur.
+      final bytes = await session.createBackup(_password.text);
+      done = await VaultPlatform.saveDocument(_fileName(DateTime.now()), bytes);
+      message = done
+          ? 'Sauvegarde enregistrée. Gardez son mot de passe en lieu sûr.'
+          : 'Export annulé.';
+    } on PlatformException {
+      message = "L'enregistrement du fichier a échoué.";
+    } catch (_) {
+      message = "L'export a échoué.";
+    }
+    if (!mounted || closing) return;
+    final messenger = ScaffoldMessenger.of(context);
+    if (done) {
+      _password.clear();
+      _confirmation.clear();
+      Navigator.of(context).pop();
+    } else {
+      setState(() => _saving = false);
+    }
+    messenger.showSnackBar(SnackBar(content: Text(message)));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final muted = AppColors.encre.withValues(alpha: 0.6);
+    return Scaffold(
+      appBar: _appBar(),
+      body: SafeArea(
+        top: false,
+        child: ListView(
+          padding: const EdgeInsets.fromLTRB(28, 8, 28, 24),
+          children: [
+            _title('Exporter une sauvegarde chiffrée'),
+            const SizedBox(height: 8),
+            Text(
+              'Pour passer à un nouveau téléphone : un fichier .sentinel, '
+              'chiffré par le mot de passe choisi ici. Sans ce mot de passe, '
+              'personne ne peut le lire, pas même Sentinel.',
+              style: TextStyle(fontSize: 15, color: muted),
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              'Rangez le fichier où vous voulez (Drive, clé USB, ordinateur) '
+              'et ne le perdez pas avec son mot de passe.',
+              style: TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w500,
+                color: AppColors.encre,
+              ),
+            ),
+            const SizedBox(height: 24),
+            VaultTextField(
+              controller: _password,
+              label: "Mot de passe d'export",
+              secret: true,
+              enabled: !_saving,
+              onChanged: (_) => setState(() {}),
+            ),
+            if (_password.text.isNotEmpty) ...[
+              const SizedBox(height: 8),
+              PasswordStrengthLine(password: _password.text),
+            ],
+            const SizedBox(height: 16),
+            VaultTextField(
+              controller: _confirmation,
+              label: 'Confirmation',
+              secret: true,
+              enabled: !_saving,
+              errorText: _confirmation.text.isNotEmpty && !_matches
+                  ? 'Les deux mots de passe diffèrent'
+                  : null,
+              onChanged: (_) => setState(() {}),
+            ),
+            if (_saving)
+              const Padding(
+                padding: EdgeInsets.only(top: 16),
+                child: LinearProgressIndicator(
+                  minHeight: 2,
+                  color: AppColors.bleu,
+                  backgroundColor: AppColors.ligne,
+                ),
+              ),
+            const SizedBox(height: 16),
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton(
+                style: FilledButton.styleFrom(backgroundColor: AppColors.bleu),
+                onPressed: _canExport ? _export : null,
+                child: Text(_saving ? 'Chiffrement…' : 'Exporter'),
               ),
             ),
           ],

@@ -8,6 +8,7 @@ import 'package:flutter/foundation.dart';
 
 import '../../utils/debug_log.dart';
 import 'recovery_key.dart';
+import 'vault_backup.dart';
 import 'vault_file.dart';
 import 'vault_item.dart';
 
@@ -431,14 +432,70 @@ Future<List<VaultItem>> openItems(Uint8List dek, VaultFile file) async {
     throw const VaultCorruptedException();
   }
   try {
+    return _decodeItems(clear);
+  } finally {
+    wipe(clear);
+  }
+}
+
+// ---------------------------------------------------------------------
+// Sauvegarde chiffrée (fichier .sentinel)
+// ---------------------------------------------------------------------
+
+/// Chiffre les éléments pour une sauvegarde : clé = Argon2id(mot de
+/// passe d'export, sel neuf), en-tête de la sauvegarde en AAD.
+Future<Uint8List> exportBackup(
+  List<VaultItem> items,
+  String password, {
+  KdfParams? kdf,
+}) async {
+  final empty = VaultBackup(
+    kdf: kdf ?? newKdfParams(),
+    data: EncryptedBlob(nonce: Uint8List(0), cipherText: Uint8List(0)),
+  );
+  final key = await deriveKek(password, empty.kdf);
+  final clear = _encodeItems(items);
+  try {
+    return empty.withData(await _encrypt(clear, key, empty.header)).encode();
+  } finally {
+    wipe(clear);
+    wipe(key);
+  }
+}
+
+/// Déchiffre une sauvegarde. Lève [BackupFormatException] si le fichier
+/// n'en est pas une, [WrongPasswordException] si le mot de passe est faux
+/// ou le fichier modifié (GCM ne permet pas de distinguer les deux).
+Future<List<VaultItem>> importBackup(Uint8List bytes, String password) async {
+  final backup = VaultBackup.decode(bytes);
+  final key = await deriveKek(password, backup.kdf);
+  final Uint8List clear;
+  try {
+    clear = await _decrypt(backup.data, key, backup.header);
+  } on SecretBoxAuthenticationError {
+    throw const WrongPasswordException();
+  } finally {
+    wipe(key);
+  }
+  try {
+    return _decodeItems(clear);
+  } on VaultCorruptedException {
+    throw const BackupFormatException(BackupProblem.illisible);
+  } finally {
+    wipe(clear);
+  }
+}
+
+List<VaultItem> _decodeItems(Uint8List clear) {
+  try {
     final json = jsonDecode(utf8.decode(clear)) as List<Object?>;
     return [
       for (final item in json) VaultItem.fromJson(item as Map<String, Object?>),
     ];
   } on FormatException {
     throw const VaultCorruptedException();
-  } finally {
-    wipe(clear);
+  } on TypeError {
+    throw const VaultCorruptedException();
   }
 }
 

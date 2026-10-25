@@ -84,6 +84,21 @@ Sentinel is a personal project. It has **not** had an independent security audit
 | Atomic write (temp file, then rename), so an interrupted write cannot corrupt the vault | `vault_storage.dart` |
 | Android backup disabled: `android:allowBackup="false"`, and on Android 12+ `dataExtractionRules` exclude every storage domain from both cloud backup and device-to-device transfer, so the file never leaves the phone through a backup | `AndroidManifest.xml`, `res/xml/data_extraction_rules.xml` |
 
+#### 3.4.1 Encrypted backup file (`.sentinel`)
+
+The only way the vault leaves the phone is an explicit export ("Exporter une sauvegarde chiffrée" in the vault settings). *Goal of an attacker:* read a `.sentinel` file found on Drive, a USB stick or a computer, or slip a modified one to the user.
+
+| Measure | Where |
+|---|---|
+| The file is protected by its own **export password**, which must pass the same rules as the master password (≥ 12 characters, strength estimate). It shares nothing with the vault: no DEK, no master password, no recovery key | `vault_crypto.dart` (`exportBackup`), `vault_settings_screen.dart` |
+| Same primitives as the vault, no new cryptography: key = Argon2id (46 MiB, 2 passes, parallelism 1, fresh 16-byte salt) of the export password, items encrypted with AES-256-GCM and a fresh 12-byte nonce | `deriveKek`, `_encrypt` in `vault_crypto.dart` |
+| Versioned format (`"format": "sentinel-sauvegarde"`, `"version": 1`). The header (format, version, KDF parameters) is the AES-GCM associated data: changing any byte of the header or the ciphertext makes decryption fail | `vault_backup.dart` (`VaultBackup.header`) |
+| Wrong password and modified file both fail the GCM tag and get the same message ("Mot de passe incorrect, ou fichier modifié depuis l'export"); GCM cannot tell them apart. Empty, non-Sentinel, oversized (> 16 MiB) or newer-version files are rejected *before* any key derivation, with a dedicated message | `VaultBackup.decode`, `restore_backup_view.dart` |
+| KDF parameters read from the file go through the same bounds as the vault, so a crafted backup cannot freeze the phone | `KdfParams.fromJson` |
+| Restoring creates a **new** vault: new DEK, new master password, new recovery key. Restoring over an existing vault is refused | `VaultSession.restore` |
+| Saving and opening use the Storage Access Framework (`ACTION_CREATE_DOCUMENT` / `ACTION_OPEN_DOCUMENT`): the user picks the location, the app has **no storage permission**. Only already-encrypted bytes cross the platform channel; nothing is logged | `VaultDocuments.kt` |
+| Covered by tests: round trip, wrong password, tampered ciphertext and header, unknown version, empty and non-backup files, restore then reopen | `test/vault_backup_test.dart` |
+
 ### 3.5 Scammer (SMS, WhatsApp, Telegram…)
 
 *Goal:* make the user click a fake link, pay, or give out a code.
@@ -192,7 +207,7 @@ These are real gaps. Some can't be fixed in this setup; others are on the roadma
 7. **Clipboard.** The "sensitive" flag is only honored by the system on Android 13+. Before that, keyboards and clipboard managers may keep a copy. Clearing after 30 s is best-effort: if the process is killed, the timer is gone.
 8. **Message text in the alert.** For tap-to-check, the message text is kept in the alert's `PendingIntent` extras until the user taps or dismisses it. It is never logged or written by Sentinel.
 9. **Keystore strength depends on the device.** The biometric key doesn't require StrongBox. On some devices the Keystore is TEE-backed or weaker. The 7-day rule is an app policy based on the device clock, not a cryptographic barrier.
-10. **No way to move the vault to a new phone (yet).** Android backup is disabled on purpose (see 3.4), so the vault, the breach-check consent and the protection switch are not restored on a new phone or after a reinstall. Users who change phones lose their vault unless they copy their entries by hand. The recovery key doesn't help here, because it unlocks a file that is no longer there. Planned fix: an explicit, user-triggered export of the vault as an encrypted file (protected by its own password with Argon2id + AES-256-GCM), imported on the new phone.
+10. **Moving the vault to a new phone is manual.** Android backup is still disabled on purpose (see 3.4). **Solution:** the user exports an encrypted `.sentinel` file and restores it on the new phone (see 3.4.1). Remaining limits: the export is a snapshot (later changes are not in it), the breach-check consent and the protection switch are not part of it, and the file is only as strong as its export password against an offline attack (Argon2id slows guessing, it cannot save a weak password). A restored vault gets a new recovery key; the old phone's key does not open it. During a restore, the decrypted items stay in memory between the backup password step and the new master password step.
 11. **Recovery key = full access.** Anyone who has it can reset the master password. It is shown once. Keeping it safe is up to the user.
 12. **Simple strength estimator.** `password_strength.dart` is an entropy heuristic with a small list of common words. It is not a dictionary- or pattern-based estimator such as zxcvbn.
 13. **Lexical link analysis only.** Links are not resolved or checked against an online reputation list (by design, to stay offline). Shortened links are flagged but not expanded.

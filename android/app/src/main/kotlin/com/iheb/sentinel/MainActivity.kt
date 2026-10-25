@@ -166,9 +166,10 @@ class MainActivity : FlutterActivity() {
         super.cleanUpFlutterEngine(flutterEngine)
     }
 
-    // Réponse de l'écran de consentement VPN d'Android.
+    // Réponse de l'écran de consentement VPN ou du sélecteur de fichiers.
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if (firewall?.onActivityResult(requestCode, resultCode) == true) return
+        if (vaultProtection?.onActivityResult(requestCode, resultCode, data) == true) return
         super.onActivityResult(requestCode, resultCode, data)
     }
 
