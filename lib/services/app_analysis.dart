@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import '../utils/french_number.dart';
+import '../l10n/l10n.dart';
 
 /// Durée de conservation d'un rapport (même valeur que AppReportStore.kt).
 const reportMaxAge = Duration(hours: 24);
@@ -10,17 +10,24 @@ const analysisMinutes = [2, 5, 15];
 
 /// Catégorie d'un domaine dans le rapport, dans l'ordre d'affichage.
 enum ReportCategory {
-  malware('malware', 'Malware et hameçonnage', dangerous: true),
-  impersonation('impersonation', 'Imitations de marques', dangerous: true),
-  trackers('trackers', 'Traqueurs'),
-  ads('ads', 'Publicités'),
-  other('other', 'Autres domaines');
+  malware('malware', dangerous: true),
+  impersonation('impersonation', dangerous: true),
+  trackers('trackers'),
+  ads('ads'),
+  other('other');
 
-  const ReportCategory(this.id, this.label, {this.dangerous = false});
+  const ReportCategory(this.id, {this.dangerous = false});
 
   final String id; // identifiant envoyé par Kotlin
-  final String label;
   final bool dangerous;
+
+  String label(AppLocalizations l) => switch (this) {
+    malware => l.categoryMalware,
+    impersonation => l.categoryImpersonation,
+    trackers => l.categoryTrackers,
+    ads => l.categoryAds,
+    other => l.categoryOther,
+  };
 
   static ReportCategory fromId(Object? id) =>
       values.firstWhere((c) => c.id == id, orElse: () => other);
@@ -123,19 +130,22 @@ class AppReport {
 
   /// Ex : « 5 min » (durée prévue, analyse menée jusqu'au bout) ou
   /// « 1 min 40 s (arrêtée avant les 2 min prévues) » (durée réelle).
-  String get durationLabel => stoppedEarly
-      ? '${_formatDuration(duration)} '
-          '(arrêtée avant les $plannedMinutes min prévues)'
-      : '$plannedMinutes min';
+  String durationLabel(AppLocalizations l) {
+    final planned = l.durationMinutes(plannedMinutes, l.number(plannedMinutes));
+    if (!stoppedEarly) return planned;
+    return l.reportStoppedEarly(_formatDuration(l, duration), planned);
+  }
 
   // « 1 min 40 s », « 3 min », « 45 s » : secondes arrondies vers le bas.
-  static String _formatDuration(Duration d) {
+  static String _formatDuration(AppLocalizations l, Duration d) {
     final seconds = d.isNegative ? 0 : d.inSeconds;
-    if (seconds < 1) return "moins d'1 s";
+    if (seconds < 1) return l.durationLessThanSecond;
     final minutes = seconds ~/ 60;
     final rest = seconds % 60;
-    if (minutes == 0) return '$rest s';
-    return rest == 0 ? '$minutes min' : '$minutes min $rest s';
+    if (minutes == 0) return l.durationSeconds('$rest');
+    return rest == 0
+        ? l.durationMinutesOnly('$minutes')
+        : l.durationMinutesSeconds('$minutes', '$rest');
   }
 
   int countOf(ReportCategory category) =>
@@ -163,24 +173,21 @@ class AppReport {
   }
 
   /// Ex : « TikTok a contacté 47 domaines, dont 18 traqueurs. »
-  String get summary {
+  String summary(AppLocalizations l) {
     final total = domains.length;
-    if (total == 0) {
-      return "$appLabel n'a contacté aucun domaine pendant l'analyse.";
-    }
-    final start = '$appLabel a contacté ${_plural(total, 'domaine')}';
+    if (total == 0) return l.reportNoDomain(appLabel);
+    final domainsText = l.domainsCount(total, l.number(total));
+    final start = l.reportContacted(appLabel, domainsText);
+    final trackers = countOf(ReportCategory.trackers);
+    final ads = countOf(ReportCategory.ads);
     final parts = [
       if (dangerousCount > 0)
-        _plural(dangerousCount, 'site dangereux', 'sites dangereux'),
-      if (countOf(ReportCategory.trackers) > 0)
-        _plural(countOf(ReportCategory.trackers), 'traqueur'),
-      if (countOf(ReportCategory.ads) > 0)
-        _plural(countOf(ReportCategory.ads), 'publicité'),
+        l.reportDangerousCount(dangerousCount, l.number(dangerousCount)),
+      if (trackers > 0) l.reportTrackersCount(trackers, l.number(trackers)),
+      if (ads > 0) l.reportAdsCount(ads, l.number(ads)),
     ];
-    if (parts.isEmpty) {
-      return '$start, aucun connu comme traqueur, publicité ou site dangereux.';
-    }
-    return '$start, dont ${_joinFrench(parts)}.';
+    if (parts.isEmpty) return l.reportNothingKnown(start);
+    return l.reportIncluding(start, _join(l, parts));
   }
 }
 
@@ -212,19 +219,19 @@ class AnalysisStatus {
   final int domains; // domaines différents vus jusqu'ici
 
   /// Ex : « Reste 3 min · 12 domaines vus ».
-  String progressAt(DateTime now) {
+  String progressAt(AppLocalizations l, DateTime now) {
     final left = endsAt.difference(now);
     final minutes = left.isNegative ? 0 : (left.inSeconds / 60).ceil();
-    final time = minutes <= 1 ? "Reste moins d'1 min" : 'Reste $minutes min';
-    final seen = domains > 1 ? 'domaines vus' : 'domaine vu';
-    return '$time · ${formatFrenchNumber(domains)} $seen';
+    final time = minutes <= 1
+        ? l.analysisLessThanMinuteLeft
+        : l.analysisMinutesLeft(minutes, l.number(minutes));
+    return '$time · ${l.analysisDomainsSeen(domains, l.number(domains))}';
   }
 }
 
-String _plural(int n, String singular, [String? plural]) =>
-    '${formatFrenchNumber(n)} ${n > 1 ? plural ?? '${singular}s' : singular}';
-
 // « a », « a et b », « a, b et c ».
-String _joinFrench(List<String> parts) => parts.length == 1
+String _join(AppLocalizations l, List<String> parts) => parts.length == 1
     ? parts.single
-    : '${parts.sublist(0, parts.length - 1).join(', ')} et ${parts.last}';
+    : parts.sublist(0, parts.length - 1).join(l.listSeparator) +
+          l.listLastSeparator +
+          parts.last;

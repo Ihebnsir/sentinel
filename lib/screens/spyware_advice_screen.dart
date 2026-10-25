@@ -1,9 +1,9 @@
 import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
 
+import '../l10n/l10n.dart';
 import '../models/installed_app.dart';
 import '../services/app_risk_calculator.dart';
-import '../services/apps/stalkerware_ioc.dart';
 import '../services/apps_scanner_service.dart';
 import '../theme/app_colors.dart';
 import '../widgets/app_icon.dart';
@@ -32,12 +32,14 @@ class SpywareAdviceScreen extends StatelessWidget {
 
   void _copyLink(BuildContext context) {
     Clipboard.setData(const ClipboardData(text: stopStalkerwareUrl));
-    ScaffoldMessenger.of(context)
-        .showSnackBar(const SnackBar(content: Text('Adresse copiée')));
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(context.l10n.spywareAddressCopied)));
   }
 
   @override
   Widget build(BuildContext context) {
+    final l = context.l10n;
     final name = report.stalkerwareName;
     return Scaffold(
       appBar: AppBar(
@@ -55,9 +57,9 @@ class SpywareAdviceScreen extends StatelessWidget {
               child: ListView(
                 padding: const EdgeInsets.fromLTRB(28, 8, 28, 24),
                 children: [
-                  const Text(
-                    'Avant de toucher à cette application',
-                    style: TextStyle(
+                  Text(
+                    l.spywareTitle,
+                    style: const TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.w600,
                       color: AppColors.encre,
@@ -83,9 +85,8 @@ class SpywareAdviceScreen extends StatelessWidget {
                             const SizedBox(height: 2),
                             Text(
                               name != null
-                                  ? 'Logiciel espion connu : $name'
-                                  : "Icône cachée et accès typiques d'un "
-                                        'logiciel espion',
+                                  ? l.detailKnownSpyware(name)
+                                  : l.riskSpyProfile,
                               style: const TextStyle(
                                 fontSize: 13,
                                 color: AppColors.rommen,
@@ -102,36 +103,24 @@ class SpywareAdviceScreen extends StatelessWidget {
                     thickness: 1,
                     color: AppColors.ligne,
                   ),
-                  const _Paragraph(
-                    "Si vous pensez que quelqu'un de votre entourage a "
-                    'installé cette application, sa suppression peut le '
-                    "prévenir. Si vous êtes en danger, contactez d'abord une "
-                    "association d'aide ou la police.",
-                    strong: true,
-                  ),
+                  _Paragraph(l.spywareParagraph1, strong: true),
                   const Divider(
                     height: 1,
                     thickness: 1,
                     color: AppColors.ligne,
                   ),
-                  const _Paragraph(
-                    "Avant d'agir, vous pouvez noter le nom de l'application "
-                    "et faire une capture d'écran : cela peut servir de preuve.",
-                  ),
+                  _Paragraph(l.spywareParagraph2),
                   const Divider(
                     height: 1,
                     thickness: 1,
                     color: AppColors.ligne,
                   ),
-                  const _Paragraph(
-                    "Sentinel ne prévient personne et n'envoie aucune "
-                    'notification à ce sujet.',
-                  ),
-                  const Padding(
-                    padding: EdgeInsets.only(top: 28, bottom: 4),
+                  _Paragraph(l.spywareParagraph3),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 28, bottom: 4),
                     child: Text(
-                      'Se faire aider',
-                      style: TextStyle(
+                      l.spywareGetHelp,
+                      style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w600,
                         color: AppColors.encre,
@@ -142,20 +131,14 @@ class SpywareAdviceScreen extends StatelessWidget {
                   // (associations, numéros officiels) après vérification
                   // auprès des organismes eux-mêmes. Ne jamais recopier un
                   // numéro sans source officielle.
-                  const _Paragraph(
-                    'Coalition Against Stalkerware : des conseils pour les '
-                    "personnes surveillées et des contacts d'associations.",
-                  ),
+                  _Paragraph(l.spywareCoalition),
                   const SelectableText(
                     stopStalkerwareUrl,
                     style: TextStyle(fontSize: 15, color: AppColors.bleu),
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    "Le site s'ouvre dans votre navigateur et restera dans "
-                    "son historique. Vous pouvez aussi copier l'adresse et "
-                    "l'ouvrir en navigation privée, ou depuis un autre "
-                    'appareil.',
+                    l.spywareBrowserNote,
                     style: TextStyle(
                       fontSize: 13,
                       color: AppColors.encre.withValues(alpha: 0.6),
@@ -171,7 +154,7 @@ class SpywareAdviceScreen extends StatelessWidget {
                         onPressed: () => AppsScannerService().openWebPage(
                           stopStalkerwareUrl,
                         ),
-                        child: const Text('Ouvrir le site'),
+                        child: Text(l.spywareOpenSite),
                       ),
                       const SizedBox(width: 24),
                       TextButton(
@@ -180,13 +163,13 @@ class SpywareAdviceScreen extends StatelessWidget {
                           padding: EdgeInsets.zero,
                         ),
                         onPressed: () => _copyLink(context),
-                        child: const Text("Copier l'adresse"),
+                        child: Text(l.spywareCopyAddress),
                       ),
                     ],
                   ),
                   const SizedBox(height: 24),
                   Text(
-                    iocCredit,
+                    l.spywareIocCredit,
                     style: TextStyle(
                       fontSize: 12,
                       color: AppColors.encre.withValues(alpha: 0.5),
@@ -206,7 +189,7 @@ class SpywareAdviceScreen extends StatelessWidget {
                     ),
                     onPressed: () =>
                         AppsScannerService().openAppSettings(app.packageName),
-                    child: const Text('Gérer les autorisations'),
+                    child: Text(l.detailManagePermissions),
                   ),
                   // Une app système ne peut pas être désinstallée.
                   if (!app.isSystemApp)
@@ -215,7 +198,7 @@ class SpywareAdviceScreen extends StatelessWidget {
                         foregroundColor: AppColors.rommen,
                       ),
                       onPressed: () => _uninstall(context),
-                      child: const Text('Désinstaller'),
+                      child: Text(l.detailUninstall),
                     ),
                 ],
               ),

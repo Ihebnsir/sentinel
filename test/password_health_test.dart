@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:sentinel/services/vault/password_health.dart';
 import 'package:sentinel/services/vault/vault_item.dart';
 import 'package:sentinel/utils/french_number.dart';
+import 'support/l10n.dart';
 
 VaultItem _item(
   String id,
@@ -77,16 +78,16 @@ void main() {
     expect(formatFrenchNumber(3861), '3 861');
     expect(formatFrenchNumber(1234567), '1 234 567');
     expect(
-      breachMessage(3861),
+      breachMessage(fr, 3861),
       'Ce mot de passe a été vu 3 861 fois dans des fuites de données. '
       'Changez-le.',
     );
     expect(
-      breachMessage(1),
+      breachMessage(fr, 1),
       'Ce mot de passe a été vu 1 fois dans des fuites de données. '
       'Changez-le.',
     );
-    expect(breachShort(12), 'Vu 12 fois dans des fuites');
-    expect(breachShort(1), 'Vu 1 fois dans des fuites');
+    expect(breachShort(fr, 12), 'Vu 12 fois dans des fuites');
+    expect(breachShort(fr, 1), 'Vu 1 fois dans des fuites');
   });
 }

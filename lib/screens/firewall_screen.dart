@@ -2,12 +2,12 @@ import 'dart:async';
 
 import 'package:material_ui/material_ui.dart';
 
+import '../l10n/l10n.dart';
 import '../services/app_analysis.dart';
 import '../services/firewall_service.dart';
 import '../services/protection_service.dart';
 import '../services/wifi_service.dart';
 import '../theme/app_colors.dart';
-import '../utils/french_number.dart';
 import '../widgets/app_analysis_section.dart';
 import '../widgets/blocklist_sections.dart';
 import '../widgets/dns_privacy_section.dart';
@@ -88,11 +88,10 @@ class _FirewallScreenState extends State<FirewallScreen> {
     setState(() => _updating = false);
     await _loadConfig();
     if (!mounted) return;
+    final l = context.l10n;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(
-          ok ? 'Listes mises à jour.' : 'Mise à jour impossible : les listes actuelles sont conservées.',
-        ),
+        content: Text(ok ? l.firewallUpdated : l.firewallUpdateFailed),
       ),
     );
   }
@@ -111,17 +110,13 @@ class _FirewallScreenState extends State<FirewallScreen> {
   Future<void> _onAddAllowed() async {
     final domain = normalizeDomainInput(_allowController.text);
     if (domain == null) {
-      setState(
-        () => _allowError = 'Domaine invalide, par exemple : exemple.fr',
-      );
+      setState(() => _allowError = context.l10n.firewallInvalidDomain);
       return;
     }
     final saved = await _service.addAllowed(domain);
     if (!mounted) return;
     if (saved == null) {
-      setState(
-        () => _allowError = 'Domaine refusé (format invalide ou liste pleine)',
-      );
+      setState(() => _allowError = context.l10n.firewallDomainRefused);
       return;
     }
     _allowController.clear();
@@ -177,17 +172,17 @@ class _FirewallScreenState extends State<FirewallScreen> {
     final open = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('DNS privé incompatible'),
-        content: Text(strictPrivateDnsMessage(server)),
+        title: Text(context.l10n.dnsStrictTitle),
+        content: Text(context.l10n.dnsStrictMessage(server)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Annuler'),
+            child: Text(context.l10n.commonCancel),
           ),
           FilledButton(
             style: FilledButton.styleFrom(backgroundColor: AppColors.bleu),
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Ouvrir les réglages'),
+            child: Text(context.l10n.commonOpenSettings),
           ),
         ],
       ),
@@ -237,6 +232,7 @@ class _FirewallScreenState extends State<FirewallScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l = context.l10n;
     final status = _status;
     final config = _config;
     final muted = AppColors.encre.withValues(alpha: 0.6);
@@ -255,19 +251,18 @@ class _FirewallScreenState extends State<FirewallScreen> {
         child: ListView(
           padding: const EdgeInsets.fromLTRB(28, 8, 28, 24),
           children: [
-            const Text(
-              'Pare-feu DNS',
-              style: TextStyle(
+            Text(
+              l.firewallTitle,
+              style: const TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.w600,
                 color: AppColors.encre,
               ),
             ),
             const SizedBox(height: 12),
-            const Text(
-              "Bloque les sites dangereux et les traqueurs avant même qu'une "
-              "application ne s'y connecte. Tout se passe sur votre téléphone.",
-              style: TextStyle(fontSize: 15, color: AppColors.encre),
+            Text(
+              l.firewallIntro,
+              style: const TextStyle(fontSize: 15, color: AppColors.encre),
             ),
             const SizedBox(height: 24),
             const Divider(height: 1, thickness: 1, color: AppColors.ligne),
@@ -279,9 +274,9 @@ class _FirewallScreenState extends State<FirewallScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
-                          'Pare-feu DNS',
-                          style: TextStyle(
+                        Text(
+                          l.firewallTitle,
+                          style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w500,
                             color: AppColors.encre,
@@ -290,8 +285,8 @@ class _FirewallScreenState extends State<FirewallScreen> {
                         const SizedBox(height: 2),
                         Text(
                           status == null
-                              ? 'Disponible sur Android'
-                              : (active ? 'Activé' : 'Désactivé'),
+                              ? l.commonAndroidOnly
+                              : (active ? l.commonOn : l.commonOff),
                           style: TextStyle(fontSize: 13, color: muted),
                         ),
                       ],
@@ -321,9 +316,9 @@ class _FirewallScreenState extends State<FirewallScreen> {
               ),
               const Divider(height: 1, thickness: 1, color: AppColors.ligne),
               const SizedBox(height: 24),
-              const Text(
-                "Depuis l'activation",
-                style: TextStyle(
+              Text(
+                l.firewallSinceActivation,
+                style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w600,
                   color: AppColors.encre,
@@ -331,12 +326,12 @@ class _FirewallScreenState extends State<FirewallScreen> {
               ),
               const SizedBox(height: 4),
               _CountRow(
-                label: 'Requêtes analysées',
+                label: l.firewallQueriesAnalyzed,
                 value: status.totalQueries,
               ),
               const Divider(height: 1, thickness: 1, color: AppColors.ligne),
               _CountRow(
-                label: 'Requêtes bloquées',
+                label: l.firewallQueriesBlocked,
                 value: status.blockedQueries,
               ),
               // Détail par catégorie (une requête compte pour une seule).
@@ -350,7 +345,7 @@ class _FirewallScreenState extends State<FirewallScreen> {
                     color: AppColors.ligne,
                   ),
                   _CountRow(
-                    label: category.name,
+                    label: category.displayName(l),
                     value: status.blockedByCategory[category.id] ?? 0,
                   ),
                 ],
@@ -358,7 +353,7 @@ class _FirewallScreenState extends State<FirewallScreen> {
                 Padding(
                   padding: const EdgeInsets.only(top: 8),
                   child: Text(
-                    'Chargement des listes…',
+                    l.firewallListsLoading,
                     style: TextStyle(fontSize: 13, color: muted),
                   ),
                 ),
@@ -393,8 +388,7 @@ class _FirewallScreenState extends State<FirewallScreen> {
             ],
             const SizedBox(height: 24),
             Text(
-              "Android n'autorise qu'un seul VPN à la fois : si vous en "
-              "activez un autre, le pare-feu s'arrête.",
+              l.firewallOneVpn,
               style: TextStyle(fontSize: 13, color: muted),
             ),
             if (config != null && config.sources.isNotEmpty)
@@ -429,7 +423,7 @@ class _CountRow extends StatelessWidget {
             ),
           ),
           Text(
-            formatFrenchNumber(value),
+            context.l10n.number(value),
             style: const TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.w500,
@@ -447,20 +441,16 @@ class _CountRow extends StatelessWidget {
 class _ExplanationSheet extends StatelessWidget {
   const _ExplanationSheet();
 
-  static const _lines = [
-    "Android va vous demander d'autoriser une « connexion VPN » : "
-        "c'est ainsi que Sentinel voit les noms de sites demandés.",
-    'Seules les demandes de noms de sites (DNS) passent par Sentinel, '
-        'le reste de votre trafic ne change pas.',
-    'Les sites autorisés sont demandés à Quad9 (résolveur suisse), de façon '
-        'chiffrée : votre réseau ne voit plus les noms des sites.',
-    "Aucun site visité n'est enregistré : seuls des compteurs existent "
-        "(sauf pendant une analyse d'application que vous lancez vous-même).",
-    'Une notification discrète reste affichée tant que le pare-feu est actif.',
-  ];
-
   @override
   Widget build(BuildContext context) {
+    final l = context.l10n;
+    final lines = [
+      l.firewallExplain1,
+      l.firewallExplain2,
+      l.firewallExplain3,
+      l.firewallExplain4,
+      l.firewallExplain5,
+    ];
     return SafeArea(
       child: SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(28, 0, 28, 16),
@@ -468,16 +458,16 @@ class _ExplanationSheet extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text(
-              'Pare-feu DNS',
-              style: TextStyle(
+            Text(
+              l.firewallTitle,
+              style: const TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.w600,
                 color: AppColors.encre,
               ),
             ),
             const SizedBox(height: 12),
-            for (final line in _lines) ...[
+            for (final line in lines) ...[
               const Divider(height: 1, thickness: 1, color: AppColors.ligne),
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 10),
@@ -495,7 +485,7 @@ class _ExplanationSheet extends StatelessWidget {
                     foregroundColor: AppColors.encre.withValues(alpha: 0.6),
                   ),
                   onPressed: () => Navigator.of(context).pop(false),
-                  child: const Text('Plus tard'),
+                  child: Text(l.commonLater),
                 ),
                 const Spacer(),
                 FilledButton(
@@ -503,7 +493,7 @@ class _ExplanationSheet extends StatelessWidget {
                     backgroundColor: AppColors.bleu,
                   ),
                   onPressed: () => Navigator.of(context).pop(true),
-                  child: const Text('Continuer'),
+                  child: Text(l.commonContinue),
                 ),
               ],
             ),
@@ -518,18 +508,10 @@ class _ExplanationSheet extends StatelessWidget {
 class _UpdateConsentSheet extends StatelessWidget {
   const _UpdateConsentSheet();
 
-  static const _lines = [
-    'Sentinel télécharge les listes de blocage depuis GitHub '
-        '(raw.githubusercontent.com), en HTTPS, au plus une fois par jour.',
-    "Aucune information vous concernant n'est envoyée : ni sites visités, "
-        'ni identifiant. Comme pour toute connexion, GitHub voit '
-        "l'adresse IP de votre téléphone.",
-    'Chaque liste est vérifiée (taille, format, cohérence) avant usage. '
-        "En cas de problème, l'ancienne version est conservée.",
-  ];
-
   @override
   Widget build(BuildContext context) {
+    final l = context.l10n;
+    final lines = [l.firewallConsent1, l.firewallConsent2, l.firewallConsent3];
     return SafeArea(
       child: SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(28, 0, 28, 16),
@@ -537,16 +519,16 @@ class _UpdateConsentSheet extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text(
-              'Mise à jour des listes',
-              style: TextStyle(
+            Text(
+              l.firewallUpdateTitle,
+              style: const TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.w600,
                 color: AppColors.encre,
               ),
             ),
             const SizedBox(height: 12),
-            for (final line in _lines) ...[
+            for (final line in lines) ...[
               const Divider(height: 1, thickness: 1, color: AppColors.ligne),
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 10),
@@ -564,7 +546,7 @@ class _UpdateConsentSheet extends StatelessWidget {
                     foregroundColor: AppColors.encre.withValues(alpha: 0.6),
                   ),
                   onPressed: () => Navigator.of(context).pop(false),
-                  child: const Text('Plus tard'),
+                  child: Text(l.commonLater),
                 ),
                 const Spacer(),
                 FilledButton(
@@ -572,7 +554,7 @@ class _UpdateConsentSheet extends StatelessWidget {
                     backgroundColor: AppColors.bleu,
                   ),
                   onPressed: () => Navigator.of(context).pop(true),
-                  child: const Text('Accepter'),
+                  child: Text(l.commonAccept),
                 ),
               ],
             ),

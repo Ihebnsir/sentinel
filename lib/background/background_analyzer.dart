@@ -1,6 +1,7 @@
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
+import '../l10n/l10n.dart';
 import '../services/phishing/known_brands.dart';
 import '../services/phishing/message_analyzer.dart';
 import '../services/phishing/phishing_model.dart';
@@ -29,13 +30,15 @@ Future<Map<String, Object>> _onNativeCall(MethodCall call) async {
   final text = args['text'] as String? ?? '';
   final packageName = args['packageName'] as String? ?? '';
   final isSms = args['isSms'] as bool? ?? false;
+  // Langue de l'app (choix de Réglages, sinon celle du téléphone).
+  final l = l10nFor(args['language'] as String?);
   try {
     final model = await loadPhishingModel();
     await loadKnownBrands();
     final analysis = analyzeMessage(text, model.predict(text));
     return {
-      ...backgroundResponseFor(analysis),
-      'alertTitle': alertTitleFor(packageName, isSms: isSms),
+      ...backgroundResponseFor(analysis, l),
+      'alertTitle': alertTitleFor(l, packageName, isSms: isSms),
     };
   } catch (_) {
     // Erreur sans détail : le texte du message ne doit jamais en sortir.
@@ -43,22 +46,25 @@ Future<Map<String, Object>> _onNativeCall(MethodCall call) async {
   }
 }
 
-/// Phrase de secours si l'analyse n'a trouvé aucune raison précise.
-const defaultAlertReason =
-    'Ce message ressemble aux arnaques connues. Ne cliquez sur aucun lien.';
-
-/// La réponse envoyée à Kotlin : verdict, pourcentage, raison principale.
+/// La réponse envoyée à Kotlin : verdict, pourcentage, raison principale
+/// (sinon une phrase de secours), dans la langue [l].
 /// verdict = nom technique stable ("arnaque", "suspect", "rien"),
 /// pas le texte affiché, pour que Kotlin puisse le comparer sans risque.
 /// La raison est affichée dans l'alerte : ses domaines sont neutralisés
 /// (« site[.]xyz ») pour qu'Android n'en fasse pas un lien cliquable.
-Map<String, Object> backgroundResponseFor(MessageAnalysis analysis) => {
-  'verdict': analysis.verdict.name,
-  'percent': analysis.percent,
-  'mainReason': analysis.reasons.isEmpty
-      ? defaultAlertReason
-      : defangDomains(analysis.reasons.first),
-};
+Map<String, Object> backgroundResponseFor(
+  MessageAnalysis analysis,
+  AppLocalizations l,
+) {
+  final reasons = analysis.reasons(l);
+  return {
+    'verdict': analysis.verdict.name,
+    'percent': analysis.percent,
+    'mainReason': reasons.isEmpty
+        ? l.alertDefaultReason
+        : defangDomains(reasons.first),
+  };
+}
 
 // Un nom de domaine ou une adresse IP : des mots séparés par des points.
 final _domainLike = RegExp(
@@ -87,9 +93,13 @@ const _chatAppNames = {
 };
 
 /// Titre de l'alerte selon l'app d'où vient le message.
-String alertTitleFor(String packageName, {bool isSms = false}) {
-  if (isSms) return 'Arnaque probable dans un SMS';
+String alertTitleFor(
+  AppLocalizations l,
+  String packageName, {
+  bool isSms = false,
+}) {
+  if (isSms) return l.alertTitleSms;
   final app = _chatAppNames[packageName];
-  if (app == null) return 'Arnaque probable dans un message';
-  return 'Arnaque probable sur $app';
+  if (app == null) return l.alertTitleMessage;
+  return l.alertTitleApp(app);
 }

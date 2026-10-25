@@ -12,6 +12,7 @@ import 'package:sentinel/services/vault/vault_storage.dart';
 import 'package:sentinel/widgets/wifi_alert.dart';
 
 import 'support/fake_biometrics.dart';
+import 'support/l10n.dart';
 
 // SEN-17 : l'alerte Wi-Fi ne recouvre jamais les boutons du coffre.
 void main() {
@@ -56,7 +57,7 @@ void main() {
     final session = newSession();
     await tester.runAsync(session.load);
     await tester.pumpWidget(
-      MaterialApp(
+      testApp(
         home: Scaffold(
           body: SafeArea(
             child: CreateVaultView(session: session, onCancel: () {}),
@@ -87,7 +88,7 @@ void main() {
     final clipboard = ClipboardGuard();
     addTearDown(clipboard.dispose);
     await tester.pumpWidget(
-      MaterialApp(
+      testApp(
         home: VaultItemScreen(
           session: session,
           clipboard: clipboard,
@@ -103,7 +104,7 @@ void main() {
   });
 
   testWidgets('se ferme seule après 10 s, ou avec « Fermer »', (tester) async {
-    await tester.pumpWidget(const MaterialApp(home: Scaffold(body: Text('x'))));
+    await tester.pumpWidget(testApp(home: Scaffold(body: Text('x'))));
     await showAlert(tester, find.text('x'));
     expect(find.byType(MaterialBanner), findsOneWidget);
     await tester.pump(wifiAlertDuration);
@@ -120,7 +121,7 @@ void main() {
     tester,
   ) async {
     var details = 0;
-    await tester.pumpWidget(const MaterialApp(home: Scaffold(body: Text('x'))));
+    await tester.pumpWidget(testApp(home: Scaffold(body: Text('x'))));
     showWifiAlert(
       tester.element(find.text('x')),
       message: 'Wi-Fi ouvert',

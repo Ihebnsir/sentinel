@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
 
+import '../l10n/l10n.dart';
 import '../services/phishing/known_brands.dart';
 import '../services/phishing/message_analyzer.dart';
 import '../services/phishing/phishing_model.dart';
@@ -105,6 +106,7 @@ class _MessagesScreenState extends State<MessagesScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l = context.l10n;
     final analysis = _analysis;
     return SafeArea(
       child: Column(
@@ -114,9 +116,9 @@ class _MessagesScreenState extends State<MessagesScreen> {
             child: ListView(
               padding: const EdgeInsets.fromLTRB(28, 24, 28, 16),
               children: [
-                const Text(
-                  'Messages',
-                  style: TextStyle(
+                Text(
+                  l.navMessages,
+                  style: const TextStyle(
                     fontSize: 28,
                     fontWeight: FontWeight.w600,
                     color: AppColors.encre,
@@ -131,7 +133,7 @@ class _MessagesScreenState extends State<MessagesScreen> {
                   onChanged: _onTextChanged,
                 ),
                 const SizedBox(height: 8),
-                _actions(),
+                _actions(l),
                 if (_analyzing)
                   const Padding(
                     padding: EdgeInsets.only(top: 24),
@@ -145,7 +147,7 @@ class _MessagesScreenState extends State<MessagesScreen> {
                   Padding(
                     padding: const EdgeInsets.only(top: 24),
                     child: Text(
-                      "L'analyse a échoué. Réessayez.",
+                      l.messagesFailed,
                       style: TextStyle(
                         fontSize: 15,
                         color: AppColors.encre.withValues(alpha: 0.6),
@@ -161,8 +163,7 @@ class _MessagesScreenState extends State<MessagesScreen> {
           Padding(
             padding: const EdgeInsets.fromLTRB(28, 0, 28, 16),
             child: Text(
-              "L'analyse se fait sur votre téléphone. "
-              "Le message n'est envoyé nulle part.",
+              l.messagesLocalNote,
               style: TextStyle(
                 fontSize: 12,
                 color: AppColors.encre.withValues(alpha: 0.45),
@@ -175,13 +176,13 @@ class _MessagesScreenState extends State<MessagesScreen> {
   }
 
   /// « Coller » à gauche ; « Effacer » et « Analyser » à droite.
-  Widget _actions() {
+  Widget _actions(AppLocalizations l) {
     return Row(
       children: [
         TextButton(
           style: TextButton.styleFrom(foregroundColor: AppColors.bleu),
           onPressed: _paste,
-          child: const Text('Coller'),
+          child: Text(l.messagesPaste),
         ),
         const Spacer(),
         if (_controller.text.isNotEmpty)
@@ -190,14 +191,14 @@ class _MessagesScreenState extends State<MessagesScreen> {
               foregroundColor: AppColors.encre.withValues(alpha: 0.6),
             ),
             onPressed: _clear,
-            child: const Text('Effacer'),
+            child: Text(l.messagesClear),
           ),
         const SizedBox(width: 8),
         FilledButton(
           style: FilledButton.styleFrom(backgroundColor: AppColors.bleu),
           // null = bouton désactivé (champ vide ou analyse en cours).
           onPressed: _hasText && !_analyzing ? _analyze : null,
-          child: const Text('Analyser'),
+          child: Text(l.messagesAnalyze),
         ),
       ],
     );
@@ -226,7 +227,7 @@ class _MessageField extends StatelessWidget {
       keyboardType: TextInputType.multiline,
       style: const TextStyle(fontSize: 15, color: AppColors.encre),
       decoration: InputDecoration(
-        hintText: 'Collez un SMS, un message WhatsApp ou un lien',
+        hintText: context.l10n.messagesHint,
         hintStyle: TextStyle(
           fontSize: 15,
           color: AppColors.encre.withValues(alpha: 0.45),
@@ -253,13 +254,14 @@ class _AnalysisResult extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = context.l10n;
     final muted = AppColors.encre.withValues(alpha: 0.6);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SizedBox(height: 28),
         Text(
-          analysis.verdict.label,
+          analysis.verdict.label(l),
           style: TextStyle(
             fontSize: 28,
             fontWeight: FontWeight.w600,
@@ -268,11 +270,11 @@ class _AnalysisResult extends StatelessWidget {
         ),
         const SizedBox(height: 4),
         Text(
-          "Probabilité d'arnaque : ${analysis.percent} %",
+          l.messagesProbability('${analysis.percent}'),
           style: TextStyle(fontSize: 15, color: muted),
         ),
         const SizedBox(height: 12),
-        for (final reason in analysis.reasons) ...[
+        for (final reason in analysis.reasons(l)) ...[
           const Divider(height: 1, thickness: 1, color: AppColors.ligne),
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 14),
@@ -286,7 +288,7 @@ class _AnalysisResult extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.only(top: 16),
           child: Text(
-            analysis.advice,
+            analysis.advice(l),
             style: const TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.w500,

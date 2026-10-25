@@ -1,5 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 
+import '../l10n/l10n.dart';
 import '../services/apps_scanner_service.dart';
 import '../services/firewall_service.dart';
 import '../theme/app_colors.dart';
@@ -17,11 +18,7 @@ class _CacheNote extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(top: 8),
-      child: Text(
-        'Les changements peuvent prendre quelques minutes à '
-        "s'appliquer (cache DNS du navigateur).",
-        style: _muted,
-      ),
+      child: Text(context.l10n.blocklistCacheNote, style: _muted),
     );
   }
 }
@@ -115,19 +112,18 @@ class BlocklistCategoriesSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = context.l10n;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const BlocklistSectionTitle('Listes de blocage'),
+        BlocklistSectionTitle(l.blocklistListsTitle),
         for (final category in categories) ...[
           _SwitchRow(
-            title: category.name,
-            subtitle: category.subtitle,
+            title: category.displayName(l),
+            subtitle: category.subtitle(l),
             warning: switch (category.id) {
-              'ads' => 'Peut empêcher certaines applications de fonctionner.',
-              'impersonation' =>
-                'Peut bloquer un vrai site non répertorié : '
-                    'ajoutez-le alors à la liste blanche.',
+              'ads' => l.blocklistAdsWarning,
+              'impersonation' => l.blocklistImpersonationWarning,
               _ => null,
             },
             value: category.enabled,
@@ -160,23 +156,20 @@ class AutoUpdateSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = context.l10n;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const BlocklistSectionTitle('Mises à jour automatiques'),
+        BlocklistSectionTitle(l.blocklistAutoUpdateTitle),
         _SwitchRow(
-          title: 'Mettre à jour chaque jour',
-          subtitle: config.updateSummary,
+          title: l.blocklistUpdateDaily,
+          subtitle: config.updateSummary(l),
           value: config.autoUpdate,
           onChanged: onAutoUpdateChanged,
         ),
         _divider,
         const SizedBox(height: 8),
-        Text(
-          'Les listes sont téléchargées en HTTPS depuis GitHub, au plus une '
-          "fois par jour. Aucune information vous concernant n'est envoyée.",
-          style: _muted,
-        ),
+        Text(l.blocklistUpdateNote, style: _muted),
         Align(
           alignment: Alignment.centerLeft,
           child: TextButton(
@@ -185,7 +178,7 @@ class AutoUpdateSection extends StatelessWidget {
               padding: EdgeInsets.zero,
             ),
             onPressed: busy ? null : onUpdateNow,
-            child: Text(busy ? 'Mise à jour en cours…' : 'Mettre à jour'),
+            child: Text(busy ? l.blocklistUpdating : l.blocklistUpdateNow),
           ),
         ),
       ],
@@ -217,15 +210,12 @@ class AllowlistSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = context.l10n;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const BlocklistSectionTitle('Liste blanche'),
-        Text(
-          "Ces sites ne sont jamais bloqués, même s'ils figurent dans une "
-          'liste. Leurs sous-domaines non plus.',
-          style: _muted,
-        ),
+        BlocklistSectionTitle(l.allowlistTitle),
+        Text(l.allowlistIntro, style: _muted),
         const SizedBox(height: 12),
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -239,7 +229,7 @@ class AllowlistSection extends StatelessWidget {
                 onSubmitted: (_) => onAdd(),
                 style: const TextStyle(fontSize: 15, color: AppColors.encre),
                 decoration: InputDecoration(
-                  hintText: 'exemple.fr',
+                  hintText: l.allowlistHint,
                   hintStyle: TextStyle(
                     fontSize: 15,
                     color: AppColors.encre.withValues(alpha: 0.45),
@@ -260,7 +250,7 @@ class AllowlistSection extends StatelessWidget {
               child: TextButton(
                 style: TextButton.styleFrom(foregroundColor: AppColors.bleu),
                 onPressed: onAdd,
-                child: const Text('Ajouter'),
+                child: Text(l.allowlistAdd),
               ),
             ),
           ],
@@ -269,7 +259,7 @@ class AllowlistSection extends StatelessWidget {
         if (domains.isEmpty)
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 8),
-            child: Text("Aucun site pour l'instant.", style: _muted),
+            child: Text(l.allowlistEmpty, style: _muted),
           ),
         for (final domain in domains) ...[
           Row(
@@ -281,7 +271,7 @@ class AllowlistSection extends StatelessWidget {
                 ),
               ),
               IconButton(
-                tooltip: 'Retirer $domain',
+                tooltip: l.allowlistRemove(domain),
                 color: AppColors.encre.withValues(alpha: 0.6),
                 icon: const Icon(Icons.close, size: 20),
                 onPressed: () => onRemove(domain),
@@ -304,10 +294,11 @@ class BlocklistSourcesSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = context.l10n;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const BlocklistSectionTitle('Sources et licences'),
+        BlocklistSectionTitle(l.sourcesTitle),
         for (final source in sources) ...[
           Padding(
             padding: const EdgeInsets.only(top: 12),
@@ -332,7 +323,7 @@ class BlocklistSourcesSection extends StatelessWidget {
                 ),
                 onPressed: () =>
                     AppsScannerService().openWebPage(source.homepage),
-                child: const Text('Voir la source'),
+                child: Text(l.sourcesSeeSource),
               ),
             ),
           _divider,

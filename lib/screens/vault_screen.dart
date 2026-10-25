@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:material_ui/material_ui.dart';
 
+import '../l10n/l10n.dart';
 import '../services/breach/breach_checker.dart';
 import '../services/vault/vault_platform.dart';
 import '../services/vault/vault_session.dart';
@@ -118,6 +119,7 @@ class _VaultScreenState extends State<VaultScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l = context.l10n;
     final opened = _session.status == VaultStatus.ouvert;
     return SafeArea(
       child: Padding(
@@ -127,9 +129,9 @@ class _VaultScreenState extends State<VaultScreen> {
           children: [
             Row(
               children: [
-                const Text(
-                  'Coffre',
-                  style: TextStyle(
+                Text(
+                  l.navVault,
+                  style: const TextStyle(
                     fontSize: 28,
                     fontWeight: FontWeight.w600,
                     color: AppColors.encre,
@@ -138,7 +140,7 @@ class _VaultScreenState extends State<VaultScreen> {
                 const Spacer(),
                 if (opened)
                   IconButton(
-                    tooltip: 'Réglages du coffre',
+                    tooltip: l.vaultSettingsTitle,
                     color: AppColors.bleu,
                     icon: const Icon(Icons.settings_outlined),
                     onPressed: _openSettings,
@@ -150,18 +152,18 @@ class _VaultScreenState extends State<VaultScreen> {
                     ),
                     onPressed: _session.lock,
                     icon: const Icon(Icons.lock_outline, size: 18),
-                    label: const Text('Verrouiller'),
+                    label: Text(l.vaultLock),
                   ),
               ],
             ),
-            Expanded(child: _body()),
+            Expanded(child: _body(l)),
           ],
         ),
       ),
     );
   }
 
-  Widget _body() {
+  Widget _body(AppLocalizations l) {
     switch (_session.status) {
       case VaultStatus.chargement:
         return const SizedBox.shrink();
@@ -181,11 +183,9 @@ class _VaultScreenState extends State<VaultScreen> {
         }
         return EmptyState(
           icon: Icons.lock_outline,
-          title: 'Vos mots de passe, chiffrés',
-          message: 'Stockez vos mots de passe et notes secrètes. '
-              'Ils sont chiffrés sur votre téléphone et personne '
-              "d'autre ne peut les lire.",
-          buttonLabel: 'Créer mon coffre',
+          title: l.vaultEmptyTitle,
+          message: l.vaultEmptyMessage,
+          buttonLabel: l.vaultCreate,
           onPressed: () => setState(() => _creating = true),
         );
       case VaultStatus.verrouille:
@@ -223,11 +223,10 @@ class _VaultScreenState extends State<VaultScreen> {
           breaches: _breaches,
         );
       case VaultStatus.illisible:
-        return const EmptyState(
+        return EmptyState(
           icon: Icons.error_outline,
-          title: 'Coffre illisible',
-          message: 'Le fichier du coffre semble endommagé ou modifié. '
-              "Sentinel ne peut pas l'ouvrir.",
+          title: l.vaultUnreadableTitle,
+          message: l.vaultUnreadableMessage,
         );
     }
   }

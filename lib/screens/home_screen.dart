@@ -1,5 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 
+import '../l10n/l10n.dart';
 import '../models/device_security_status.dart';
 import '../models/security_action.dart';
 import '../models/wifi_status.dart';
@@ -9,16 +10,12 @@ import '../services/security_score_calculator.dart';
 import '../services/wifi_risk.dart';
 import '../services/wifi_service.dart';
 import '../theme/app_colors.dart';
-import '../utils/french_date.dart';
 import '../widgets/action_tile.dart';
 import '../widgets/network_protection_section.dart';
 import '../widgets/score_arch.dart';
 import '../widgets/wifi_alert.dart';
 import '../widgets/wifi_section.dart';
 import 'settings_screen.dart';
-
-/// Salutation neutre : l'app ne stocke aucun prénom (SEN-16).
-const homeGreeting = 'Bonjour';
 
 /// L'écran d'accueil : salutation, score et actions conseillées.
 /// StatefulWidget car il garde le résultat de l'audit en mémoire.
@@ -37,12 +34,10 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   bool _failed = false; // Android a renvoyé une erreur
   bool _auditRunning = false; // évite de lancer deux analyses en même temps
   DeviceSecurityStatus? _status; // null : analyse indisponible (Windows)
-  SecurityReport? _report;
 
   // Wi-Fi : une situation, pas un réglage, donc hors du score.
   final _wifiService = WifiService();
   WifiStatus? _wifi; // null : pas encore lu ou indisponible
-  WifiReport? _wifiReport;
   bool _wifiLoaded = false; // première lecture terminée
 
   @override
@@ -90,7 +85,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     if (!mounted) return;
     setState(() {
       _wifi = wifi;
-      _wifiReport = wifi == null ? null : assessWifi(wifi);
       _wifiLoaded = true;
     });
   }
@@ -98,11 +92,12 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   /// Le réseau a changé pendant que l'app est ouverte.
   void _onWifiChanged(WifiStatus wifi) {
     if (!mounted) return;
-    final before = _wifiReport?.level;
-    final report = assessWifi(wifi);
+    final l = context.l10n;
+    final previous = _wifi;
+    final before = previous == null ? null : assessWifi(l, previous).level;
+    final report = assessWifi(l, wifi);
     setState(() {
       _wifi = wifi;
-      _wifiReport = report;
       _wifiLoaded = true;
     });
     // Alerte seulement quand on passe d'un réseau sûr à un réseau dangereux.
@@ -111,7 +106,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         report.level == WifiLevel.danger) {
       showWifiAlert(
         context,
-        message: '${report.title} : évitez la banque et les achats.',
+        message: l.homeWifiAlert(report.title),
         onDetails: _showWifiDetails,
       );
     }
@@ -120,12 +115,11 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   /// Ouvre la feuille de détails du Wi-Fi.
   void _showWifiDetails() {
     final wifi = _wifi;
-    final report = _wifiReport;
-    if (wifi == null || report == null) return;
+    if (wifi == null) return;
     showWifiDetails(
       context,
       status: wifi,
-      report: report,
+      report: assessWifi(context.l10n, wifi),
       onOpenPrivateDns: _wifiService.openPrivateDnsSettings,
     );
   }
@@ -140,9 +134,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       if (!mounted) return;
       setState(() {
         _status = status;
-        _report = status == null
-            ? null
-            : calculateSecurityScore(status, DateTime.now());
         _failed = false;
         _loading = false;
       });
@@ -158,27 +149,33 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   }
 
   /// Titre principal selon l'état de l'analyse et le score.
-  String _title() {
-    final report = _report;
-    if (_failed) return 'Analyse impossible';
-    if (report == null) return 'Sécurité du téléphone';
+  String _title(AppLocalizations l, SecurityReport? report) {
+    if (_failed) return l.homeTitleFailed;
+    if (report == null) return l.homeTitleDefault;
     if (report.actions.isEmpty || report.score >= 70) {
-      return 'Votre téléphone est bien protégé';
+      return l.homeTitleProtected;
     }
-    if (report.score >= 45) return 'Quelques points à renforcer';
-    return 'Votre téléphone est exposé';
+    if (report.score >= 45) return l.homeTitleToImprove;
+    return l.homeTitleExposed;
   }
 
   /// Ligne discrète sous l'arche, ex : « Android 15 · correctif du 5 août 2026 ».
-  String _versionLine(DeviceSecurityStatus status) {
+  String _versionLine(AppLocalizations l, DeviceSecurityStatus status) {
     final patch = status.securityPatch;
-    final android = 'Android ${status.androidVersion}';
-    if (patch == null) return android;
-    return '$android · correctif du ${formatFrenchDate(patch)}';
+    if (patch == null) return l.homeAndroidVersion(status.androidVersion);
+    return l.homeAndroidVersionPatch(status.androidVersion, l.date(patch));
   }
 
   @override
   Widget build(BuildContext context) {
+    final l = context.l10n;
+    // Calculés à chaque affichage : les textes suivent la langue choisie.
+    final status = _status;
+    final report = status == null
+        ? null
+        : calculateSecurityScore(l, status, DateTime.now());
+    final wifi = _wifi;
+    final wifiReport = wifi == null ? null : assessWifi(l, wifi);
     return Scaffold(
       body: SafeArea(
         // RefreshIndicator : tirer vers le bas relance l'analyse.
@@ -197,7 +194,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                   children: [
                     Expanded(
                       child: Text(
-                        homeGreeting,
+                        l.homeGreeting,
                         style: TextStyle(
                           fontSize: 16,
                           color: AppColors.encre.withValues(alpha: 0.6),
@@ -205,7 +202,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                       ),
                     ),
                     IconButton(
-                      tooltip: 'Réglages',
+                      tooltip: l.settingsTitle,
                       visualDensity: VisualDensity.compact,
                       color: AppColors.encre.withValues(alpha: 0.5),
                       icon: const Icon(Icons.settings_outlined, size: 22),
@@ -219,7 +216,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                 ),
                 const SizedBox(height: 6),
                 Text(
-                  _title(),
+                  _title(l, report),
                   style: const TextStyle(
                     fontSize: 28,
                     fontWeight: FontWeight.w600,
@@ -227,11 +224,11 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                   ),
                 ),
                 const SizedBox(height: 40),
-                ..._content(),
+                ..._content(l, status, report),
                 // Hors Android (Windows) : section masquée.
                 if (WifiService.isSupported && _wifiLoaded && !_loading) ...[
                   const SizedBox(height: 32),
-                  WifiSection(report: _wifiReport, onTap: _showWifiDetails),
+                  WifiSection(report: wifiReport, onTap: _showWifiDetails),
                 ],
                 if (FirewallService.isSupported && !_loading) ...[
                   const SizedBox(height: 32),
@@ -246,24 +243,19 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   }
 
   /// Le contenu sous le titre, selon l'état de l'analyse.
-  List<Widget> _content() {
-    final status = _status;
-    final report = _report;
-
+  List<Widget> _content(
+    AppLocalizations l,
+    DeviceSecurityStatus? status,
+    SecurityReport? report,
+  ) {
     if (_loading) {
-      return const [
-        Center(child: ScoreArch.empty(message: 'Analyse en cours…')),
-      ];
+      return [Center(child: ScoreArch.empty(message: l.homeAnalyzing))];
     }
     if (_failed) {
-      return const [
-        _InfoMessage("L'analyse a échoué. Tirez vers le bas pour réessayer."),
-      ];
+      return [_InfoMessage(l.commonAnalysisFailedPull)];
     }
     if (status == null || report == null) {
-      return const [
-        _InfoMessage("L'analyse du téléphone est disponible sur Android."),
-      ];
+      return [_InfoMessage(l.homeAndroidOnly)];
     }
 
     final actions = report.actions;
@@ -272,7 +264,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       const SizedBox(height: 12),
       Center(
         child: Text(
-          _versionLine(status),
+          _versionLine(l, status),
           style: TextStyle(
             fontSize: 13,
             color: AppColors.encre.withValues(alpha: 0.5),
@@ -280,9 +272,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         ),
       ),
       const SizedBox(height: 40),
-      const Text(
-        'Pour gagner des points',
-        style: TextStyle(
+      Text(
+        l.homeToGainPoints,
+        style: const TextStyle(
           fontSize: 18,
           fontWeight: FontWeight.w600,
           color: AppColors.encre,
@@ -293,7 +285,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 16),
           child: Text(
-            'Rien à corriger pour le moment.',
+            l.homeNothingToFix,
             style: TextStyle(
               fontSize: 15,
               color: AppColors.encre.withValues(alpha: 0.6),

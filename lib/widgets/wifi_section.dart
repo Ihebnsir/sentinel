@@ -1,5 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 
+import '../l10n/l10n.dart';
 import '../models/wifi_status.dart';
 import '../services/wifi_risk.dart';
 import '../theme/app_colors.dart';
@@ -23,6 +24,7 @@ class WifiSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = context.l10n;
     final report = this.report;
     final color = report == null
         ? AppColors.encre.withValues(alpha: 0.45)
@@ -30,9 +32,9 @@ class WifiSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Réseau Wi-Fi',
-          style: TextStyle(
+        Text(
+          l.wifiSectionTitle,
+          style: const TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.w600,
             color: AppColors.encre,
@@ -57,7 +59,7 @@ class WifiSection extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        report?.title ?? 'Information indisponible',
+                        report?.title ?? l.wifiUnavailableTitle,
                         style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w500,
@@ -66,8 +68,7 @@ class WifiSection extends StatelessWidget {
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        report?.summary ??
-                            "Android n'a pas pu lire l'état du Wi-Fi.",
+                        report?.summary ?? l.wifiUnavailableSummary,
                         style: TextStyle(
                           fontSize: 13,
                           color: AppColors.encre.withValues(alpha: 0.6),
@@ -79,7 +80,7 @@ class WifiSection extends StatelessWidget {
                 if (report != null) ...[
                   const SizedBox(width: 12),
                   Text(
-                    report.level.label,
+                    report.level.label(l),
                     style: TextStyle(fontWeight: FontWeight.w600, color: color),
                   ),
                 ],
@@ -130,20 +131,21 @@ class _WifiDetails extends StatelessWidget {
   final WifiReport report;
   final VoidCallback onOpenPrivateDns;
 
-  String get _dnsText => switch (status.privateDnsActive) {
-    true => 'Activé',
-    false => 'Désactivé',
-    null => 'Inconnu',
+  String _dnsText(AppLocalizations l) => switch (status.privateDnsActive) {
+    true => l.commonOn,
+    false => l.commonOff,
+    null => l.commonUnknown,
   };
 
   @override
   Widget build(BuildContext context) {
+    final l = context.l10n;
     final muted = AppColors.encre.withValues(alpha: 0.6);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          report.level.label,
+          report.level.label(l),
           style: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w600,
@@ -166,20 +168,23 @@ class _WifiDetails extends StatelessWidget {
         ),
         if (status.connected) ...[
           const SizedBox(height: 20),
-          _InfoRow(label: 'Protection', value: status.security.label),
-          const Divider(height: 1, thickness: 1, color: AppColors.ligne),
           _InfoRow(
-            label: 'Page de connexion',
-            value: status.captivePortal ? 'Oui' : 'Non',
+            label: l.wifiDetailProtection,
+            value: status.security.label(l),
           ),
           const Divider(height: 1, thickness: 1, color: AppColors.ligne),
-          _InfoRow(label: 'DNS privé', value: _dnsText),
+          _InfoRow(
+            label: l.wifiDetailCaptive,
+            value: status.captivePortal ? l.commonYes : l.commonNo,
+          ),
+          const Divider(height: 1, thickness: 1, color: AppColors.ligne),
+          _InfoRow(label: l.wifiDetailPrivateDns, value: _dnsText(l)),
         ],
         if (report.advice.isNotEmpty) ...[
           const SizedBox(height: 24),
-          const Text(
-            'Nos conseils',
-            style: TextStyle(
+          Text(
+            l.wifiOurAdvice,
+            style: const TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w600,
               color: AppColors.encre,
@@ -224,13 +229,12 @@ class _WifiDetails extends StatelessWidget {
                 elevation: 0,
               ),
               onPressed: onOpenPrivateDns,
-              child: const Text('Activer le DNS privé'),
+              child: Text(l.wifiEnablePrivateDns),
             ),
           ),
           const SizedBox(height: 8),
           Text(
-            'Ouvre « Réseau et Internet ». Le DNS privé se trouve parfois '
-            'sous « Avancé » ou « Plus de paramètres de connexion ».',
+            l.wifiPrivateDnsHelp,
             style: TextStyle(fontSize: 13, color: muted),
           ),
         ],

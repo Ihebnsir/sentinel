@@ -1,7 +1,9 @@
 import 'package:material_ui/material_ui.dart';
 
 import '../app_info.dart';
+import '../l10n/l10n.dart';
 import '../services/apps_scanner_service.dart';
+import '../services/language_store.dart';
 import '../theme/app_colors.dart';
 import '../widgets/arch_icon.dart';
 import 'audit_summary_screen.dart';
@@ -23,6 +25,7 @@ class SettingsScreen extends StatelessWidget {
   }
 
   void _showLicenses(BuildContext context) {
+    final l = context.l10n;
     showLicensePage(
       context: context,
       applicationName: 'Sentinel',
@@ -31,16 +34,63 @@ class SettingsScreen extends StatelessWidget {
         padding: EdgeInsets.all(12),
         child: ArchIcon(filled: true, size: 48, color: AppColors.bleu),
       ),
-      applicationLegalese: 'Licence MIT',
+      applicationLegalese: l.settingsLicenseLegalese,
     );
+  }
+
+  // Liste des langues ; null : celle du téléphone.
+  Future<void> _chooseLanguage(
+    BuildContext context,
+    LanguageController language,
+  ) async {
+    final current = language.value?.languageCode;
+    final l = context.l10n;
+    final choice = await showModalBottomSheet<_LanguageChoice>(
+      context: context,
+      showDragHandle: true,
+      backgroundColor: AppColors.chaux,
+      builder: (context) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            for (final code in [null, ...languageNames.keys])
+              ListTile(
+                contentPadding: const EdgeInsets.symmetric(horizontal: 28),
+                title: Text(
+                  code == null ? l.settingsLanguageSystem : languageNames[code]!,
+                  style: const TextStyle(fontSize: 15, color: AppColors.encre),
+                ),
+                trailing: code == current
+                    ? const Icon(Icons.check, color: AppColors.bleu)
+                    : null,
+                onTap: () => Navigator.of(context).pop(_LanguageChoice(code)),
+              ),
+          ],
+        ),
+      ),
+    );
+    if (choice != null) await language.choose(choice.code);
   }
 
   @override
   Widget build(BuildContext context) {
+    final l = context.l10n;
+    // Absent quand l'écran est testé seul : la ligne Langue est masquée.
+    final language = LanguageScope.maybeOf(context);
+    final code = language?.value?.languageCode;
     final rows = <Widget>[
+      if (language != null)
+        _Row(
+          icon: Icons.translate,
+          title: l.settingsLanguage,
+          subtitle: code == null
+              ? l.settingsLanguageSystem
+              : languageNames[code] ?? code,
+          onTap: () => _chooseLanguage(context, language),
+        ),
       _Row(
         icon: Icons.replay,
-        title: 'Revoir la présentation',
+        title: l.settingsReplayOnboarding,
         onTap: () => _push(
           context,
           (route) => OnboardingScreen(onDone: () => Navigator.of(route).pop()),
@@ -48,24 +98,24 @@ class SettingsScreen extends StatelessWidget {
       ),
       _Row(
         icon: Icons.privacy_tip_outlined,
-        title: 'Politique de confidentialité',
+        title: l.settingsPrivacy,
         onTap: () => _push(context, (_) => const PrivacyPolicyScreen()),
       ),
       _Row(
         icon: Icons.description_outlined,
-        title: 'Licences',
-        subtitle: 'Bibliothèques, police, listes de blocage, logiciels espions',
+        title: l.settingsLicenses,
+        subtitle: l.settingsLicensesDetail,
         onTap: () => _showLicenses(context),
       ),
       _Row(
         icon: Icons.verified_user_outlined,
-        title: "Rapport d'audit de sécurité",
+        title: l.settingsAudit,
         onTap: () => _push(context, (_) => const AuditSummaryScreen()),
       ),
       _Row(
         icon: Icons.bug_report_outlined,
-        title: 'Signaler une faille',
-        subtitle: 'En privé, via GitHub (ouvre le navigateur)',
+        title: l.settingsReportFlaw,
+        subtitle: l.settingsReportFlawDetail,
         onTap: () => _open(securityPolicyUrl),
       ),
     ];
@@ -83,9 +133,9 @@ class SettingsScreen extends StatelessWidget {
         child: ListView(
           padding: const EdgeInsets.fromLTRB(28, 8, 28, 24),
           children: [
-            const Text(
-              'Réglages',
-              style: TextStyle(
+            Text(
+              l.settingsTitle,
+              style: const TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.w600,
                 color: AppColors.encre,
@@ -97,7 +147,7 @@ class SettingsScreen extends StatelessWidget {
                 const ArchIcon(filled: true, size: 32, color: AppColors.bleu),
                 const SizedBox(width: 16),
                 Text(
-                  'Sentinel $appVersion',
+                  l.settingsAppVersion(appVersion),
                   style: const TextStyle(fontSize: 16, color: AppColors.encre),
                 ),
               ],
@@ -113,6 +163,16 @@ class SettingsScreen extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Noms des langues, chacun écrit dans sa propre langue.
+const languageNames = {'fr': 'Français', 'ar': 'العربية', 'en': 'English'};
+
+/// Choix dans la liste des langues (code null : langue du téléphone).
+class _LanguageChoice {
+  const _LanguageChoice(this.code);
+
+  final String? code;
 }
 
 /// Une ligne de réglage : icône, titre, détail facultatif.

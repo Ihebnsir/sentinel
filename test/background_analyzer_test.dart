@@ -1,56 +1,83 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sentinel/background/background_analyzer.dart';
+import 'package:sentinel/l10n/l10n.dart';
 import 'package:sentinel/services/phishing/message_analyzer.dart';
+import 'package:sentinel/services/phishing/url_analyzer.dart';
+
+import 'support/l10n.dart';
 
 /// Une analyse inventée, pour tester la réponse seule.
 MessageAnalysis fakeAnalysis(
   Verdict verdict,
-  double probability, [
-  List<String> reasons = const [],
-]) => MessageAnalysis(
+  double probability, {
+  List<AnalyzedLink> links = const [],
+  List<String> words = const [],
+}) => MessageAnalysis(
   verdict: verdict,
   probability: probability,
-  reasons: reasons,
-  advice: adviceFor(verdict),
-  links: const [],
+  links: links,
+  scamWords: words,
+);
+
+/// Un lien qui imite La Poste Tunisienne.
+AnalyzedLink imitation(String host) => AnalyzedLink(
+  text: host,
+  host: host,
+  findings: [
+    LinkFinding(
+      LinkSignal.usurpationMarque,
+      host: host,
+      brand: 'La Poste Tunisienne',
+    ),
+  ],
 );
 
 void main() {
   group('Réponse envoyée à Kotlin', () {
     test('arnaque : verdict technique, pourcentage, première raison', () {
       final response = backgroundResponseFor(
-        fakeAnalysis(Verdict.arnaque, 0.874, [
-          'Le lien imite La Poste',
-          'Mots typiques des arnaques : « colis »',
-        ]),
+        fakeAnalysis(
+          Verdict.arnaque,
+          0.874,
+          links: [imitation('poste-tn.xyz')],
+          words: ['colis'],
+        ),
+        fr,
       );
       expect(response, {
         'verdict': 'arnaque',
         'percent': 87,
-        'mainReason': 'Le lien imite La Poste',
+        'mainReason':
+            "« poste-tn[.]xyz » imite La Poste Tunisienne mais ce n'est pas "
+            'son site officiel',
       });
     });
 
     test('sans raison : phrase de secours', () {
       final response = backgroundResponseFor(
         fakeAnalysis(Verdict.arnaque, 0.95),
+        fr,
       );
-      expect(response['mainReason'], defaultAlertReason);
+      expect(response['mainReason'], fr.alertDefaultReason);
     });
 
     test('suspect et rien gardent leur nom technique', () {
       expect(
-        backgroundResponseFor(fakeAnalysis(Verdict.suspect, 0.6))['verdict'],
+        backgroundResponseFor(
+          fakeAnalysis(Verdict.suspect, 0.6),
+          fr,
+        )['verdict'],
         'suspect',
       );
-      final rien = backgroundResponseFor(fakeAnalysis(Verdict.rien, 0.04));
+      final rien = backgroundResponseFor(fakeAnalysis(Verdict.rien, 0.04), fr);
       expect(rien['verdict'], 'rien');
       expect(rien['percent'], 4);
     });
 
     test('ne contient que des types simples (transmissibles au canal)', () {
       final response = backgroundResponseFor(
-        fakeAnalysis(Verdict.arnaque, 0.9, ['raison']),
+        fakeAnalysis(Verdict.arnaque, 0.9, words: ['raison']),
+        fr,
       );
       expect(response.keys, {'verdict', 'percent', 'mainReason'});
       expect(response['percent'], isA<int>());
@@ -58,15 +85,40 @@ void main() {
 
     test("la raison de l'alerte a ses domaines neutralisés", () {
       final response = backgroundResponseFor(
-        fakeAnalysis(Verdict.arnaque, 0.9, [
-          "« poste-tn-livraison.xyz » imite La Poste Tunisienne mais ce n'est "
-              'pas son site officiel',
-        ]),
+        fakeAnalysis(
+          Verdict.arnaque,
+          0.9,
+          links: [imitation('poste-tn-livraison.xyz')],
+        ),
+        fr,
       );
       expect(
         response['mainReason'],
         startsWith('« poste-tn-livraison[.]xyz »'),
       );
+    });
+
+    test("dans la langue de l'app (arabe, anglais)", () {
+      final analysis = fakeAnalysis(
+        Verdict.arnaque,
+        0.9,
+        links: [imitation('poste-tn.xyz')],
+      );
+      expect(
+        backgroundResponseFor(analysis, ar)['mainReason'],
+        '«poste-tn[.]xyz» ينتحل صفة La Poste Tunisienne لكنه ليس موقعه الرسمي',
+      );
+      expect(
+        backgroundResponseFor(analysis, en)['mainReason'],
+        '"poste-tn[.]xyz" imitates La Poste Tunisienne but is not its '
+        'official website',
+      );
+    });
+
+    test('langue inconnue ou absente : français', () {
+      expect(l10nFor('de').localeName, 'fr');
+      expect(l10nFor(null).localeName, 'fr');
+      expect(l10nFor('ar').localeName, 'ar');
     });
   });
 
@@ -97,11 +149,11 @@ void main() {
     });
 
     test('nombres, extension seule et phrase sans domaine : inchangés', () {
-      const texts = [
+      final texts = [
         'Votre colis coûte 3.5 dinars.',
         "L'extension « .xyz » est souvent utilisée par les arnaques",
         "Le lien n'est pas sécurisé (http au lieu de https)",
-        defaultAlertReason,
+        fr.alertDefaultReason,
       ];
       for (final text in texts) {
         expect(defangDomains(text), text);
@@ -116,34 +168,39 @@ void main() {
   group("Titre de l'alerte", () {
     test('SMS, quelle que soit l\'app', () {
       expect(
-        alertTitleFor('com.google.android.apps.messaging', isSms: true),
+        alertTitleFor(fr, 'com.google.android.apps.messaging', isSms: true),
         'Arnaque probable dans un SMS',
       );
       expect(
-        alertTitleFor('com.exemple.sms', isSms: true),
+        alertTitleFor(fr, 'com.exemple.sms', isSms: true),
         'Arnaque probable dans un SMS',
       );
     });
 
     test('messageries connues', () {
-      expect(alertTitleFor('com.whatsapp'), 'Arnaque probable sur WhatsApp');
+      expect(alertTitleFor(fr, 'com.whatsapp'), 'Arnaque probable sur WhatsApp');
       expect(
-        alertTitleFor('com.whatsapp.w4b'),
+        alertTitleFor(fr, 'com.whatsapp.w4b'),
         'Arnaque probable sur WhatsApp Business',
       );
       expect(
-        alertTitleFor('com.facebook.orca'),
+        alertTitleFor(fr, 'com.facebook.orca'),
         'Arnaque probable sur Messenger',
       );
       expect(
-        alertTitleFor('org.telegram.messenger'),
+        alertTitleFor(fr, 'org.telegram.messenger'),
         'Arnaque probable sur Telegram',
       );
-      expect(alertTitleFor('com.viber.voip'), 'Arnaque probable sur Viber');
+      expect(alertTitleFor(fr, 'com.viber.voip'), 'Arnaque probable sur Viber');
+    });
+
+    test('en arabe et en anglais', () {
+      expect(alertTitleFor(ar, 'com.whatsapp'), 'احتيال محتمل على WhatsApp');
+      expect(alertTitleFor(en, 'x', isSms: true), 'Likely scam in an SMS');
     });
 
     test('app inconnue : titre générique', () {
-      expect(alertTitleFor('com.inconnue'), 'Arnaque probable dans un message');
+      expect(alertTitleFor(fr, 'com.inconnue'), 'Arnaque probable dans un message');
     });
   });
 }

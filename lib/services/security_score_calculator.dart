@@ -1,5 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 
+import '../l10n/l10n.dart';
 import '../models/device_security_status.dart';
 import '../models/security_action.dart';
 
@@ -17,7 +18,9 @@ const maxSecurityPatchAgeDays = 90;
 /// Calcule le score à partir de l'état du téléphone.
 /// Fonction « pure » : mêmes entrées = même résultat, aucun appel à Android.
 /// La date du jour est un paramètre pour pouvoir la fixer dans les tests.
+/// [l] : langue des titres et des explications.
 SecurityReport calculateSecurityScore(
+  AppLocalizations l,
   DeviceSecurityStatus status,
   DateTime today,
 ) {
@@ -35,12 +38,10 @@ SecurityReport calculateSecurityScore(
 
   check(
     status.screenLock,
-    const SecurityAction(
+    SecurityAction(
       icon: Icons.lock_outline,
-      title: "Configurer un verrouillage d'écran",
-      description:
-          "Un code ou un schéma empêche l'accès à vos données "
-          'si le téléphone est perdu',
+      title: l.scoreLockTitle,
+      description: l.scoreLockDesc,
       points: 25,
       settingsTarget: SettingsTarget.security,
     ),
@@ -49,12 +50,10 @@ SecurityReport calculateSecurityScore(
   // Pas de bouton paramètres : le root ne se retire pas depuis les réglages.
   check(
     !status.rooted,
-    const SecurityAction(
+    SecurityAction(
       icon: Icons.warning_amber_outlined,
-      title: 'Votre téléphone semble rooté',
-      description:
-          "Le root contourne les protections d'Android. "
-          'Il ne se retire pas depuis les paramètres',
+      title: l.scoreRootTitle,
+      description: l.scoreRootDesc,
       points: 20,
     ),
   );
@@ -64,10 +63,8 @@ SecurityReport calculateSecurityScore(
     patch != null && _ageInDays(patch, today) < maxSecurityPatchAgeDays,
     SecurityAction(
       icon: Icons.system_update_outlined,
-      title: 'Installer la mise à jour de sécurité',
-      description: patch == null
-          ? 'La date du dernier correctif est inconnue'
-          : 'Le dernier correctif date de plus de 3 mois',
+      title: l.scoreUpdateTitle,
+      description: patch == null ? l.scoreUpdateUnknown : l.scoreUpdateOld,
       points: 20,
       settingsTarget: SettingsTarget.update,
     ),
@@ -75,10 +72,10 @@ SecurityReport calculateSecurityScore(
 
   check(
     status.biometricEnrolled,
-    const SecurityAction(
+    SecurityAction(
       icon: Icons.fingerprint,
-      title: 'Activer le déverrouillage biométrique',
-      description: 'Empreinte ou visage pour ouvrir le téléphone',
+      title: l.scoreBiometricTitle,
+      description: l.scoreBiometricDesc,
       points: 10,
       settingsTarget: SettingsTarget.biometric,
     ),
@@ -86,10 +83,10 @@ SecurityReport calculateSecurityScore(
 
   check(
     !status.developerOptions,
-    const SecurityAction(
+    SecurityAction(
       icon: Icons.developer_mode_outlined,
-      title: 'Désactiver les options pour les développeurs',
-      description: 'Elles donnent accès à des réglages sensibles du système',
+      title: l.scoreDevOptionsTitle,
+      description: l.scoreDevOptionsDesc,
       points: 10,
       settingsTarget: SettingsTarget.developer,
     ),
@@ -97,10 +94,10 @@ SecurityReport calculateSecurityScore(
 
   check(
     !status.usbDebugging,
-    const SecurityAction(
+    SecurityAction(
       icon: Icons.usb,
-      title: 'Désactiver le débogage USB',
-      description: 'Un ordinateur branché pourrait accéder à vos données',
+      title: l.scoreUsbTitle,
+      description: l.scoreUsbDesc,
       points: 10,
       settingsTarget: SettingsTarget.developer,
     ),
@@ -108,10 +105,10 @@ SecurityReport calculateSecurityScore(
 
   check(
     status.encrypted,
-    const SecurityAction(
+    SecurityAction(
       icon: Icons.enhanced_encryption_outlined,
-      title: 'Chiffrer le stockage',
-      description: 'Vos fichiers restent illisibles sans votre code',
+      title: l.scoreEncryptTitle,
+      description: l.scoreEncryptDesc,
       points: 5,
       settingsTarget: SettingsTarget.security,
     ),

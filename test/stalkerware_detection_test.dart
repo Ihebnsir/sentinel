@@ -3,6 +3,7 @@ import 'package:sentinel/models/installed_app.dart';
 import 'package:sentinel/services/app_risk_calculator.dart';
 import 'package:sentinel/services/apps/known_apps.dart';
 import 'package:sentinel/services/apps/stalkerware_ioc.dart';
+import 'support/l10n.dart';
 
 // Empreintes factices, pour les tests uniquement.
 const officialSha256 =
@@ -102,7 +103,7 @@ void main() {
         expect(report.score, 60);
         expect(report.level, RiskLevel.eleve);
         expect(
-          report.mainReason,
+          report.mainReason(fr),
           "Se fait passer pour WhatsApp, mais ce n'est pas l'application "
           'officielle',
         );
@@ -115,7 +116,7 @@ void main() {
         app(packageName: 'com.whatsapp', label: 'WhatsApp'),
       );
       expect(report.score, 0);
-      expect(report.reasons, isEmpty);
+      expect(report.reasons(fr), isEmpty);
       // Base réelle sans empreinte : on ne conclut rien sur la signature.
       expect(report.identity.verdict, IdentityVerdict.officialUnchecked);
     });
@@ -124,7 +125,7 @@ void main() {
       final report = calculateAppRisk(
         app(packageName: 'com.exemple.d17', label: 'D17'),
       );
-      expect(report.reasons, isEmpty);
+      expect(report.reasons(fr), isEmpty);
     });
 
     test("app système : pas de règle d'usurpation", () {
@@ -151,7 +152,7 @@ void main() {
       );
       expect(report.score, 80);
       expect(
-        report.mainReason,
+        report.mainReason(fr),
         "Copie modifiée de WhatsApp (signature différente de l'éditeur "
         'officiel)',
       );
@@ -196,7 +197,7 @@ void main() {
     test('certificat de test sur une app non système : +15', () {
       final report = calculateAppRisk(app(debugCert: true));
       expect(report.score, 15);
-      expect(report.reasons, ['Signée avec un certificat de test']);
+      expect(report.reasons(fr), ['Signée avec un certificat de test']);
     });
 
     test('certificat de test sur une app système : ignoré', () {
@@ -224,7 +225,7 @@ void main() {
       );
       expect(report.score, 45);
       expect(
-        report.mainReason,
+        report.mainReason(fr),
         'Version modifiée non officielle de WhatsApp : elle peut lire vos '
         'messages',
       );
@@ -259,7 +260,7 @@ void main() {
       expect(report.spywareSuspected, isTrue);
       expect(report.score, 85); // 40 + 30 + 15
       expect(
-        report.mainReason,
+        report.mainReason(fr),
         "Icône cachée et accès typiques d'un logiciel espion",
       );
     });
@@ -306,7 +307,7 @@ void main() {
       );
       expect(report.score, 100);
       expect(report.level, RiskLevel.eleve);
-      expect(report.mainReason, 'Logiciel espion connu (stalkerware)');
+      expect(report.mainReason(fr), 'Logiciel espion connu (stalkerware)');
       expect(report.stalkerwareName, 'EspionTest');
       expect(report.spywareSuspected, isTrue);
     });
@@ -325,7 +326,7 @@ void main() {
         ioc: testIoc,
       );
       expect(report.score, 100);
-      expect(report.reasons.first, stalkerwareReason);
+      expect(report.reasons(fr).first, fr.riskStalkerware);
     });
 
     test('app sans indicateur : score habituel', () {

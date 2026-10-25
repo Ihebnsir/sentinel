@@ -1,5 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 
+import '../l10n/l10n.dart';
 import '../services/share_service.dart';
 import '../theme/app_theme.dart';
 import '../widgets/arch_icon.dart';
@@ -57,6 +58,7 @@ class _MainShellState extends State<MainShell> {
 
   @override
   Widget build(BuildContext context) {
+    final l = context.l10n;
     return Scaffold(
       // IndexedStack garde toutes les pages en mémoire
       // et n'affiche que celle de l'index choisi.
@@ -72,26 +74,26 @@ class _MainShellState extends State<MainShell> {
           onDestinationSelected: (index) {
             setState(() => _selectedIndex = index);
           },
-          destinations: const [
+          destinations: [
             NavigationDestination(
-              icon: ArchIcon(),
-              selectedIcon: ArchIcon(filled: true),
-              label: 'Accueil',
+              icon: const ArchIcon(),
+              selectedIcon: const ArchIcon(filled: true),
+              label: l.navHome,
             ),
             NavigationDestination(
-              icon: Icon(Icons.apps_outlined),
-              selectedIcon: Icon(Icons.apps),
-              label: 'Applications',
+              icon: const Icon(Icons.apps_outlined),
+              selectedIcon: const Icon(Icons.apps),
+              label: l.navApps,
             ),
             NavigationDestination(
-              icon: Icon(Icons.sms_outlined),
-              selectedIcon: Icon(Icons.sms),
-              label: 'Messages',
+              icon: const Icon(Icons.sms_outlined),
+              selectedIcon: const Icon(Icons.sms),
+              label: l.navMessages,
             ),
             NavigationDestination(
-              icon: Icon(Icons.lock_outline),
-              selectedIcon: Icon(Icons.lock),
-              label: 'Coffre',
+              icon: const Icon(Icons.lock_outline),
+              selectedIcon: const Icon(Icons.lock),
+              label: l.navVault,
             ),
           ],
         ),

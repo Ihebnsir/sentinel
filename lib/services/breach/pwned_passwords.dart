@@ -5,14 +5,27 @@ import 'dart:io';
 import 'package:crypto/crypto.dart';
 import 'package:http/http.dart' as http;
 
-/// Erreur de vérification, avec un message en français prêt à afficher.
-class BreachCheckException implements Exception {
-  const BreachCheckException(this.message);
+import '../../l10n/l10n.dart';
 
-  final String message;
+/// Ce qui a empêché la vérification.
+enum BreachProblem { timeout, offline, tooManyRequests, unavailable }
+
+/// Erreur de vérification ; [message] l'explique dans la langue de l'app.
+class BreachCheckException implements Exception {
+  const BreachCheckException(this.problem, {this.statusCode});
+
+  final BreachProblem problem;
+  final int? statusCode; // réponse HTTP (service indisponible)
+
+  String message(AppLocalizations l) => switch (problem) {
+    BreachProblem.timeout => l.breachErrorTimeout,
+    BreachProblem.offline => l.breachErrorOffline,
+    BreachProblem.tooManyRequests => l.breachErrorTooMany,
+    BreachProblem.unavailable => l.breachErrorUnavailable('${statusCode ?? ''}'),
+  };
 
   @override
-  String toString() => 'BreachCheckException($message)';
+  String toString() => 'BreachCheckException(${problem.name})';
 }
 
 /// Empreinte SHA-1 en hexadécimal majuscule (40 caractères).
@@ -84,27 +97,19 @@ class PwnedPasswordsClient {
           )
           .timeout(timeout);
     } on TimeoutException {
-      throw const BreachCheckException(
-        'Le service ne répond pas. Réessayez plus tard.',
-      );
+      throw const BreachCheckException(BreachProblem.timeout);
     } on SocketException {
-      throw const BreachCheckException(
-        'Pas de connexion Internet. Vérifiez le Wi-Fi ou les données mobiles.',
-      );
+      throw const BreachCheckException(BreachProblem.offline);
     } on http.ClientException {
-      throw const BreachCheckException(
-        'Pas de connexion Internet. Vérifiez le Wi-Fi ou les données mobiles.',
-      );
+      throw const BreachCheckException(BreachProblem.offline);
     }
     if (response.statusCode == 429) {
-      throw const BreachCheckException(
-        'Trop de demandes. Réessayez dans un instant.',
-      );
+      throw const BreachCheckException(BreachProblem.tooManyRequests);
     }
     if (response.statusCode != 200) {
       throw BreachCheckException(
-        'Le service Have I Been Pwned est indisponible '
-        '(erreur ${response.statusCode}).',
+        BreachProblem.unavailable,
+        statusCode: response.statusCode,
       );
     }
     return parseRangeResponse(response.body);

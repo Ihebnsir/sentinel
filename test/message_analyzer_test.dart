@@ -3,6 +3,7 @@ import 'package:sentinel/services/phishing/known_brands.dart';
 import 'package:sentinel/services/phishing/message_analyzer.dart';
 import 'package:sentinel/services/phishing/phishing_model.dart';
 import 'package:sentinel/services/phishing/url_analyzer.dart';
+import 'support/l10n.dart';
 
 /// Les signaux trouvés dans le premier lien d'un texte.
 Set<LinkSignal> signalsOf(String text) {
@@ -140,7 +141,7 @@ void main() {
 
     test('chaque signal a une raison en français', () {
       final link = analyzeLinks('http://poste.tn.colis.xyz').single;
-      expect(link.findings.first.reason, contains('La Poste Tunisienne'));
+      expect(link.findings.first.reason(fr), contains('La Poste Tunisienne'));
     });
   });
 
@@ -186,8 +187,8 @@ void main() {
         fakePrediction(0.2, ['mange']),
       );
       expect(a.verdict, Verdict.rien);
-      expect(a.reasons, isEmpty);
-      expect(a.advice, isNotEmpty);
+      expect(a.reasons(fr), isEmpty);
+      expect(a.advice(fr), isNotEmpty);
     });
 
     test('raisons : liens d\'abord, puis les mots', () {
@@ -195,15 +196,15 @@ void main() {
         'Colis bloqué, payez ici : poste-tn.xyz/p',
         fakePrediction(0.9, ['colis', 'payez']),
       );
-      expect(a.reasons.first, contains('poste-tn.xyz'));
-      expect(a.reasons.last, 'Mots typiques des arnaques : « colis », « payez »');
+      expect(a.reasons(fr).first, contains('poste-tn.xyz'));
+      expect(a.reasons(fr).last, 'Mots typiques des arnaques : « colis », « payez »');
       expect(a.percent, 90);
-      expect(a.advice, contains('ne communiquez aucun code'));
+      expect(a.advice(fr), contains('ne communiquez aucun code'));
     });
 
     test('la même raison n\'apparaît qu\'une fois', () {
       final a = analyzeMessage('bit.ly/a bit.ly/b', fakePrediction(0.1));
-      expect(a.reasons, hasLength(1));
+      expect(a.reasons(fr), hasLength(1));
     });
   });
 }

@@ -37,6 +37,8 @@ object BackgroundAnalyzer {
 
     private class Request(
         val arguments: Map<String, Any>,
+        val language: String,
+        val defaultTitle: String,
         val onResult: (AnalysisResult?) -> Unit,
     )
 
@@ -50,7 +52,13 @@ object BackgroundAnalyzer {
         arguments: Map<String, Any>,
         onResult: (AnalysisResult?) -> Unit,
     ) {
-        val request = Request(arguments, onResult)
+        val texts = AppLanguage.localized(context)
+        val request = Request(
+            arguments,
+            AppLanguage.current(context),
+            texts.getString(R.string.scam_default_title),
+            onResult,
+        )
         if (dartReady) {
             send(request)
             return
@@ -103,9 +111,11 @@ object BackgroundAnalyzer {
 
     private fun send(request: Request) {
         val current = channel ?: return request.onResult(null)
-        current.invokeMethod("analyze", request.arguments, object : MethodChannel.Result {
+        // Langue des textes de l'alerte (choix de Réglages, sinon le téléphone).
+        val arguments = request.arguments + ("language" to request.language)
+        current.invokeMethod("analyze", arguments, object : MethodChannel.Result {
             override fun success(result: Any?) {
-                request.onResult(parse(result))
+                request.onResult(parse(result, request.defaultTitle))
             }
 
             // Seul le code d'erreur est écrit : jamais le message analysé.
@@ -120,13 +130,13 @@ object BackgroundAnalyzer {
         })
     }
 
-    private fun parse(result: Any?): AnalysisResult? {
+    private fun parse(result: Any?, defaultTitle: String): AnalysisResult? {
         val map = result as? Map<*, *> ?: return null
         return AnalysisResult(
             verdict = map["verdict"] as? String ?: return null,
             percent = (map["percent"] as? Number)?.toInt() ?: 0,
             mainReason = map["mainReason"] as? String ?: "",
-            alertTitle = map["alertTitle"] as? String ?: "Arnaque probable",
+            alertTitle = map["alertTitle"] as? String ?: defaultTitle,
         )
     }
 }

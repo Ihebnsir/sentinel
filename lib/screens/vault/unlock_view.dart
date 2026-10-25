@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:material_ui/material_ui.dart';
 
+import '../../l10n/l10n.dart';
 import '../../services/vault/vault_session.dart';
 import '../../theme/app_colors.dart';
 import '../../widgets/vault_fields.dart';
@@ -82,17 +83,13 @@ class _UnlockViewState extends State<UnlockView> {
     });
     final result = await widget.session.unlockWithBiometrics();
     if (!mounted || result == BiometricUnlockResult.ouvert) return;
+    final l = context.l10n;
     setState(() {
       _opening = false;
       _biometricMessage = switch (result) {
-        BiometricUnlockResult.empreintesChangees =>
-          'Les empreintes du téléphone ont changé. Ouvrez le coffre avec '
-              "votre mot de passe, puis réactivez l'empreinte.",
-        BiometricUnlockResult.bloque =>
-          "Trop d'essais. Utilisez votre mot de passe.",
-        BiometricUnlockResult.echec =>
-          "L'empreinte n'a pas pu ouvrir le coffre. Utilisez votre mot de "
-              'passe.',
+        BiometricUnlockResult.empreintesChangees => l.vaultFingerprintsChanged,
+        BiometricUnlockResult.bloque => l.vaultTooManyTries,
+        BiometricUnlockResult.echec => l.vaultFingerprintFailed,
         _ => null, // annulé : le mot de passe reste disponible
       };
     });
@@ -127,6 +124,7 @@ class _UnlockViewState extends State<UnlockView> {
 
   @override
   Widget build(BuildContext context) {
+    final l = context.l10n;
     final muted = AppColors.encre.withValues(alpha: 0.6);
     final waitSeconds = (_wait.inMilliseconds / 1000).ceil();
     final session = widget.session;
@@ -134,20 +132,18 @@ class _UnlockViewState extends State<UnlockView> {
     final info =
         _biometricMessage ??
         (session.biometricBroken
-            ? 'Les empreintes du téléphone ont changé. Ouvrez le coffre avec '
-                  "votre mot de passe, puis réactivez l'empreinte."
+            ? l.vaultFingerprintsChanged
             : session.biometricNeedsPassword
-            ? 'Pour votre sécurité, le mot de passe maître est demandé au '
-                  'moins une fois tous les 7 jours.'
+            ? l.vaultWeeklyPassword
             : null);
     return ListView(
       padding: const EdgeInsets.only(top: 16, bottom: 24),
       children: [
         const Icon(Icons.lock_outline, size: 48, color: AppColors.bleu),
         const SizedBox(height: 16),
-        const Text(
-          'Coffre verrouillé',
-          style: TextStyle(
+        Text(
+          l.vaultLockedTitle,
+          style: const TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.w600,
             color: AppColors.encre,
@@ -156,8 +152,8 @@ class _UnlockViewState extends State<UnlockView> {
         const SizedBox(height: 8),
         Text(
           biometric
-              ? 'Utilisez votre empreinte ou votre mot de passe maître.'
-              : 'Entrez votre mot de passe maître.',
+              ? l.vaultUseFingerprintOrPassword
+              : l.vaultEnterMasterPassword,
           style: TextStyle(fontSize: 15, color: muted),
         ),
         if (info != null)
@@ -176,12 +172,12 @@ class _UnlockViewState extends State<UnlockView> {
               style: FilledButton.styleFrom(backgroundColor: AppColors.bleu),
               onPressed: _opening ? null : _openWithBiometrics,
               icon: const Icon(Icons.fingerprint),
-              label: const Text("Ouvrir avec l'empreinte"),
+              label: Text(l.vaultOpenWithFingerprint),
             ),
           ),
           const SizedBox(height: 16),
           Text(
-            'Ou avec le mot de passe :',
+            l.vaultOrWithPassword,
             style: TextStyle(fontSize: 13, color: muted),
           ),
           const SizedBox(height: 8),
@@ -189,7 +185,7 @@ class _UnlockViewState extends State<UnlockView> {
           const SizedBox(height: 24),
         VaultTextField(
           controller: _password,
-          label: 'Mot de passe maître',
+          label: l.vaultMasterPassword,
           secret: true,
           enabled: !_opening,
           onChanged: (_) => setState(() {}),
@@ -200,8 +196,8 @@ class _UnlockViewState extends State<UnlockView> {
             padding: const EdgeInsets.only(top: 12),
             child: Text(
               [
-                if (_wrong) 'Mot de passe incorrect.',
-                if (waitSeconds > 0) 'Réessayez dans $waitSeconds s.',
+                if (_wrong) l.vaultWrongPassword,
+                if (waitSeconds > 0) l.vaultRetryIn('$waitSeconds'),
               ].join(' '),
               style: const TextStyle(fontSize: 15, color: AppColors.rommen),
             ),
@@ -224,7 +220,7 @@ class _UnlockViewState extends State<UnlockView> {
                 !_opening && waitSeconds == 0 && _password.text.isNotEmpty
                 ? _open
                 : null,
-            child: Text(_opening ? 'Ouverture…' : 'Ouvrir le coffre'),
+            child: Text(_opening ? l.vaultOpening : l.vaultOpen),
           ),
         ),
         // Les vieux coffres migrés n'ont pas toujours de clé.
@@ -236,7 +232,7 @@ class _UnlockViewState extends State<UnlockView> {
             child: TextButton(
               style: TextButton.styleFrom(foregroundColor: AppColors.bleu),
               onPressed: _opening ? null : widget.onForgotPassword,
-              child: const Text('Mot de passe oublié ?'),
+              child: Text(l.vaultForgotPassword),
             ),
           ),
         ],

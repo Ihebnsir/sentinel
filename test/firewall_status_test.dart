@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sentinel/services/firewall_service.dart';
+import 'support/l10n.dart';
 
 void main() {
   group('FirewallStatus.fromMap', () {
@@ -22,7 +23,7 @@ void main() {
     });
   });
 
-  group('FirewallStatus.summary', () {
+  group('FirewallStatus.summary(fr)', () {
     FirewallStatus status(bool active, int blocked) => FirewallStatus(
       active: active,
       totalQueries: 5000,
@@ -30,14 +31,14 @@ void main() {
     );
 
     test('désactivé', () {
-      expect(status(false, 12).summary, 'Désactivé');
+      expect(status(false, 12).summary(fr), 'Désactivé');
     });
 
     test('singulier pour 0 et 1, pluriel au-delà', () {
-      expect(status(true, 0).summary, 'Activé · 0 requête bloquée');
-      expect(status(true, 1).summary, 'Activé · 1 requête bloquée');
+      expect(status(true, 0).summary(fr), 'Activé · 0 requête bloquée');
+      expect(status(true, 1).summary(fr), 'Activé · 1 requête bloquée');
       // Espace insécable entre les milliers.
-      expect(status(true, 1234).summary, 'Activé · 1 234 requêtes bloquées');
+      expect(status(true, 1234).summary(fr), 'Activé · 1 234 requêtes bloquées');
     });
   });
 }

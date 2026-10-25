@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:sentinel/models/device_security_status.dart';
 import 'package:sentinel/models/security_action.dart';
 import 'package:sentinel/services/security_score_calculator.dart';
+import 'support/l10n.dart';
 
 // Date du jour fixe : les tests donnent le même résultat quel que soit le jour.
 final today = DateTime(2026, 10, 11);
@@ -32,13 +33,13 @@ DeviceSecurityStatus secureStatus({
 
 void main() {
   test('tout sécurisé : 100 et aucune action', () {
-    final report = calculateSecurityScore(secureStatus(), today);
+    final report = calculateSecurityScore(fr, secureStatus(), today);
     expect(report.score, 100);
     expect(report.actions, isEmpty);
   });
 
   test('sans verrouillage : 75 et une action vers les paramètres sécurité', () {
-    final report = calculateSecurityScore(
+    final report = calculateSecurityScore(fr, 
       secureStatus(screenLock: false),
       today,
     );
@@ -50,14 +51,14 @@ void main() {
   });
 
   test('téléphone rooté : 80 et une action sans bouton paramètres', () {
-    final report = calculateSecurityScore(secureStatus(rooted: true), today);
+    final report = calculateSecurityScore(fr, secureStatus(rooted: true), today);
     expect(report.score, 80);
     expect(report.actions.single.points, 20);
     expect(report.actions.single.settingsTarget, isNull);
   });
 
   test('correctif de plus de 90 jours : 80 et action mise à jour', () {
-    final report = calculateSecurityScore(
+    final report = calculateSecurityScore(fr, 
       secureStatus(securityPatch: DateTime(2026, 6, 1)),
       today,
     );
@@ -67,7 +68,7 @@ void main() {
 
   test('correctif de 89 jours : encore valable', () {
     final patch = today.subtract(const Duration(days: 89));
-    final report = calculateSecurityScore(
+    final report = calculateSecurityScore(fr, 
       secureStatus(securityPatch: patch),
       today,
     );
@@ -76,7 +77,7 @@ void main() {
 
   test('correctif de 90 jours pile : dépassé', () {
     final patch = DateTime(today.year, today.month, today.day - 90);
-    final report = calculateSecurityScore(
+    final report = calculateSecurityScore(fr, 
       secureStatus(securityPatch: patch),
       today,
     );
@@ -84,7 +85,7 @@ void main() {
   });
 
   test('date du correctif inconnue : comptée comme dépassée', () {
-    final report = calculateSecurityScore(
+    final report = calculateSecurityScore(fr, 
       secureStatus(unknownPatch: true),
       today,
     );
@@ -93,7 +94,7 @@ void main() {
   });
 
   test('biométrie absente : 90', () {
-    final report = calculateSecurityScore(
+    final report = calculateSecurityScore(fr, 
       secureStatus(biometricEnrolled: false),
       today,
     );
@@ -102,7 +103,7 @@ void main() {
   });
 
   test('options développeur + débogage USB : 80 et deux actions', () {
-    final report = calculateSecurityScore(
+    final report = calculateSecurityScore(fr, 
       secureStatus(developerOptions: true, usbDebugging: true),
       today,
     );
@@ -115,7 +116,7 @@ void main() {
   });
 
   test('stockage non chiffré : 95', () {
-    final report = calculateSecurityScore(
+    final report = calculateSecurityScore(fr, 
       secureStatus(encrypted: false),
       today,
     );
@@ -124,7 +125,7 @@ void main() {
 
   test('rien de sécurisé : 0 et sept actions, les plus importantes en premier',
       () {
-    final report = calculateSecurityScore(
+    final report = calculateSecurityScore(fr, 
       secureStatus(
         screenLock: false,
         biometricEnrolled: false,
@@ -141,7 +142,7 @@ void main() {
   });
 
   test('le score + les points des actions font toujours 100', () {
-    final report = calculateSecurityScore(
+    final report = calculateSecurityScore(fr, 
       secureStatus(screenLock: false, encrypted: false, usbDebugging: true),
       today,
     );

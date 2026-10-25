@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:sentinel/screens/app_report_screen.dart';
 import 'package:sentinel/services/app_analysis.dart';
+import 'support/l10n.dart';
 
 // SEN-14 : un rapport expiré n'est jamais affiché, même resté ouvert.
 void main() {
@@ -32,7 +33,7 @@ void main() {
   Future<List<bool?>> open(WidgetTester tester, DateTime now) async {
     final results = <bool?>[];
     await tester.pumpWidget(
-      MaterialApp(
+      testApp(
         home: Builder(
           builder: (context) => TextButton(
             onPressed: () async => results.add(

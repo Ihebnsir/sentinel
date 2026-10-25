@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:material_ui/material_ui.dart';
 
+import '../../l10n/l10n.dart';
 import '../../services/breach/breach_checker.dart';
 import '../../services/vault/password_generator.dart';
 import '../../services/vault/password_health.dart';
@@ -112,10 +113,7 @@ class _VaultItemScreenState extends State<VaultItemScreen> {
     if (wait == null || !mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(
-          'Mot de passe copié. Il sera effacé du presse-papiers dans '
-          '${wait.inSeconds} s.',
-        ),
+        content: Text(context.l10n.vaultPasswordCopied('${wait.inSeconds}')),
       ),
     );
   }
@@ -124,7 +122,7 @@ class _VaultItemScreenState extends State<VaultItemScreen> {
     final titre = _titre.text.trim();
     if (titre.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Donnez un titre à cet élément.')),
+        SnackBar(content: Text(context.l10n.vaultNeedTitle)),
       );
       return;
     }
@@ -159,22 +157,20 @@ class _VaultItemScreenState extends State<VaultItemScreen> {
       builder: (context) => AlertDialog(
         backgroundColor: AppColors.chaux,
         surfaceTintColor: Colors.transparent,
-        title: Text('Supprimer « ${widget.item!.titre} » ?'),
-        content: const Text(
-          'Cet élément sera définitivement effacé du coffre.',
-        ),
+        title: Text(context.l10n.vaultDeleteItemTitle(widget.item!.titre)),
+        content: Text(context.l10n.vaultDeleteItemText),
         actions: [
           TextButton(
             style: TextButton.styleFrom(
               foregroundColor: AppColors.encre.withValues(alpha: 0.6),
             ),
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Annuler'),
+            child: Text(context.l10n.commonCancel),
           ),
           TextButton(
             style: TextButton.styleFrom(foregroundColor: AppColors.rommen),
             onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Supprimer'),
+            child: Text(context.l10n.vaultDelete),
           ),
         ],
       ),
@@ -193,7 +189,7 @@ class _VaultItemScreenState extends State<VaultItemScreen> {
       if (!mounted || _closing) return;
       setState(() => _saving = false);
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("L'enregistrement a échoué.")),
+        SnackBar(content: Text(context.l10n.vaultSaveFailed)),
       );
     }
   }
@@ -208,6 +204,7 @@ class _VaultItemScreenState extends State<VaultItemScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l = context.l10n;
     final muted = AppColors.encre.withValues(alpha: 0.6);
     return Scaffold(
       // Barre du haut discrète, sans ombre (comme le détail d'une app).
@@ -220,7 +217,7 @@ class _VaultItemScreenState extends State<VaultItemScreen> {
         actions: [
           if (widget.item != null)
             IconButton(
-              tooltip: 'Supprimer',
+              tooltip: l.vaultDelete,
               icon: const Icon(Icons.delete_outline),
               onPressed: _saving ? null : _delete,
             ),
@@ -236,8 +233,8 @@ class _VaultItemScreenState extends State<VaultItemScreen> {
                 children: [
                   Text(
                     widget.item == null
-                        ? 'Nouveau : ${widget.type.label.toLowerCase()}'
-                        : widget.type.label,
+                        ? (_isPassword ? l.vaultNewPassword : l.vaultNewNote)
+                        : widget.type.label(l),
                     style: const TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.w600,
@@ -245,12 +242,12 @@ class _VaultItemScreenState extends State<VaultItemScreen> {
                     ),
                   ),
                   const SizedBox(height: 24),
-                  VaultTextField(controller: _titre, label: 'Titre'),
-                  if (_isPassword) ..._passwordFields(muted),
+                  VaultTextField(controller: _titre, label: l.vaultFieldTitle),
+                  if (_isPassword) ..._passwordFields(l, muted),
                   const SizedBox(height: 16),
                   VaultTextField(
                     controller: _note,
-                    label: _isPassword ? 'Note' : 'Note secrète',
+                    label: _isPassword ? l.vaultFieldNote : l.vaultTypeNote,
                     minLines: _isPassword ? 2 : 6,
                     maxLines: 12,
                     keyboardType: TextInputType.multiline,
@@ -267,7 +264,7 @@ class _VaultItemScreenState extends State<VaultItemScreen> {
                     backgroundColor: AppColors.bleu,
                   ),
                   onPressed: _saving ? null : _save,
-                  child: Text(_saving ? 'Enregistrement…' : 'Enregistrer'),
+                  child: Text(_saving ? l.vaultSaving : l.vaultSave),
                 ),
               ),
             ),
@@ -277,17 +274,17 @@ class _VaultItemScreenState extends State<VaultItemScreen> {
     );
   }
 
-  List<Widget> _passwordFields(Color muted) => [
+  List<Widget> _passwordFields(AppLocalizations l, Color muted) => [
     const SizedBox(height: 16),
     VaultTextField(
       controller: _identifiant,
-      label: 'Identifiant',
+      label: l.vaultFieldUsername,
       keyboardType: TextInputType.emailAddress,
     ),
     const SizedBox(height: 16),
     VaultTextField(
       controller: _motDePasse,
-      label: 'Mot de passe',
+      label: l.vaultTypePassword,
       secret: true,
       revealed: _revealPassword,
     ),
@@ -301,7 +298,7 @@ class _VaultItemScreenState extends State<VaultItemScreen> {
           return Padding(
             padding: const EdgeInsets.only(top: 8),
             child: Text(
-              breachMessage(count),
+              breachMessage(l, count),
               style: const TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
@@ -317,7 +314,7 @@ class _VaultItemScreenState extends State<VaultItemScreen> {
           style: TextButton.styleFrom(foregroundColor: AppColors.bleu),
           onPressed: _copyPassword,
           icon: const Icon(Icons.copy, size: 18),
-          label: const Text('Copier'),
+          label: Text(l.vaultCopy),
         ),
         const Spacer(),
         TextButton.icon(
@@ -327,7 +324,7 @@ class _VaultItemScreenState extends State<VaultItemScreen> {
             if (_showGenerator) _generate();
           },
           icon: const Icon(Icons.autorenew, size: 18),
-          label: Text(_showGenerator ? 'Masquer le générateur' : 'Générer'),
+          label: Text(_showGenerator ? l.vaultHideGenerator : l.vaultGenerate),
         ),
       ],
     ),
@@ -340,7 +337,7 @@ class _VaultItemScreenState extends State<VaultItemScreen> {
     const SizedBox(height: 16),
     VaultTextField(
       controller: _siteWeb,
-      label: 'Site web',
+      label: l.vaultFieldWebsite,
       keyboardType: TextInputType.url,
     ),
   ];
@@ -385,6 +382,7 @@ class _GeneratorPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = context.l10n;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -392,7 +390,7 @@ class _GeneratorPanel extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.only(top: 12),
           child: Text(
-            'Longueur : ${options.length} caractères',
+            l.generatorLength(options.length, l.number(options.length)),
             style: const TextStyle(fontSize: 15, color: AppColors.encre),
           ),
         ),
@@ -409,19 +407,19 @@ class _GeneratorPanel extends StatelessWidget {
         ),
         _divider,
         _switch(
-          'Majuscules (A-Z)',
+          l.generatorUppercase,
           options.uppercase,
           (v) => onChanged(options.copyWith(uppercase: v)),
         ),
         _divider,
         _switch(
-          'Chiffres (0-9)',
+          l.generatorDigits,
           options.digits,
           (v) => onChanged(options.copyWith(digits: v)),
         ),
         _divider,
         _switch(
-          'Symboles (!#\$…)',
+          l.generatorSymbols,
           options.symbols,
           (v) => onChanged(options.copyWith(symbols: v)),
         ),
@@ -431,7 +429,7 @@ class _GeneratorPanel extends StatelessWidget {
           child: TextButton(
             style: TextButton.styleFrom(foregroundColor: AppColors.bleu),
             onPressed: onRegenerate,
-            child: const Text('Nouveau mot de passe'),
+            child: Text(l.generatorNewPassword),
           ),
         ),
       ],

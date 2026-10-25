@@ -6,6 +6,7 @@ import 'package:sentinel/models/installed_app.dart';
 import 'package:sentinel/screens/app_detail_screen.dart';
 import 'package:sentinel/services/app_risk_calculator.dart';
 import 'package:sentinel/widgets/app_icon.dart';
+import 'support/l10n.dart';
 
 // Une image PNG de 1x1 pixel, pour tester l'icône avec une vraie image.
 final _png = base64Decode(
@@ -44,10 +45,10 @@ void main() {
         const report = AppRiskReport(
           score: 0,
           level: RiskLevel.faible,
-          reasons: [],
+          rules: [],
         );
         await tester.pumpWidget(
-          MaterialApp(
+          testApp(
             home: AppDetailScreen(
               app: _app(withIcon: withIcon),
               report: report,

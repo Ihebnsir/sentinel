@@ -1,5 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 
+import '../l10n/l10n.dart';
 import '../theme/app_colors.dart';
 
 /// Demande l'accord avant d'utiliser Have I Been Pwned.
@@ -21,6 +22,7 @@ class _ConsentSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = context.l10n;
     final muted = AppColors.encre.withValues(alpha: 0.6);
     return SafeArea(
       child: SingleChildScrollView(
@@ -28,26 +30,22 @@ class _ConsentSheet extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Vérifier les fuites ?',
-              style: TextStyle(
+            Text(
+              l.breachConsentTitle,
+              style: const TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.w600,
                 color: AppColors.encre,
               ),
             ),
             const SizedBox(height: 12),
-            const Text(
-              "Sentinel envoie seulement les 5 premiers caractères d'une "
-              'empreinte (hash) de chaque mot de passe à Have I Been Pwned. '
-              'Votre mot de passe ne quitte jamais le téléphone.',
-              style: TextStyle(fontSize: 15, color: AppColors.encre),
+            Text(
+              l.breachConsentText,
+              style: const TextStyle(fontSize: 15, color: AppColors.encre),
             ),
             const SizedBox(height: 12),
             Text(
-              'Le service répond avec une liste de fuites connues, et la '
-              'comparaison se fait sur votre téléphone. Vous pourrez retirer '
-              'cet accord dans les réglages du coffre.',
+              l.breachConsentDetail,
               style: TextStyle(fontSize: 13, color: muted),
             ),
             const SizedBox(height: 24),
@@ -56,7 +54,7 @@ class _ConsentSheet extends StatelessWidget {
               child: FilledButton(
                 style: FilledButton.styleFrom(backgroundColor: AppColors.bleu),
                 onPressed: () => Navigator.of(context).pop(true),
-                child: const Text('Vérifier'),
+                child: Text(l.breachConsentCheck),
               ),
             ),
             const SizedBox(height: 4),
@@ -65,7 +63,7 @@ class _ConsentSheet extends StatelessWidget {
               child: TextButton(
                 style: TextButton.styleFrom(foregroundColor: muted),
                 onPressed: () => Navigator.of(context).pop(false),
-                child: const Text('Annuler'),
+                child: Text(l.commonCancel),
               ),
             ),
           ],

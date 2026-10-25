@@ -1,5 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 
+import '../l10n/l10n.dart';
 import '../services/protection_service.dart';
 import '../theme/app_colors.dart';
 
@@ -91,6 +92,7 @@ class _AutoProtectionSectionState extends State<AutoProtectionSection> {
 
   @override
   Widget build(BuildContext context) {
+    final l = context.l10n;
     final status = _status;
     if (status == null) return const SizedBox.shrink();
     final muted = AppColors.encre.withValues(alpha: 0.6);
@@ -108,9 +110,9 @@ class _AutoProtectionSectionState extends State<AutoProtectionSection> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'Protection automatique',
-                      style: TextStyle(
+                    Text(
+                      l.autoProtectionTitle,
+                      style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w500,
                         color: AppColors.encre,
@@ -118,7 +120,7 @@ class _AutoProtectionSectionState extends State<AutoProtectionSection> {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      _statusSentence(status),
+                      _statusSentence(l, status),
                       style: TextStyle(fontSize: 13, color: muted),
                     ),
                   ],
@@ -131,12 +133,12 @@ class _AutoProtectionSectionState extends State<AutoProtectionSection> {
         ),
         if (active && !status.notificationsAllowed)
           _Link(
-            label: 'Autoriser les notifications de Sentinel',
+            label: l.autoProtectionAllowNotifications,
             onPressed: _service.openNotificationSettings,
           ),
         if (!active && _justDisabled && status.listenerAccess)
           _Link(
-            label: "Retirer aussi l'accès dans les réglages Android",
+            label: l.autoProtectionRemoveAccess,
             onPressed: _service.openListenerSettings,
           ),
         const Divider(height: 1, thickness: 1, color: AppColors.ligne),
@@ -144,13 +146,12 @@ class _AutoProtectionSectionState extends State<AutoProtectionSection> {
     );
   }
 
-  static String _statusSentence(ProtectionStatus status) {
-    if (!status.isActive) return 'Désactivée';
+  static String _statusSentence(AppLocalizations l, ProtectionStatus status) {
+    if (!status.isActive) return l.commonOffFeminine;
     if (!status.notificationsAllowed) {
-      return 'Notifications de Sentinel bloquées : '
-          'vous ne serez pas prévenu en cas d\'arnaque.';
+      return l.autoProtectionNotificationsBlocked;
     }
-    return "Analyse les messages reçus et vous prévient en cas d'arnaque.";
+    return l.autoProtectionOn;
   }
 }
 
@@ -185,6 +186,7 @@ class _ExplanationSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = context.l10n;
     return SafeArea(
       child: SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(28, 0, 28, 16),
@@ -192,31 +194,30 @@ class _ExplanationSheet extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text(
-              'Protection automatique',
-              style: TextStyle(
+            Text(
+              l.autoProtectionTitle,
+              style: const TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.w600,
                 color: AppColors.encre,
               ),
             ),
             const SizedBox(height: 20),
-            const _SheetSection(
-              title: 'Ce que fait Sentinel',
+            _SheetSection(
+              title: l.autoProtectionDoesTitle,
               lines: [
-                'Lit le texte des notifications de vos applications de '
-                    'messagerie.',
-                "L'analyse sur votre téléphone.",
-                "Vous prévient si c'est une arnaque.",
+                l.autoProtectionDoes1,
+                l.autoProtectionDoes2,
+                l.autoProtectionDoes3,
               ],
             ),
             const SizedBox(height: 20),
-            const _SheetSection(
-              title: 'Ce que Sentinel ne fait jamais',
+            _SheetSection(
+              title: l.autoProtectionNeverTitle,
               lines: [
-                'Envoyer vos messages sur Internet.',
-                'Les enregistrer.',
-                'Lire les notifications des autres applications.',
+                l.autoProtectionNever1,
+                l.autoProtectionNever2,
+                l.autoProtectionNever3,
               ],
             ),
             const SizedBox(height: 24),
@@ -227,7 +228,7 @@ class _ExplanationSheet extends StatelessWidget {
                     foregroundColor: AppColors.encre.withValues(alpha: 0.6),
                   ),
                   onPressed: () => Navigator.of(context).pop(false),
-                  child: const Text('Plus tard'),
+                  child: Text(l.commonLater),
                 ),
                 const Spacer(),
                 FilledButton(
@@ -235,7 +236,7 @@ class _ExplanationSheet extends StatelessWidget {
                     backgroundColor: AppColors.bleu,
                   ),
                   onPressed: () => Navigator.of(context).pop(true),
-                  child: const Text('Continuer'),
+                  child: Text(l.commonContinue),
                 ),
               ],
             ),

@@ -75,7 +75,7 @@
             </intent-filter>
             <!-- Menu de sélection de texte (Copier, Coller…) de toutes les apps.
                  Le label est le texte affiché dans ce menu. -->
-            <intent-filter android:label="Vérifier avec Sentinel">
+            <intent-filter android:label="@string/process_text_label">
                 <action android:name="android.intent.action.PROCESS_TEXT"/>
                 <category android:name="android.intent.category.DEFAULT"/>
                 <data android:mimeType="text/plain"/>
@@ -97,7 +97,7 @@
              et seulement si l'utilisateur l'a autorisé dans les réglages. -->
         <service
             android:name=".SentinelNotificationListener"
-            android:label="Sentinel – protection anti-arnaque"
+            android:label="@string/listener_label"
             android:exported="true"
             android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE">
             <intent-filter>

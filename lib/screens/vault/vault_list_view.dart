@@ -1,5 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 
+import '../../l10n/l10n.dart';
 import '../../services/breach/breach_checker.dart';
 import '../../services/vault/password_health.dart';
 import '../../services/vault/vault_item.dart';
@@ -87,6 +88,7 @@ class _VaultListViewState extends State<VaultListView> {
 
   @override
   Widget build(BuildContext context) {
+    final l = context.l10n;
     final muted = AppColors.encre.withValues(alpha: 0.6);
     final items = _visibleItems;
     final empty = widget.session.items.isEmpty;
@@ -104,7 +106,7 @@ class _VaultListViewState extends State<VaultListView> {
               style: FilledButton.styleFrom(backgroundColor: AppColors.bleu),
               onPressed: _add,
               icon: const Icon(Icons.add),
-              label: const Text('Ajouter'),
+              label: Text(l.vaultAdd),
             ),
           ],
         ),
@@ -126,10 +128,7 @@ class _VaultListViewState extends State<VaultListView> {
               ? Padding(
                   padding: const EdgeInsets.only(top: 16),
                   child: Text(
-                    empty
-                        ? 'Votre coffre est vide. Ajoutez un premier mot de '
-                              'passe ou une note secrète.'
-                        : 'Aucun résultat.',
+                    empty ? l.vaultEmptyList : l.vaultNoResults,
                     style: TextStyle(fontSize: 15, color: muted),
                   ),
                 )
@@ -170,6 +169,7 @@ class _HealthRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = context.l10n;
     final toFix = report.toFix;
     final color = report.breached.isNotEmpty
         ? AppColors.rommen
@@ -184,10 +184,10 @@ class _HealthRow extends StatelessWidget {
           children: [
             Icon(Icons.health_and_safety_outlined, color: color),
             const SizedBox(width: 16),
-            const Expanded(
+            Expanded(
               child: Text(
-                'Santé des mots de passe',
-                style: TextStyle(
+                l.vaultHealthTitle,
+                style: const TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.w500,
                   color: AppColors.encre,
@@ -195,7 +195,7 @@ class _HealthRow extends StatelessWidget {
               ),
             ),
             Text(
-              toFix == 0 ? 'Tout va bien' : '$toFix à corriger',
+              toFix == 0 ? l.vaultAllGood : l.vaultToFix(l.number(toFix)),
               style: TextStyle(fontWeight: FontWeight.w600, color: color),
             ),
             Icon(
@@ -230,7 +230,7 @@ class _SearchField extends StatelessWidget {
       style: const TextStyle(fontSize: 15, color: AppColors.encre),
       decoration: InputDecoration(
         isDense: true,
-        hintText: 'Rechercher',
+        hintText: context.l10n.vaultSearch,
         hintStyle: TextStyle(fontSize: 15, color: muted),
         prefixIcon: Icon(Icons.search, color: muted),
         contentPadding: const EdgeInsets.symmetric(vertical: 12),
@@ -251,7 +251,7 @@ class _ItemRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final subtitle = item.type == VaultItemType.note
-        ? item.type.label
+        ? item.type.label(context.l10n)
         : item.identifiant;
     return InkWell(
       onTap: onTap,
@@ -318,9 +318,9 @@ class _TypeChooser extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Ajouter',
-              style: TextStyle(
+            Text(
+              context.l10n.vaultAdd,
+              style: const TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.w600,
                 color: AppColors.encre,
@@ -338,7 +338,7 @@ class _TypeChooser extends StatelessWidget {
                       Icon(iconFor(type), color: AppColors.bleu),
                       const SizedBox(width: 16),
                       Text(
-                        type.label,
+                        type.label(context.l10n),
                         style: const TextStyle(
                           fontSize: 15,
                           color: AppColors.encre,

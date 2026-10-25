@@ -39,6 +39,8 @@ class MainActivity : FlutterActivity() {
 
     // Même nom que dans lib/services/protection_service.dart.
     private val protectionChannelName = "com.iheb.sentinel/protection"
+    // Langue choisie dans Réglages (lib/services/language_store.dart).
+    private val languageChannelName = "com.iheb.sentinel/language"
 
     // Réponse à renvoyer à Dart quand l'utilisateur a répondu à la demande
     // d'autorisation des notifications.
@@ -136,6 +138,17 @@ class MainActivity : FlutterActivity() {
                         result.success(null)
                     }
                     "requestNotificationPermission" -> requestNotificationPermission(result)
+                    else -> result.notImplemented()
+                }
+            }
+
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, languageChannelName)
+            .setMethodCallHandler { call, result ->
+                when (call.method) {
+                    "setLanguage" -> {
+                        AppLanguage.choose(this, call.argument<String>("language"))
+                        result.success(null)
+                    }
                     else -> result.notImplemented()
                 }
             }

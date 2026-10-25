@@ -1,18 +1,72 @@
+import '../l10n/l10n.dart';
 import '../models/installed_app.dart';
 import 'apps/known_apps.dart';
 import 'apps/stalkerware_ioc.dart';
 
-/// Les niveaux de risque, avec leur libellé affiché.
+/// Les niveaux de risque.
 /// « Système » : app d'Android ou du fabricant, permissions non évaluées.
 enum RiskLevel {
-  systeme('Système'),
-  faible('Faible'),
-  modere('Modéré'),
-  eleve('Élevé');
+  systeme,
+  faible,
+  modere,
+  eleve;
 
-  const RiskLevel(this.label);
+  /// Libellé affiché, ex : « Élevé ».
+  String label(AppLocalizations l) => switch (this) {
+    systeme => l.riskLevelSystem,
+    faible => l.riskLevelLow,
+    modere => l.riskLevelModerate,
+    eleve => l.riskLevelHigh,
+  };
+}
 
-  final String label;
+/// Les règles qui peuvent s'appliquer à une app. L'explication est écrite
+/// à l'affichage, dans la langue de l'app ([AppRiskReport.reasons]).
+enum AppRiskRule {
+  stalkerware,
+  modifiedCopy,
+  impersonation,
+  knownMod,
+  spyProfile,
+  bankingCombo,
+  accessibility,
+  unknownSource,
+  deviceAdmin,
+  debugCert,
+  sms,
+  notifications,
+  microphone,
+  callLog,
+  overlay,
+  backgroundLocation,
+  oldTarget,
+  otherStore,
+  contacts,
+  camera;
+
+  /// [brand] : nom de l'app imitée (règles sur l'identité).
+  String reason(AppLocalizations l, String brand) => switch (this) {
+    stalkerware => l.riskStalkerware,
+    modifiedCopy => l.riskModifiedCopy(brand),
+    impersonation => l.riskImpersonation(brand),
+    knownMod => l.riskKnownMod(brand),
+    spyProfile => l.riskSpyProfile,
+    bankingCombo => l.riskBankingCombo,
+    accessibility => l.riskAccessibility,
+    unknownSource => l.riskUnknownSource,
+    deviceAdmin => l.riskDeviceAdmin,
+    debugCert => l.riskDebugCert,
+    sms => l.riskSms,
+    notifications => l.riskNotifications,
+    microphone => l.riskMicrophone,
+    callLog => l.riskCallLog,
+    overlay => l.riskOverlay,
+    backgroundLocation => l.riskBackgroundLocation,
+    oldTarget => l.riskOldTarget,
+    otherStore => l.riskOtherStore,
+    contacts => l.riskContacts,
+    camera => l.riskCamera,
+  };
 }
 
 /// Résultat de l'analyse d'une app : score, niveau et explications.
@@ -20,7 +74,7 @@ class AppRiskReport {
   const AppRiskReport({
     required this.score,
     required this.level,
-    required this.reasons,
+    required this.rules,
     this.identity = AppIdentity.unknown,
     this.stalkerwareName,
     this.spyProfile = false,
@@ -28,7 +82,7 @@ class AppRiskReport {
 
   final int score; // de 0 à 100
   final RiskLevel level;
-  final List<String> reasons; // de la plus grave à la moins grave
+  final List<AppRiskRule> rules; // de la plus grave à la moins grave
   final AppIdentity identity; // comparaison avec les apps officielles
   final String? stalkerwareName; // nom du stalkerware connu, sinon null
   final bool spyProfile; // icône cachée + accès typiques d'un espion
@@ -40,8 +94,14 @@ class AppRiskReport {
   bool get needsReview =>
       level == RiskLevel.modere || level == RiskLevel.eleve;
 
+  /// Les explications, de la plus grave à la moins grave.
+  List<String> reasons(AppLocalizations l) => [
+    for (final rule in rules) rule.reason(l, identity.brand ?? ''),
+  ];
+
   /// La raison la plus grave, ou null si aucune.
-  String? get mainReason => reasons.isEmpty ? null : reasons.first;
+  String? mainReason(AppLocalizations l) =>
+      rules.isEmpty ? null : rules.first.reason(l, identity.brand ?? '');
 }
 
 /// Score maximal, même si plusieurs règles s'additionnent au-delà.
@@ -56,9 +116,6 @@ RiskLevel riskLevelFor(int score) {
   if (score >= 30) return RiskLevel.modere;
   return RiskLevel.faible;
 }
-
-/// Raison affichée pour un stalkerware connu.
-const stalkerwareReason = 'Logiciel espion connu (stalkerware)';
 
 /// Nombre minimal d'accès d'espion, en plus de l'icône cachée.
 const minSpyAccesses = 2;
@@ -96,7 +153,7 @@ AppRiskReport calculateAppRisk(
   return AppRiskReport(
     score: maxAppRiskScore,
     level: RiskLevel.eleve,
-    reasons: List.unmodifiable([stalkerwareReason, ...report.reasons]),
+    rules: List.unmodifiable([AppRiskRule.stalkerware, ...report.rules]),
     identity: report.identity,
     stalkerwareName: stalkerware,
     spyProfile: report.spyProfile,
@@ -112,30 +169,23 @@ AppRiskReport _rulesReport(
   List<ModdedApp> mods,
 ) {
   var score = 0;
-  final reasons = <String>[];
+  final rules = <AppRiskRule>[];
 
-  // Ajoute les points et l'explication si la règle s'applique.
-  void rule(bool applies, int points, String reason) {
+  // Ajoute les points et la règle si elle s'applique.
+  void rule(bool applies, int points, AppRiskRule appRule) {
     if (!applies) return;
     score += points;
-    reasons.add(reason);
+    rules.add(appRule);
   }
 
   bool has(String permission) =>
       app.hasPermission('android.permission.$permission');
 
-  void accessibilityRule() => rule(
-        app.accessibilityServiceEnabled,
-        30,
-        "Peut lire tout ce qui s'affiche à l'écran et agir à votre place",
-      );
+  void accessibilityRule() =>
+      rule(app.accessibilityServiceEnabled, 30, AppRiskRule.accessibility);
 
-  void deviceAdminRule() => rule(
-        app.isDeviceAdmin,
-        20,
-        "Est administrateur de l'appareil et peut compliquer sa "
-            'désinstallation',
-      );
+  void deviceAdminRule() =>
+      rule(app.isDeviceAdmin, 20, AppRiskRule.deviceAdmin);
 
   // App système : ses permissions étendues sont normales, on ne les compte
   // pas. On garde seulement l'accessibilité et l'administration, car des
@@ -143,98 +193,80 @@ AppRiskReport _rulesReport(
   if (app.isSystemApp) {
     accessibilityRule();
     deviceAdminRule();
-    if (reasons.isEmpty) {
+    if (rules.isEmpty) {
       return const AppRiskReport(
         score: 0,
         level: RiskLevel.systeme,
-        reasons: [],
+        rules: [],
       );
     }
     return AppRiskReport(
       score: score,
       level: riskLevelFor(score),
-      reasons: List.unmodifiable(reasons),
+      rules: List.unmodifiable(rules),
     );
   }
 
   final unknownSource = !app.isFromOfficialStore;
   final otherStore = app.isFromOfficialStore && !app.isFromPlayStore;
   final identity = identifyApp(app, known: known, mods: mods);
-  final brand = identity.brand;
   final spyProfile = hasSpyProfile(app);
 
   // Identité : copie repackagée, usurpation de nom, mod connu.
   rule(
     identity.verdict == IdentityVerdict.modifiedCopy,
     80,
-    "Copie modifiée de $brand (signature différente de l'éditeur officiel)",
+    AppRiskRule.modifiedCopy,
   );
   rule(
     identity.verdict == IdentityVerdict.impersonation,
     60,
-    "Se fait passer pour $brand, mais ce n'est pas l'application officielle",
+    AppRiskRule.impersonation,
   );
   rule(
     identity.verdict == IdentityVerdict.knownMod,
     45,
-    'Version modifiée non officielle de $brand : elle peut lire vos messages',
+    AppRiskRule.knownMod,
   );
-  rule(spyProfile, 40, "Icône cachée et accès typiques d'un logiciel espion");
+  rule(spyProfile, 40, AppRiskRule.spyProfile);
 
   // Règle de combinaison, toujours affichée en premier :
   // c'est le schéma des chevaux de Troie bancaires.
   rule(
     app.accessibilityServiceEnabled && unknownSource,
     15,
-    'Combinaison typique des applications qui volent les comptes bancaires',
+    AppRiskRule.bankingCombo,
   );
   accessibilityRule();
-  rule(unknownSource, 25, 'Installée en dehors du Play Store');
+  rule(unknownSource, 25, AppRiskRule.unknownSource);
   deviceAdminRule();
-  rule(app.debugCert, 15, 'Signée avec un certificat de test');
-  rule(
-    has('READ_SMS') || has('RECEIVE_SMS'),
-    15,
-    'Peut lire vos SMS, y compris les codes de vérification bancaires',
-  );
-  rule(
-    app.notificationListenerEnabled,
-    15,
-    'Peut lire toutes vos notifications, y compris vos messages',
-  );
-  rule(has('RECORD_AUDIO'), 10, 'Peut utiliser le micro');
-  rule(has('READ_CALL_LOG'), 10, "Peut consulter l'historique de vos appels");
-  rule(
-    app.requestsOverlay,
-    10,
-    "Peut s'afficher par-dessus les autres applications",
-  );
+  rule(app.debugCert, 15, AppRiskRule.debugCert);
+  rule(has('READ_SMS') || has('RECEIVE_SMS'), 15, AppRiskRule.sms);
+  rule(app.notificationListenerEnabled, 15, AppRiskRule.notifications);
+  rule(has('RECORD_AUDIO'), 10, AppRiskRule.microphone);
+  rule(has('READ_CALL_LOG'), 10, AppRiskRule.callLog);
+  rule(app.requestsOverlay, 10, AppRiskRule.overlay);
   rule(
     has('ACCESS_BACKGROUND_LOCATION'),
     10,
-    "Peut connaître votre position même quand vous ne l'utilisez pas",
+    AppRiskRule.backgroundLocation,
   );
   // targetSdk à 0 : valeur inconnue, on ne pénalise pas.
   rule(
     app.targetSdk > 0 && app.targetSdk < minSafeTargetSdk,
     10,
-    "Conçue pour une ancienne version d'Android, avec moins de protections",
+    AppRiskRule.oldTarget,
   );
   // Boutique d'un fabricant (AppGallery, Galaxy Store…) : petit signal.
-  rule(
-    otherStore,
-    5,
-    'Installée depuis une boutique autre que le Play Store '
-        '(contrôles différents)',
-  );
-  rule(has('READ_CONTACTS'), 5, 'Peut lire vos contacts');
-  rule(has('CAMERA'), 5, "Peut utiliser l'appareil photo");
+  rule(otherStore, 5, AppRiskRule.otherStore);
+  rule(has('READ_CONTACTS'), 5, AppRiskRule.contacts);
+  rule(has('CAMERA'), 5, AppRiskRule.camera);
 
   final capped = score > maxAppRiskScore ? maxAppRiskScore : score;
   return AppRiskReport(
     score: capped,
     level: riskLevelFor(capped),
-    reasons: List.unmodifiable(reasons),
+    rules: List.unmodifiable(rules),
     identity: identity,
     spyProfile: spyProfile,
   );
@@ -242,12 +274,10 @@ AppRiskReport _rulesReport(
 
 /// Résumé de l'analyse, ex : « 34 applications analysées, dont 2 à vérifier. »
 /// Les apps « Système » comptent dans le total, jamais dans « à vérifier ».
-String appsScanSummary(List<AppRiskReport> reports) {
+String appsScanSummary(AppLocalizations l, List<AppRiskReport> reports) {
   final total = reports.length;
   final toReview = reports.where((r) => r.needsReview).length;
-  final analysed = total > 1
-      ? '$total applications analysées'
-      : '$total application analysée';
-  if (toReview == 0) return '$analysed, aucune à vérifier.';
-  return '$analysed, dont $toReview à vérifier.';
+  final analyzed = l.appsAnalyzed(total, l.number(total));
+  if (toReview == 0) return l.appsSummaryNoneToReview(analyzed);
+  return l.appsSummaryToReview(analyzed, l.number(toReview));
 }

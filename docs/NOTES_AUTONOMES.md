@@ -34,3 +34,23 @@ Choix faits sans demander :
 - **Signaler une faille** : ouvre directement `SECURITY.md` sur GitHub dans le navigateur (canal existant `openWebPage`, https uniquement).
 
 Non vérifié : l'interface n'a pas été lancée sur un téléphone (règle : pas de `flutter run`). Le bouton Réglages de l'accueil n'a pas de test widget (l'accueil appelle les canaux Android) ; les écrans eux-mêmes sont testés.
+
+## Traduction : français, arabe, anglais (2026-10-25)
+
+Choix faits sans demander :
+
+- **Système officiel** : `flutter_localizations` + `gen-l10n` (`l10n.yaml`). Fichiers ARB dans `lib/l10n` : `app_fr.arb` (modèle, chaque valeur à insérer y est décrite), `app_ar.arb`, `app_en.arb`. Les fichiers générés (`app_localizations*.dart`) sont écrits dans `lib/l10n` et commités (le « paquet synthétique » n'existe plus). Clés en camelCase, préfixées par l'écran ou la fonction (`home…`, `vault…`, `risk…`, `reason…`, `perm…`).
+- **material_ui** : les délégués `GlobalMaterialLocalizations` de `material_ui` (pas ceux de `flutter_localizations`, d'un autre type), `GlobalCupertinoLocalizations` de `cupertino_ui`, `GlobalWidgetsLocalizations` (sens de lecture). Liste dans `lib/l10n/l10n.dart`, avec `context.l10n` et les formats de nombres et de dates. `intl` et `cupertino_ui` ajoutés en dépendances directes (déjà présents en indirect).
+- **Langue** : celle du téléphone, sinon le français (premier de la liste). Choix manuel en tête de Réglages (« Langue » : langue du téléphone, Français, العربية, English ; chaque nom écrit dans sa langue). Mémorisé dans `language.json` (même modèle que `onboarding.json`), lu avant le premier écran.
+- **Kotlin** : `res/values` (français, par défaut), `values-en`, `values-ar` pour les notifications (arnaque, pare-feu, VPN), leurs canaux, la fenêtre d'empreinte et les deux libellés du manifeste. Le choix de Réglages est envoyé par le canal `com.iheb.sentinel/language` et gardé dans `AppLanguage.kt` ; les textes passent par `createConfigurationContext`. Les deux libellés du manifeste (menu « Vérifier avec Sentinel », réglage d'accès aux notifications) sont affichés par Android : ils suivent la langue du téléphone. L'analyse en arrière-plan reçoit la langue de Kotlin (`language`).
+- **Textes des règles** : les règles renvoient des données (`AppRiskRule`, `LinkFinding`, `MessageAnalysis`, `AnalysisStartError`, `BreachProblem`…) et la phrase est écrite à l'affichage. Le score et le Wi-Fi sont recalculés dans `build`. Changer de langue retraduit tout sans relancer d'analyse.
+- **Pluriels** ICU, avec les 6 formes de l'arabe. **Nombres** : français inchangé (espace insécable) ; arabe et anglais en chiffres 0-9 avec virgule (format `intl` « ar », courant au Maghreb). **Dates** : français inchangé (« 1er mars ») ; sinon `intl` (mois arabes du Machrek, ex. أغسطس ; en Tunisie on dirait plutôt أوت : à voir à la relecture).
+- **Arabe** standard simple : الخزنة (coffre), جدار الحماية (pare-feu), مفتاح الاسترداد (clé de récupération), صلاحيات الجذر (root). Durées abrégées « د » (minutes) et « ث » (secondes).
+- **Non traduit** (noms propres ou techniques) : Sentinel, noms des marques et des apps (`known_brands.json`, `known_apps.dart`, ex. « La Poste Tunisienne »), sigles Wi-Fi (WEP, WPA, WPA3, OWE), noms et attributions des listes de blocage (textes de licence), nom du fichier d'export (`sentinel-coffre-AAAA-MM-JJ.sentinel`). L'entrée de la page Licences devient « Phishing.Database, AdGuard, AdAway, ShadowWhisperer » (cette page système n'est pas traduite).
+- **Mot à taper pour supprimer le coffre** : traduit (SUPPRIMER, DELETE, حذف).
+- **Politique de confidentialité** : « langue » ajoutée à « Vos choix » (nouveau fichier `language.json`).
+- **Police** : Readex Pro contient l'alphabet arabe et la table de liaison des lettres (GSUB « arab »). `test/l10n_keys_test.dart` vérifie que chaque caractère des 3 fichiers ARB existe dans la police.
+- **Relecture humaine** : attribut `@@x-relecture` dans chaque ARB, commentaire en tête de `values-en` et `values-ar`.
+- **Tests ajoutés** : `l10n_keys_test.dart` (mêmes clés et mêmes valeurs à insérer dans les 3 langues, police), `l10n_screens_test.dart` (accueil et Messages en arabe de droite à gauche, et en anglais), `language_test.dart` (choix dans Réglages, fichier), `StringsResourcesTest.kt` (mêmes clés Android dans les 3 langues, manifeste sans texte en dur).
+
+Non vérifié : l'interface n'a pas été lancée sur un téléphone (règle : pas de `flutter run`). Le rendu arabe réel (textes longs, retours à la ligne) et les notifications en arabe sont à regarder à la main. Le réglage Android 13 « Langue de l'application » n'est pas branché (`locales_config`) : le choix se fait dans Sentinel.

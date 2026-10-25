@@ -1,0 +1,1446 @@
+{
+  "@@locale": "fr",
+  "@@x-relecture": "Langue de référence. Traductions arabe (app_ar.arb) et anglaise (app_en.arb) produites sans relecture : à relire par un humain avant publication.",
+  "appTitle": "Sentinel",
+  "@appTitle": {
+    "description": "Nom de l'app (ne pas traduire)"
+  },
+  "commonCancel": "Annuler",
+  "commonContinue": "Continuer",
+  "commonLater": "Plus tard",
+  "commonAccept": "Accepter",
+  "commonClose": "Fermer",
+  "commonDetails": "Détails",
+  "commonOn": "Activé",
+  "commonOff": "Désactivé",
+  "commonOffFeminine": "Désactivée",
+  "@commonOffFeminine": {
+    "description": "Pour « la protection »"
+  },
+  "commonUnknown": "Inconnu",
+  "commonUnknownFeminine": "Inconnue",
+  "@commonUnknownFeminine": {
+    "description": "Pour « la date »"
+  },
+  "commonYes": "Oui",
+  "commonNo": "Non",
+  "commonAndroidOnly": "Disponible sur Android",
+  "commonOpenSettings": "Ouvrir les réglages",
+  "commonComingSoon": "Bientôt disponible",
+  "commonAnalysisFailedPull": "L'analyse a échoué. Tirez vers le bas pour réessayer.",
+  "commonDateAtTime": "{date} à {time}",
+  "@commonDateAtTime": {
+    "description": "Date puis heure, déjà formatées",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "commonOutOf100": "sur 100",
+  "@commonOutOf100": {
+    "description": "Sous le score de l'arche"
+  },
+  "navHome": "Accueil",
+  "navApps": "Applications",
+  "navMessages": "Messages",
+  "navVault": "Coffre",
+  "homeGreeting": "Bonjour",
+  "@homeGreeting": {
+    "description": "Salutation neutre, sans prénom (SEN-16)"
+  },
+  "homeTitleFailed": "Analyse impossible",
+  "homeTitleDefault": "Sécurité du téléphone",
+  "homeTitleProtected": "Votre téléphone est bien protégé",
+  "homeTitleToImprove": "Quelques points à renforcer",
+  "homeTitleExposed": "Votre téléphone est exposé",
+  "homeAndroidVersion": "Android {version}",
+  "@homeAndroidVersion": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "homeAndroidVersionPatch": "Android {version} · correctif du {date}",
+  "@homeAndroidVersionPatch": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "homeAnalyzing": "Analyse en cours…",
+  "homeAndroidOnly": "L'analyse du téléphone est disponible sur Android.",
+  "homeToGainPoints": "Pour gagner des points",
+  "homeNothingToFix": "Rien à corriger pour le moment.",
+  "homeWifiAlert": "{title} : évitez la banque et les achats.",
+  "@homeWifiAlert": {
+    "description": "Bandeau Wi-Fi dangereux ; title = nom du réseau à risque",
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "scoreLockTitle": "Configurer un verrouillage d'écran",
+  "scoreLockDesc": "Un code ou un schéma empêche l'accès à vos données si le téléphone est perdu",
+  "scoreRootTitle": "Votre téléphone semble rooté",
+  "scoreRootDesc": "Le root contourne les protections d'Android. Il ne se retire pas depuis les paramètres",
+  "scoreUpdateTitle": "Installer la mise à jour de sécurité",
+  "scoreUpdateUnknown": "La date du dernier correctif est inconnue",
+  "scoreUpdateOld": "Le dernier correctif date de plus de 3 mois",
+  "scoreBiometricTitle": "Activer le déverrouillage biométrique",
+  "scoreBiometricDesc": "Empreinte ou visage pour ouvrir le téléphone",
+  "scoreDevOptionsTitle": "Désactiver les options pour les développeurs",
+  "scoreDevOptionsDesc": "Elles donnent accès à des réglages sensibles du système",
+  "scoreUsbTitle": "Désactiver le débogage USB",
+  "scoreUsbDesc": "Un ordinateur branché pourrait accéder à vos données",
+  "scoreEncryptTitle": "Chiffrer le stockage",
+  "scoreEncryptDesc": "Vos fichiers restent illisibles sans votre code",
+  "settingsTitle": "Réglages",
+  "settingsAppVersion": "Sentinel {version}",
+  "@settingsAppVersion": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsLanguage": "Langue",
+  "settingsLanguageSystem": "Langue du téléphone",
+  "settingsReplayOnboarding": "Revoir la présentation",
+  "settingsPrivacy": "Politique de confidentialité",
+  "settingsLicenses": "Licences",
+  "settingsLicensesDetail": "Bibliothèques, police, listes de blocage, logiciels espions",
+  "settingsLicenseLegalese": "Licence MIT",
+  "settingsAudit": "Rapport d'audit de sécurité",
+  "settingsReportFlaw": "Signaler une faille",
+  "settingsReportFlawDetail": "En privé, via GitHub (ouvre le navigateur)",
+  "onboardingNext": "Suivant",
+  "onboardingStart": "Commencer",
+  "onboarding1Title": "Sentinel veille sur votre téléphone",
+  "onboarding1Line1": "Un score de sécurité et les réglages à corriger.",
+  "onboarding1Line2": "Les applications suspectes : fausses apps, logiciels espions.",
+  "onboarding1Line3": "Les messages d'arnaque, analysés sur le téléphone.",
+  "onboarding1Line4": "Un coffre chiffré pour vos mots de passe.",
+  "onboarding1Line5": "Un pare-feu qui bloque les sites dangereux et les traqueurs.",
+  "onboarding2Title": "Tout reste sur votre téléphone",
+  "onboarding2Line1": "Pas de compte, pas de publicité, pas de statistiques. Vos messages, vos mots de passe et la liste de vos applications ne quittent jamais le téléphone.",
+  "onboarding2Line2": "Seuls trois échanges réseau existent, tous facultatifs, et seulement si vous les activez :",
+  "onboarding2Line3": "• Vérifier les fuites de mots de passe (Have I Been Pwned) : 5 caractères d'une empreinte, jamais le mot de passe.",
+  "onboarding2Line4": "• Pare-feu DNS : les noms des sites autorisés sont transmis, chiffrés, au résolveur Quad9.",
+  "onboarding2Line5": "• Mise à jour des listes de blocage : un simple téléchargement depuis GitHub.",
+  "onboarding3Title": "Les autorisations, au bon moment",
+  "onboarding3Line1": "Sentinel ne demande rien maintenant.",
+  "onboarding3Line2": "Chaque autorisation (notifications, accès aux notifications, VPN, biométrie) est demandée seulement quand vous activez la fonction qui en a besoin, avec une explication.",
+  "onboarding3Line3": "Vous pouvez tout désactiver à tout moment.",
+  "privacyBriefTitle": "En bref",
+  "privacyBrief1": "Sentinel n'a ni serveur, ni compte, ni publicité, ni statistiques d'utilisation, ni rapport de plantage. Toutes les analyses se font sur le téléphone.",
+  "privacyBrief2": "Sentinel ne contacte Internet que pour les trois fonctions facultatives ci-dessous, et seulement après votre accord.",
+  "privacyNetworkTitle": "Les seuls échanges réseau (facultatifs)",
+  "privacyNetwork1": "1. Vérification des fuites de mots de passe (coffre). Après votre accord, Sentinel calcule l'empreinte SHA-1 de chaque mot de passe et envoie seulement ses 5 premiers caractères à Have I Been Pwned (api.pwnedpasswords.com), en HTTPS. Le mot de passe et son empreinte complète ne quittent jamais le téléphone. Le service voit votre adresse IP. Vous pouvez retirer cet accord ; les résultats sont alors effacés.",
+  "privacyNetwork2": "2. Pare-feu DNS. Quand vous l'activez, les noms des sites demandés par vos applications passent par Sentinel. Les sites bloqués reçoivent une réponse sur le téléphone ; les autres noms sont transmis au résolveur Quad9, chiffrés (DNS sur TLS ou sur HTTPS). Quad9 voit ces noms et votre adresse IP, selon sa propre politique de confidentialité. Si un réseau bloque le DNS chiffré, rien ne part en clair, sauf si vous l'autorisez pour ce réseau.",
+  "privacyNetwork3": "3. Mise à jour des listes de blocage. Désactivée par défaut. Si vous la lancez ou activez la mise à jour automatique (au plus une fois par jour), Sentinel télécharge les listes depuis GitHub (raw.githubusercontent.com), sans cookie ni information sur vous. GitHub voit votre adresse IP.",
+  "privacyNetwork4": "Les liens « Ouvrir le site » (conseils, sources, rapport d'audit) s'ouvrent dans votre navigateur, seulement quand vous les touchez.",
+  "privacyLocalTitle": "Ce qui reste sur le téléphone",
+  "privacyLocal1": "Le coffre (mots de passe, notes) : chiffré avec votre mot de passe maître (Argon2id, AES-256-GCM).",
+  "privacyLocal2": "Vos choix : accord pour la vérification des fuites, réglages du pare-feu et liste des sites autorisés, protection automatique activée ou non, présentation déjà vue, langue.",
+  "privacyLocal3": "Les listes de blocage et leurs mises à jour.",
+  "privacyLocal4": "Les rapports « Analyser une application » : la liste des sites contactés par l'application choisie, effacés au plus tard 24 h après l'analyse.",
+  "privacyLocal5": "La sauvegarde Android est désactivée : rien ne part dans le cloud. Une sauvegarde du coffre (fichier .sentinel chiffré) n'est créée que si vous la demandez, à l'endroit que vous choisissez.",
+  "privacyNeverTitle": "Ce que Sentinel n'enregistre jamais",
+  "privacyNever1": "Le texte des messages analysés (collés, partagés ou lus dans les notifications) : il est analysé en mémoire puis oublié.",
+  "privacyNever2": "Votre historique de navigation : le pare-feu ne garde que des compteurs, jamais un nom de site (sauf pendant une analyse d'application que vous lancez).",
+  "privacyNever3": "Le nom du Wi-Fi et votre position : Sentinel ne demande pas la localisation.",
+  "privacyPermissionsTitle": "Les autorisations",
+  "privacyPermissions1": "Liste des applications installées : pour repérer les fausses apps et les logiciels espions. Elle n'est jamais envoyée.",
+  "privacyPermissions2": "Notifications : demandée quand vous activez la protection automatique ou le pare-feu, pour afficher les alertes.",
+  "privacyPermissions3": "Accès aux notifications : réglage Android que vous ouvrez vous-même pour la protection automatique ; Sentinel lit les messages reçus pour y chercher des arnaques.",
+  "privacyPermissions4": "VPN : demandé quand vous activez le pare-feu. Il ne capte que le DNS, pas le reste du trafic.",
+  "privacyPermissions5": "Biométrie : seulement si vous choisissez de déverrouiller le coffre sans taper votre mot de passe maître.",
+  "privacyEraseTitle": "Effacer vos données",
+  "privacyErase1": "Désinstaller Sentinel efface tout ce qu'il a enregistré sur le téléphone. Il n'existe aucune copie ailleurs.",
+  "auditFrameTitle": "Le cadre",
+  "auditFrame1": "Audit de sécurité selon le référentiel OWASP MASVS v2, du 21 au 24 octobre 2026, sur Sentinel 1.0.0 : analyse du code, du trafic réseau, du stockage et des composants Android.",
+  "auditFrame2": "Il a été mené pour le propriétaire de l'application, sur son propre code : ce n'est pas un audit indépendant.",
+  "auditResultsTitle": "Les résultats",
+  "auditResults1": "17 constats, dont un de sévérité élevée et quatre moyens.",
+  "auditResults2": "14 sont corrigés, chacun avec un test automatique. 3 sont acceptés en connaissance de cause (modèle anti-arnaque lisible car l'app est open source, pas d'épinglage de certificat, un constat déjà conforme).",
+  "auditResults3": "Depuis, le pare-feu chiffre toutes ses requêtes et l'app ne contacte plus rien sans accord.",
+  "auditLimitsTitle": "Les limites",
+  "auditLimits1": "Aucune application n'est sûre à 100 %. Les principaux risques restants dépendent du téléphone : un Android trop ancien, ou un logiciel espion à qui l'on a donné l'accessibilité ou le root.",
+  "auditReadFull": "Lire le rapport complet sur GitHub",
+  "verdictScam": "Arnaque probable",
+  "verdictSuspect": "Suspect",
+  "verdictNothing": "Rien de suspect",
+  "adviceScam": "Ne cliquez pas sur le lien et ne communiquez aucun code. Votre banque ou La Poste ne vous demandent jamais de payer par SMS. Supprimez ce message.",
+  "adviceSuspect": "Soyez prudent : n'ouvrez pas le lien et ne donnez aucune information. En cas de doute, appelez l'organisme au numéro de son site officiel.",
+  "adviceNothing": "Aucun signe d'arnaque trouvé. Restez quand même vigilant : ne communiquez jamais vos codes ni vos mots de passe.",
+  "reasonHiddenCharacters": "Caractères invisibles ou d'inversion de texte (technique d'arnaque)",
+  "reasonScamWords": "Mots typiques des arnaques : {words}",
+  "@reasonScamWords": {
+    "description": "words = liste de mots entre guillemets",
+    "placeholders": {
+      "words": {
+        "type": "String"
+      }
+    }
+  },
+  "reasonQuotedWord": "« {word} »",
+  "@reasonQuotedWord": {
+    "description": "Un mot cité",
+    "placeholders": {
+      "word": {
+        "type": "String"
+      }
+    }
+  },
+  "listSeparator": ", ",
+  "@listSeparator": {
+    "description": "Entre deux éléments d'une liste"
+  },
+  "reasonLinkImpersonation": "« {host} » imite {brand} mais ce n'est pas son site officiel",
+  "@reasonLinkImpersonation": {
+    "placeholders": {
+      "host": {
+        "type": "String"
+      },
+      "brand": {
+        "type": "String"
+      }
+    }
+  },
+  "reasonLinkIp": "Le lien utilise une adresse IP ({host}) au lieu d'un nom de site",
+  "@reasonLinkIp": {
+    "placeholders": {
+      "host": {
+        "type": "String"
+      }
+    }
+  },
+  "reasonLinkPunycode": "« {host} » contient des lettres déguisées (punycode) pour ressembler à un vrai site",
+  "@reasonLinkPunycode": {
+    "placeholders": {
+      "host": {
+        "type": "String"
+      }
+    }
+  },
+  "reasonLinkAt": "Le lien contient « @ » : la vraie destination est « {host} »",
+  "@reasonLinkAt": {
+    "placeholders": {
+      "host": {
+        "type": "String"
+      }
+    }
+  },
+  "reasonLinkShortener": "Lien raccourci ({host}) : la vraie adresse est cachée",
+  "@reasonLinkShortener": {
+    "placeholders": {
+      "host": {
+        "type": "String"
+      }
+    }
+  },
+  "reasonLinkTld": "L'extension « .{tld} » est souvent utilisée par les arnaques",
+  "@reasonLinkTld": {
+    "placeholders": {
+      "tld": {
+        "type": "String"
+      }
+    }
+  },
+  "reasonLinkSubdomains": "« {host} » a beaucoup de sous-domaines, une technique pour tromper",
+  "@reasonLinkSubdomains": {
+    "placeholders": {
+      "host": {
+        "type": "String"
+      }
+    }
+  },
+  "reasonLinkHttp": "Le lien n'est pas sécurisé (http au lieu de https)",
+  "messagesHint": "Collez un SMS, un message WhatsApp ou un lien",
+  "messagesPaste": "Coller",
+  "messagesClear": "Effacer",
+  "messagesAnalyze": "Analyser",
+  "messagesFailed": "L'analyse a échoué. Réessayez.",
+  "messagesLocalNote": "L'analyse se fait sur votre téléphone. Le message n'est envoyé nulle part.",
+  "messagesProbability": "Probabilité d'arnaque : {percent} %",
+  "@messagesProbability": {
+    "placeholders": {
+      "percent": {
+        "type": "String"
+      }
+    }
+  },
+  "alertDefaultReason": "Ce message ressemble aux arnaques connues. Ne cliquez sur aucun lien.",
+  "alertTitleSms": "Arnaque probable dans un SMS",
+  "alertTitleMessage": "Arnaque probable dans un message",
+  "alertTitleApp": "Arnaque probable sur {app}",
+  "@alertTitleApp": {
+    "description": "app = WhatsApp, Telegram…",
+    "placeholders": {
+      "app": {
+        "type": "String"
+      }
+    }
+  },
+  "autoProtectionTitle": "Protection automatique",
+  "autoProtectionOn": "Analyse les messages reçus et vous prévient en cas d'arnaque.",
+  "autoProtectionNotificationsBlocked": "Notifications de Sentinel bloquées : vous ne serez pas prévenu en cas d'arnaque.",
+  "autoProtectionAllowNotifications": "Autoriser les notifications de Sentinel",
+  "autoProtectionRemoveAccess": "Retirer aussi l'accès dans les réglages Android",
+  "autoProtectionDoesTitle": "Ce que fait Sentinel",
+  "autoProtectionDoes1": "Lit le texte des notifications de vos applications de messagerie.",
+  "autoProtectionDoes2": "L'analyse sur votre téléphone.",
+  "autoProtectionDoes3": "Vous prévient si c'est une arnaque.",
+  "autoProtectionNeverTitle": "Ce que Sentinel ne fait jamais",
+  "autoProtectionNever1": "Envoyer vos messages sur Internet.",
+  "autoProtectionNever2": "Les enregistrer.",
+  "autoProtectionNever3": "Lire les notifications des autres applications.",
+  "wifiLevelDanger": "Danger",
+  "wifiLevelWeak": "Faible",
+  "wifiLevelOk": "Correct",
+  "wifiLevelExcellent": "Excellent",
+  "wifiLevelNone": "Aucun",
+  "wifiLevelUnknown": "Inconnu",
+  "wifiSecurityOpen": "Aucune (réseau ouvert)",
+  "wifiSecurityWpa2": "WPA2 ou WPA",
+  "wifiSecurityEnterprise": "Entreprise (WPA2 / WPA3)",
+  "wifiAdviceNoBanking": "Évitez la banque et les achats sur ce réseau",
+  "wifiAdviceUseMobile": "Utilisez plutôt les données mobiles",
+  "wifiAdviceUpgradeBox": "Si c'est votre box, choisissez WPA2 ou WPA3 dans ses réglages",
+  "wifiAdvicePublicUnknown": "Sur un Wi-Fi public, évitez la banque et les achats",
+  "wifiNoneTitle": "Pas de Wi-Fi",
+  "wifiNoneSummary": "Vous n'êtes connecté à aucun Wi-Fi.",
+  "wifiNoneExplanation": "Vous n'êtes connecté à aucun Wi-Fi : rien à vérifier pour le moment.",
+  "wifiPublicTitle": "Wi-Fi public",
+  "wifiPublicSummary": "Réseau partagé avec une page de connexion.",
+  "wifiCaptiveExplanation": "Ce réseau demande de se connecter sur une page (hôtel, gare, café…). Beaucoup de personnes le partagent.",
+  "wifiCaptiveAdvice": "N'utilisez jamais vos mots de passe habituels sur la page de connexion",
+  "wifiDnsOffExplanation": "Le DNS privé est désactivé : le réseau peut voir les noms des sites que vous visitez.",
+  "wifiDnsOffAdvice": "Activez le DNS privé (mode automatique) dans les réglages",
+  "wifiOpenTitle": "Wi-Fi ouvert",
+  "wifiOpenSummary": "Ce Wi-Fi n'est pas protégé.",
+  "wifiOpenExplanation": "Ce Wi-Fi n'est pas protégé. Les personnes connectées au même réseau peuvent voir ce que vous envoyez.",
+  "wifiWepTitle": "Protection WEP dépassée",
+  "wifiWepSummary": "Sa protection se casse en quelques minutes.",
+  "wifiWepExplanation": "Ce Wi-Fi utilise WEP, une protection de 1999 qui se casse en quelques minutes. C'est presque comme un réseau ouvert.",
+  "wifiWpaTitle": "Protection WPA ancienne",
+  "wifiWpaSummary": "Protection ancienne et fragile.",
+  "wifiWpaExplanation": "Ce Wi-Fi utilise WPA, une protection ancienne qui a des failles connues.",
+  "wifiOweTitle": "Wi-Fi public chiffré",
+  "wifiOweSummary": "Chiffré, mais ouvert à tous.",
+  "wifiOweExplanation": "Ce Wi-Fi public chiffre vos échanges (Enhanced Open) : les autres ne peuvent pas les lire. Mais tout le monde peut s'y connecter, et un faux réseau peut imiter le vrai.",
+  "wifiWpa2Title": "Wi-Fi protégé (WPA2)",
+  "wifiWpa2Summary": "Protégé par un mot de passe.",
+  "wifiWpa2Explanation": "Ce Wi-Fi est protégé par un mot de passe (WPA2). Les personnes qui ne le connaissent pas ne peuvent pas lire ce que vous envoyez.",
+  "wifiWpa3Title": "Wi-Fi très protégé (WPA3)",
+  "wifiWpa3Summary": "La meilleure protection Wi-Fi actuelle.",
+  "wifiWpa3Explanation": "Ce Wi-Fi utilise WPA3, la protection la plus récente. Même quelqu'un qui connaît le mot de passe ne peut pas lire vos échanges.",
+  "wifiEnterpriseTitle": "Wi-Fi d'entreprise",
+  "wifiEnterpriseSummary": "Chacun se connecte avec son propre identifiant.",
+  "wifiEnterpriseExplanation": "Ce Wi-Fi d'entreprise (WPA2 / WPA3-Entreprise) donne à chaque personne son propre identifiant et sa propre clé.",
+  "wifiUnknownTitle": "Sécurité inconnue",
+  "wifiUnknownSummary": "Le type de protection n'est pas disponible.",
+  "wifiUnknownOldAndroid": "Sur Android 11 et avant, connaître la protection d'un Wi-Fi demande l'autorisation de localisation, que Sentinel ne demande pas.",
+  "wifiUnknownExplanation": "Android n'a pas indiqué le type de protection de ce Wi-Fi.",
+  "wifiSectionTitle": "Réseau Wi-Fi",
+  "wifiUnavailableTitle": "Information indisponible",
+  "wifiUnavailableSummary": "Android n'a pas pu lire l'état du Wi-Fi.",
+  "wifiDetailProtection": "Protection",
+  "wifiDetailCaptive": "Page de connexion",
+  "wifiDetailPrivateDns": "DNS privé",
+  "wifiOurAdvice": "Nos conseils",
+  "wifiEnablePrivateDns": "Activer le DNS privé",
+  "wifiPrivateDnsHelp": "Ouvre « Réseau et Internet ». Le DNS privé se trouve parfois sous « Avancé » ou « Plus de paramètres de connexion ».",
+  "riskLevelSystem": "Système",
+  "riskLevelLow": "Faible",
+  "riskLevelModerate": "Modéré",
+  "riskLevelHigh": "Élevé",
+  "riskStalkerware": "Logiciel espion connu (stalkerware)",
+  "riskModifiedCopy": "Copie modifiée de {brand} (signature différente de l'éditeur officiel)",
+  "@riskModifiedCopy": {
+    "placeholders": {
+      "brand": {
+        "type": "String"
+      }
+    }
+  },
+  "riskImpersonation": "Se fait passer pour {brand}, mais ce n'est pas l'application officielle",
+  "@riskImpersonation": {
+    "placeholders": {
+      "brand": {
+        "type": "String"
+      }
+    }
+  },
+  "riskKnownMod": "Version modifiée non officielle de {brand} : elle peut lire vos messages",
+  "@riskKnownMod": {
+    "placeholders": {
+      "brand": {
+        "type": "String"
+      }
+    }
+  },
+  "riskSpyProfile": "Icône cachée et accès typiques d'un logiciel espion",
+  "riskBankingCombo": "Combinaison typique des applications qui volent les comptes bancaires",
+  "riskAccessibility": "Peut lire tout ce qui s'affiche à l'écran et agir à votre place",
+  "riskUnknownSource": "Installée en dehors du Play Store",
+  "riskDeviceAdmin": "Est administrateur de l'appareil et peut compliquer sa désinstallation",
+  "riskDebugCert": "Signée avec un certificat de test",
+  "riskSms": "Peut lire vos SMS, y compris les codes de vérification bancaires",
+  "riskNotifications": "Peut lire toutes vos notifications, y compris vos messages",
+  "riskMicrophone": "Peut utiliser le micro",
+  "riskCallLog": "Peut consulter l'historique de vos appels",
+  "riskOverlay": "Peut s'afficher par-dessus les autres applications",
+  "riskBackgroundLocation": "Peut connaître votre position même quand vous ne l'utilisez pas",
+  "riskOldTarget": "Conçue pour une ancienne version d'Android, avec moins de protections",
+  "riskOtherStore": "Installée depuis une boutique autre que le Play Store (contrôles différents)",
+  "riskContacts": "Peut lire vos contacts",
+  "riskCamera": "Peut utiliser l'appareil photo",
+  "appsAnalyzed": "{count, plural, one{{n} application analysée} other{{n} applications analysées}}",
+  "@appsAnalyzed": {
+    "description": "count = nombre d'apps, n = le même nombre déjà formaté",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "appsSummaryNoneToReview": "{analyzed}, aucune à vérifier.",
+  "@appsSummaryNoneToReview": {
+    "placeholders": {
+      "analyzed": {
+        "type": "String"
+      }
+    }
+  },
+  "appsSummaryToReview": "{analyzed}, dont {count} à vérifier.",
+  "@appsSummaryToReview": {
+    "placeholders": {
+      "analyzed": {
+        "type": "String"
+      },
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "appsEmptyTitle": "Analysez vos applications",
+  "appsEmptyMessage": "Sentinel vérifie les permissions de chaque application installée et signale celles qui en demandent trop.",
+  "appsStartScan": "Lancer l'analyse",
+  "appsAndroidOnly": "L'analyse des applications est disponible sur Android.",
+  "appsShowSystem": "Afficher les applications système",
+  "appsSpywareFound": "Un logiciel espion possible a été trouvé",
+  "appsSpywareReadAdvice": "Lisez les conseils avant de le supprimer.",
+  "appsSeeAdvice": "Voir les conseils",
+  "appsScanning": "Analyse de vos applications…",
+  "appsSystemApp": "Application du système Android",
+  "appsNoWorry": "Aucun signal inquiétant",
+  "detailPreinstalled": "Préinstallée",
+  "detailUnknownSource": "Source inconnue",
+  "detailKnownSpyware": "Logiciel espion connu : {name}",
+  "@detailKnownSpyware": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "detailSignatureVerified": "Signature vérifiée pour {brand}",
+  "@detailSignatureVerified": {
+    "placeholders": {
+      "brand": {
+        "type": "String"
+      }
+    }
+  },
+  "detailSignatureDifferent": "Signature différente de l'éditeur officiel de {brand}",
+  "@detailSignatureDifferent": {
+    "placeholders": {
+      "brand": {
+        "type": "String"
+      }
+    }
+  },
+  "detailNotOfficial": "Ce n'est pas l'application officielle de {brand}",
+  "@detailNotOfficial": {
+    "placeholders": {
+      "brand": {
+        "type": "String"
+      }
+    }
+  },
+  "detailKnownMod": "Version modifiée non officielle de {brand}",
+  "@detailKnownMod": {
+    "placeholders": {
+      "brand": {
+        "type": "String"
+      }
+    }
+  },
+  "detailUnchecked": "Empreinte officielle de {brand} pas encore enregistrée dans Sentinel",
+  "@detailUnchecked": {
+    "placeholders": {
+      "brand": {
+        "type": "String"
+      }
+    }
+  },
+  "detailSignatureUnreadable": "Signature illisible",
+  "detailSha256": "Empreinte SHA-256",
+  "detailCertificate": "Certificat",
+  "detailPublisherMissing": "Éditeur non renseigné",
+  "detailOtherCertificates": "{count, plural, one{Et 1 autre certificat (ancien ou multiple)} other{Et {n} autres certificats (anciens ou multiples)}}",
+  "@detailOtherCertificates": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "detailWhatToDo": "Que faire ?",
+  "detailManagePermissions": "Gérer les autorisations",
+  "detailUninstall": "Désinstaller",
+  "detailRiskLevel": "Niveau de risque",
+  "detailSource": "Source",
+  "detailInstalledOn": "Installée le",
+  "detailUpdatedOn": "Mise à jour le",
+  "detailWhyLevel": "Pourquoi ce niveau",
+  "detailSystemExplanation": "Cette application fait partie d'Android ou de votre fabricant. Ses autorisations étendues sont normales pour son fonctionnement.",
+  "detailSignature": "Signature",
+  "detailGrantedPermissions": "Autorisations accordées",
+  "detailNoPermissions": "Aucune autorisation accordée",
+  "detailOtherPermissions": "{count, plural, one{Et 1 autre autorisation technique} other{Et {n} autres autorisations techniques}}",
+  "@detailOtherPermissions": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "spywareTitle": "Avant de toucher à cette application",
+  "spywareParagraph1": "Si vous pensez que quelqu'un de votre entourage a installé cette application, sa suppression peut le prévenir. Si vous êtes en danger, contactez d'abord une association d'aide ou la police.",
+  "spywareParagraph2": "Avant d'agir, vous pouvez noter le nom de l'application et faire une capture d'écran : cela peut servir de preuve.",
+  "spywareParagraph3": "Sentinel ne prévient personne et n'envoie aucune notification à ce sujet.",
+  "spywareGetHelp": "Se faire aider",
+  "spywareCoalition": "Coalition Against Stalkerware : des conseils pour les personnes surveillées et des contacts d'associations.",
+  "spywareBrowserNote": "Le site s'ouvre dans votre navigateur et restera dans son historique. Vous pouvez aussi copier l'adresse et l'ouvrir en navigation privée, ou depuis un autre appareil.",
+  "spywareOpenSite": "Ouvrir le site",
+  "spywareCopyAddress": "Copier l'adresse",
+  "spywareAddressCopied": "Adresse copiée",
+  "spywareIocCredit": "Liste de logiciels espions : projet Stalkerware Indicators (Echap), licence CC BY 4.0.",
+  "@spywareIocCredit": {
+    "description": "Mention exigée par la licence CC BY 4.0"
+  },
+  "permReadSms": "Lire vos SMS",
+  "@permReadSms": {
+    "description": "Permission android.permission.READ_SMS"
+  },
+  "permReceiveSms": "Recevoir vos SMS",
+  "@permReceiveSms": {
+    "description": "Permission android.permission.RECEIVE_SMS"
+  },
+  "permSendSms": "Envoyer des SMS (parfois payants)",
+  "@permSendSms": {
+    "description": "Permission android.permission.SEND_SMS"
+  },
+  "permReceiveMms": "Recevoir des MMS",
+  "@permReceiveMms": {
+    "description": "Permission android.permission.RECEIVE_MMS"
+  },
+  "permReadCallLog": "Consulter l'historique des appels",
+  "@permReadCallLog": {
+    "description": "Permission android.permission.READ_CALL_LOG"
+  },
+  "permWriteCallLog": "Modifier l'historique des appels",
+  "@permWriteCallLog": {
+    "description": "Permission android.permission.WRITE_CALL_LOG"
+  },
+  "permCallPhone": "Passer des appels",
+  "@permCallPhone": {
+    "description": "Permission android.permission.CALL_PHONE"
+  },
+  "permAnswerPhoneCalls": "Répondre aux appels",
+  "@permAnswerPhoneCalls": {
+    "description": "Permission android.permission.ANSWER_PHONE_CALLS"
+  },
+  "permReadPhoneState": "Voir l'état du téléphone et des appels",
+  "@permReadPhoneState": {
+    "description": "Permission android.permission.READ_PHONE_STATE"
+  },
+  "permReadPhoneNumbers": "Connaître votre numéro de téléphone",
+  "@permReadPhoneNumbers": {
+    "description": "Permission android.permission.READ_PHONE_NUMBERS"
+  },
+  "permReadContacts": "Lire vos contacts",
+  "@permReadContacts": {
+    "description": "Permission android.permission.READ_CONTACTS"
+  },
+  "permWriteContacts": "Modifier vos contacts",
+  "@permWriteContacts": {
+    "description": "Permission android.permission.WRITE_CONTACTS"
+  },
+  "permGetAccounts": "Voir les comptes enregistrés sur le téléphone",
+  "@permGetAccounts": {
+    "description": "Permission android.permission.GET_ACCOUNTS"
+  },
+  "permReadCalendar": "Lire votre agenda",
+  "@permReadCalendar": {
+    "description": "Permission android.permission.READ_CALENDAR"
+  },
+  "permWriteCalendar": "Modifier votre agenda",
+  "@permWriteCalendar": {
+    "description": "Permission android.permission.WRITE_CALENDAR"
+  },
+  "permRecordAudio": "Utiliser le micro",
+  "@permRecordAudio": {
+    "description": "Permission android.permission.RECORD_AUDIO"
+  },
+  "permCamera": "Utiliser l'appareil photo",
+  "@permCamera": {
+    "description": "Permission android.permission.CAMERA"
+  },
+  "permBodySensors": "Lire les capteurs corporels (rythme cardiaque…)",
+  "@permBodySensors": {
+    "description": "Permission android.permission.BODY_SENSORS"
+  },
+  "permBodySensorsBackground": "Lire les capteurs corporels en arrière-plan",
+  "@permBodySensorsBackground": {
+    "description": "Permission android.permission.BODY_SENSORS_BACKGROUND"
+  },
+  "permActivityRecognition": "Détecter votre activité physique",
+  "@permActivityRecognition": {
+    "description": "Permission android.permission.ACTIVITY_RECOGNITION"
+  },
+  "permAccessFineLocation": "Connaître votre position précise",
+  "@permAccessFineLocation": {
+    "description": "Permission android.permission.ACCESS_FINE_LOCATION"
+  },
+  "permAccessCoarseLocation": "Connaître votre position approximative",
+  "@permAccessCoarseLocation": {
+    "description": "Permission android.permission.ACCESS_COARSE_LOCATION"
+  },
+  "permAccessBackgroundLocation": "Connaître votre position même quand l'app est fermée",
+  "@permAccessBackgroundLocation": {
+    "description": "Permission android.permission.ACCESS_BACKGROUND_LOCATION"
+  },
+  "permAccessMediaLocation": "Lire le lieu de prise de vos photos",
+  "@permAccessMediaLocation": {
+    "description": "Permission android.permission.ACCESS_MEDIA_LOCATION"
+  },
+  "permReadExternalStorage": "Lire vos fichiers",
+  "@permReadExternalStorage": {
+    "description": "Permission android.permission.READ_EXTERNAL_STORAGE"
+  },
+  "permWriteExternalStorage": "Modifier vos fichiers",
+  "@permWriteExternalStorage": {
+    "description": "Permission android.permission.WRITE_EXTERNAL_STORAGE"
+  },
+  "permManageExternalStorage": "Accéder à tous vos fichiers",
+  "@permManageExternalStorage": {
+    "description": "Permission android.permission.MANAGE_EXTERNAL_STORAGE"
+  },
+  "permReadMediaImages": "Voir vos photos",
+  "@permReadMediaImages": {
+    "description": "Permission android.permission.READ_MEDIA_IMAGES"
+  },
+  "permReadMediaVideo": "Voir vos vidéos",
+  "@permReadMediaVideo": {
+    "description": "Permission android.permission.READ_MEDIA_VIDEO"
+  },
+  "permReadMediaAudio": "Accéder à vos fichiers audio",
+  "@permReadMediaAudio": {
+    "description": "Permission android.permission.READ_MEDIA_AUDIO"
+  },
+  "permReadMediaVisualUserSelected": "Voir les photos que vous choisissez",
+  "@permReadMediaVisualUserSelected": {
+    "description": "Permission android.permission.READ_MEDIA_VISUAL_USER_SELECTED"
+  },
+  "permBluetooth": "Utiliser le Bluetooth",
+  "@permBluetooth": {
+    "description": "Permission android.permission.BLUETOOTH"
+  },
+  "permBluetoothConnect": "Se connecter aux appareils Bluetooth",
+  "@permBluetoothConnect": {
+    "description": "Permission android.permission.BLUETOOTH_CONNECT"
+  },
+  "permBluetoothScan": "Rechercher des appareils Bluetooth",
+  "@permBluetoothScan": {
+    "description": "Permission android.permission.BLUETOOTH_SCAN"
+  },
+  "permNearbyWifiDevices": "Trouver les appareils Wi-Fi à proximité",
+  "@permNearbyWifiDevices": {
+    "description": "Permission android.permission.NEARBY_WIFI_DEVICES"
+  },
+  "permNfc": "Utiliser le NFC (paiement sans contact…)",
+  "@permNfc": {
+    "description": "Permission android.permission.NFC"
+  },
+  "permInternet": "Accéder à internet",
+  "@permInternet": {
+    "description": "Permission android.permission.INTERNET"
+  },
+  "permAccessNetworkState": "Voir l'état de la connexion",
+  "@permAccessNetworkState": {
+    "description": "Permission android.permission.ACCESS_NETWORK_STATE"
+  },
+  "permAccessWifiState": "Voir les réseaux Wi-Fi",
+  "@permAccessWifiState": {
+    "description": "Permission android.permission.ACCESS_WIFI_STATE"
+  },
+  "permChangeWifiState": "Activer ou couper le Wi-Fi",
+  "@permChangeWifiState": {
+    "description": "Permission android.permission.CHANGE_WIFI_STATE"
+  },
+  "permSystemAlertWindow": "S'afficher par-dessus les autres applications",
+  "@permSystemAlertWindow": {
+    "description": "Permission android.permission.SYSTEM_ALERT_WINDOW"
+  },
+  "permPostNotifications": "Afficher des notifications",
+  "@permPostNotifications": {
+    "description": "Permission android.permission.POST_NOTIFICATIONS"
+  },
+  "permRequestInstallPackages": "Proposer d'installer d'autres applications",
+  "@permRequestInstallPackages": {
+    "description": "Permission android.permission.REQUEST_INSTALL_PACKAGES"
+  },
+  "permRequestDeletePackages": "Proposer de désinstaller des applications",
+  "@permRequestDeletePackages": {
+    "description": "Permission android.permission.REQUEST_DELETE_PACKAGES"
+  },
+  "permQueryAllPackages": "Voir la liste de vos applications",
+  "@permQueryAllPackages": {
+    "description": "Permission android.permission.QUERY_ALL_PACKAGES"
+  },
+  "permPackageUsageStats": "Voir quelles applications vous utilisez",
+  "@permPackageUsageStats": {
+    "description": "Permission android.permission.PACKAGE_USAGE_STATS"
+  },
+  "permReceiveBootCompleted": "Se lancer au démarrage du téléphone",
+  "@permReceiveBootCompleted": {
+    "description": "Permission android.permission.RECEIVE_BOOT_COMPLETED"
+  },
+  "permForegroundService": "Fonctionner en continu en arrière-plan",
+  "@permForegroundService": {
+    "description": "Permission android.permission.FOREGROUND_SERVICE"
+  },
+  "permWakeLock": "Empêcher la mise en veille",
+  "@permWakeLock": {
+    "description": "Permission android.permission.WAKE_LOCK"
+  },
+  "permVibrate": "Faire vibrer le téléphone",
+  "@permVibrate": {
+    "description": "Permission android.permission.VIBRATE"
+  },
+  "permUseBiometric": "Utiliser l'empreinte ou le visage",
+  "@permUseBiometric": {
+    "description": "Permission android.permission.USE_BIOMETRIC"
+  },
+  "permUseFingerprint": "Utiliser l'empreinte digitale",
+  "@permUseFingerprint": {
+    "description": "Permission android.permission.USE_FINGERPRINT"
+  },
+  "permScheduleExactAlarm": "Programmer des alarmes précises",
+  "@permScheduleExactAlarm": {
+    "description": "Permission android.permission.SCHEDULE_EXACT_ALARM"
+  },
+  "permUseFullScreenIntent": "Afficher des alertes en plein écran",
+  "@permUseFullScreenIntent": {
+    "description": "Permission android.permission.USE_FULL_SCREEN_INTENT"
+  },
+  "firewallTitle": "Pare-feu DNS",
+  "firewallOnBlocked": "{count, plural, one{Activé · {n} requête bloquée} other{Activé · {n} requêtes bloquées}}",
+  "@firewallOnBlocked": {
+    "description": "n = le même nombre, déjà formaté",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "categoryMalware": "Malware et hameçonnage",
+  "categoryImpersonation": "Imitations de marques",
+  "categoryTrackers": "Traqueurs",
+  "categoryAds": "Publicités",
+  "categoryOther": "Autres domaines",
+  "categoryBrandsWatched": "{count, plural, one{{n} marque surveillée · sites qui les imitent} other{{n} marques surveillées · sites qui les imitent}}",
+  "@categoryBrandsWatched": {
+    "description": "n = le même nombre, déjà formaté",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "domainsCount": "{count, plural, one{{n} domaine} other{{n} domaines}}",
+  "@domainsCount": {
+    "description": "n = le même nombre, déjà formaté",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "firewallListsBundled": "Listes livrées avec l'application",
+  "firewallLastUpdate": "Dernière mise à jour : {date}",
+  "@firewallLastUpdate": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "firewallLastAttemptFailed": "dernière tentative échouée",
+  "analysisErrorFirewallOff": "Activez d'abord le pare-feu DNS.",
+  "analysisErrorRunning": "Une analyse est déjà en cours.",
+  "analysisErrorUnknownApp": "Cette application n'est plus installée.",
+  "analysisErrorFailed": "Impossible de lancer l'analyse.",
+  "durationMinutes": "{count, plural, other{{n} min}}",
+  "@durationMinutes": {
+    "description": "Durée courte, ex : 5 min. n = le même nombre, déjà formaté",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "durationMinutesLong": "{count, plural, one{{n} minute} other{{n} minutes}}",
+  "@durationMinutesLong": {
+    "description": "Durée dans une phrase. n = le même nombre, déjà formaté",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "durationSeconds": "{n} s",
+  "@durationSeconds": {
+    "description": "Secondes",
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "durationMinutesSeconds": "{minutes} min {seconds} s",
+  "@durationMinutesSeconds": {
+    "description": "Ex : 1 min 40 s",
+    "placeholders": {
+      "minutes": {
+        "type": "String"
+      },
+      "seconds": {
+        "type": "String"
+      }
+    }
+  },
+  "durationMinutesOnly": "{minutes} min",
+  "@durationMinutesOnly": {
+    "placeholders": {
+      "minutes": {
+        "type": "String"
+      }
+    }
+  },
+  "durationLessThanSecond": "moins d'1 s",
+  "reportStoppedEarly": "{duration} (arrêtée avant les {planned} prévues)",
+  "@reportStoppedEarly": {
+    "placeholders": {
+      "duration": {
+        "type": "String"
+      },
+      "planned": {
+        "type": "String"
+      }
+    }
+  },
+  "reportNoDomain": "{app} n'a contacté aucun domaine pendant l'analyse.",
+  "@reportNoDomain": {
+    "placeholders": {
+      "app": {
+        "type": "String"
+      }
+    }
+  },
+  "reportContacted": "{app} a contacté {domains}",
+  "@reportContacted": {
+    "placeholders": {
+      "app": {
+        "type": "String"
+      },
+      "domains": {
+        "type": "String"
+      }
+    }
+  },
+  "reportNothingKnown": "{start}, aucun connu comme traqueur, publicité ou site dangereux.",
+  "@reportNothingKnown": {
+    "placeholders": {
+      "start": {
+        "type": "String"
+      }
+    }
+  },
+  "reportIncluding": "{start}, dont {parts}.",
+  "@reportIncluding": {
+    "placeholders": {
+      "start": {
+        "type": "String"
+      },
+      "parts": {
+        "type": "String"
+      }
+    }
+  },
+  "reportDangerousCount": "{count, plural, one{{n} site dangereux} other{{n} sites dangereux}}",
+  "@reportDangerousCount": {
+    "description": "n = le même nombre, déjà formaté",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "reportTrackersCount": "{count, plural, one{{n} traqueur} other{{n} traqueurs}}",
+  "@reportTrackersCount": {
+    "description": "n = le même nombre, déjà formaté",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "reportAdsCount": "{count, plural, one{{n} publicité} other{{n} publicités}}",
+  "@reportAdsCount": {
+    "description": "n = le même nombre, déjà formaté",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "listLastSeparator": " et ",
+  "@listLastSeparator": {
+    "description": "Avant le dernier élément : « a, b et c »"
+  },
+  "analysisLessThanMinuteLeft": "Reste moins d'1 min",
+  "analysisMinutesLeft": "{count, plural, other{Reste {n} min}}",
+  "@analysisMinutesLeft": {
+    "description": "n = le même nombre, déjà formaté",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "analysisDomainsSeen": "{count, plural, one{{n} domaine vu} other{{n} domaines vus}}",
+  "@analysisDomainsSeen": {
+    "description": "n = le même nombre, déjà formaté",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "analysisSectionTitle": "Analyser une application",
+  "analysisRunning": "Analyse de {app} en cours",
+  "@analysisRunning": {
+    "placeholders": {
+      "app": {
+        "type": "String"
+      }
+    }
+  },
+  "analysisUnprotectedWarning": "Les autres applications ne sont pas protégées par le pare-feu jusqu'à la fin de l'analyse.",
+  "analysisStop": "Arrêter l'analyse",
+  "analysisIntroActive": "Découvrez quels sites une application contacte pendant quelques minutes : traqueurs, publicités, sites dangereux.",
+  "analysisIntroInactive": "Activez le pare-feu pour analyser une application.",
+  "analysisChooseApp": "Choisir une application",
+  "analysisRecentReports": "Rapports des dernières 24 heures",
+  "analysisScreenIntro": "Choisissez l'application à observer. Pendant quelques minutes, Sentinel note les sites (domaines) qu'elle contacte.",
+  "analysisListFailed": "Impossible de lister les applications.",
+  "analysisNoApps": "Aucune application à analyser.",
+  "analysisSheetTitle": "Analyser {app}",
+  "@analysisSheetTitle": {
+    "placeholders": {
+      "app": {
+        "type": "String"
+      }
+    }
+  },
+  "analysisSheetLine1": "Pendant {duration}, seules les demandes de {app} passent par le pare-feu : chaque domaine vu lui appartient.",
+  "@analysisSheetLine1": {
+    "placeholders": {
+      "duration": {
+        "type": "String"
+      },
+      "app": {
+        "type": "String"
+      }
+    }
+  },
+  "analysisSheetLine2": "Les autres applications ne sont PAS protégées pendant ce temps : ni blocage, ni alerte. Évitez d'ouvrir des liens inconnus.",
+  "analysisSheetLine3": "À la fin, le pare-feu normal revient tout seul. Vous pouvez arrêter avant, depuis Sentinel ou la notification.",
+  "analysisSheetLine4": "Le rapport reste sur ce téléphone 24 heures au plus, puis il est supprimé. Il n'est jamais envoyé.",
+  "analysisSheetLine5": "{app} va s'ouvrir : utilisez-la normalement.",
+  "@analysisSheetLine5": {
+    "placeholders": {
+      "app": {
+        "type": "String"
+      }
+    }
+  },
+  "reportDateLine": "Analyse du {date} · {duration}",
+  "@reportDateLine": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "duration": {
+        "type": "String"
+      }
+    }
+  },
+  "reportDomainsContacted": "Domaines contactés",
+  "reportDangerousSites": "Sites dangereux",
+  "reportTruncated": "Liste incomplète : l'application a contacté trop de domaines différents.",
+  "reportSeeApp": "Voir l'application",
+  "reportDelete": "Supprimer ce rapport",
+  "reportLocalOnly": "Ce rapport reste uniquement sur ce téléphone, jusqu'au {date}, puis il est supprimé automatiquement. Il n'est jamais envoyé.",
+  "@reportLocalOnly": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "reportApproximate": "Le nombre de requêtes est approximatif : Android garde certaines réponses en mémoire quelques minutes.",
+  "reportRequests": "{count, plural, one{{n} requête} other{{n} requêtes}}",
+  "@reportRequests": {
+    "description": "n = le même nombre, déjà formaté",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "reportImitates": "Imite {brand}",
+  "@reportImitates": {
+    "placeholders": {
+      "brand": {
+        "type": "String"
+      }
+    }
+  },
+  "reportBlocked": "Bloqué",
+  "firewallIntro": "Bloque les sites dangereux et les traqueurs avant même qu'une application ne s'y connecte. Tout se passe sur votre téléphone.",
+  "firewallSinceActivation": "Depuis l'activation",
+  "firewallQueriesAnalyzed": "Requêtes analysées",
+  "firewallQueriesBlocked": "Requêtes bloquées",
+  "firewallListsLoading": "Chargement des listes…",
+  "firewallOneVpn": "Android n'autorise qu'un seul VPN à la fois : si vous en activez un autre, le pare-feu s'arrête.",
+  "firewallUpdated": "Listes mises à jour.",
+  "firewallUpdateFailed": "Mise à jour impossible : les listes actuelles sont conservées.",
+  "firewallInvalidDomain": "Domaine invalide, par exemple : exemple.fr",
+  "firewallDomainRefused": "Domaine refusé (format invalide ou liste pleine)",
+  "firewallExplain1": "Android va vous demander d'autoriser une « connexion VPN » : c'est ainsi que Sentinel voit les noms de sites demandés.",
+  "firewallExplain2": "Seules les demandes de noms de sites (DNS) passent par Sentinel, le reste de votre trafic ne change pas.",
+  "firewallExplain3": "Les sites autorisés sont demandés à Quad9 (résolveur suisse), de façon chiffrée : votre réseau ne voit plus les noms des sites.",
+  "firewallExplain4": "Aucun site visité n'est enregistré : seuls des compteurs existent (sauf pendant une analyse d'application que vous lancez vous-même).",
+  "firewallExplain5": "Une notification discrète reste affichée tant que le pare-feu est actif.",
+  "firewallUpdateTitle": "Mise à jour des listes",
+  "firewallConsent1": "Sentinel télécharge les listes de blocage depuis GitHub (raw.githubusercontent.com), en HTTPS, au plus une fois par jour.",
+  "firewallConsent2": "Aucune information vous concernant n'est envoyée : ni sites visités, ni identifiant. Comme pour toute connexion, GitHub voit l'adresse IP de votre téléphone.",
+  "firewallConsent3": "Chaque liste est vérifiée (taille, format, cohérence) avant usage. En cas de problème, l'ancienne version est conservée.",
+  "blocklistCacheNote": "Les changements peuvent prendre quelques minutes à s'appliquer (cache DNS du navigateur).",
+  "blocklistListsTitle": "Listes de blocage",
+  "blocklistAdsWarning": "Peut empêcher certaines applications de fonctionner.",
+  "blocklistImpersonationWarning": "Peut bloquer un vrai site non répertorié : ajoutez-le alors à la liste blanche.",
+  "blocklistAutoUpdateTitle": "Mises à jour automatiques",
+  "blocklistUpdateDaily": "Mettre à jour chaque jour",
+  "blocklistUpdateNote": "Les listes sont téléchargées en HTTPS depuis GitHub, au plus une fois par jour. Aucune information vous concernant n'est envoyée.",
+  "blocklistUpdating": "Mise à jour en cours…",
+  "blocklistUpdateNow": "Mettre à jour",
+  "allowlistTitle": "Liste blanche",
+  "allowlistIntro": "Ces sites ne sont jamais bloqués, même s'ils figurent dans une liste. Leurs sous-domaines non plus.",
+  "allowlistHint": "exemple.fr",
+  "allowlistAdd": "Ajouter",
+  "allowlistEmpty": "Aucun site pour l'instant.",
+  "allowlistRemove": "Retirer {domain}",
+  "@allowlistRemove": {
+    "placeholders": {
+      "domain": {
+        "type": "String"
+      }
+    }
+  },
+  "sourcesTitle": "Sources et licences",
+  "sourcesSeeSource": "Voir la source",
+  "upstreamIdle": "En attente de la première requête",
+  "upstreamDot": "Chiffré (DNS-over-TLS)",
+  "upstreamDoh": "Chiffré (DNS-over-HTTPS)",
+  "upstreamPlain": "Non chiffré : autorisé sur ce réseau",
+  "upstreamFailing": "Quad9 injoignable de façon chiffrée",
+  "upstreamFailingHelp": "Ce réseau bloque le DNS chiffré : les sites ne s'ouvrent pas. Sentinel n'envoie jamais vos requêtes en clair sans votre accord. Si vous faites confiance à ce réseau, vous pouvez l'autoriser ci-dessous : les noms des sites visités deviendront alors visibles sur le réseau.",
+  "upstreamLabel": "Requêtes vers Quad9",
+  "upstreamAllowPlain": "Autoriser le DNS non chiffré sur ce réseau",
+  "dnsStrictTitle": "DNS privé incompatible",
+  "dnsStrictMessage": "Votre DNS privé est réglé sur « {server} » (mode strict). Avec le pare-feu, plus aucun site ne s'ouvrirait. Choisissez « Automatique » dans les réglages : Sentinel chiffre déjà vos requêtes DNS.",
+  "@dnsStrictMessage": {
+    "placeholders": {
+      "server": {
+        "type": "String"
+      }
+    }
+  },
+  "dnsStrictOpenSettings": "Ouvrir les réglages du DNS privé",
+  "networkProtectionTitle": "Protection réseau",
+  "vaultSettingsTitle": "Réglages du coffre",
+  "vaultLock": "Verrouiller",
+  "vaultEmptyTitle": "Vos mots de passe, chiffrés",
+  "vaultEmptyMessage": "Stockez vos mots de passe et notes secrètes. Ils sont chiffrés sur votre téléphone et personne d'autre ne peut les lire.",
+  "vaultCreate": "Créer mon coffre",
+  "vaultUnreadableTitle": "Coffre illisible",
+  "vaultUnreadableMessage": "Le fichier du coffre semble endommagé ou modifié. Sentinel ne peut pas l'ouvrir.",
+  "vaultCreateFailed": "La création du coffre a échoué.",
+  "vaultCreateIntro": "Choisissez un mot de passe maître : il ouvre le coffre et chiffre tout son contenu.",
+  "vaultCreateWarning": "Personne, pas même Sentinel, ne peut retrouver ce mot de passe. Vous recevrez ensuite une clé de récupération : notez-la, c'est le seul moyen d'ouvrir le coffre si vous l'oubliez.",
+  "vaultMasterPassword": "Mot de passe maître",
+  "vaultConfirmation": "Confirmation",
+  "vaultPasswordsDiffer": "Les deux mots de passe diffèrent",
+  "vaultUnderstood": "J'ai compris que ce mot de passe ne peut pas être récupéré",
+  "vaultCreating": "Création…",
+  "vaultRestoreBackup": "Restaurer une sauvegarde",
+  "vaultFingerprintsChanged": "Les empreintes du téléphone ont changé. Ouvrez le coffre avec votre mot de passe, puis réactivez l'empreinte.",
+  "vaultTooManyTries": "Trop d'essais. Utilisez votre mot de passe.",
+  "vaultFingerprintFailed": "L'empreinte n'a pas pu ouvrir le coffre. Utilisez votre mot de passe.",
+  "vaultWeeklyPassword": "Pour votre sécurité, le mot de passe maître est demandé au moins une fois tous les 7 jours.",
+  "vaultLockedTitle": "Coffre verrouillé",
+  "vaultUseFingerprintOrPassword": "Utilisez votre empreinte ou votre mot de passe maître.",
+  "vaultEnterMasterPassword": "Entrez votre mot de passe maître.",
+  "vaultOpenWithFingerprint": "Ouvrir avec l'empreinte",
+  "vaultOrWithPassword": "Ou avec le mot de passe :",
+  "vaultWrongPassword": "Mot de passe incorrect.",
+  "vaultRetryIn": "Réessayez dans {seconds} s.",
+  "@vaultRetryIn": {
+    "placeholders": {
+      "seconds": {
+        "type": "String"
+      }
+    }
+  },
+  "vaultOpening": "Ouverture…",
+  "vaultOpen": "Ouvrir le coffre",
+  "vaultForgotPassword": "Mot de passe oublié ?",
+  "vaultSaveFailed": "L'enregistrement a échoué.",
+  "vaultForgotTitle": "Mot de passe oublié",
+  "vaultKeyAccepted": "Clé acceptée. Choisissez un nouveau mot de passe maître.",
+  "vaultEnterRecoveryKey": "Entrez la clé de récupération notée à la création du coffre. Les tirets et les minuscules sont acceptés.",
+  "vaultRecoveryKeyLabel": "Clé de récupération",
+  "vaultWrongRecoveryKey": "Clé de récupération incorrecte",
+  "vaultNewMasterPassword": "Nouveau mot de passe maître",
+  "vaultNewKeyWillBeCreated": "Une nouvelle clé de récupération sera créée ; l'ancienne ne fonctionnera plus.",
+  "vaultSaving": "Enregistrement…",
+  "vaultSave": "Enregistrer",
+  "vaultKeyCopied": "Clé copiée. Elle sera effacée du presse-papiers dans {seconds} s.",
+  "@vaultKeyCopied": {
+    "placeholders": {
+      "seconds": {
+        "type": "String"
+      }
+    }
+  },
+  "vaultYourRecoveryKey": "Votre clé de récupération",
+  "vaultWriteKeyDown": "Écrivez-la sur papier et gardez-la en lieu sûr. C'est le seul moyen d'ouvrir le coffre si vous oubliez votre mot de passe.",
+  "vaultKeyShownOnce": "Elle ne sera plus jamais affichée.",
+  "vaultCopy": "Copier",
+  "vaultRetypeLast4": "Pour vérifier que vous l'avez notée, retapez ses 4 derniers caractères.",
+  "vaultLast4Label": "4 derniers caractères",
+  "vaultKeyNoted": "J'ai noté ma clé",
+  "vaultKeyCreateFailed": "La création de la clé a échoué.",
+  "vaultKeyOfferTitle": "Nouveau : la clé de récupération",
+  "vaultKeyOfferText": "Si vous oubliez votre mot de passe maître, une clé de récupération est le seul moyen d'ouvrir le coffre. Créez-la maintenant et notez-la sur papier.",
+  "vaultCreateKey": "Créer ma clé",
+  "backupEmpty": "Ce fichier est vide.",
+  "backupUnreadable": "Ce fichier n'est pas une sauvegarde Sentinel, ou il est abîmé.",
+  "backupNewerVersion": "Cette sauvegarde vient d'une version plus récente de Sentinel. Mettez l'application à jour, puis réessayez.",
+  "backupTooBig": "Ce fichier est trop gros pour être une sauvegarde Sentinel.",
+  "backupCannotReadFile": "Impossible de lire ce fichier.",
+  "backupWrongPassword": "Mot de passe incorrect, ou fichier modifié depuis l'export.",
+  "backupCannotRead": "Impossible de lire cette sauvegarde.",
+  "backupRestoreFailed": "La restauration a échoué.",
+  "backupIntroFile": "Choisissez le fichier .sentinel créé avec « Exporter une sauvegarde chiffrée » sur votre ancien téléphone.",
+  "backupIntroPassword": "Entrez le mot de passe choisi au moment de l'export.",
+  "backupIntroNewPassword": "Sauvegarde ouverte : {count, plural, one{{n} élément} other{{n} éléments}}. Choisissez le mot de passe maître de ce téléphone.",
+  "@backupIntroNewPassword": {
+    "description": "n = le même nombre, déjà formaté",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "backupPasswordLabel": "Mot de passe de la sauvegarde",
+  "backupNewKeyNote": "Une nouvelle clé de récupération sera créée pour ce téléphone.",
+  "backupChooseFile": "Choisir le fichier",
+  "backupRestoring": "Restauration…",
+  "backupRestore": "Restaurer",
+  "vaultAdd": "Ajouter",
+  "vaultEmptyList": "Votre coffre est vide. Ajoutez un premier mot de passe ou une note secrète.",
+  "vaultNoResults": "Aucun résultat.",
+  "vaultHealthTitle": "Santé des mots de passe",
+  "vaultAllGood": "Tout va bien",
+  "vaultToFix": "{count} à corriger",
+  "@vaultToFix": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "vaultSearch": "Rechercher",
+  "vaultTypePassword": "Mot de passe",
+  "vaultTypeNote": "Note secrète",
+  "vaultPasswordCopied": "Mot de passe copié. Il sera effacé du presse-papiers dans {seconds} s.",
+  "@vaultPasswordCopied": {
+    "placeholders": {
+      "seconds": {
+        "type": "String"
+      }
+    }
+  },
+  "vaultNeedTitle": "Donnez un titre à cet élément.",
+  "vaultDeleteItemTitle": "Supprimer « {title} » ?",
+  "@vaultDeleteItemTitle": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "vaultDeleteItemText": "Cet élément sera définitivement effacé du coffre.",
+  "vaultDelete": "Supprimer",
+  "vaultNewPassword": "Nouveau : mot de passe",
+  "vaultNewNote": "Nouveau : note secrète",
+  "vaultFieldTitle": "Titre",
+  "vaultFieldNote": "Note",
+  "vaultFieldUsername": "Identifiant",
+  "vaultFieldWebsite": "Site web",
+  "vaultHideGenerator": "Masquer le générateur",
+  "vaultGenerate": "Générer",
+  "generatorLength": "{count, plural, one{Longueur : {n} caractère} other{Longueur : {n} caractères}}",
+  "@generatorLength": {
+    "description": "n = le même nombre, déjà formaté",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "generatorUppercase": "Majuscules (A-Z)",
+  "generatorDigits": "Chiffres (0-9)",
+  "generatorSymbols": "Symboles (!#$…)",
+  "generatorNewPassword": "Nouveau mot de passe",
+  "healthToFix": "{count} à corriger. Touchez un élément pour changer son mot de passe.",
+  "@healthToFix": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "healthBreached": "Trouvés dans des fuites",
+  "healthNoBreach": "Aucun mot de passe trouvé dans une fuite.",
+  "healthReused": "Utilisés plusieurs fois",
+  "healthAllUnique": "Chaque mot de passe est unique.",
+  "healthAlsoUsedFor": "Aussi utilisé pour : {titles}",
+  "@healthAlsoUsedFor": {
+    "placeholders": {
+      "titles": {
+        "type": "String"
+      }
+    }
+  },
+  "healthWeak": "Trop faibles",
+  "healthNoWeak": "Aucun mot de passe trop faible.",
+  "healthEasyToGuess": "Facile à deviner",
+  "healthCheckIntro": "Vérifiez si vos mots de passe apparaissent dans des fuites connues (Have I Been Pwned).",
+  "healthCheckButton": "Vérifier les fuites",
+  "healthChecking": "Vérification… {done} / {total}",
+  "@healthChecking": {
+    "placeholders": {
+      "done": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "healthRetry": "Réessayer",
+  "breachMessage": "{count, plural, other{Ce mot de passe a été vu {n} fois dans des fuites de données. Changez-le.}}",
+  "@breachMessage": {
+    "description": "Nombre de fois où le mot de passe a été vu (« fois » invariable). n = le même nombre, déjà formaté",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "breachShort": "{count, plural, other{Vu {n} fois dans des fuites}}",
+  "@breachShort": {
+    "description": "n = le même nombre, déjà formaté",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "breachConsentTitle": "Vérifier les fuites ?",
+  "breachConsentText": "Sentinel envoie seulement les 5 premiers caractères d'une empreinte (hash) de chaque mot de passe à Have I Been Pwned. Votre mot de passe ne quitte jamais le téléphone.",
+  "breachConsentDetail": "Le service répond avec une liste de fuites connues, et la comparaison se fait sur votre téléphone. Vous pourrez retirer cet accord dans les réglages du coffre.",
+  "breachConsentCheck": "Vérifier",
+  "breachErrorTimeout": "Le service ne répond pas. Réessayez plus tard.",
+  "breachErrorOffline": "Pas de connexion Internet. Vérifiez le Wi-Fi ou les données mobiles.",
+  "breachErrorTooMany": "Trop de demandes. Réessayez dans un instant.",
+  "breachErrorUnavailable": "Le service Have I Been Pwned est indisponible (erreur {code}).",
+  "@breachErrorUnavailable": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "clipboardSharedTitle": "Presse-papiers partagé",
+  "clipboardSharedWarning": "Sur cette version d'Android, toutes les applications peuvent lire ce que vous copiez. Le presse-papiers sera vidé après 10 secondes.",
+  "clipboardCopyAnyway": "Copier quand même",
+  "fieldShow": "Afficher",
+  "fieldHide": "Masquer",
+  "strengthWeak": "faible",
+  "strengthMedium": "moyen",
+  "strengthStrong": "fort",
+  "strengthLine": "Force : {strength}",
+  "@strengthLine": {
+    "placeholders": {
+      "strength": {
+        "type": "String"
+      }
+    }
+  },
+  "strengthLineTooShort": "Force : {strength} · {length} / {min} caractères minimum",
+  "@strengthLineTooShort": {
+    "placeholders": {
+      "strength": {
+        "type": "String"
+      },
+      "length": {
+        "type": "String"
+      },
+      "min": {
+        "type": "String"
+      }
+    }
+  },
+  "vaultFingerprintEnabled": "Ouverture par l'empreinte activée.",
+  "vaultBiometricTooManyTries": "Trop d'essais. Réessayez dans quelques instants.",
+  "vaultNoFingerprint": "Aucune empreinte enregistrée sur ce téléphone.",
+  "vaultFingerprintActivationFailed": "L'activation de l'empreinte a échoué.",
+  "vaultNewKeyTitle": "Nouvelle clé de récupération ?",
+  "vaultNewKeyText": "L'ancienne clé ne fonctionnera plus. Pensez à noter la nouvelle.",
+  "vaultDeleteFailed": "La suppression a échoué.",
+  "vaultFingerprintWeekly": "Le mot de passe reste demandé au moins une fois tous les 7 jours.",
+  "vaultBreachSettingDetail": "Have I Been Pwned. Seul un début d'empreinte est envoyé, jamais le mot de passe.",
+  "vaultChangeMaster": "Changer le mot de passe maître",
+  "vaultNewRecoveryKey": "Générer une nouvelle clé de récupération",
+  "vaultExport": "Exporter une sauvegarde chiffrée",
+  "vaultDeleteVault": "Supprimer le coffre",
+  "vaultDeleteVaultTitle": "Supprimer le coffre ?",
+  "vaultDeleteVaultText": "Tous les mots de passe et notes seront définitivement effacés. Tapez {word} pour confirmer.",
+  "@vaultDeleteVaultText": {
+    "placeholders": {
+      "word": {
+        "type": "String"
+      }
+    }
+  },
+  "vaultDeleteWord": "SUPPRIMER",
+  "@vaultDeleteWord": {
+    "description": "Mot à taper pour confirmer"
+  },
+  "vaultMasterChanged": "Mot de passe maître changé.",
+  "vaultCurrentPassword": "Mot de passe actuel",
+  "vaultWrongPasswordShort": "Mot de passe incorrect",
+  "vaultChange": "Changer",
+  "exportSaved": "Sauvegarde enregistrée. Gardez son mot de passe en lieu sûr.",
+  "exportCancelled": "Export annulé.",
+  "exportFileFailed": "L'enregistrement du fichier a échoué.",
+  "exportFailed": "L'export a échoué.",
+  "exportIntro": "Pour passer à un nouveau téléphone : un fichier .sentinel, chiffré par le mot de passe choisi ici. Sans ce mot de passe, personne ne peut le lire, pas même Sentinel.",
+  "exportStore": "Rangez le fichier où vous voulez (Drive, clé USB, ordinateur) et ne le perdez pas avec son mot de passe.",
+  "exportPasswordLabel": "Mot de passe d'export",
+  "exportEncrypting": "Chiffrement…",
+  "exportButton": "Exporter"
+}

@@ -1,0 +1,10 @@
+# Traductions de l'app (flutter gen-l10n, lancé par flutter pub get).
+# Le français est la langue de référence : chaque clé y est décrite.
+# test/l10n_keys_test.dart vérifie que les 3 langues ont les mêmes clés.
+arb-dir: lib/l10n
+template-arb-file: app_fr.arb
+output-localization-file: app_localizations.dart
+output-class: AppLocalizations
+output-dir: lib/l10n
+# AppLocalizations.of(context) ne renvoie jamais null.
+nullable-getter: false

@@ -20,7 +20,9 @@ object ScamAlertNotifier {
     fun show(context: Context, id: Int, title: String, reason: String, text: String) {
         val manager = context.getSystemService(NotificationManager::class.java)
         if (!manager.areNotificationsEnabled()) return
-        createChannel(context, manager)
+        // Textes dans la langue choisie dans Réglages.
+        val texts = AppLanguage.localized(context)
+        createChannel(texts, manager)
 
         // SEN-06 : relais non exporté, qui transmet le texte à MainActivity
         // par la mémoire (alertInbox), jamais par un Intent forgeable.
@@ -39,7 +41,7 @@ object ScamAlertNotifier {
             .setSmallIcon(R.drawable.ic_stat_arch)
             .setColor(RED)
             .setContentTitle("Sentinel")
-            .setContentText("Arnaque probable détectée")
+            .setContentText(texts.getString(R.string.scam_public_text))
             .build()
 
         val notification = builder(context)
@@ -58,14 +60,14 @@ object ScamAlertNotifier {
         manager.notify(id, notification)
     }
 
-    private fun createChannel(context: Context, manager: NotificationManager) {
+    private fun createChannel(texts: Context, manager: NotificationManager) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
         val channel = NotificationChannel(
             CHANNEL_ID,
-            "Alertes arnaques",
+            texts.getString(R.string.scam_channel_name),
             NotificationManager.IMPORTANCE_HIGH,
         ).apply {
-            description = "Prévient quand un message reçu ressemble à une arnaque."
+            description = texts.getString(R.string.scam_channel_description)
         }
         manager.createNotificationChannel(channel) // sans effet s'il existe déjà
     }

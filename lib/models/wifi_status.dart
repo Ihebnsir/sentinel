@@ -1,18 +1,28 @@
+import '../l10n/l10n.dart';
+
 /// Le type de protection d'un réseau Wi-Fi.
 /// Le nom (ex : « wpa2 ») est celui envoyé par WifiSecurityChecker.kt.
 enum WifiSecurity {
-  open('Aucune (réseau ouvert)'),
-  owe('Enhanced Open (OWE)'),
-  wep('WEP'),
-  wpa('WPA'),
-  wpa2('WPA2 ou WPA'),
-  wpa3('WPA3'),
-  enterprise('Entreprise (WPA2 / WPA3)'),
-  unknown('Inconnue');
+  open,
+  owe,
+  wep,
+  wpa,
+  wpa2,
+  wpa3,
+  enterprise,
+  unknown;
 
-  const WifiSecurity(this.label);
-
-  final String label; // texte affiché dans les détails
+  /// Texte affiché dans les détails (les sigles ne se traduisent pas).
+  String label(AppLocalizations l) => switch (this) {
+    open => l.wifiSecurityOpen,
+    owe => 'Enhanced Open (OWE)',
+    wep => 'WEP',
+    wpa => 'WPA',
+    wpa2 => l.wifiSecurityWpa2,
+    wpa3 => 'WPA3',
+    enterprise => l.wifiSecurityEnterprise,
+    unknown => l.commonUnknownFeminine,
+  };
 
   /// Retrouve la valeur à partir du texte Android ; inconnu sinon.
   static WifiSecurity fromName(Object? name) => WifiSecurity.values.firstWhere(

@@ -1,11 +1,11 @@
 import 'package:material_ui/material_ui.dart';
 
+import '../l10n/l10n.dart';
 import '../models/installed_app.dart';
 import '../services/app_risk_calculator.dart';
 import '../services/apps/known_apps.dart';
 import '../services/apps_scanner_service.dart';
 import '../theme/app_colors.dart';
-import '../utils/french_date.dart';
 import '../utils/permission_labels.dart';
 import '../widgets/app_icon.dart';
 import '../widgets/risk_level_text.dart';
@@ -18,71 +18,63 @@ class AppDetailScreen extends StatelessWidget {
   final InstalledApp app;
   final AppRiskReport report;
 
-  /// D'où vient l'app, en français.
-  String _installSource() {
-    if (app.isSystemApp) return 'Préinstallée';
+  /// D'où vient l'app.
+  String _installSource(AppLocalizations l) {
+    if (app.isSystemApp) return l.detailPreinstalled;
     // Nom de la boutique officielle (« AppGallery »…), sinon source inconnue.
-    return app.storeName ?? 'Source inconnue';
+    return app.storeName ?? l.detailUnknownSource;
   }
 
-  static String _date(DateTime? date) =>
-      date == null ? 'Inconnue' : formatFrenchDate(date);
+  static String _date(AppLocalizations l, DateTime? date) =>
+      date == null ? l.commonUnknownFeminine : l.date(date);
 
   /// Conclusion sur la signature : texte et couleur, null si rien à dire.
-  (String, Color)? _signatureVerdict() {
-    final brand = report.identity.brand;
+  (String, Color)? _signatureVerdict(AppLocalizations l) {
+    final brand = report.identity.brand ?? '';
     final stalkerware = report.stalkerwareName;
     if (stalkerware != null) {
-      return ('Logiciel espion connu : $stalkerware', AppColors.rommen);
+      return (l.detailKnownSpyware(stalkerware), AppColors.rommen);
     }
     switch (report.identity.verdict) {
       case IdentityVerdict.verified:
-        return ('Signature vérifiée pour $brand', AppColors.zitouna);
+        return (l.detailSignatureVerified(brand), AppColors.zitouna);
       case IdentityVerdict.modifiedCopy:
-        return (
-          "Signature différente de l'éditeur officiel de $brand",
-          AppColors.rommen,
-        );
+        return (l.detailSignatureDifferent(brand), AppColors.rommen);
       case IdentityVerdict.impersonation:
-        return (
-          "Ce n'est pas l'application officielle de $brand",
-          AppColors.rommen,
-        );
+        return (l.detailNotOfficial(brand), AppColors.rommen);
       case IdentityVerdict.knownMod:
-        return ('Version modifiée non officielle de $brand', AppColors.rommen);
+        return (l.detailKnownMod(brand), AppColors.rommen);
       case IdentityVerdict.officialUnchecked:
         return (
-          'Empreinte officielle de $brand pas encore enregistrée dans Sentinel',
+          l.detailUnchecked(brand),
           AppColors.encre.withValues(alpha: 0.6),
         );
       case IdentityVerdict.unknown:
         break;
     }
     if (app.debugCert) {
-      return ('Signée avec un certificat de test', AppColors.ocre);
+      return (l.riskDebugCert, AppColors.ocre);
     }
     return null;
   }
 
   /// Les lignes de la section « Signature ».
-  List<Widget> _signatureRows() {
+  List<Widget> _signatureRows(AppLocalizations l) {
     final cert = app.mainCert;
-    final verdict = _signatureVerdict();
+    final verdict = _signatureVerdict(l);
     final others = app.signingCerts.length - 1;
     return _withSeparators([
       if (cert == null)
-        const _TextRow('Signature illisible', muted: true)
+        _TextRow(l.detailSignatureUnreadable, muted: true)
       else ...[
-        _StackedRow(label: 'Empreinte SHA-256', value: cert.shortSha256),
+        _StackedRow(label: l.detailSha256, value: cert.shortSha256),
         _StackedRow(
-          label: 'Certificat',
-          value: cert.subject ?? 'Éditeur non renseigné',
+          label: l.detailCertificate,
+          value: cert.subject ?? l.detailPublisherMissing,
         ),
         if (others > 0)
           _TextRow(
-            others > 1
-                ? 'Et $others autres certificats (anciens ou multiples)'
-                : 'Et 1 autre certificat (ancien ou multiple)',
+            l.detailOtherCertificates(others, l.number(others)),
             muted: true,
           ),
       ],
@@ -102,12 +94,13 @@ class AppDetailScreen extends StatelessWidget {
   /// Boutons du bas. Logiciel espion possible : un seul bouton, vers les
   /// conseils, pour ne pas désinstaller sans réfléchir.
   List<Widget> _actions(BuildContext context) {
+    final l = context.l10n;
     if (report.spywareSuspected) {
       return [
         FilledButton(
           style: FilledButton.styleFrom(backgroundColor: AppColors.rommen),
           onPressed: () => _openAdvice(context),
-          child: const Text('Que faire ?'),
+          child: Text(l.detailWhatToDo),
         ),
       ];
     }
@@ -115,14 +108,14 @@ class AppDetailScreen extends StatelessWidget {
       FilledButton(
         style: FilledButton.styleFrom(backgroundColor: AppColors.bleu),
         onPressed: () => AppsScannerService().openAppSettings(app.packageName),
-        child: const Text('Gérer les autorisations'),
+        child: Text(l.detailManagePermissions),
       ),
       // Une app système ne peut pas être désinstallée.
       if (!app.isSystemApp)
         TextButton(
           style: TextButton.styleFrom(foregroundColor: AppColors.rommen),
           onPressed: () => _uninstall(context),
-          child: const Text('Désinstaller'),
+          child: Text(l.detailUninstall),
         ),
     ];
   }
@@ -135,10 +128,11 @@ class AppDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = context.l10n;
     final labels = <String>[];
-    var technicalCount = 0; // permissions sans libellé français
+    var technicalCount = 0; // permissions sans libellé simple
     for (final permission in app.grantedPermissions) {
-      final label = permissionLabel(permission);
+      final label = permissionLabel(l, permission);
       if (label == null) {
         technicalCount++;
       } else {
@@ -188,44 +182,44 @@ class AppDetailScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 24),
                   _InfoRow(
-                    label: 'Niveau de risque',
+                    label: l.detailRiskLevel,
                     trailing: RiskLevelText(level: report.level, fontSize: 15),
                   ),
                   const _Separator(),
-                  _InfoRow(label: 'Source', value: _installSource()),
-                  const _Separator(),
                   _InfoRow(
-                    label: 'Installée le',
-                    value: _date(app.firstInstallTime),
+                    label: l.detailSource,
+                    value: _installSource(l),
                   ),
                   const _Separator(),
                   _InfoRow(
-                    label: 'Mise à jour le',
-                    value: _date(app.lastUpdateTime),
+                    label: l.detailInstalledOn,
+                    value: _date(l, app.firstInstallTime),
                   ),
-                  const _SectionTitle('Pourquoi ce niveau'),
+                  const _Separator(),
+                  _InfoRow(
+                    label: l.detailUpdatedOn,
+                    value: _date(l, app.lastUpdateTime),
+                  ),
+                  _SectionTitle(l.detailWhyLevel),
                   if (report.level == RiskLevel.systeme)
-                    const _TextRow(
-                      "Cette application fait partie d'Android ou de votre "
-                      'fabricant. Ses autorisations étendues sont normales '
-                      'pour son fonctionnement.',
-                    )
-                  else if (report.reasons.isEmpty)
-                    const _TextRow('Aucun signal inquiétant')
+                    _TextRow(l.detailSystemExplanation)
+                  else if (report.rules.isEmpty)
+                    _TextRow(l.appsNoWorry)
                   else
-                    ..._withSeparators(report.reasons.map(_TextRow.new)),
-                  const _SectionTitle('Signature'),
-                  ..._signatureRows(),
-                  const _SectionTitle('Autorisations accordées'),
+                    ..._withSeparators(report.reasons(l).map(_TextRow.new)),
+                  _SectionTitle(l.detailSignature),
+                  ..._signatureRows(l),
+                  _SectionTitle(l.detailGrantedPermissions),
                   if (labels.isEmpty && technicalCount == 0)
-                    const _TextRow('Aucune autorisation accordée'),
+                    _TextRow(l.detailNoPermissions),
                   ..._withSeparators([
                     ...labels.map(_TextRow.new),
                     if (technicalCount > 0)
                       _TextRow(
-                        technicalCount > 1
-                            ? 'Et $technicalCount autres autorisations techniques'
-                            : 'Et 1 autre autorisation technique',
+                        l.detailOtherPermissions(
+                          technicalCount,
+                          l.number(technicalCount),
+                        ),
                         muted: true,
                       ),
                   ]),

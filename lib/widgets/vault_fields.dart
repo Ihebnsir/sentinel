@@ -1,5 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 
+import '../l10n/l10n.dart';
 import '../services/vault/password_strength.dart';
 import '../theme/app_colors.dart';
 
@@ -88,7 +89,9 @@ class _VaultTextFieldState extends State<VaultTextField> {
         focusedErrorBorder: _border(AppColors.rommen),
         suffixIcon: widget.secret
             ? IconButton(
-                tooltip: _hidden ? 'Afficher' : 'Masquer',
+                tooltip: _hidden
+                    ? context.l10n.fieldShow
+                    : context.l10n.fieldHide,
                 color: muted,
                 icon: Icon(
                   _hidden
@@ -117,6 +120,7 @@ class PasswordStrengthLine extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = context.l10n;
     final strength = passwordStrength(password);
     final length = password.runes.length;
     final tooShort = length < masterPasswordMinLength;
@@ -132,9 +136,12 @@ class PasswordStrengthLine extends StatelessWidget {
         const SizedBox(height: 6),
         Text(
           tooShort
-              ? 'Force : ${strength.label.toLowerCase()} · '
-                    '$length / $masterPasswordMinLength caractères minimum'
-              : 'Force : ${strength.label.toLowerCase()}',
+              ? l.strengthLineTooShort(
+                  strength.label(l),
+                  '$length',
+                  '$masterPasswordMinLength',
+                )
+              : l.strengthLine(strength.label(l)),
           style: TextStyle(fontSize: 13, color: _color(strength)),
         ),
       ],

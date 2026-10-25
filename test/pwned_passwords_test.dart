@@ -8,6 +8,7 @@ import 'package:sentinel/services/breach/breach_checker.dart';
 import 'package:sentinel/services/breach/breach_consent.dart';
 import 'package:sentinel/services/breach/pwned_passwords.dart';
 import 'package:sentinel/services/vault/vault_item.dart';
+import 'support/l10n.dart';
 
 // SHA-1 de « password » (vecteur connu).
 const _hash = '5BAA61E4C9B93F3F0682250B6CF8331B7EE68FD8';
@@ -113,7 +114,7 @@ void main() {
       try {
         await client.breachCount('password');
       } on BreachCheckException catch (e) {
-        return e.message;
+        return e.message(fr);
       }
       fail('Une BreachCheckException était attendue');
     }

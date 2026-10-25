@@ -2,10 +2,13 @@ import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'package:material_ui/material_ui.dart';
 
+import 'l10n/l10n.dart';
 import 'screens/main_shell.dart';
 import 'screens/startup_gate.dart';
+import 'services/language_store.dart';
 import 'services/onboarding_store.dart';
 import 'theme/app_theme.dart';
 
@@ -14,11 +17,17 @@ import 'theme/app_theme.dart';
 export 'background/background_analyzer.dart' show backgroundAnalyzerMain;
 
 // Point d'entrée : Flutter démarre l'app ici.
-void main() {
+Future<void> main() async {
   LicenseRegistry.addLicense(readexProLicense);
   LicenseRegistry.addLicense(blocklistsLicense);
   LicenseRegistry.addLicense(stalkerwareLicense);
-  runApp(SentinelApp());
+  WidgetsFlutterBinding.ensureInitialized();
+  // Noms des mois en anglais et en arabe (données dans l'app).
+  await initializeDateFormatting();
+  // Langue choisie dans Réglages, lue avant le premier écran.
+  final language = LanguageController();
+  await language.load();
+  runApp(SentinelApp(language: language));
 }
 
 /// Licence OFL de la police embarquée (lue seulement si on l'affiche).
@@ -31,7 +40,8 @@ Stream<LicenseEntry> readexProLicense() async* {
 Stream<LicenseEntry> blocklistsLicense() async* {
   final text = await rootBundle.loadString('assets/blocklists/LICENSES.txt');
   yield LicenseEntryWithLineBreaks([
-    'Listes de blocage (Phishing.Database, AdGuard, AdAway, ShadowWhisperer)',
+    // Sans mot français : la page des licences n'a pas de traduction.
+    'Phishing.Database, AdGuard, AdAway, ShadowWhisperer',
   ], text);
 }
 
@@ -45,21 +55,38 @@ Stream<LicenseEntry> stalkerwareLicense() async* {
   ], '${json['attribution']}\n\n${json['license']} : ${json['licenseUrl']}');
 }
 
-/// Le widget racine : il configure le thème et l'écran de départ.
+/// Le widget racine : il configure le thème, la langue et l'écran de départ.
 class SentinelApp extends StatelessWidget {
-  SentinelApp({super.key, OnboardingStore? onboardingStore})
-    : onboardingStore = onboardingStore ?? OnboardingStore();
+  SentinelApp({
+    super.key,
+    OnboardingStore? onboardingStore,
+    LanguageController? language,
+  }) : onboardingStore = onboardingStore ?? OnboardingStore(),
+       language = language ?? LanguageController();
 
   final OnboardingStore onboardingStore;
 
+  /// Langue choisie (null : celle du téléphone, sinon le français).
+  final LanguageController language;
+
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Sentinel',
-      debugShowCheckedModeBanner: false,
-      theme: AppTheme.light,
-      // Présentation au premier lancement, puis l'app.
-      home: StartupGate(store: onboardingStore, home: const MainShell()),
+    // Au-dessus de MaterialApp : Réglages peut changer la langue.
+    return LanguageScope(
+      controller: language,
+      child: ValueListenableBuilder<Locale?>(
+        valueListenable: language,
+        builder: (context, locale, _) => MaterialApp(
+          onGenerateTitle: (context) => context.l10n.appTitle,
+          debugShowCheckedModeBanner: false,
+          theme: AppTheme.light,
+          locale: locale,
+          supportedLocales: appSupportedLocales,
+          localizationsDelegates: appLocalizationsDelegates,
+          // Présentation au premier lancement, puis l'app.
+          home: StartupGate(store: onboardingStore, home: const MainShell()),
+        ),
+      ),
     );
   }
 }

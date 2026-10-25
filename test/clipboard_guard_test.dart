@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:sentinel/services/vault/vault_platform.dart';
 import 'package:sentinel/widgets/vault_copy.dart';
+import 'support/l10n.dart';
 
 // SEN-03 : Android 9 et avant, avertissement + effacement après 10 s.
 void main() {
@@ -86,7 +87,7 @@ void main() {
   group('copyFromVault (dialogue)', () {
     Future<BuildContext> host(WidgetTester tester) async {
       await tester.pumpWidget(
-        const MaterialApp(home: Scaffold(body: Text('x'))),
+        testApp(home: Scaffold(body: Text('x'))),
       );
       return tester.element(find.text('x'));
     }
@@ -97,9 +98,9 @@ void main() {
       final context = await host(tester);
       final result = copyFromVault(context, g, 'secret');
       await tester.pumpAndSettle();
-      expect(find.text(sharedClipboardWarning), findsOneWidget);
+      expect(find.text(fr.clipboardSharedWarning), findsOneWidget);
       expect(
-        sharedClipboardWarning,
+        fr.clipboardSharedWarning,
         contains('toutes les applications peuvent lire ce que vous copiez'),
       );
       await tester.tap(find.text('Annuler'));

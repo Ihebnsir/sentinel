@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:material_ui/material_ui.dart';
 
+import '../l10n/l10n.dart';
 import '../theme/app_colors.dart';
 
 /// Durée d'affichage de l'alerte Wi-Fi avant qu'elle se ferme seule.
@@ -18,6 +19,7 @@ void showWifiAlert(
   Duration duration = wifiAlertDuration,
 }) {
   final messenger = ScaffoldMessenger.of(context);
+  final l = context.l10n;
   messenger.clearMaterialBanners();
   final controller = messenger.showMaterialBanner(
     MaterialBanner(
@@ -27,14 +29,20 @@ void showWifiAlert(
       actions: [
         TextButton(
           onPressed: messenger.hideCurrentMaterialBanner,
-          child: const Text('Fermer', style: TextStyle(color: Colors.white)),
+          child: Text(
+            l.commonClose,
+            style: const TextStyle(color: Colors.white),
+          ),
         ),
         TextButton(
           onPressed: () {
             messenger.hideCurrentMaterialBanner();
             onDetails();
           },
-          child: const Text('Détails', style: TextStyle(color: Colors.white)),
+          child: Text(
+            l.commonDetails,
+            style: const TextStyle(color: Colors.white),
+          ),
         ),
       ],
     ),

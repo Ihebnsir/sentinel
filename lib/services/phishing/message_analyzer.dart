@@ -1,15 +1,19 @@
+import '../../l10n/l10n.dart';
 import 'phishing_model.dart';
 import 'url_analyzer.dart';
 
 /// Le verdict affiché à l'utilisateur, du plus grave au moins grave.
+/// Le nom (« arnaque »…) est envoyé tel quel à Kotlin.
 enum Verdict {
-  arnaque('Arnaque probable'),
-  suspect('Suspect'),
-  rien('Rien de suspect');
+  arnaque,
+  suspect,
+  rien;
 
-  const Verdict(this.label);
-
-  final String label;
+  String label(AppLocalizations l) => switch (this) {
+    arnaque => l.verdictScam,
+    suspect => l.verdictSuspect,
+    rien => l.verdictNothing,
+  };
 }
 
 /// À partir de cette probabilité, l'IA seule suffit pour « Arnaque probable ».
@@ -19,28 +23,42 @@ const scamThreshold = 0.8;
 const suspectThreshold = 0.5;
 
 /// Ce qu'on montre à l'utilisateur après l'analyse d'un message.
+/// Les phrases sont écrites à l'affichage, dans la langue de l'app.
 class MessageAnalysis {
   const MessageAnalysis({
     required this.verdict,
     required this.probability,
-    required this.reasons,
-    required this.advice,
     required this.links,
+    this.hiddenCharacters = false,
+    this.scamWords = const [],
   });
 
   final Verdict verdict;
   final double probability; // probabilité d'arnaque donnée par l'IA (0 à 1)
-  final List<String> reasons; // liens d'abord, puis mots typiques
-  final String advice;
   final List<AnalyzedLink> links;
+  final bool hiddenCharacters; // caractères cachés ou inversés (SEN-12)
+  final List<String> scamWords; // vide si l'IA ne penche pas vers « arnaque »
 
   /// Probabilité en pourcentage entier, ex : 0,874 → 87.
   int get percent => (probability * 100).round();
-}
 
-/// Raison affichée quand le message cache des caractères (SEN-12).
-const hiddenCharactersReason =
-    "Caractères invisibles ou d'inversion de texte (technique d'arnaque)";
+  /// Les raisons : caractères cachés, liens, puis mots typiques.
+  /// Une même phrase n'apparaît qu'une fois.
+  List<String> reasons(AppLocalizations l) {
+    final reasons = <String>[if (hiddenCharacters) l.reasonHiddenCharacters];
+    for (final finding in [for (final link in links) ...link.findings]) {
+      final reason = finding.reason(l);
+      if (!reasons.contains(reason)) reasons.add(reason);
+    }
+    if (scamWords.isNotEmpty) {
+      final words = scamWords.map(l.reasonQuotedWord).join(l.listSeparator);
+      reasons.add(l.reasonScamWords(words));
+    }
+    return reasons;
+  }
+
+  String advice(AppLocalizations l) => adviceFor(l, verdict);
+}
 
 /// Combine la prédiction de l'IA et l'analyse des liens en un verdict.
 MessageAnalysis analyzeMessage(String text, PhishingPrediction prediction) {
@@ -62,33 +80,19 @@ MessageAnalysis analyzeMessage(String text, PhishingPrediction prediction) {
     verdict = Verdict.rien;
   }
 
-  final reasons = <String>[if (deceptive) hiddenCharactersReason];
-  for (final finding in findings) {
-    if (!reasons.contains(finding.reason)) reasons.add(finding.reason);
-  }
-  // Les mots ne sont montrés que si l'IA penche vers « arnaque ».
-  if (p >= suspectThreshold && prediction.suspiciousWords.isNotEmpty) {
-    final words = prediction.suspiciousWords.map((w) => '« $w »').join(', ');
-    reasons.add('Mots typiques des arnaques : $words');
-  }
-
   return MessageAnalysis(
     verdict: verdict,
     probability: p,
-    reasons: reasons,
-    advice: adviceFor(verdict),
     links: links,
+    hiddenCharacters: deceptive,
+    // Les mots ne sont montrés que si l'IA penche vers « arnaque ».
+    scamWords: p >= suspectThreshold ? prediction.suspiciousWords : const [],
   );
 }
 
 /// Le conseil à suivre pour chaque verdict.
-String adviceFor(Verdict verdict) => switch (verdict) {
-      Verdict.arnaque => 'Ne cliquez pas sur le lien et ne communiquez aucun '
-          'code. Votre banque ou La Poste ne vous demandent jamais de payer '
-          'par SMS. Supprimez ce message.',
-      Verdict.suspect => "Soyez prudent : n'ouvrez pas le lien et ne donnez "
-          "aucune information. En cas de doute, appelez l'organisme au "
-          'numéro de son site officiel.',
-      Verdict.rien => "Aucun signe d'arnaque trouvé. Restez quand même "
-          'vigilant : ne communiquez jamais vos codes ni vos mots de passe.',
-    };
+String adviceFor(AppLocalizations l, Verdict verdict) => switch (verdict) {
+  Verdict.arnaque => l.adviceScam,
+  Verdict.suspect => l.adviceSuspect,
+  Verdict.rien => l.adviceNothing,
+};

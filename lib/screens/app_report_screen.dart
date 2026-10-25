@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:material_ui/material_ui.dart';
 
+import '../l10n/l10n.dart';
 import '../models/installed_app.dart';
 import '../services/app_analysis.dart';
 import '../services/app_risk_calculator.dart';
@@ -9,8 +10,6 @@ import '../services/apps/stalkerware_ioc.dart';
 import '../services/apps_scanner_service.dart';
 import '../services/firewall_service.dart';
 import '../theme/app_colors.dart';
-import '../utils/french_number.dart';
-import '../widgets/app_analysis_section.dart';
 import '../widgets/app_icon.dart';
 import '../widgets/blocklist_sections.dart';
 import 'app_detail_screen.dart';
@@ -109,6 +108,7 @@ class _AppReportScreenState extends State<AppReportScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l = context.l10n;
     final report = widget.report;
     final app = _app;
     return Scaffold(
@@ -144,41 +144,42 @@ class _AppReportScreenState extends State<AppReportScreen> {
             ),
             const SizedBox(height: 4),
             Text(
-              'Analyse du ${formatFrenchDateTime(report.startedAt)} · '
-              '${report.durationLabel}',
+              l.reportDateLine(
+                l.dateTime(report.startedAt),
+                report.durationLabel(l),
+              ),
               style: _muted,
             ),
             const SizedBox(height: 16),
             Text(
-              report.summary,
+              report.summary(l),
               style: const TextStyle(fontSize: 17, color: AppColors.encre),
             ),
             const SizedBox(height: 16),
             _divider,
-            _CountRow('Domaines contactés', report.domains.length),
+            _CountRow(l.reportDomainsContacted, report.domains.length),
             _divider,
             _CountRow(
-              'Sites dangereux',
+              l.reportDangerousSites,
               report.dangerousCount,
               color: report.dangerousCount > 0 ? AppColors.rommen : null,
             ),
             _divider,
-            _CountRow('Traqueurs', report.countOf(ReportCategory.trackers)),
+            _CountRow(
+              l.categoryTrackers,
+              report.countOf(ReportCategory.trackers),
+            ),
             _divider,
-            _CountRow('Publicités', report.countOf(ReportCategory.ads)),
+            _CountRow(l.categoryAds, report.countOf(ReportCategory.ads)),
             _divider,
             if (report.truncated)
               Padding(
                 padding: const EdgeInsets.only(top: 8),
-                child: Text(
-                  "Liste incomplète : l'application a contacté trop de "
-                  'domaines différents.',
-                  style: _muted,
-                ),
+                child: Text(l.reportTruncated, style: _muted),
               ),
             for (final group in report.groups) ...[
               BlocklistSectionTitle(
-                '${group.category.label} (${formatFrenchNumber(group.domains.length)})',
+                '${group.category.label(l)} (${l.number(group.domains.length)})',
               ),
               for (final domain in group.domains) ...[
                 _DomainRow(domain),
@@ -195,7 +196,7 @@ class _AppReportScreenState extends State<AppReportScreen> {
                     padding: EdgeInsets.zero,
                   ),
                   onPressed: _openDetail,
-                  child: const Text("Voir l'application"),
+                  child: Text(l.reportSeeApp),
                 ),
               ),
             Align(
@@ -206,22 +207,16 @@ class _AppReportScreenState extends State<AppReportScreen> {
                   padding: EdgeInsets.zero,
                 ),
                 onPressed: _delete,
-                child: const Text('Supprimer ce rapport'),
+                child: Text(l.reportDelete),
               ),
             ),
             const SizedBox(height: 8),
             Text(
-              'Ce rapport reste uniquement sur ce téléphone, jusqu\'au '
-              '${formatFrenchDateTime(report.expiresAt)}, puis il est '
-              "supprimé automatiquement. Il n'est jamais envoyé.",
+              l.reportLocalOnly(l.dateTime(report.expiresAt)),
               style: _muted,
             ),
             const SizedBox(height: 8),
-            Text(
-              'Le nombre de requêtes est approximatif : Android garde '
-              'certaines réponses en mémoire quelques minutes.',
-              style: _muted,
-            ),
+            Text(l.reportApproximate, style: _muted),
           ],
         ),
       ),
@@ -253,7 +248,7 @@ class _CountRow extends StatelessWidget {
             ),
           ),
           Text(
-            formatFrenchNumber(value),
+            context.l10n.number(value),
             style: TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.w500,
@@ -274,9 +269,8 @@ class _DomainRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final count = domain.count > 1
-        ? '${formatFrenchNumber(domain.count)} requêtes'
-        : '1 requête';
+    final l = context.l10n;
+    final count = l.reportRequests(domain.count, l.number(domain.count));
     final brand = domain.brand;
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 10),
@@ -292,7 +286,7 @@ class _DomainRow extends StatelessWidget {
                 ),
                 if (brand != null)
                   Text(
-                    'Imite $brand',
+                    l.reportImitates(brand),
                     style: const TextStyle(
                       fontSize: 13,
                       color: AppColors.rommen,
@@ -307,9 +301,12 @@ class _DomainRow extends StatelessWidget {
             children: [
               Text(count, style: _muted),
               if (domain.blocked)
-                const Text(
-                  'Bloqué',
-                  style: TextStyle(fontSize: 13, color: AppColors.zitouna),
+                Text(
+                  l.reportBlocked,
+                  style: const TextStyle(
+                    fontSize: 13,
+                    color: AppColors.zitouna,
+                  ),
                 ),
             ],
           ),

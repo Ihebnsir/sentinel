@@ -1,9 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
+import '../l10n/l10n.dart';
 import '../utils/debug_log.dart';
-import '../utils/french_date.dart';
-import '../utils/french_number.dart';
 import 'app_analysis.dart';
 
 /// L'état du pare-feu DNS, lu côté Android.
@@ -61,12 +60,9 @@ class FirewallStatus {
   final String? strictPrivateDns; // DNS privé strict (SEN-11), sinon null
 
   /// Ligne courte pour l'accueil, ex : « Activé · 12 requêtes bloquées ».
-  String get summary {
-    if (!active) return 'Désactivé';
-    final n = formatFrenchNumber(blockedQueries);
-    return blockedQueries > 1
-        ? 'Activé · $n requêtes bloquées'
-        : 'Activé · $n requête bloquée';
+  String summary(AppLocalizations l) {
+    if (!active) return l.commonOff;
+    return l.firewallOnBlocked(blockedQueries, l.number(blockedQueries));
   }
 }
 
@@ -91,7 +87,7 @@ class BlocklistCategory {
       );
 
   final String id;
-  final String name;
+  final String name; // nom français envoyé par Kotlin (secours)
   final bool enabled;
   final int domains;
   final List<String> sources; // noms courts, ex : « ShadowWhisperer »
@@ -99,16 +95,21 @@ class BlocklistCategory {
   /// Catégorie sans liste : une règle sur les marques connues.
   bool get isBrandRule => id == 'impersonation';
 
+  /// Nom affiché, dans la langue de l'app.
+  String displayName(AppLocalizations l) => switch (id) {
+    'malware' => l.categoryMalware,
+    'trackers' => l.categoryTrackers,
+    'ads' => l.categoryAds,
+    'impersonation' => l.categoryImpersonation,
+    _ => name,
+  };
+
   /// Ex : « 430 961 domaines · Phishing.Database, ShadowWhisperer ».
-  String get subtitle {
-    if (isBrandRule) {
-      // Pour cette catégorie, Android envoie le nombre de marques.
-      final marques = domains > 1 ? 'marques surveillées' : 'marque surveillée';
-      return '${formatFrenchNumber(domains)} $marques · '
-          'sites qui les imitent';
-    }
-    final n = formatFrenchNumber(domains);
-    final count = domains > 1 ? '$n domaines' : '$n domaine';
+  String subtitle(AppLocalizations l) {
+    final n = l.number(domains);
+    // Pour cette catégorie, Android envoie le nombre de marques.
+    if (isBrandRule) return l.categoryBrandsWatched(domains, n);
+    final count = l.domainsCount(domains, n);
     return sources.isEmpty ? count : '$count · ${sources.join(', ')}';
   }
 }
@@ -181,12 +182,12 @@ class FirewallConfig {
   final List<BlocklistSourceInfo> sources;
 
   /// Ex : « Dernière mise à jour : 19 octobre 2026 ».
-  String get updateSummary {
+  String updateSummary(AppLocalizations l) {
     final last = lastUpdate;
     final base = last == null
-        ? "Listes livrées avec l'application"
-        : 'Dernière mise à jour : ${formatFrenchDate(last)}';
-    return lastUpdateFailed ? '$base · dernière tentative échouée' : base;
+        ? l.firewallListsBundled
+        : l.firewallLastUpdate(l.date(last));
+    return lastUpdateFailed ? '$base · ${l.firewallLastAttemptFailed}' : base;
   }
 }
 
@@ -235,6 +236,23 @@ List<String> _strings(Object? value) => [
   for (final item in _list(value))
     if (item is String) item,
 ];
+
+/// Pourquoi une analyse n'a pas pu démarrer.
+enum AnalysisStartError {
+  androidOnly,
+  firewallOff,
+  alreadyRunning,
+  unknownApp,
+  failed;
+
+  String message(AppLocalizations l) => switch (this) {
+    androidOnly => l.commonAndroidOnly,
+    firewallOff => l.analysisErrorFirewallOff,
+    alreadyRunning => l.analysisErrorRunning,
+    unknownApp => l.analysisErrorUnknownApp,
+    failed => l.analysisErrorFailed,
+  };
+}
 
 /// Fait le lien avec FirewallChannel.kt via un MethodChannel.
 class FirewallService {
@@ -320,9 +338,12 @@ class FirewallService {
   Future<void> start() => _call('start');
 
   /// Lance l'analyse de [packageName] pendant [minutes] (2, 5 ou 15).
-  /// Renvoie null si c'est parti, sinon un message d'erreur en français.
-  Future<String?> startAnalysis(String packageName, int minutes) async {
-    if (!isSupported) return 'Disponible sur Android';
+  /// Renvoie null si c'est parti, sinon la raison de l'échec.
+  Future<AnalysisStartError?> startAnalysis(
+    String packageName,
+    int minutes,
+  ) async {
+    if (!isSupported) return AnalysisStartError.androidOnly;
     try {
       await _channel.invokeMethod<void>('startAnalysis', {
         'packageName': packageName,
@@ -330,13 +351,13 @@ class FirewallService {
       });
       return null;
     } on MissingPluginException {
-      return 'Disponible sur Android';
+      return AnalysisStartError.androidOnly;
     } on PlatformException catch (e) {
       return switch (e.code) {
-        'NOT_RUNNING' => "Activez d'abord le pare-feu DNS.",
-        'ALREADY_RUNNING' => 'Une analyse est déjà en cours.',
-        'UNKNOWN_APP' => "Cette application n'est plus installée.",
-        _ => "Impossible de lancer l'analyse.",
+        'NOT_RUNNING' => AnalysisStartError.firewallOff,
+        'ALREADY_RUNNING' => AnalysisStartError.alreadyRunning,
+        'UNKNOWN_APP' => AnalysisStartError.unknownApp,
+        _ => AnalysisStartError.failed,
       };
     }
   }

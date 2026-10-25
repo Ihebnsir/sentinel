@@ -1,5 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 
+import '../../l10n/l10n.dart';
 import '../../services/vault/recovery_key.dart';
 import '../../services/vault/vault_platform.dart';
 import '../../theme/app_colors.dart';
@@ -46,16 +47,14 @@ class _RecoveryKeyViewState extends State<RecoveryKeyView> {
     if (wait == null || !mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(
-          'Clé copiée. Elle sera effacée du presse-papiers dans '
-          '${wait.inSeconds} s.',
-        ),
+        content: Text(context.l10n.vaultKeyCopied('${wait.inSeconds}')),
       ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final l = context.l10n;
     final muted = AppColors.encre.withValues(alpha: 0.6);
     final groups = widget.recoveryKey.split('-');
     return ListView(
@@ -63,19 +62,18 @@ class _RecoveryKeyViewState extends State<RecoveryKeyView> {
       children: [
         const Icon(Icons.key_outlined, size: 48, color: AppColors.bleu),
         const SizedBox(height: 16),
-        const Text(
-          'Votre clé de récupération',
-          style: TextStyle(
+        Text(
+          l.vaultYourRecoveryKey,
+          style: const TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.w600,
             color: AppColors.encre,
           ),
         ),
         const SizedBox(height: 8),
-        const Text(
-          "Écrivez-la sur papier et gardez-la en lieu sûr. C'est le seul "
-          "moyen d'ouvrir le coffre si vous oubliez votre mot de passe.",
-          style: TextStyle(
+        Text(
+          l.vaultWriteKeyDown,
+          style: const TextStyle(
             fontSize: 15,
             fontWeight: FontWeight.w500,
             color: AppColors.encre,
@@ -83,7 +81,7 @@ class _RecoveryKeyViewState extends State<RecoveryKeyView> {
         ),
         const SizedBox(height: 8),
         Text(
-          'Elle ne sera plus jamais affichée.',
+          l.vaultKeyShownOnce,
           style: TextStyle(fontSize: 15, color: muted),
         ),
         const SizedBox(height: 16),
@@ -117,19 +115,18 @@ class _RecoveryKeyViewState extends State<RecoveryKeyView> {
             style: TextButton.styleFrom(foregroundColor: AppColors.bleu),
             onPressed: _copy,
             icon: const Icon(Icons.copy, size: 18),
-            label: const Text('Copier'),
+            label: Text(l.vaultCopy),
           ),
         ),
         const SizedBox(height: 16),
         Text(
-          "Pour vérifier que vous l'avez notée, retapez ses 4 derniers "
-          'caractères.',
+          l.vaultRetypeLast4,
           style: TextStyle(fontSize: 15, color: muted),
         ),
         const SizedBox(height: 12),
         VaultTextField(
           controller: _lastChars,
-          label: '4 derniers caractères',
+          label: l.vaultLast4Label,
           // Visible, mais sans suggestions ni apprentissage du clavier.
           secret: true,
           revealed: true,
@@ -141,7 +138,7 @@ class _RecoveryKeyViewState extends State<RecoveryKeyView> {
           child: FilledButton(
             style: FilledButton.styleFrom(backgroundColor: AppColors.bleu),
             onPressed: _confirmed ? widget.onDone : null,
-            child: const Text("J'ai noté ma clé"),
+            child: Text(l.vaultKeyNoted),
           ),
         ),
       ],
@@ -175,22 +172,23 @@ class _RecoveryKeyOfferViewState extends State<RecoveryKeyOfferView> {
       if (!mounted) return;
       setState(() => _creating = false);
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('La création de la clé a échoué.')),
+        SnackBar(content: Text(context.l10n.vaultKeyCreateFailed)),
       );
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final l = context.l10n;
     final muted = AppColors.encre.withValues(alpha: 0.6);
     return ListView(
       padding: const EdgeInsets.only(top: 16, bottom: 24),
       children: [
         const Icon(Icons.key_outlined, size: 48, color: AppColors.bleu),
         const SizedBox(height: 16),
-        const Text(
-          'Nouveau : la clé de récupération',
-          style: TextStyle(
+        Text(
+          l.vaultKeyOfferTitle,
+          style: const TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.w600,
             color: AppColors.encre,
@@ -198,9 +196,7 @@ class _RecoveryKeyOfferViewState extends State<RecoveryKeyOfferView> {
         ),
         const SizedBox(height: 8),
         Text(
-          'Si vous oubliez votre mot de passe maître, une clé de '
-          "récupération est le seul moyen d'ouvrir le coffre. Créez-la "
-          'maintenant et notez-la sur papier.',
+          l.vaultKeyOfferText,
           style: TextStyle(fontSize: 15, color: muted),
         ),
         const SizedBox(height: 24),
@@ -209,13 +205,13 @@ class _RecoveryKeyOfferViewState extends State<RecoveryKeyOfferView> {
             TextButton(
               style: TextButton.styleFrom(foregroundColor: muted),
               onPressed: _creating ? null : widget.onLater,
-              child: const Text('Plus tard'),
+              child: Text(l.commonLater),
             ),
             const Spacer(),
             FilledButton(
               style: FilledButton.styleFrom(backgroundColor: AppColors.bleu),
               onPressed: _creating ? null : _create,
-              child: Text(_creating ? 'Création…' : 'Créer ma clé'),
+              child: Text(_creating ? l.vaultCreating : l.vaultCreateKey),
             ),
           ],
         ),

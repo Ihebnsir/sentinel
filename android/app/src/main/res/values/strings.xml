@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Textes des notifications et du système, en français (langue par défaut).
+         Mêmes clés dans values-en et values-ar (vérifié par StringsResourcesTest). -->
+    <!-- Menu de sélection de texte des autres apps -->
+    <string name="process_text_label">Vérifier avec Sentinel</string>
+    <!-- Réglage Android « Accès aux notifications » -->
+    <string name="listener_label">Sentinel – protection anti-arnaque</string>
+    <string name="scam_channel_name">Alertes arnaques</string>
+    <string name="scam_channel_description">Prévient quand un message reçu ressemble à une arnaque.</string>
+    <!-- Écran verrouillé : version neutre -->
+    <string name="scam_public_text">Arnaque probable détectée</string>
+    <!-- Titre de secours si Dart n'en envoie pas -->
+    <string name="scam_default_title">Arnaque probable</string>
+    <string name="firewall_channel_name">Alertes pare-feu</string>
+    <string name="firewall_channel_description">Prévient quand le pare-feu bloque un site dangereux.</string>
+    <string name="firewall_alert_title">Site dangereux bloqué</string>
+    <!-- %1$s : marque imitée -->
+    <string name="firewall_alert_title_brand">Site imitant %1$s bloqué</string>
+    <!-- %1$s : domaine neutralisé (site[.]xyz) -->
+    <string name="firewall_alert_text">Sentinel a empêché une connexion vers %1$s, un site connu pour du hameçonnage ou des logiciels malveillants.</string>
+    <!-- %1$s : domaine neutralisé, %2$s : marque -->
+    <string name="firewall_alert_text_brand">Sentinel a empêché une connexion vers %1$s, qui imite %2$s sans être son site officiel.</string>
+    <string name="vpn_channel_name">Pare-feu DNS</string>
+    <string name="vpn_channel_description">Indique que le pare-feu DNS est actif.</string>
+    <string name="vpn_title">Sentinel filtre les sites dangereux</string>
+    <string name="vpn_stop">Arrêter</string>
+    <!-- %1$s : nom de l'app analysée -->
+    <string name="vpn_analysis_title">Analyse de %1$s en cours</string>
+    <!-- %1$s : heure de fin -->
+    <string name="vpn_analysis_text">Les autres applications ne sont pas protégées par le pare-feu jusqu\'à %1$s.</string>
+    <string name="vpn_analysis_stop">Arrêter l\'analyse</string>
+    <string name="biometric_enable_title">Activer l\'empreinte</string>
+    <string name="biometric_open_title">Ouvrir le coffre</string>
+    <string name="biometric_use_password">Utiliser le mot de passe</string>
+    <string name="biometric_cancel">Annuler</string>
+    <string name="biometric_subtitle">Posez votre doigt sur le capteur</string>
+</resources>

@@ -1,5 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 
+import '../../l10n/l10n.dart';
 import '../../services/breach/breach_checker.dart';
 import '../../services/vault/password_health.dart';
 import '../../services/vault/vault_item.dart';
@@ -103,6 +104,7 @@ class _PasswordHealthScreenState extends State<PasswordHealthScreen> {
   }
 
   Widget _content() {
+    final l = context.l10n;
     final breaches = widget.breaches;
     final report = analyzePasswordHealth(
       widget.session.items,
@@ -112,9 +114,9 @@ class _PasswordHealthScreenState extends State<PasswordHealthScreen> {
     return ListView(
       padding: const EdgeInsets.fromLTRB(28, 8, 28, 24),
       children: [
-        const Text(
-          'Santé des mots de passe',
-          style: TextStyle(
+        Text(
+          l.vaultHealthTitle,
+          style: const TextStyle(
             fontSize: 24,
             fontWeight: FontWeight.w600,
             color: AppColors.encre,
@@ -123,38 +125,38 @@ class _PasswordHealthScreenState extends State<PasswordHealthScreen> {
         const SizedBox(height: 8),
         Text(
           report.toFix == 0
-              ? 'Rien à corriger pour le moment.'
-              : '${report.toFix} à corriger. Touchez un élément pour '
-                    'changer son mot de passe.',
+              ? l.homeNothingToFix
+              : l.healthToFix(l.number(report.toFix)),
           style: TextStyle(fontSize: 15, color: muted),
         ),
         const SizedBox(height: 24),
         _Section(
-          title: 'Trouvés dans des fuites',
-          header: _breachStatus(muted),
+          title: l.healthBreached,
+          header: _breachStatus(l, muted),
           emptyText:
               breaches.consent && breaches.isUpToDate(widget.session.items)
-              ? 'Aucun mot de passe trouvé dans une fuite.'
+              ? l.healthNoBreach
               : null,
           items: report.breached,
-          subtitle: (item) => breachShort(report.breachCounts[item.id]!),
+          subtitle: (item) => breachShort(l, report.breachCounts[item.id]!),
           color: AppColors.rommen,
           onTap: _open,
         ),
         _Section(
-          title: 'Utilisés plusieurs fois',
-          emptyText: 'Chaque mot de passe est unique.',
+          title: l.healthReused,
+          emptyText: l.healthAllUnique,
           items: report.reused,
-          subtitle: (item) =>
-              'Aussi utilisé pour : ${report.reusedWith[item.id]!.join(', ')}',
+          subtitle: (item) => l.healthAlsoUsedFor(
+            report.reusedWith[item.id]!.join(l.listSeparator),
+          ),
           color: AppColors.ocre,
           onTap: _open,
         ),
         _Section(
-          title: 'Trop faibles',
-          emptyText: 'Aucun mot de passe trop faible.',
+          title: l.healthWeak,
+          emptyText: l.healthNoWeak,
           items: report.weak,
-          subtitle: (_) => 'Facile à deviner',
+          subtitle: (_) => l.healthEasyToGuess,
           color: AppColors.ocre,
           onTap: _open,
         ),
@@ -163,15 +165,14 @@ class _PasswordHealthScreenState extends State<PasswordHealthScreen> {
   }
 
   /// Sous le titre « fuites » : accord, progression ou erreur.
-  Widget? _breachStatus(Color muted) {
+  Widget? _breachStatus(AppLocalizations l, Color muted) {
     final breaches = widget.breaches;
     if (!breaches.consent) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Vérifiez si vos mots de passe apparaissent dans des fuites '
-            'connues (Have I Been Pwned).',
+            l.healthCheckIntro,
             style: TextStyle(fontSize: 13, color: muted),
           ),
           TextButton(
@@ -180,7 +181,7 @@ class _PasswordHealthScreenState extends State<PasswordHealthScreen> {
               padding: EdgeInsets.zero,
             ),
             onPressed: _askAndCheck,
-            child: const Text('Vérifier les fuites'),
+            child: Text(l.healthCheckButton),
           ),
         ],
       );
@@ -193,7 +194,7 @@ class _PasswordHealthScreenState extends State<PasswordHealthScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Vérification… $done / $total',
+              l.healthChecking('$done', '$total'),
               style: TextStyle(fontSize: 13, color: muted),
             ),
             const SizedBox(height: 8),
@@ -213,7 +214,7 @@ class _PasswordHealthScreenState extends State<PasswordHealthScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            error,
+            error.message(l),
             style: const TextStyle(fontSize: 13, color: AppColors.rommen),
           ),
           TextButton(
@@ -222,7 +223,7 @@ class _PasswordHealthScreenState extends State<PasswordHealthScreen> {
               padding: EdgeInsets.zero,
             ),
             onPressed: () => breaches.check(widget.session.items),
-            child: const Text('Réessayer'),
+            child: Text(l.healthRetry),
           ),
         ],
       );

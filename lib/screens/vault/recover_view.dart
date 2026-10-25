@@ -1,6 +1,7 @@
 import 'package:material_ui/material_ui.dart';
 
 import '../../services/vault/password_strength.dart';
+import '../../l10n/l10n.dart';
 import '../../services/vault/vault_session.dart';
 import '../../theme/app_colors.dart';
 import '../../widgets/vault_fields.dart';
@@ -72,20 +73,21 @@ class _RecoverViewState extends State<RecoverView> {
       if (!mounted) return;
       setState(() => _busy = false);
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("L'enregistrement a échoué.")),
+        SnackBar(content: Text(context.l10n.vaultSaveFailed)),
       );
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final l = context.l10n;
     final muted = AppColors.encre.withValues(alpha: 0.6);
     return ListView(
       padding: const EdgeInsets.only(top: 16, bottom: 24),
       children: [
-        const Text(
-          'Mot de passe oublié',
-          style: TextStyle(
+        Text(
+          l.vaultForgotTitle,
+          style: const TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.w600,
             color: AppColors.encre,
@@ -93,29 +95,26 @@ class _RecoverViewState extends State<RecoverView> {
         ),
         const SizedBox(height: 8),
         Text(
-          _keyChecked
-              ? 'Clé acceptée. Choisissez un nouveau mot de passe maître.'
-              : 'Entrez la clé de récupération notée à la création du '
-                    'coffre. Les tirets et les minuscules sont acceptés.',
+          _keyChecked ? l.vaultKeyAccepted : l.vaultEnterRecoveryKey,
           style: TextStyle(fontSize: 15, color: muted),
         ),
         const SizedBox(height: 24),
         if (!_keyChecked) ...[
           VaultTextField(
             controller: _recoveryKey,
-            label: 'Clé de récupération',
+            label: l.vaultRecoveryKeyLabel,
             // Visible, mais sans suggestions ni apprentissage du clavier.
             secret: true,
             revealed: true,
             enabled: !_busy,
-            errorText: _wrongKey ? 'Clé de récupération incorrecte' : null,
+            errorText: _wrongKey ? l.vaultWrongRecoveryKey : null,
             onChanged: (_) => setState(() => _wrongKey = false),
             onSubmitted: (_) => _checkKey(),
           ),
         ] else ...[
           VaultTextField(
             controller: _password,
-            label: 'Nouveau mot de passe maître',
+            label: l.vaultNewMasterPassword,
             secret: true,
             enabled: !_busy,
             onChanged: (_) => setState(() {}),
@@ -127,18 +126,17 @@ class _RecoverViewState extends State<RecoverView> {
           const SizedBox(height: 16),
           VaultTextField(
             controller: _confirmation,
-            label: 'Confirmation',
+            label: l.vaultConfirmation,
             secret: true,
             enabled: !_busy,
             errorText: _confirmation.text.isNotEmpty && !_matches
-                ? 'Les deux mots de passe diffèrent'
+                ? l.vaultPasswordsDiffer
                 : null,
             onChanged: (_) => setState(() {}),
           ),
           const SizedBox(height: 12),
           Text(
-            'Une nouvelle clé de récupération sera créée ; '
-            "l'ancienne ne fonctionnera plus.",
+            l.vaultNewKeyWillBeCreated,
             style: TextStyle(fontSize: 13, color: muted),
           ),
         ],
@@ -157,7 +155,7 @@ class _RecoverViewState extends State<RecoverView> {
             TextButton(
               style: TextButton.styleFrom(foregroundColor: muted),
               onPressed: _busy ? null : widget.onCancel,
-              child: const Text('Annuler'),
+              child: Text(l.commonCancel),
             ),
             const Spacer(),
             if (!_keyChecked)
@@ -166,13 +164,13 @@ class _RecoverViewState extends State<RecoverView> {
                 onPressed: !_busy && _recoveryKey.text.trim().isNotEmpty
                     ? _checkKey
                     : null,
-                child: const Text('Continuer'),
+                child: Text(l.commonContinue),
               )
             else
               FilledButton(
                 style: FilledButton.styleFrom(backgroundColor: AppColors.bleu),
                 onPressed: _canSave ? _save : null,
-                child: Text(_busy ? 'Enregistrement…' : 'Enregistrer'),
+                child: Text(_busy ? l.vaultSaving : l.vaultSave),
               ),
           ],
         ),

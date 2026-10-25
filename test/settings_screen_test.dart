@@ -6,6 +6,7 @@ import 'package:sentinel/app_info.dart';
 import 'package:sentinel/main.dart';
 import 'package:sentinel/screens/onboarding_screen.dart';
 import 'package:sentinel/screens/settings_screen.dart';
+import 'support/l10n.dart';
 
 void main() {
   late List<String> opened;
@@ -13,7 +14,7 @@ void main() {
   Future<void> pumpSettings(WidgetTester tester) async {
     opened = [];
     await tester.pumpWidget(
-      MaterialApp(home: SettingsScreen(openUrl: opened.add)),
+      testApp(home: SettingsScreen(openUrl: opened.add)),
     );
   }
 
@@ -54,7 +55,7 @@ void main() {
     await pumpSettings(tester);
     await tester.tap(find.text('Revoir la présentation'));
     await tester.pumpAndSettle();
-    expect(find.text(onboardingPages[0].title), findsOneWidget);
+    expect(find.text(onboardingPages(fr)[0].title), findsOneWidget);
 
     await tester.tap(find.text('Suivant'));
     await tester.pumpAndSettle();

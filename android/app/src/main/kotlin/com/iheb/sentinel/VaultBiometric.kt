@@ -71,8 +71,8 @@ class VaultBiometric(private val activity: Activity) {
         }
         authenticate(
             cipher,
-            title = "Activer l'empreinte",
-            negative = "Annuler",
+            title = R.string.biometric_enable_title,
+            negative = R.string.biometric_cancel,
             result = result,
         ) { c ->
             c.updateAAD(aad)
@@ -102,8 +102,8 @@ class VaultBiometric(private val activity: Activity) {
         }
         authenticate(
             cipher,
-            title = "Ouvrir le coffre",
-            negative = "Utiliser le mot de passe",
+            title = R.string.biometric_open_title,
+            negative = R.string.biometric_use_password,
             result = result,
         ) { c ->
             c.updateAAD(aad)
@@ -159,8 +159,8 @@ class VaultBiometric(private val activity: Activity) {
     // UNE opération avec ce Cipher précis (CryptoObject).
     private fun authenticate(
         cipher: Cipher,
-        title: String,
-        negative: String,
+        title: Int,
+        negative: Int,
         result: MethodChannel.Result,
         operation: (Cipher) -> Any,
     ) {
@@ -179,10 +179,12 @@ class VaultBiometric(private val activity: Activity) {
         }
 
         val executor = activity.mainExecutor
+        // Textes dans la langue choisie dans Réglages.
+        val texts = AppLanguage.localized(activity)
         val builder = BiometricPrompt.Builder(activity)
-            .setTitle(title)
-            .setSubtitle("Posez votre doigt sur le capteur")
-            .setNegativeButton(negative, executor) { _, _ ->
+            .setTitle(texts.getString(title))
+            .setSubtitle(texts.getString(R.string.biometric_subtitle))
+            .setNegativeButton(texts.getString(negative), executor) { _, _ ->
                 answer { result.error("ANNULEE", null, null) }
             }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {

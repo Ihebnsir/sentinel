@@ -1,5 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 
+import '../l10n/l10n.dart';
 import '../services/app_risk_calculator.dart';
 import '../theme/app_colors.dart';
 
@@ -21,7 +22,7 @@ class RiskLevelText extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Text(
-      level.label,
+      level.label(context.l10n),
       style: TextStyle(
         fontSize: fontSize,
         fontWeight: FontWeight.w600,

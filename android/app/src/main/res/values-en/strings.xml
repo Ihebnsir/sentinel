@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Anglais. À RELIRE PAR UN HUMAIN : traduction produite sans relecture. -->
+    <string name="process_text_label">Check with Sentinel</string>
+    <string name="listener_label">Sentinel – scam protection</string>
+    <string name="scam_channel_name">Scam alerts</string>
+    <string name="scam_channel_description">Warns you when a message you receive looks like a scam.</string>
+    <string name="scam_public_text">Likely scam detected</string>
+    <string name="scam_default_title">Likely scam</string>
+    <string name="firewall_channel_name">Firewall alerts</string>
+    <string name="firewall_channel_description">Warns you when the firewall blocks a dangerous site.</string>
+    <string name="firewall_alert_title">Dangerous site blocked</string>
+    <string name="firewall_alert_title_brand">Site imitating %1$s blocked</string>
+    <string name="firewall_alert_text">Sentinel stopped a connection to %1$s, a site known for phishing or malware.</string>
+    <string name="firewall_alert_text_brand">Sentinel stopped a connection to %1$s, which imitates %2$s without being its official site.</string>
+    <string name="vpn_channel_name">DNS firewall</string>
+    <string name="vpn_channel_description">Shows that the DNS firewall is on.</string>
+    <string name="vpn_title">Sentinel is filtering dangerous sites</string>
+    <string name="vpn_stop">Stop</string>
+    <string name="vpn_analysis_title">Analyzing %1$s</string>
+    <string name="vpn_analysis_text">Other apps are not protected by the firewall until %1$s.</string>
+    <string name="vpn_analysis_stop">Stop the analysis</string>
+    <string name="biometric_enable_title">Turn on fingerprint</string>
+    <string name="biometric_open_title">Open the vault</string>
+    <string name="biometric_use_password">Use the password</string>
+    <string name="biometric_cancel">Cancel</string>
+    <string name="biometric_subtitle">Place your finger on the sensor</string>
+</resources>

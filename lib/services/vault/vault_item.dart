@@ -1,12 +1,15 @@
+import '../../l10n/l10n.dart';
+
 /// Les deux sortes d'éléments rangés dans le coffre.
 enum VaultItemType {
-  motDePasse('Mot de passe'),
-  note('Note secrète');
-
-  const VaultItemType(this.label);
+  motDePasse,
+  note;
 
   /// Nom affiché à l'utilisateur.
-  final String label;
+  String label(AppLocalizations l) => switch (this) {
+    motDePasse => l.vaultTypePassword,
+    note => l.vaultTypeNote,
+  };
 }
 
 /// Un élément du coffre, tel qu'il est une fois déchiffré.

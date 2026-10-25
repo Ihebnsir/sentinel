@@ -1,5 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 
+import '../l10n/l10n.dart';
 import '../models/installed_app.dart';
 import '../services/app_risk_calculator.dart';
 import '../services/apps/stalkerware_ioc.dart';
@@ -182,29 +183,25 @@ class _AppsScreenState extends State<AppsScreen> with WidgetsBindingObserver {
   }
 
   Widget _emptyState() {
+    final l = context.l10n;
     return EmptyState(
       icon: Icons.apps_outlined,
-      title: 'Analysez vos applications',
-      message:
-          'Sentinel vérifie les permissions de chaque application '
-          'installée et signale celles qui en demandent trop.',
-      buttonLabel: "Lancer l'analyse",
+      title: l.appsEmptyTitle,
+      message: l.appsEmptyMessage,
+      buttonLabel: l.appsStartScan,
       onPressed: _startFirstScan,
     );
   }
 
   /// Le contenu sous le titre, selon le résultat de l'analyse.
   List<Widget> _results() {
+    final l = context.l10n;
     final apps = _apps;
     if (_failed) {
-      return const [
-        _InfoMessage("L'analyse a échoué. Tirez vers le bas pour réessayer."),
-      ];
+      return [_InfoMessage(l.commonAnalysisFailedPull)];
     }
     if (apps == null) {
-      return const [
-        _InfoMessage("L'analyse des applications est disponible sur Android."),
-      ];
+      return [_InfoMessage(l.appsAndroidOnly)];
     }
 
     final visible = _showSystemApps
@@ -217,7 +214,7 @@ class _AppsScreenState extends State<AppsScreen> with WidgetsBindingObserver {
       if (spyware.isNotEmpty) _SpywareBlock(apps: spyware, onTap: _openAdvice),
       const SizedBox(height: 8),
       Text(
-        appsScanSummary([for (final s in visible) s.report]),
+        appsScanSummary(l, [for (final s in visible) s.report]),
         style: TextStyle(
           fontSize: 15,
           color: AppColors.encre.withValues(alpha: 0.6),
@@ -226,10 +223,10 @@ class _AppsScreenState extends State<AppsScreen> with WidgetsBindingObserver {
       const SizedBox(height: 16),
       Row(
         children: [
-          const Expanded(
+          Expanded(
             child: Text(
-              'Afficher les applications système',
-              style: TextStyle(fontSize: 15, color: AppColors.encre),
+              l.appsShowSystem,
+              style: const TextStyle(fontSize: 15, color: AppColors.encre),
             ),
           ),
           Switch(
@@ -257,9 +254,9 @@ class _PageTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Text(
-      'Applications',
-      style: TextStyle(
+    return Text(
+      context.l10n.navApps,
+      style: const TextStyle(
         fontSize: 28,
         fontWeight: FontWeight.w600,
         color: AppColors.encre,
@@ -278,6 +275,7 @@ class _SpywareBlock extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = context.l10n;
     return Padding(
       padding: const EdgeInsets.only(top: 16, bottom: 8),
       child: Column(
@@ -285,9 +283,9 @@ class _SpywareBlock extends StatelessWidget {
         children: [
           const Divider(height: 1, thickness: 1, color: AppColors.rommen),
           const SizedBox(height: 14),
-          const Text(
-            'Un logiciel espion possible a été trouvé',
-            style: TextStyle(
+          Text(
+            l.appsSpywareFound,
+            style: const TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w600,
               color: AppColors.rommen,
@@ -295,7 +293,7 @@ class _SpywareBlock extends StatelessWidget {
           ),
           const SizedBox(height: 4),
           Text(
-            'Lisez les conseils avant de le supprimer.',
+            l.appsSpywareReadAdvice,
             style: TextStyle(
               fontSize: 14,
               color: AppColors.encre.withValues(alpha: 0.7),
@@ -321,9 +319,12 @@ class _SpywareBlock extends StatelessWidget {
                         ),
                       ),
                     ),
-                    const Text(
-                      'Voir les conseils',
-                      style: TextStyle(fontSize: 14, color: AppColors.rommen),
+                    Text(
+                      l.appsSeeAdvice,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        color: AppColors.rommen,
+                      ),
                     ),
                   ],
                 ),
@@ -355,7 +356,7 @@ class _ScanProgress extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           Text(
-            'Analyse de vos applications…',
+            context.l10n.appsScanning,
             style: TextStyle(
               fontSize: 15,
               color: AppColors.encre.withValues(alpha: 0.6),
@@ -376,6 +377,7 @@ class _AppTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = context.l10n;
     final report = scanned.report;
     return InkWell(
       onTap: onTap,
@@ -402,8 +404,8 @@ class _AppTile extends StatelessWidget {
                   const SizedBox(height: 2),
                   Text(
                     report.level == RiskLevel.systeme
-                        ? 'Application du système Android'
-                        : report.mainReason ?? 'Aucun signal inquiétant',
+                        ? l.appsSystemApp
+                        : report.mainReason(l) ?? l.appsNoWorry,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(

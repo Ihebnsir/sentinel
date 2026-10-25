@@ -4,6 +4,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:sentinel/screens/firewall_screen.dart';
 import 'package:sentinel/services/firewall_service.dart';
 import 'package:sentinel/widgets/dns_privacy_section.dart';
+import 'support/l10n.dart';
 
 // SEN-10 (DNS chiffré, jamais de clair sans accord) et SEN-11 (DNS privé strict).
 void main() {
@@ -35,7 +36,7 @@ void main() {
       bool allowed = false,
       ValueChanged<bool>? onChanged,
     }) => tester.pumpWidget(
-      MaterialApp(
+      testApp(
         home: Scaffold(
           body: UpstreamSection(
             mode: mode,
@@ -60,7 +61,7 @@ void main() {
     ) async {
       final changes = <bool>[];
       await show(tester, UpstreamMode.failing, onChanged: changes.add);
-      expect(find.text(upstreamFailingHelp), findsOneWidget);
+      expect(find.text(fr.upstreamFailingHelp), findsOneWidget);
       expect(
         find.text('Autoriser le DNS non chiffré sur ce réseau'),
         findsOneWidget,
@@ -112,11 +113,11 @@ void main() {
     testWidgets('avertit, refuse d\'activer et propose les réglages', (
       tester,
     ) async {
-      await tester.pumpWidget(const MaterialApp(home: FirewallScreen()));
+      await tester.pumpWidget(testApp(home: FirewallScreen()));
       await tester.pumpAndSettle();
 
       // Avertissement visible avant même l'activation.
-      expect(find.text(strictPrivateDnsMessage('dns.google')), findsOneWidget);
+      expect(find.text(fr.dnsStrictMessage('dns.google')), findsOneWidget);
 
       await tester.tap(find.byType(Switch));
       await tester.pumpAndSettle();

@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sentinel/models/installed_app.dart';
 import 'package:sentinel/services/app_risk_calculator.dart';
+import 'support/l10n.dart';
 
 /// Une app sans aucun signal ; chaque test change seulement ce qu'il teste.
 InstalledApp cleanApp({
@@ -38,8 +39,8 @@ void main() {
     final report = calculateAppRisk(cleanApp());
     expect(report.score, 0);
     expect(report.level, RiskLevel.faible);
-    expect(report.reasons, isEmpty);
-    expect(report.mainReason, isNull);
+    expect(report.reasons(fr), isEmpty);
+    expect(report.mainReason(fr), isNull);
     expect(report.needsReview, isFalse);
   });
 
@@ -50,7 +51,7 @@ void main() {
     );
     expect(report.score, 70); // 30 + 25 + 15
     expect(report.level, RiskLevel.eleve);
-    expect(report.reasons, [
+    expect(report.reasons(fr), [
       'Combinaison typique des applications qui volent les comptes bancaires',
       "Peut lire tout ce qui s'affiche à l'écran et agir à votre place",
       'Installée en dehors du Play Store',
@@ -64,7 +65,7 @@ void main() {
     expect(report.score, 35); // 30 + 5
     expect(report.level, RiskLevel.modere);
     expect(
-      report.mainReason,
+      report.mainReason(fr),
       "Peut lire tout ce qui s'affiche à l'écran et agir à votre place",
     );
   });
@@ -81,7 +82,7 @@ void main() {
     // Pas de combinaison, et les permissions ne comptent pas.
     expect(report.score, 30);
     expect(report.level, RiskLevel.modere);
-    expect(report.reasons, [
+    expect(report.reasons(fr), [
       "Peut lire tout ce qui s'affiche à l'écran et agir à votre place",
     ]);
     expect(report.needsReview, isTrue);
@@ -93,7 +94,7 @@ void main() {
     );
     expect(report.score, 50);
     expect(report.level, RiskLevel.modere);
-    expect(report.reasons, hasLength(2));
+    expect(report.reasons(fr), hasLength(2));
   });
 
   test('app système avec SMS, appels, micro : niveau Système', () {
@@ -115,8 +116,8 @@ void main() {
     );
     expect(report.score, 0);
     expect(report.level, RiskLevel.systeme);
-    expect(report.level.label, 'Système');
-    expect(report.reasons, isEmpty);
+    expect(report.level.label(fr), 'Système');
+    expect(report.reasons(fr), isEmpty);
     expect(report.needsReview, isFalse);
   });
 
@@ -154,7 +155,7 @@ void main() {
     );
     expect(report.score, 100);
     expect(report.level, RiskLevel.eleve);
-    expect(report.reasons, hasLength(13)); // 12 règles + la combinaison
+    expect(report.reasons(fr), hasLength(13)); // 12 règles + la combinaison
   });
 
   test('app système sans installateur : pas pénalisée', () {
@@ -175,10 +176,10 @@ void main() {
 
   group('résumé', () {
     AppRiskReport reportOf(RiskLevel level) =>
-        AppRiskReport(score: 0, level: level, reasons: const []);
+        AppRiskReport(score: 0, level: level, rules: const []);
 
     test('les apps système ne sont jamais « à vérifier »', () {
-      final summary = appsScanSummary([
+      final summary = appsScanSummary(fr, [
         reportOf(RiskLevel.eleve),
         reportOf(RiskLevel.modere),
         reportOf(RiskLevel.faible),
@@ -189,7 +190,7 @@ void main() {
     });
 
     test('seulement des apps système : aucune à vérifier', () {
-      final summary = appsScanSummary([
+      final summary = appsScanSummary(fr, [
         reportOf(RiskLevel.systeme),
         reportOf(RiskLevel.systeme),
       ]);
@@ -198,7 +199,7 @@ void main() {
 
     test('une seule app : singulier', () {
       expect(
-        appsScanSummary([reportOf(RiskLevel.faible)]),
+        appsScanSummary(fr, [reportOf(RiskLevel.faible)]),
         '1 application analysée, aucune à vérifier.',
       );
     });
@@ -214,7 +215,7 @@ void main() {
       cleanApp(permissions: ['READ_SMS', 'RECEIVE_SMS']),
     );
     expect(report.score, 15);
-    expect(report.reasons, hasLength(1));
+    expect(report.reasons(fr), hasLength(1));
   });
 
   test('permission sans règle (internet) : aucun point', () {
@@ -317,7 +318,7 @@ void main() {
       test('$name : +$points', () {
         final report = calculateAppRisk(app);
         expect(report.score, points);
-        expect(report.reasons, [reason]);
+        expect(report.reasons(fr), [reason]);
       });
     });
   });

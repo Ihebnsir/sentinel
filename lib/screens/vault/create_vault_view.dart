@@ -2,6 +2,7 @@ import 'package:material_ui/material_ui.dart';
 
 import '../../services/vault/password_strength.dart';
 import '../../services/vault/vault_platform.dart';
+import '../../l10n/l10n.dart';
 import '../../services/vault/vault_session.dart';
 import '../../theme/app_colors.dart';
 import '../../widgets/vault_fields.dart';
@@ -57,7 +58,7 @@ class _CreateVaultViewState extends State<CreateVaultView> {
     } catch (_) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('La création du coffre a échoué.')),
+        SnackBar(content: Text(context.l10n.vaultCreateFailed)),
       );
     } finally {
       if (mounted) setState(() => _creating = false);
@@ -66,14 +67,15 @@ class _CreateVaultViewState extends State<CreateVaultView> {
 
   @override
   Widget build(BuildContext context) {
+    final l = context.l10n;
     final muted = AppColors.encre.withValues(alpha: 0.6);
     final showMismatch = _confirmation.text.isNotEmpty && !_matches;
     return ListView(
       padding: const EdgeInsets.only(top: 16, bottom: 24),
       children: [
-        const Text(
-          'Créer mon coffre',
-          style: TextStyle(
+        Text(
+          l.vaultCreate,
+          style: const TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.w600,
             color: AppColors.encre,
@@ -81,16 +83,13 @@ class _CreateVaultViewState extends State<CreateVaultView> {
         ),
         const SizedBox(height: 8),
         Text(
-          'Choisissez un mot de passe maître : il ouvre le coffre et '
-          'chiffre tout son contenu.',
+          l.vaultCreateIntro,
           style: TextStyle(fontSize: 15, color: muted),
         ),
         const SizedBox(height: 8),
-        const Text(
-          'Personne, pas même Sentinel, ne peut retrouver ce mot de passe. '
-          'Vous recevrez ensuite une clé de récupération : notez-la, '
-          "c'est le seul moyen d'ouvrir le coffre si vous l'oubliez.",
-          style: TextStyle(
+        Text(
+          l.vaultCreateWarning,
+          style: const TextStyle(
             fontSize: 15,
             fontWeight: FontWeight.w500,
             color: AppColors.encre,
@@ -99,7 +98,7 @@ class _CreateVaultViewState extends State<CreateVaultView> {
         const SizedBox(height: 24),
         VaultTextField(
           controller: _password,
-          label: 'Mot de passe maître',
+          label: l.vaultMasterPassword,
           secret: true,
           enabled: !_creating,
           onChanged: (_) => setState(() {}),
@@ -111,10 +110,10 @@ class _CreateVaultViewState extends State<CreateVaultView> {
         const SizedBox(height: 16),
         VaultTextField(
           controller: _confirmation,
-          label: 'Confirmation',
+          label: l.vaultConfirmation,
           secret: true,
           enabled: !_creating,
-          errorText: showMismatch ? 'Les deux mots de passe diffèrent' : null,
+          errorText: showMismatch ? l.vaultPasswordsDiffer : null,
           onChanged: (_) => setState(() {}),
         ),
         const SizedBox(height: 16),
@@ -136,11 +135,10 @@ class _CreateVaultViewState extends State<CreateVaultView> {
                       : (value) => setState(() => _understood = value == true),
                 ),
                 const SizedBox(width: 4),
-                const Expanded(
+                Expanded(
                   child: Text(
-                    "J'ai compris que ce mot de passe ne peut pas être "
-                    'récupéré',
-                    style: TextStyle(fontSize: 15, color: AppColors.encre),
+                    l.vaultUnderstood,
+                    style: const TextStyle(fontSize: 15, color: AppColors.encre),
                   ),
                 ),
               ],
@@ -163,13 +161,13 @@ class _CreateVaultViewState extends State<CreateVaultView> {
             TextButton(
               style: TextButton.styleFrom(foregroundColor: muted),
               onPressed: _creating ? null : widget.onCancel,
-              child: const Text('Annuler'),
+              child: Text(l.commonCancel),
             ),
             const Spacer(),
             FilledButton(
               style: FilledButton.styleFrom(backgroundColor: AppColors.bleu),
               onPressed: _canCreate ? _create : null,
-              child: Text(_creating ? 'Création…' : 'Créer mon coffre'),
+              child: Text(_creating ? l.vaultCreating : l.vaultCreate),
             ),
           ],
         ),
@@ -182,7 +180,7 @@ class _CreateVaultViewState extends State<CreateVaultView> {
             style: TextButton.styleFrom(foregroundColor: AppColors.bleu),
             onPressed: _creating ? null : widget.onRestore,
             icon: const Icon(Icons.restore, size: 18),
-            label: const Text('Restaurer une sauvegarde'),
+            label: Text(l.vaultRestoreBackup),
           ),
         ],
       ],

@@ -19,6 +19,7 @@ import android.system.ErrnoException
 import android.system.Os
 import android.system.OsConstants
 import android.system.StructPollfd
+import com.iheb.sentinel.AppLanguage
 import com.iheb.sentinel.MainActivity
 import com.iheb.sentinel.R
 import java.io.FileDescriptor
@@ -570,13 +571,15 @@ class SentinelVpnService : VpnService() {
     // Pendant une analyse, elle rappelle que les autres apps ne sont pas protégées.
     private fun showForegroundNotification() {
         val manager = getSystemService(NotificationManager::class.java)
+        // Textes dans la langue choisie dans Réglages.
+        val texts = AppLanguage.localized(this)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
                 CHANNEL_ID,
-                "Pare-feu DNS",
+                texts.getString(R.string.vpn_channel_name),
                 NotificationManager.IMPORTANCE_LOW, // ni son ni vibration
             ).apply {
-                description = "Indique que le pare-feu DNS est actif."
+                description = texts.getString(R.string.vpn_channel_description)
                 setShowBadge(false)
             }
             manager.createNotificationChannel(channel)
@@ -596,17 +599,26 @@ class SentinelVpnService : VpnService() {
             .setOngoing(true)
             .setCategory(Notification.CATEGORY_SERVICE)
         if (running == null) {
-            builder.setContentTitle("Sentinel filtre les sites dangereux")
-                .addAction(Notification.Action.Builder(null as Icon?, "Arrêter", stopIntent).build())
+            builder.setContentTitle(texts.getString(R.string.vpn_title))
+                .addAction(
+                    Notification.Action.Builder(
+                        null as Icon?,
+                        texts.getString(R.string.vpn_stop),
+                        stopIntent,
+                    ).build(),
+                )
         } else {
             val end = DateFormat.getTimeInstance(DateFormat.SHORT).format(Date(running.endsAt))
-            val text = "Les autres applications ne sont pas protégées par le pare-feu " +
-                "jusqu'à $end."
-            builder.setContentTitle("Analyse de ${running.appLabel} en cours")
+            val text = texts.getString(R.string.vpn_analysis_text, end)
+            builder.setContentTitle(texts.getString(R.string.vpn_analysis_title, running.appLabel))
                 .setContentText(text)
                 .setStyle(Notification.BigTextStyle().bigText(text))
                 .addAction(
-                    Notification.Action.Builder(null as Icon?, "Arrêter l'analyse", stopIntent).build(),
+                    Notification.Action.Builder(
+                        null as Icon?,
+                        texts.getString(R.string.vpn_analysis_stop),
+                        stopIntent,
+                    ).build(),
                 )
         }
         val notification = builder.build()

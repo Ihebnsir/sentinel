@@ -6,19 +6,18 @@ import '../../services/vault/vault_backup.dart';
 import '../../services/vault/vault_crypto.dart';
 import '../../services/vault/vault_item.dart';
 import '../../services/vault/vault_platform.dart';
+import '../../l10n/l10n.dart';
 import '../../services/vault/vault_session.dart';
 import '../../theme/app_colors.dart';
 import '../../widgets/vault_fields.dart';
 
 /// Message clair pour un fichier qui n'est pas une sauvegarde lisible.
-String backupProblemText(BackupProblem problem) => switch (problem) {
-  BackupProblem.vide => 'Ce fichier est vide.',
-  BackupProblem.illisible =>
-    "Ce fichier n'est pas une sauvegarde Sentinel, ou il est abîmé.",
-  BackupProblem.versionInconnue =>
-    "Cette sauvegarde vient d'une version plus récente de Sentinel. "
-        "Mettez l'application à jour, puis réessayez.",
-};
+String backupProblemText(AppLocalizations l, BackupProblem problem) =>
+    switch (problem) {
+      BackupProblem.vide => l.backupEmpty,
+      BackupProblem.illisible => l.backupUnreadable,
+      BackupProblem.versionInconnue => l.backupNewerVersion,
+    };
 
 enum _Step { fichier, motDePasse, nouveauMotDePasse }
 
@@ -66,6 +65,7 @@ class _RestoreBackupViewState extends State<RestoreBackupView> {
   }
 
   Future<void> _pickFile() async {
+    final l = context.l10n;
     setState(() {
       _busy = true;
       _error = null;
@@ -81,13 +81,11 @@ class _RestoreBackupViewState extends State<RestoreBackupView> {
         _step = _Step.motDePasse;
       }
     } on BackupFormatException catch (e) {
-      error = backupProblemText(e.problem);
+      error = backupProblemText(l, e.problem);
     } on PlatformException catch (e) {
-      error = e.code == 'TROP_GROS'
-          ? "Ce fichier est trop gros pour être une sauvegarde Sentinel."
-          : 'Impossible de lire ce fichier.';
+      error = e.code == 'TROP_GROS' ? l.backupTooBig : l.backupCannotReadFile;
     } catch (_) {
-      error = 'Impossible de lire ce fichier.';
+      error = l.backupCannotReadFile;
     }
     if (!mounted) return;
     setState(() {
@@ -99,6 +97,7 @@ class _RestoreBackupViewState extends State<RestoreBackupView> {
   Future<void> _checkPassword() async {
     final bytes = _bytes;
     if (bytes == null || _busy || _backupPassword.text.isEmpty) return;
+    final l = context.l10n;
     FocusScope.of(context).unfocus();
     setState(() {
       _busy = true;
@@ -111,12 +110,12 @@ class _RestoreBackupViewState extends State<RestoreBackupView> {
       _backupPassword.clear();
       _step = _Step.nouveauMotDePasse;
     } on WrongPasswordException {
-      error = "Mot de passe incorrect, ou fichier modifié depuis l'export.";
+      error = l.backupWrongPassword;
       _backupPassword.clear();
     } on BackupFormatException catch (e) {
-      error = backupProblemText(e.problem);
+      error = backupProblemText(l, e.problem);
     } catch (_) {
-      error = 'Impossible de lire cette sauvegarde.';
+      error = l.backupCannotRead;
     }
     if (!mounted) return;
     setState(() {
@@ -137,42 +136,45 @@ class _RestoreBackupViewState extends State<RestoreBackupView> {
       if (!mounted) return;
       setState(() => _busy = false);
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('La restauration a échoué.')),
+        SnackBar(content: Text(context.l10n.backupRestoreFailed)),
       );
     }
   }
 
-  String get _intro => switch (_step) {
-    _Step.fichier =>
-      'Choisissez le fichier .sentinel créé avec « Exporter une sauvegarde '
-          'chiffrée » sur votre ancien téléphone.',
-    _Step.motDePasse => "Entrez le mot de passe choisi au moment de l'export.",
-    _Step.nouveauMotDePasse =>
-      'Sauvegarde ouverte : ${_items?.length ?? 0} élément(s). Choisissez '
-          'le mot de passe maître de ce téléphone.',
-  };
+  String _intro(AppLocalizations l) {
+    final count = _items?.length ?? 0;
+    return switch (_step) {
+      _Step.fichier => l.backupIntroFile,
+      _Step.motDePasse => l.backupIntroPassword,
+      _Step.nouveauMotDePasse => l.backupIntroNewPassword(
+        count,
+        l.number(count),
+      ),
+    };
+  }
 
   @override
   Widget build(BuildContext context) {
+    final l = context.l10n;
     final muted = AppColors.encre.withValues(alpha: 0.6);
     return ListView(
       padding: const EdgeInsets.only(top: 16, bottom: 24),
       children: [
-        const Text(
-          'Restaurer une sauvegarde',
-          style: TextStyle(
+        Text(
+          l.vaultRestoreBackup,
+          style: const TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.w600,
             color: AppColors.encre,
           ),
         ),
         const SizedBox(height: 8),
-        Text(_intro, style: TextStyle(fontSize: 15, color: muted)),
+        Text(_intro(l), style: TextStyle(fontSize: 15, color: muted)),
         const SizedBox(height: 24),
         if (_step == _Step.motDePasse)
           VaultTextField(
             controller: _backupPassword,
-            label: 'Mot de passe de la sauvegarde',
+            label: l.backupPasswordLabel,
             secret: true,
             enabled: !_busy,
             onChanged: (_) => setState(() => _error = null),
@@ -181,7 +183,7 @@ class _RestoreBackupViewState extends State<RestoreBackupView> {
         if (_step == _Step.nouveauMotDePasse) ...[
           VaultTextField(
             controller: _password,
-            label: 'Nouveau mot de passe maître',
+            label: l.vaultNewMasterPassword,
             secret: true,
             enabled: !_busy,
             onChanged: (_) => setState(() {}),
@@ -193,17 +195,17 @@ class _RestoreBackupViewState extends State<RestoreBackupView> {
           const SizedBox(height: 16),
           VaultTextField(
             controller: _confirmation,
-            label: 'Confirmation',
+            label: l.vaultConfirmation,
             secret: true,
             enabled: !_busy,
             errorText: _confirmation.text.isNotEmpty && !_matches
-                ? 'Les deux mots de passe diffèrent'
+                ? l.vaultPasswordsDiffer
                 : null,
             onChanged: (_) => setState(() {}),
           ),
           const SizedBox(height: 12),
           Text(
-            'Une nouvelle clé de récupération sera créée pour ce téléphone.',
+            l.backupNewKeyNote,
             style: TextStyle(fontSize: 13, color: muted),
           ),
         ],
@@ -229,7 +231,7 @@ class _RestoreBackupViewState extends State<RestoreBackupView> {
             TextButton(
               style: TextButton.styleFrom(foregroundColor: muted),
               onPressed: _busy ? null : widget.onCancel,
-              child: const Text('Annuler'),
+              child: Text(l.commonCancel),
             ),
             const Spacer(),
             FilledButton(
@@ -243,10 +245,10 @@ class _RestoreBackupViewState extends State<RestoreBackupView> {
                 _Step.nouveauMotDePasse => _canRestore ? _restore : null,
               },
               child: Text(switch (_step) {
-                _Step.fichier => 'Choisir le fichier',
-                _Step.motDePasse => 'Continuer',
+                _Step.fichier => l.backupChooseFile,
+                _Step.motDePasse => l.commonContinue,
                 _Step.nouveauMotDePasse =>
-                  _busy ? 'Restauration…' : 'Restaurer',
+                  _busy ? l.backupRestoring : l.backupRestore,
               }),
             ),
           ],

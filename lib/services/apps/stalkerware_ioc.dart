@@ -4,11 +4,6 @@ import 'package:flutter/services.dart';
 
 import '../../models/installed_app.dart';
 
-/// Mention de la source, exigée par la licence CC BY 4.0.
-const iocCredit =
-    'Liste de logiciels espions : projet Stalkerware '
-    'Indicators (Echap), licence CC BY 4.0.';
-
 /// Indicateurs de logiciels espions (stalkerware), généré par
 /// tools/stalkerware/update_ioc.py à partir du projet public
 /// AssoEchap/stalkerware-indicators (licence CC BY 4.0).

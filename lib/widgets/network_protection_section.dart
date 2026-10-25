@@ -1,5 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 
+import '../l10n/l10n.dart';
 import '../screens/firewall_screen.dart';
 import '../services/firewall_service.dart';
 import '../theme/app_colors.dart';
@@ -48,6 +49,7 @@ class _NetworkProtectionSectionState extends State<NetworkProtectionSection> {
 
   @override
   Widget build(BuildContext context) {
+    final l = context.l10n;
     final status = _status;
     if (status == null) return const SizedBox.shrink();
     final color = status.active
@@ -57,9 +59,9 @@ class _NetworkProtectionSectionState extends State<NetworkProtectionSection> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Protection réseau',
-          style: TextStyle(
+        Text(
+          l.networkProtectionTitle,
+          style: const TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.w600,
             color: AppColors.encre,
@@ -78,9 +80,9 @@ class _NetworkProtectionSectionState extends State<NetworkProtectionSection> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        'Pare-feu DNS',
-                        style: TextStyle(
+                      Text(
+                        l.firewallTitle,
+                        style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w500,
                           color: AppColors.encre,
@@ -88,7 +90,7 @@ class _NetworkProtectionSectionState extends State<NetworkProtectionSection> {
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        status.summary,
+                        status.summary(l),
                         style: TextStyle(
                           fontSize: 13,
                           color: AppColors.encre.withValues(alpha: 0.6),

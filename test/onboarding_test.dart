@@ -6,6 +6,7 @@ import 'package:sentinel/screens/onboarding_screen.dart';
 import 'package:sentinel/screens/privacy_policy_screen.dart';
 import 'package:sentinel/screens/startup_gate.dart';
 import 'package:sentinel/services/onboarding_store.dart';
+import 'support/l10n.dart';
 
 /// Préférence en mémoire : pas de vrai fichier dans les tests widget.
 class _MemoryStore extends OnboardingStore {
@@ -24,7 +25,7 @@ class _MemoryStore extends OnboardingStore {
   }
 }
 
-Widget _app(OnboardingStore store) => MaterialApp(
+Widget _app(OnboardingStore store) => testApp(
   home: StartupGate(store: store, home: const Text('ACCUEIL')),
 );
 
@@ -34,16 +35,16 @@ void main() {
     await tester.pumpWidget(_app(store));
     await tester.pumpAndSettle();
 
-    expect(find.text(onboardingPages[0].title), findsOneWidget);
+    expect(find.text(onboardingPages(fr)[0].title), findsOneWidget);
     expect(find.text('ACCUEIL'), findsNothing);
 
     // 3 pages : « Suivant » deux fois, puis « Commencer ».
     await tester.tap(find.text('Suivant'));
     await tester.pumpAndSettle();
-    expect(find.text(onboardingPages[1].title), findsOneWidget);
+    expect(find.text(onboardingPages(fr)[1].title), findsOneWidget);
     await tester.tap(find.text('Suivant'));
     await tester.pumpAndSettle();
-    expect(find.text(onboardingPages[2].title), findsOneWidget);
+    expect(find.text(onboardingPages(fr)[2].title), findsOneWidget);
     expect(find.text('Suivant'), findsNothing);
 
     await tester.tap(find.text('Commencer'));
@@ -59,17 +60,17 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('ACCUEIL'), findsOneWidget);
-    expect(find.text(onboardingPages[0].title), findsNothing);
+    expect(find.text(onboardingPages(fr)[0].title), findsNothing);
     expect(store.writes, 0);
   });
 
   test('3 pages au plus', () {
-    expect(onboardingPages.length, lessThanOrEqualTo(3));
+    expect(onboardingPages(fr).length, lessThanOrEqualTo(3));
   });
 
   test('les appels réseau annoncés sont ceux de la politique', () {
-    final onboarding = onboardingPages[1].lines.join(' ');
-    final policy = privacySections.expand((s) => s.paragraphs).join(' ');
+    final onboarding = onboardingPages(fr)[1].lines.join(' ');
+    final policy = privacySections(fr).expand((s) => s.paragraphs).join(' ');
     for (final service in ['Have I Been Pwned', 'Quad9', 'GitHub']) {
       expect(onboarding, contains(service));
       expect(policy, contains(service));

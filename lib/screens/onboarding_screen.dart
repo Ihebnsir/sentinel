@@ -1,5 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 
+import '../l10n/l10n.dart';
 import '../theme/app_colors.dart';
 import '../widgets/arch_icon.dart';
 
@@ -14,42 +15,30 @@ class OnboardingPage {
 /// Les 3 pages : ce que fait Sentinel, la vie privée, les autorisations.
 /// La liste des appels réseau doit rester celle de la politique de
 /// confidentialité (privacy_policy_screen.dart).
-const onboardingPages = [
+List<OnboardingPage> onboardingPages(AppLocalizations l) => [
   OnboardingPage(
-    title: 'Sentinel veille sur votre téléphone',
+    title: l.onboarding1Title,
     lines: [
-      'Un score de sécurité et les réglages à corriger.',
-      'Les applications suspectes : fausses apps, logiciels espions.',
-      "Les messages d'arnaque, analysés sur le téléphone.",
-      'Un coffre chiffré pour vos mots de passe.',
-      'Un pare-feu qui bloque les sites dangereux et les traqueurs.',
+      l.onboarding1Line1,
+      l.onboarding1Line2,
+      l.onboarding1Line3,
+      l.onboarding1Line4,
+      l.onboarding1Line5,
     ],
   ),
   OnboardingPage(
-    title: 'Tout reste sur votre téléphone',
+    title: l.onboarding2Title,
     lines: [
-      'Pas de compte, pas de publicité, pas de statistiques. '
-          'Vos messages, vos mots de passe et la liste de vos '
-          'applications ne quittent jamais le téléphone.',
-      'Seuls trois échanges réseau existent, tous facultatifs, '
-          'et seulement si vous les activez :',
-      '• Vérifier les fuites de mots de passe (Have I Been Pwned) : '
-          "5 caractères d'une empreinte, jamais le mot de passe.",
-      '• Pare-feu DNS : les noms des sites autorisés sont transmis, '
-          'chiffrés, au résolveur Quad9.',
-      '• Mise à jour des listes de blocage : un simple '
-          'téléchargement depuis GitHub.',
+      l.onboarding2Line1,
+      l.onboarding2Line2,
+      l.onboarding2Line3,
+      l.onboarding2Line4,
+      l.onboarding2Line5,
     ],
   ),
   OnboardingPage(
-    title: 'Les autorisations, au bon moment',
-    lines: [
-      'Sentinel ne demande rien maintenant.',
-      'Chaque autorisation (notifications, accès aux notifications, '
-          'VPN, biométrie) est demandée seulement quand vous '
-          'activez la fonction qui en a besoin, avec une explication.',
-      'Vous pouvez tout désactiver à tout moment.',
-    ],
+    title: l.onboarding3Title,
+    lines: [l.onboarding3Line1, l.onboarding3Line2, l.onboarding3Line3],
   ),
 ];
 
@@ -68,7 +57,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   final _controller = PageController();
   int _page = 0;
 
-  bool get _isLast => _page == onboardingPages.length - 1;
+  // Toujours 3 pages, quelle que soit la langue.
+  bool get _isLast => _page == _pageCount - 1;
+
+  static const _pageCount = 3;
 
   @override
   void dispose() {
@@ -89,6 +81,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l = context.l10n;
+    final pages = onboardingPages(l);
     return Scaffold(
       body: SafeArea(
         child: Column(
@@ -98,11 +92,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 controller: _controller,
                 onPageChanged: (i) => setState(() => _page = i),
                 children: [
-                  for (final page in onboardingPages) _PageContent(page),
+                  for (final page in pages) _PageContent(page),
                 ],
               ),
             ),
-            _Dots(count: onboardingPages.length, current: _page),
+            _Dots(count: pages.length, current: _page),
             Padding(
               padding: const EdgeInsets.fromLTRB(28, 24, 28, 24),
               child: SizedBox(
@@ -112,7 +106,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     backgroundColor: AppColors.bleu,
                   ),
                   onPressed: _next,
-                  child: Text(_isLast ? 'Commencer' : 'Suivant'),
+                  child: Text(_isLast ? l.onboardingStart : l.onboardingNext),
                 ),
               ),
             ),

@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:sentinel/services/app_analysis.dart';
 import 'package:sentinel/services/firewall_service.dart';
 import 'package:sentinel/utils/french_number.dart';
+import 'support/l10n.dart';
 
 /// Un domaine du rapport, au format envoyé par AppReport.kt.
 Map<String, Object?> domain(
@@ -117,7 +118,7 @@ void main() {
         ...many(18, 'trackers', 't'),
         ...many(29, 'other', 'o'),
       ]);
-      expect(r.summary, 'TikTok a contacté 47 domaines, dont 18 traqueurs.');
+      expect(r.summary(fr), 'TikTok a contacté 47 domaines, dont 18 traqueurs.');
     });
 
     test('dangereux, traqueurs et publicités', () {
@@ -128,7 +129,7 @@ void main() {
         ...many(5, 'ads', 'a'),
       ]);
       expect(
-        r.summary,
+        r.summary(fr),
         'TikTok a contacté 8 domaines, dont 2 sites dangereux, '
         '1 traqueur et 5 publicités.',
       );
@@ -136,15 +137,15 @@ void main() {
 
     test('singuliers', () {
       final r = report([domain('a.ads.net', 'ads')], label: 'Météo');
-      expect(r.summary, 'Météo a contacté 1 domaine, dont 1 publicité.');
+      expect(r.summary(fr), 'Météo a contacté 1 domaine, dont 1 publicité.');
       final danger = report([domain('virus.xyz', 'malware')]);
-      expect(danger.summary, contains('dont 1 site dangereux.'));
+      expect(danger.summary(fr), contains('dont 1 site dangereux.'));
     });
 
     test('rien de connu', () {
       final r = report([domain('a.com', 'other'), domain('b.com', 'other')]);
       expect(
-        r.summary,
+        r.summary(fr),
         'TikTok a contacté 2 domaines, aucun connu comme traqueur, '
         'publicité ou site dangereux.',
       );
@@ -152,7 +153,7 @@ void main() {
 
     test('aucun domaine', () {
       expect(
-        report(const []).summary,
+        report(const []).summary(fr),
         "TikTok n'a contacté aucun domaine pendant l'analyse.",
       );
     });
@@ -162,7 +163,7 @@ void main() {
       // Espace insécable entre les milliers (formatFrenchNumber).
       final n = formatFrenchNumber(1200);
       expect(n, isNot('1200'));
-      expect(r.summary, 'TikTok a contacté $n domaines, dont $n traqueurs.');
+      expect(r.summary(fr), 'TikTok a contacté $n domaines, dont $n traqueurs.');
     });
   });
 
@@ -192,14 +193,14 @@ void main() {
 
   group('Lecture du rapport', () {
     test('analyse menée jusqu\'au bout : durée prévue', () {
-      expect(report(const []).durationLabel, '5 min');
+      expect(report(const []).durationLabel(fr), '5 min');
       // Fin un peu tardive (réveil d'Android) : pas « 3 min ».
       final late = report(
         const [],
         length: const Duration(minutes: 2, milliseconds: 200),
         planned: 2,
       );
-      expect(late.durationLabel, '2 min');
+      expect(late.durationLabel(fr), '2 min');
     });
 
     test('analyse arrêtée avant la fin : durée réelle', () {
@@ -208,7 +209,7 @@ void main() {
             length: length,
             planned: planned,
             stoppedEarly: true,
-          ).durationLabel;
+          ).durationLabel(fr);
       expect(
         early(const Duration(minutes: 1, seconds: 40)),
         '1 min 40 s (arrêtée avant les 2 min prévues)',
@@ -254,13 +255,13 @@ void main() {
       final analysis = status.analysis!;
       expect(analysis.appLabel, 'Exemple');
       expect(
-        analysis.progressAt(
+        analysis.progressAt(fr, 
           start.subtract(const Duration(minutes: 2, seconds: 30)),
         ),
         'Reste 3 min · 12 domaines vus',
       );
       expect(
-        analysis.progressAt(start.add(const Duration(seconds: 5))),
+        analysis.progressAt(fr, start.add(const Duration(seconds: 5))),
         "Reste moins d'1 min · 12 domaines vus",
       );
     });
@@ -287,7 +288,7 @@ void main() {
       });
       expect(category.isBrandRule, isTrue);
       expect(
-        category.subtitle,
+        category.subtitle(fr),
         '22 marques surveillées · sites qui les imitent',
       );
     });

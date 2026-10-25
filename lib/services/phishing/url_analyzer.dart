@@ -1,3 +1,4 @@
+import '../../l10n/l10n.dart';
 import 'known_brands.dart';
 
 /// Les signaux qu'on peut trouver dans un lien, du plus grave au moins grave.
@@ -12,12 +13,26 @@ enum LinkSignal {
   sansHttps,
 }
 
-/// Un signal trouvé dans un lien, avec son explication en français.
+/// Un signal trouvé dans un lien. L'explication est écrite à l'affichage,
+/// dans la langue de l'app ([reason]).
 class LinkFinding {
-  const LinkFinding(this.signal, this.reason);
+  const LinkFinding(this.signal, {required this.host, this.brand});
 
   final LinkSignal signal;
-  final String reason;
+  final String host; // le domaine (ou l'adresse IP) concerné
+  final String? brand; // marque imitée (usurpationMarque seulement)
+
+  /// L'explication du signal, ex : « Lien raccourci (bit.ly) : … ».
+  String reason(AppLocalizations l) => switch (signal) {
+    LinkSignal.usurpationMarque => l.reasonLinkImpersonation(host, brand ?? ''),
+    LinkSignal.adresseIp => l.reasonLinkIp(host),
+    LinkSignal.punycode => l.reasonLinkPunycode(host),
+    LinkSignal.arobase => l.reasonLinkAt(host),
+    LinkSignal.raccourcisseur => l.reasonLinkShortener(host),
+    LinkSignal.extensionSuspecte => l.reasonLinkTld(host.split('.').last),
+    LinkSignal.tropDeSousDomaines => l.reasonLinkSubdomains(host),
+    LinkSignal.sansHttps => l.reasonLinkHttp,
+  };
 }
 
 /// Un lien trouvé dans le message et ce qu'on en pense.
@@ -132,62 +147,23 @@ List<LinkFinding> _rules({
   required bool hasAt,
 }) {
   final findings = <LinkFinding>[];
-  void add(LinkSignal signal, String reason) =>
-      findings.add(LinkFinding(signal, reason));
+  void add(LinkSignal signal, [String? brand]) =>
+      findings.add(LinkFinding(signal, host: host, brand: brand));
   final tld = host.split('.').last;
 
   if (!isIp) {
     final brand = impersonatedBrand(host);
-    if (brand != null) {
-      add(
-        LinkSignal.usurpationMarque,
-        "« $host » imite ${brand.name} mais ce n'est pas son site officiel",
-      );
-    }
+    if (brand != null) add(LinkSignal.usurpationMarque, brand.name);
   }
-  if (isIp) {
-    add(
-      LinkSignal.adresseIp,
-      "Le lien utilise une adresse IP ($host) au lieu d'un nom de site",
-    );
-  }
+  if (isIp) add(LinkSignal.adresseIp);
   if (host.split('.').any((label) => label.startsWith('xn--'))) {
-    add(
-      LinkSignal.punycode,
-      '« $host » contient des lettres déguisées (punycode) '
-      'pour ressembler à un vrai site',
-    );
+    add(LinkSignal.punycode);
   }
-  if (hasAt) {
-    add(
-      LinkSignal.arobase,
-      'Le lien contient « @ » : la vraie destination est « $host »',
-    );
-  }
-  if (!isIp && _isShortener(host)) {
-    add(
-      LinkSignal.raccourcisseur,
-      'Lien raccourci ($host) : la vraie adresse est cachée',
-    );
-  }
-  if (!isIp && suspiciousTlds.contains(tld)) {
-    add(
-      LinkSignal.extensionSuspecte,
-      "L'extension « .$tld » est souvent utilisée par les arnaques",
-    );
-  }
-  if (!isIp && subdomainCount(host) > 3) {
-    add(
-      LinkSignal.tropDeSousDomaines,
-      '« $host » a beaucoup de sous-domaines, une technique pour tromper',
-    );
-  }
-  if (scheme == 'http') {
-    add(
-      LinkSignal.sansHttps,
-      "Le lien n'est pas sécurisé (http au lieu de https)",
-    );
-  }
+  if (hasAt) add(LinkSignal.arobase);
+  if (!isIp && _isShortener(host)) add(LinkSignal.raccourcisseur);
+  if (!isIp && suspiciousTlds.contains(tld)) add(LinkSignal.extensionSuspecte);
+  if (!isIp && subdomainCount(host) > 3) add(LinkSignal.tropDeSousDomaines);
+  if (scheme == 'http') add(LinkSignal.sansHttps);
   return findings;
 }
 

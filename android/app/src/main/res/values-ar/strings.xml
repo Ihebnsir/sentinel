@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Arabe. À RELIRE PAR UN HUMAIN : traduction produite sans relecture. -->
+    <string name="process_text_label">التحقق عبر Sentinel</string>
+    <string name="listener_label">Sentinel – الحماية من الاحتيال</string>
+    <string name="scam_channel_name">تنبيهات الاحتيال</string>
+    <string name="scam_channel_description">ينبّهك عندما تبدو رسالة واردة كأنها عملية احتيال.</string>
+    <string name="scam_public_text">تم رصد احتيال محتمل</string>
+    <string name="scam_default_title">احتيال محتمل</string>
+    <string name="firewall_channel_name">تنبيهات جدار الحماية</string>
+    <string name="firewall_channel_description">ينبّهك عندما يحظر جدار الحماية موقعًا خطيرًا.</string>
+    <string name="firewall_alert_title">تم حظر موقع خطير</string>
+    <string name="firewall_alert_title_brand">تم حظر موقع ينتحل صفة %1$s</string>
+    <string name="firewall_alert_text">منع Sentinel اتصالًا بالموقع %1$s، وهو موقع معروف بالتصيّد أو البرمجيات الخبيثة.</string>
+    <string name="firewall_alert_text_brand">منع Sentinel اتصالًا بالموقع %1$s، الذي ينتحل صفة %2$s دون أن يكون موقعه الرسمي.</string>
+    <string name="vpn_channel_name">جدار حماية DNS</string>
+    <string name="vpn_channel_description">يشير إلى أن جدار حماية DNS مفعّل.</string>
+    <string name="vpn_title">Sentinel يحجب المواقع الخطيرة</string>
+    <string name="vpn_stop">إيقاف</string>
+    <string name="vpn_analysis_title">جارٍ تحليل %1$s</string>
+    <string name="vpn_analysis_text">التطبيقات الأخرى غير محمية بجدار الحماية حتى %1$s.</string>
+    <string name="vpn_analysis_stop">إيقاف التحليل</string>
+    <string name="biometric_enable_title">تفعيل البصمة</string>
+    <string name="biometric_open_title">فتح الخزنة</string>
+    <string name="biometric_use_password">استخدام كلمة المرور</string>
+    <string name="biometric_cancel">إلغاء</string>
+    <string name="biometric_subtitle">ضع إصبعك على المستشعر</string>
+</resources>

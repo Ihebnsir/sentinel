@@ -1,6 +1,7 @@
 import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
 
+import '../../l10n/l10n.dart';
 import '../../services/breach/breach_checker.dart';
 import '../../services/vault/password_strength.dart';
 import '../../services/vault/vault_backup.dart';
@@ -94,22 +95,23 @@ class _VaultSettingsScreenState extends State<VaultSettingsScreen>
     setState(() => _busy = true);
     try {
       await session.setBiometricEnabled(enabled);
-      if (mounted && enabled) _snack("Ouverture par l'empreinte activée.");
+      if (mounted && enabled) _snack(context.l10n.vaultFingerprintEnabled);
     } on BiometricException catch (e) {
       if (!mounted) return;
+      final l = context.l10n;
       switch (e.error) {
         case BiometricError.annulee:
           break; // l'utilisateur a fermé la fenêtre : rien à dire
         case BiometricError.bloquee:
-          _snack("Trop d'essais. Réessayez dans quelques instants.");
+          _snack(l.vaultBiometricTooManyTries);
         case BiometricError.indisponible:
-          _snack('Aucune empreinte enregistrée sur ce téléphone.');
+          _snack(l.vaultNoFingerprint);
         case BiometricError.invalidee:
         case BiometricError.echec:
-          _snack("L'activation de l'empreinte a échoué.");
+          _snack(l.vaultFingerprintActivationFailed);
       }
     } catch (_) {
-      if (mounted) _snack("L'enregistrement a échoué.");
+      if (mounted) _snack(context.l10n.vaultSaveFailed);
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -144,22 +146,20 @@ class _VaultSettingsScreenState extends State<VaultSettingsScreen>
       builder: (context) => AlertDialog(
         backgroundColor: AppColors.chaux,
         surfaceTintColor: Colors.transparent,
-        title: const Text('Nouvelle clé de récupération ?'),
-        content: const Text(
-          "L'ancienne clé ne fonctionnera plus. Pensez à noter la nouvelle.",
-        ),
+        title: Text(context.l10n.vaultNewKeyTitle),
+        content: Text(context.l10n.vaultNewKeyText),
         actions: [
           TextButton(
             style: TextButton.styleFrom(
               foregroundColor: AppColors.encre.withValues(alpha: 0.6),
             ),
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Annuler'),
+            child: Text(context.l10n.commonCancel),
           ),
           TextButton(
             style: TextButton.styleFrom(foregroundColor: AppColors.bleu),
             onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Générer'),
+            child: Text(context.l10n.vaultGenerate),
           ),
         ],
       ),
@@ -173,7 +173,7 @@ class _VaultSettingsScreenState extends State<VaultSettingsScreen>
     } catch (_) {
       if (!mounted) return;
       setState(() => _busy = false);
-      _snack('La création de la clé a échoué.');
+      _snack(context.l10n.vaultKeyCreateFailed);
     }
   }
 
@@ -189,12 +189,13 @@ class _VaultSettingsScreenState extends State<VaultSettingsScreen>
     } catch (_) {
       if (!mounted) return;
       setState(() => _busy = false);
-      _snack('La suppression a échoué.');
+      _snack(context.l10n.vaultDeleteFailed);
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final l = context.l10n;
     final muted = AppColors.encre.withValues(alpha: 0.6);
     return Scaffold(
       appBar: _appBar(),
@@ -203,7 +204,7 @@ class _VaultSettingsScreenState extends State<VaultSettingsScreen>
         child: ListView(
           padding: const EdgeInsets.fromLTRB(28, 8, 28, 24),
           children: [
-            _title('Réglages du coffre'),
+            _title(l.vaultSettingsTitle),
             const SizedBox(height: 24),
             // Empreinte : Android avec capteur seulement (masqué sur Windows).
             if (session.biometricsAvailable) ...[
@@ -218,16 +219,15 @@ class _VaultSettingsScreenState extends State<VaultSettingsScreen>
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
-                            "Ouvrir avec l'empreinte",
-                            style: TextStyle(
+                          Text(
+                            l.vaultOpenWithFingerprint,
+                            style: const TextStyle(
                               fontSize: 15,
                               color: AppColors.encre,
                             ),
                           ),
                           Text(
-                            'Le mot de passe reste demandé au moins une fois '
-                            'tous les 7 jours.',
+                            l.vaultFingerprintWeekly,
                             style: TextStyle(fontSize: 13, color: muted),
                           ),
                         ],
@@ -253,16 +253,15 @@ class _VaultSettingsScreenState extends State<VaultSettingsScreen>
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
-                          'Vérifier les fuites',
-                          style: TextStyle(
+                        Text(
+                          l.healthCheckButton,
+                          style: const TextStyle(
                             fontSize: 15,
                             color: AppColors.encre,
                           ),
                         ),
                         Text(
-                          "Have I Been Pwned. Seul un début d'empreinte est "
-                          'envoyé, jamais le mot de passe.',
+                          l.vaultBreachSettingDetail,
                           style: TextStyle(fontSize: 13, color: muted),
                         ),
                       ],
@@ -279,13 +278,13 @@ class _VaultSettingsScreenState extends State<VaultSettingsScreen>
             _divider,
             _SettingsRow(
               icon: Icons.password,
-              label: 'Changer le mot de passe maître',
+              label: l.vaultChangeMaster,
               onTap: _busy ? null : _changePassword,
             ),
             _divider,
             _SettingsRow(
               icon: Icons.key_outlined,
-              label: 'Générer une nouvelle clé de récupération',
+              label: l.vaultNewRecoveryKey,
               onTap: _busy ? null : _newRecoveryKey,
             ),
             _divider,
@@ -293,14 +292,14 @@ class _VaultSettingsScreenState extends State<VaultSettingsScreen>
             if (VaultPlatform.supportsDocuments) ...[
               _SettingsRow(
                 icon: Icons.save_alt,
-                label: 'Exporter une sauvegarde chiffrée',
+                label: l.vaultExport,
                 onTap: _busy ? null : _exportBackup,
               ),
               _divider,
             ],
             _SettingsRow(
               icon: Icons.delete_outline,
-              label: 'Supprimer le coffre',
+              label: l.vaultDeleteVault,
               color: AppColors.rommen,
               onTap: _busy ? null : _deleteVault,
             ),
@@ -371,7 +370,6 @@ class _DeleteDialog extends StatefulWidget {
 }
 
 class _DeleteDialogState extends State<_DeleteDialog> {
-  static const _word = 'SUPPRIMER';
   final _typed = TextEditingController();
 
   @override
@@ -382,22 +380,22 @@ class _DeleteDialogState extends State<_DeleteDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final l = context.l10n;
+    // Mot à taper, dans la langue de l'app (« SUPPRIMER »).
+    final word = l.vaultDeleteWord;
     return AlertDialog(
       backgroundColor: AppColors.chaux,
       surfaceTintColor: Colors.transparent,
-      title: const Text('Supprimer le coffre ?'),
+      title: Text(l.vaultDeleteVaultTitle),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Tous les mots de passe et notes seront définitivement effacés. '
-            'Tapez $_word pour confirmer.',
-          ),
+          Text(l.vaultDeleteVaultText(word)),
           const SizedBox(height: 16),
           VaultTextField(
             controller: _typed,
-            label: _word,
+            label: word,
             autofocus: true,
             onChanged: (_) => setState(() {}),
           ),
@@ -409,14 +407,14 @@ class _DeleteDialogState extends State<_DeleteDialog> {
             foregroundColor: AppColors.encre.withValues(alpha: 0.6),
           ),
           onPressed: () => Navigator.of(context).pop(false),
-          child: const Text('Annuler'),
+          child: Text(l.commonCancel),
         ),
         TextButton(
           style: TextButton.styleFrom(foregroundColor: AppColors.rommen),
-          onPressed: _typed.text.trim() == _word
+          onPressed: _typed.text.trim() == word
               ? () => Navigator.of(context).pop(true)
               : null,
-          child: const Text('Supprimer'),
+          child: Text(l.vaultDelete),
         ),
       ],
     );
@@ -475,7 +473,7 @@ class _ChangePasswordScreenState extends State<_ChangePasswordScreen>
         final messenger = ScaffoldMessenger.of(context);
         Navigator.of(context).pop();
         messenger.showSnackBar(
-          const SnackBar(content: Text('Mot de passe maître changé.')),
+          SnackBar(content: Text(context.l10n.vaultMasterChanged)),
         );
         return;
       }
@@ -488,13 +486,14 @@ class _ChangePasswordScreenState extends State<_ChangePasswordScreen>
       if (!mounted || closing) return;
       setState(() => _saving = false);
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("L'enregistrement a échoué.")),
+        SnackBar(content: Text(context.l10n.vaultSaveFailed)),
       );
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final l = context.l10n;
     return Scaffold(
       appBar: _appBar(),
       body: SafeArea(
@@ -502,20 +501,20 @@ class _ChangePasswordScreenState extends State<_ChangePasswordScreen>
         child: ListView(
           padding: const EdgeInsets.fromLTRB(28, 8, 28, 24),
           children: [
-            _title('Changer le mot de passe maître'),
+            _title(l.vaultChangeMaster),
             const SizedBox(height: 24),
             VaultTextField(
               controller: _old,
-              label: 'Mot de passe actuel',
+              label: l.vaultCurrentPassword,
               secret: true,
               enabled: !_saving,
-              errorText: _wrongOld ? 'Mot de passe incorrect' : null,
+              errorText: _wrongOld ? l.vaultWrongPasswordShort : null,
               onChanged: (_) => setState(() => _wrongOld = false),
             ),
             const SizedBox(height: 16),
             VaultTextField(
               controller: _password,
-              label: 'Nouveau mot de passe maître',
+              label: l.vaultNewMasterPassword,
               secret: true,
               enabled: !_saving,
               onChanged: (_) => setState(() {}),
@@ -527,11 +526,11 @@ class _ChangePasswordScreenState extends State<_ChangePasswordScreen>
             const SizedBox(height: 16),
             VaultTextField(
               controller: _confirmation,
-              label: 'Confirmation',
+              label: l.vaultConfirmation,
               secret: true,
               enabled: !_saving,
               errorText: _confirmation.text.isNotEmpty && !_matches
-                  ? 'Les deux mots de passe diffèrent'
+                  ? l.vaultPasswordsDiffer
                   : null,
               onChanged: (_) => setState(() {}),
             ),
@@ -550,7 +549,7 @@ class _ChangePasswordScreenState extends State<_ChangePasswordScreen>
               child: FilledButton(
                 style: FilledButton.styleFrom(backgroundColor: AppColors.bleu),
                 onPressed: _canSave ? _save : null,
-                child: Text(_saving ? 'Enregistrement…' : 'Changer'),
+                child: Text(_saving ? l.vaultSaving : l.vaultChange),
               ),
             ),
           ],
@@ -600,6 +599,7 @@ class _ExportBackupScreenState extends State<_ExportBackupScreen>
   }
 
   Future<void> _export() async {
+    final l = context.l10n;
     FocusScope.of(context).unfocus();
     setState(() => _saving = true);
     String message;
@@ -608,13 +608,11 @@ class _ExportBackupScreenState extends State<_ExportBackupScreen>
       // Argon2 d'abord : le fichier est prêt avant d'ouvrir le sélecteur.
       final bytes = await session.createBackup(_password.text);
       done = await VaultPlatform.saveDocument(_fileName(DateTime.now()), bytes);
-      message = done
-          ? 'Sauvegarde enregistrée. Gardez son mot de passe en lieu sûr.'
-          : 'Export annulé.';
+      message = done ? l.exportSaved : l.exportCancelled;
     } on PlatformException {
-      message = "L'enregistrement du fichier a échoué.";
+      message = l.exportFileFailed;
     } catch (_) {
-      message = "L'export a échoué.";
+      message = l.exportFailed;
     }
     if (!mounted || closing) return;
     final messenger = ScaffoldMessenger.of(context);
@@ -630,6 +628,7 @@ class _ExportBackupScreenState extends State<_ExportBackupScreen>
 
   @override
   Widget build(BuildContext context) {
+    final l = context.l10n;
     final muted = AppColors.encre.withValues(alpha: 0.6);
     return Scaffold(
       appBar: _appBar(),
@@ -638,19 +637,16 @@ class _ExportBackupScreenState extends State<_ExportBackupScreen>
         child: ListView(
           padding: const EdgeInsets.fromLTRB(28, 8, 28, 24),
           children: [
-            _title('Exporter une sauvegarde chiffrée'),
+            _title(l.vaultExport),
             const SizedBox(height: 8),
             Text(
-              'Pour passer à un nouveau téléphone : un fichier .sentinel, '
-              'chiffré par le mot de passe choisi ici. Sans ce mot de passe, '
-              'personne ne peut le lire, pas même Sentinel.',
+              l.exportIntro,
               style: TextStyle(fontSize: 15, color: muted),
             ),
             const SizedBox(height: 8),
-            const Text(
-              'Rangez le fichier où vous voulez (Drive, clé USB, ordinateur) '
-              'et ne le perdez pas avec son mot de passe.',
-              style: TextStyle(
+            Text(
+              l.exportStore,
+              style: const TextStyle(
                 fontSize: 15,
                 fontWeight: FontWeight.w500,
                 color: AppColors.encre,
@@ -659,7 +655,7 @@ class _ExportBackupScreenState extends State<_ExportBackupScreen>
             const SizedBox(height: 24),
             VaultTextField(
               controller: _password,
-              label: "Mot de passe d'export",
+              label: l.exportPasswordLabel,
               secret: true,
               enabled: !_saving,
               onChanged: (_) => setState(() {}),
@@ -671,11 +667,11 @@ class _ExportBackupScreenState extends State<_ExportBackupScreen>
             const SizedBox(height: 16),
             VaultTextField(
               controller: _confirmation,
-              label: 'Confirmation',
+              label: l.vaultConfirmation,
               secret: true,
               enabled: !_saving,
               errorText: _confirmation.text.isNotEmpty && !_matches
-                  ? 'Les deux mots de passe diffèrent'
+                  ? l.vaultPasswordsDiffer
                   : null,
               onChanged: (_) => setState(() {}),
             ),
@@ -694,7 +690,7 @@ class _ExportBackupScreenState extends State<_ExportBackupScreen>
               child: FilledButton(
                 style: FilledButton.styleFrom(backgroundColor: AppColors.bleu),
                 onPressed: _canExport ? _export : null,
-                child: Text(_saving ? 'Chiffrement…' : 'Exporter'),
+                child: Text(_saving ? l.exportEncrypting : l.exportButton),
               ),
             ),
           ],

@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:sentinel/services/phishing/known_brands.dart';
 import 'package:sentinel/services/phishing/message_analyzer.dart';
 import 'package:sentinel/services/phishing/phishing_model.dart';
+import 'support/l10n.dart';
 
 // SEN-12 : caractères invisibles et inversion de texte.
 // Les caractères cachés sont écrits en \u, jamais tels quels.
@@ -81,14 +82,14 @@ void main() {
       () {
         final a = analyzeMessage('Bon\u200Bjour', fakePrediction(0.1));
         expect(a.verdict, Verdict.suspect);
-        expect(a.reasons.first, hiddenCharactersReason);
+        expect(a.reasons(fr).first, fr.reasonHiddenCharacters);
       },
     );
 
     test('sans caractère trompeur : verdict inchangé', () {
       final a = analyzeMessage('Bonjour', fakePrediction(0.1));
       expect(a.verdict, Verdict.rien);
-      expect(a.reasons, isNot(contains(hiddenCharactersReason)));
+      expect(a.reasons(fr), isNot(contains(fr.reasonHiddenCharacters)));
     });
 
     test('ne baisse jamais un verdict plus grave', () {
@@ -127,7 +128,7 @@ void main() {
       expect(aHidden.verdict, aClean.verdict);
       expect(aHidden.verdict, Verdict.arnaque);
       expect(aHidden.percent, aClean.percent);
-      expect(aHidden.reasons, [hiddenCharactersReason, ...aClean.reasons]);
+      expect(aHidden.reasons(fr), [fr.reasonHiddenCharacters, ...aClean.reasons(fr)]);
     });
   });
 }

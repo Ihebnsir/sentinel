@@ -1,5 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 
+import '../l10n/l10n.dart';
 import '../theme/app_colors.dart';
 
 /// État vide réutilisable : grande icône, titre, explication et bouton.
@@ -21,7 +22,7 @@ class EmptyState extends StatelessWidget {
 
   void _showComingSoon(BuildContext context) {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Bientôt disponible')),
+      SnackBar(content: Text(context.l10n.commonComingSoon)),
     );
   }
 

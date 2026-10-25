@@ -1,14 +1,19 @@
 import 'dart:math';
 
+import '../../l10n/l10n.dart';
+
 /// Force d'un mot de passe, du plus faible au plus fort.
 enum PasswordStrength {
-  faible('Faible'),
-  moyen('Moyen'),
-  fort('Fort');
+  faible,
+  moyen,
+  fort;
 
-  const PasswordStrength(this.label);
-
-  final String label;
+  /// En minuscules, pour « Force : moyen ».
+  String label(AppLocalizations l) => switch (this) {
+    faible => l.strengthWeak,
+    moyen => l.strengthMedium,
+    fort => l.strengthStrong,
+  };
 }
 
 /// Longueur minimale du mot de passe maître.

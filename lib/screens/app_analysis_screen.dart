@@ -1,5 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 
+import '../l10n/l10n.dart';
 import '../models/installed_app.dart';
 import '../services/app_analysis.dart';
 import '../services/apps_scanner_service.dart';
@@ -67,8 +68,9 @@ class _AppAnalysisScreenState extends State<AppAnalysisScreen> {
     if (!mounted) return;
     if (error != null) {
       setState(() => _starting = false);
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(error)));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(error.message(context.l10n))));
       return;
     }
     // Le VPN se reconstruit en un instant, puis on ouvre l'app à observer.
@@ -79,6 +81,7 @@ class _AppAnalysisScreenState extends State<AppAnalysisScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l = context.l10n;
     final apps = _apps;
     final muted = TextStyle(
       fontSize: 15,
@@ -97,30 +100,25 @@ class _AppAnalysisScreenState extends State<AppAnalysisScreen> {
         child: ListView(
           padding: const EdgeInsets.fromLTRB(28, 8, 28, 24),
           children: [
-            const Text(
-              'Analyser une application',
-              style: TextStyle(
+            Text(
+              l.analysisSectionTitle,
+              style: const TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.w600,
                 color: AppColors.encre,
               ),
             ),
             const SizedBox(height: 12),
-            const Text(
-              "Choisissez l'application à observer. Pendant quelques "
-              'minutes, Sentinel note les sites (domaines) '
-              "qu'elle contacte.",
-              style: TextStyle(fontSize: 15, color: AppColors.encre),
+            Text(
+              l.analysisScreenIntro,
+              style: const TextStyle(fontSize: 15, color: AppColors.encre),
             ),
             const SizedBox(height: 24),
             _divider,
             if (_failed)
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 24),
-                child: Text(
-                  'Impossible de lister les applications.',
-                  style: muted,
-                ),
+                child: Text(l.analysisListFailed, style: muted),
               )
             else if (apps == null || _starting)
               const Padding(
@@ -130,7 +128,7 @@ class _AppAnalysisScreenState extends State<AppAnalysisScreen> {
             else if (apps.isEmpty)
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 24),
-                child: Text('Aucune application à analyser.', style: muted),
+                child: Text(l.analysisNoApps, style: muted),
               )
             else
               for (final app in apps) ...[
@@ -182,17 +180,15 @@ class _AnalysisSheetState extends State<_AnalysisSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final l = context.l10n;
     final name = widget.app.label;
+    final duration = l.durationMinutesLong(_minutes, l.number(_minutes));
     final lines = [
-      'Pendant $_minutes minutes, seules les demandes de $name passent par '
-          'le pare-feu : chaque domaine vu lui appartient.',
-      'Les autres applications ne sont PAS protégées pendant ce temps : '
-          "ni blocage, ni alerte. Évitez d'ouvrir des liens inconnus.",
-      'À la fin, le pare-feu normal revient tout seul. Vous pouvez arrêter '
-          "avant, depuis Sentinel ou la notification.",
-      'Le rapport reste sur ce téléphone 24 heures au plus, puis il est '
-          "supprimé. Il n'est jamais envoyé.",
-      '$name va s\'ouvrir : utilisez-la normalement.',
+      l.analysisSheetLine1(duration, name),
+      l.analysisSheetLine2,
+      l.analysisSheetLine3,
+      l.analysisSheetLine4,
+      l.analysisSheetLine5(name),
     ];
     return SafeArea(
       child: SingleChildScrollView(
@@ -207,7 +203,7 @@ class _AnalysisSheetState extends State<_AnalysisSheet> {
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
-                    'Analyser $name',
+                    l.analysisSheetTitle(name),
                     style: const TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.w600,
@@ -224,7 +220,10 @@ class _AnalysisSheetState extends State<_AnalysisSheet> {
                 showSelectedIcon: false,
                 segments: [
                   for (final m in analysisMinutes)
-                    ButtonSegment(value: m, label: Text('$m min')),
+                    ButtonSegment(
+                      value: m,
+                      label: Text(l.durationMinutes(m, l.number(m))),
+                    ),
                 ],
                 selected: {_minutes},
                 onSelectionChanged: (value) =>
@@ -254,7 +253,7 @@ class _AnalysisSheetState extends State<_AnalysisSheet> {
                     foregroundColor: AppColors.encre.withValues(alpha: 0.6),
                   ),
                   onPressed: () => Navigator.of(context).pop(),
-                  child: const Text('Annuler'),
+                  child: Text(l.commonCancel),
                 ),
                 const Spacer(),
                 FilledButton(
@@ -262,7 +261,7 @@ class _AnalysisSheetState extends State<_AnalysisSheet> {
                     backgroundColor: AppColors.bleu,
                   ),
                   onPressed: () => Navigator.of(context).pop(_minutes),
-                  child: const Text("Lancer l'analyse"),
+                  child: Text(l.appsStartScan),
                 ),
               ],
             ),

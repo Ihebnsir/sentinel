@@ -28,10 +28,10 @@ class BreachChecker extends ChangeNotifier {
   /// Progression, ex : (3, 12).
   (int done, int total) get progress => (_done, _total);
 
-  String? _error;
+  BreachCheckException? _error;
 
   /// Dernier message d'erreur en français (null si tout va bien).
-  String? get error => _error;
+  BreachCheckException? get error => _error;
 
   // Résultats par empreinte SHA-1 : effacés au verrouillage.
   final _counts = <String, int>{};
@@ -84,7 +84,7 @@ class BreachChecker extends ChangeNotifier {
         notifyListeners();
       }
     } on BreachCheckException catch (e) {
-      if (generation == _generation) _error = e.message;
+      if (generation == _generation) _error = e;
     } finally {
       _client.clearCache(); // le cache ne dure que le temps de l'analyse
       _checking = false;

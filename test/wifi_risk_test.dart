@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sentinel/models/wifi_status.dart';
 import 'package:sentinel/services/wifi_risk.dart';
+import 'support/l10n.dart';
 
 // Wi-Fi connecté, DNS privé actif, Android 15 : seul le type change.
 WifiReport _assess(
@@ -8,7 +9,7 @@ WifiReport _assess(
   bool portal = false,
   bool? dns = true,
   int sdk = 35,
-}) => assessWifi(
+}) => assessWifi(fr, 
   WifiStatus(
     connected: true,
     security: security,
@@ -108,7 +109,7 @@ void main() {
   });
 
   test('pas de Wi-Fi : aucun conseil, pas de bouton', () {
-    final r = assessWifi(const WifiStatus(connected: false));
+    final r = assessWifi(fr, const WifiStatus(connected: false));
     expect(r.level, WifiLevel.pasDeWifi);
     expect(r.advice, isEmpty);
     expect(r.suggestPrivateDns, isFalse);

@@ -1,4 +1,4 @@
-import '../../utils/french_number.dart';
+import '../../l10n/l10n.dart';
 import 'password_strength.dart';
 import 'vault_item.dart';
 
@@ -90,10 +90,9 @@ PasswordHealthReport analyzePasswordHealth(
 
 /// « Ce mot de passe a été vu 3 861 fois dans des fuites de données.
 /// Changez-le. »
-String breachMessage(int count) =>
-    'Ce mot de passe a été vu ${formatFrenchNumber(count)} fois dans des '
-    'fuites de données. Changez-le.';
+String breachMessage(AppLocalizations l, int count) =>
+    l.breachMessage(count, l.number(count));
 
 /// Version courte pour les listes : « Vu 3 861 fois dans des fuites ».
-String breachShort(int count) =>
-    'Vu ${formatFrenchNumber(count)} fois dans des fuites';
+String breachShort(AppLocalizations l, int count) =>
+    l.breachShort(count, l.number(count));

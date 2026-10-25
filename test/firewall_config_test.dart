@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sentinel/services/firewall_service.dart';
+import 'support/l10n.dart';
 
 void main() {
   group('FirewallStatus : compteurs par catégorie', () {
@@ -75,20 +76,20 @@ void main() {
       final config = FirewallConfig.fromMap(map);
       // Espace insécable entre les milliers.
       expect(
-        config.categories.first.subtitle,
+        config.categories.first.subtitle(fr),
         '430 961 domaines · Phishing.Database, ShadowWhisperer',
       );
-      expect(config.categories.last.subtitle, '1 domaine');
+      expect(config.categories.last.subtitle(fr), '1 domaine');
     });
 
     test('résumé de mise à jour', () {
       expect(
-        FirewallConfig.fromMap(map).updateSummary,
+        FirewallConfig.fromMap(map).updateSummary(fr),
         'Dernière mise à jour : 19 octobre 2026',
       );
       final never = FirewallConfig.fromMap({'lastUpdateFailed': true});
       expect(
-        never.updateSummary,
+        never.updateSummary(fr),
         "Listes livrées avec l'application · dernière tentative échouée",
       );
     });
