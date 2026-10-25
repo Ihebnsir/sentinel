@@ -15,6 +15,7 @@ import '../widgets/network_protection_section.dart';
 import '../widgets/score_arch.dart';
 import '../widgets/wifi_alert.dart';
 import '../widgets/wifi_section.dart';
+import 'settings_screen.dart';
 
 /// Salutation neutre : l'app ne stocke aucun prénom (SEN-16).
 const homeGreeting = 'Bonjour';
@@ -191,12 +192,30 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  homeGreeting,
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: AppColors.encre.withValues(alpha: 0.6),
-                  ),
+                // Salutation, et à droite l'accès discret aux réglages.
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        homeGreeting,
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: AppColors.encre.withValues(alpha: 0.6),
+                        ),
+                      ),
+                    ),
+                    IconButton(
+                      tooltip: 'Réglages',
+                      visualDensity: VisualDensity.compact,
+                      color: AppColors.encre.withValues(alpha: 0.5),
+                      icon: const Icon(Icons.settings_outlined, size: 22),
+                      onPressed: () => Navigator.of(context).push(
+                        MaterialPageRoute<void>(
+                          builder: (_) => const SettingsScreen(),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 6),
                 Text(

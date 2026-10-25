@@ -17,3 +17,20 @@ Choix faits sans demander :
 - **Bouton « Restaurer une sauvegarde »** placé en bas de l'écran « Créer mon coffre » (comme demandé), pas sur l'écran vide d'accueil du coffre.
 
 Non vérifié : l'interface n'a pas été lancée sur un téléphone (règle : pas de `flutter run`). Le parcours réel avec le sélecteur Android est à tester à la main.
+
+## Présentation du premier lancement et Réglages / À propos (2026-10-25)
+
+Choix faits sans demander :
+
+- **Préférence « présentation vue »** : petit fichier `onboarding.json` dans le dossier privé de l'app (`OnboardingStore`, même modèle que `BreachConsentStore`). Pas de paquet `shared_preferences` ajouté. Fichier absent ou abîmé : la présentation revient. Si l'écriture échoue, l'app s'ouvre quand même (la présentation reviendra au lancement suivant).
+- **Démarrage** : `StartupGate` lit la préférence avant de construire `MainShell`. Pendant cette lecture (quelques ms), un fond uni ; l'accueil (et son analyse Android) ne démarre qu'après « Commencer ».
+- **3 écrans** : ce que fait Sentinel ; vie privée avec la liste exacte des 3 échanges réseau facultatifs (Have I Been Pwned, Quad9, mise à jour des listes depuis GitHub) ; autorisations demandées au moment où elles servent. Boutons « Suivant » puis « Commencer », pas de bouton « Passer » (3 écrans courts). Arche pleine en bleu en haut de chaque écran.
+- **Icône Réglages** : roue dentée discrète (encre à 50 %) à droite de « Bonjour » sur l'accueil.
+- **Version** : constante `appVersion` dans `lib/app_info.dart` plutôt qu'un paquet `package_info_plus` ou un canal Kotlin. Un test vérifie qu'elle suit `version:` de `pubspec.yaml` : il faudra la changer en même temps.
+- **Liens GitHub en minuscules** (`github.com/ihebnsir/sentinel`) : `test/home_greeting_test.dart` interdit le prénom dans `lib/` ; GitHub ignore la casse du nom de compte. Les liens supposent que le dépôt est public et que la branche s'appelle `main`.
+- **Politique de confidentialité** : écrite d'après le code (manifeste, `pwned_passwords.dart`, `FirewallEngine.kt`, `FirewallSettings.kt`, `ProtectionSettings.kt`, `SECURITY_DESIGN.md`). Rien sur iOS ni Windows (non distribués). Le texte est dans `privacySections` ; un test vérifie que la présentation et la politique citent les mêmes trois services.
+- **Licences** : `showLicensePage` (bibliothèques Dart, Readex Pro déjà enregistrée) + deux entrées ajoutées dans `main.dart` : `assets/blocklists/LICENSES.txt` (Phishing.Database, AdGuard, AdAway, ShadowWhisperer) et la mention CC BY 4.0 lue dans `assets/data/stalkerware_ioc.json`. Le modèle anti-arnaque est entraîné sur des données synthétiques du projet : pas de licence tierce.
+- **Rapport d'audit** : page de résumé (d'après la section 1 de `docs/audit/RAPPORT_AUDIT.md`) + bouton vers le rapport complet sur GitHub. À mettre à jour si le rapport change.
+- **Signaler une faille** : ouvre directement `SECURITY.md` sur GitHub dans le navigateur (canal existant `openWebPage`, https uniquement).
+
+Non vérifié : l'interface n'a pas été lancée sur un téléphone (règle : pas de `flutter run`). Le bouton Réglages de l'accueil n'a pas de test widget (l'accueil appelle les canaux Android) ; les écrans eux-mêmes sont testés.
