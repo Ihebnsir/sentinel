@@ -54,7 +54,12 @@ jobs:
         run: flutter analyze
 
       - name: Test
-        run: flutter test
+        run: flutter test --coverage
+
+      # Couverture de lib/services, lib/models et lib/utils : tableau dans
+      # le résumé de l'exécution, échec sous 85 %. Aucun service extérieur.
+      - name: Coverage (logic, min 85 %)
+        run: dart run tools/coverage/coverage_summary.dart --min=85
 
       - name: Build debug APK
         run: flutter build apk --debug

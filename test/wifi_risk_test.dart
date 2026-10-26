@@ -155,5 +155,28 @@ void main() {
       expect(s.privateDnsActive, isNull);
       expect(WifiSecurity.fromName('wapi').name, 'unknown');
     });
+
+    test('valeurs d\'un mauvais type : comme absentes', () {
+      final s = WifiStatus.fromMap({
+        'connected': 'true',
+        'security': 3,
+        'captivePortal': 1,
+        'privateDnsActive': 'oui',
+      });
+      expect(s.connected, isFalse);
+      expect(s.security, WifiSecurity.unknown);
+      expect(s.captivePortal, isFalse);
+      expect(s.privateDnsActive, isNull);
+      expect(s.sdkInt, 0);
+    });
+  });
+
+  test('chaque type de Wi-Fi a un libellé distinct, dans chaque langue', () {
+    for (final l in [fr, en, ar]) {
+      final labels = {for (final s in WifiSecurity.values) s.label(l)};
+      expect(labels, hasLength(WifiSecurity.values.length));
+    }
+    // Les sigles ne se traduisent pas.
+    expect(WifiSecurity.wpa3.label(ar), 'WPA3');
   });
 }

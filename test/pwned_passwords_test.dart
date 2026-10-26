@@ -217,5 +217,40 @@ void main() {
       await again.loadConsent();
       expect(again.consent, isFalse);
     });
+
+    test('pas de réseau : erreur gardée, rien retenu', () async {
+      final checker = BreachChecker(
+        consentStore: BreachConsentStore(directory: () async => dir),
+        client: PwnedPasswordsClient(
+          client: MockClient((_) => throw http.ClientException('hors ligne')),
+        ),
+      );
+      await checker.setConsent(true);
+      await checker.check(items);
+      expect(checker.error?.problem, BreachProblem.offline);
+      expect(checker.checking, isFalse);
+      expect(checker.progress, (0, 1));
+      expect(checker.countFor('password'), isNull);
+      expect(checker.isUpToDate(items), isFalse);
+      checker.dispose();
+    });
+
+    test('verrouillé pendant l\'analyse : tout est ignoré', () async {
+      final reponse = Completer<http.Response>();
+      final checker = BreachChecker(
+        consentStore: BreachConsentStore(directory: () async => dir),
+        client: PwnedPasswordsClient(client: MockClient((_) => reponse.future)),
+      );
+      await checker.setConsent(true);
+      final analyse = checker.check(items);
+      expect(checker.checking, isTrue);
+      await checker.check(items); // déjà en cours : ne relance rien
+      checker.clear(); // verrouillage
+      reponse.complete(http.Response('', 503));
+      await analyse;
+      expect(checker.error, isNull);
+      expect(checker.checking, isFalse);
+      expect(checker.countFor('password'), isNull);
+    });
   });
 }

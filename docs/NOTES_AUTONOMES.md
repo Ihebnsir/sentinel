@@ -54,3 +54,20 @@ Choix faits sans demander :
 - **Tests ajoutés** : `l10n_keys_test.dart` (mêmes clés et mêmes valeurs à insérer dans les 3 langues, police), `l10n_screens_test.dart` (accueil et Messages en arabe de droite à gauche, et en anglais), `language_test.dart` (choix dans Réglages, fichier), `StringsResourcesTest.kt` (mêmes clés Android dans les 3 langues, manifeste sans texte en dur).
 
 Non vérifié : l'interface n'a pas été lancée sur un téléphone (règle : pas de `flutter run`). Le rendu arabe réel (textes longs, retours à la ligne) et les notifications en arabe sont à regarder à la main. Le réglage Android 13 « Langue de l'application » n'est pas branché (`locales_config`) : le choix se fait dans Sentinel.
+
+## Couverture de tests de la logique (2026-10-26)
+
+Choix faits sans demander :
+
+- **Périmètre mesuré** : `lib/services`, `lib/models`, `lib/utils` (demandé). Les écrans et widgets ne sont pas comptés. Mesure en lignes (fichier `coverage/lcov.info` de `flutter test --coverage`, déjà ignoré par Git).
+- **Avant / après** : 81,7 % → 94,9 % (1 987 lignes). Les moins couverts au départ : `permission_labels.dart` (0 %), `share_service.dart` (0 %), `vault_biometrics.dart` (5 %), `protection_service.dart` (19 %), `apps_scanner_service.dart` (35 %), `device_security_service.dart` (36 %), `wifi_status.dart` (57 %), `vault_item.dart` (58 %), `firewall_service.dart` (60 %).
+- **Tests ajoutés** (pas de test qui appelle du code sans rien vérifier) :
+  - `firewall_service_test.dart`, `platform_services_test.dart`, `android_vault_biometrics_test.dart`, `share_service_test.dart` : un faux canal joue Android (`setMockMethodCallHandler`). Vérifient les arguments envoyés, la réponse vide, l'absence de code natif, et chaque code d'erreur Kotlin (ex. `NOT_RUNNING` → pare-feu coupé, `INVALIDEE`/`ABSENTE` → empreinte invalidée). Biométrie : une réponse mal formée (iv absent ou de mauvaise taille) est refusée. Rapports : seuls les rapports lisibles de moins de 24 h sont gardés. Texte partagé : vide ou arrivé après la fermeture, ignoré.
+  - `permission_labels_test.dart` : lit la liste des permissions dans le source et vérifie, dans les 3 langues, un libellé non vide et **différent** pour chacune (détecte une clé recopiée) ; préfixe absent, autre app, casse : null.
+  - `vault_item_test.dart` : JSON aller-retour, dates en UTC, champs facultatifs absents, JSON abîmé qui échoue (pas d'élément à moitié rempli), `copyWith`, `toString` sans secret ; générateur tout décoché.
+  - `pwned_passwords_test.dart` : réseau coupé pendant la vérification (erreur gardée, rien retenu) ; coffre verrouillé pendant la vérification (erreur et résultat ignorés).
+  - `wifi_risk_test.dart` : valeurs d'un mauvais type dans la Map Android ; libellés distincts dans les 3 langues.
+- **Laissé de côté** : `vault_platform.dart` (53 %), `wifi_service.dart` (73 %), `language_store.dart` (80 %) : le reste est surtout du passage de canal déjà du même modèle que ceux testés ; le total dépasse largement 85 %.
+- **Script de résumé** : `tools/coverage/coverage_summary.dart`, en Dart (déjà installé en CI, rien à ajouter), plutôt que `lcov`/`genhtml` ou un service comme Codecov/Coveralls. Il affiche un tableau Markdown du moins au plus couvert, l'ajoute au résumé GitHub (`GITHUB_STEP_SUMMARY`) et sort en erreur sous `--min`.
+- **CI** : `flutter test` devient `flutter test --coverage`, puis l'étape « Coverage (logic, min 85 %) ». Seuil à 85 % (demandé) et non au chiffre actuel, pour ne pas bloquer un petit ajout de code non testé. Pas d'envoi du fichier lcov en artefact (évite d'ajouter une action de plus à épingler).
+- **README** (anglais et français) : nombre de tests mis à jour (545 tests, 40 fichiers ; l'ancien chiffre 447/29 datait d'avant la traduction), paragraphe « Couverture » avec la commande locale. Le pourcentage du README est écrit à la main : à remettre à jour de temps en temps.

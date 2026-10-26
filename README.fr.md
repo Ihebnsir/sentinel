@@ -79,16 +79,24 @@ Schémas et détails : [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) (en anglais)
 
 ## Tests
 
-**447 tests** répartis dans 29 fichiers (`flutter test`). Ils couvrent :
+**545 tests** répartis dans 40 fichiers (`flutter test`). Ils couvrent :
 
 - le coffre : vecteur de test Argon2id de la RFC 9106, chiffrement, emplacements de clé, migration v1 → v2, détection des modifications (chiffré, clé enveloppée, en-tête), session et verrouillage ;
 - la sauvegarde chiffrée : aller-retour export/import, mauvais mot de passe, fichier altéré, version inconnue, fichier vide, restauration dans un coffre neuf ;
 - la **parité exacte** entre le modèle Dart et scikit-learn sur 30 textes de référence (5 langues et cas limites Unicode, tolérance 1e-9) ;
 - le client k-anonymity, avec un faux client HTTP ;
 - les règles de risque des applications, du téléphone et du Wi-Fi ;
-- le bilan de santé des mots de passe et le générateur.
+- le bilan de santé des mots de passe et le générateur ;
+- les ponts vers Android (pare-feu, protection, applications, biométrie, texte partagé) : arguments envoyés et chaque code d'erreur qu'Android peut renvoyer.
 
 Le réseau et la biométrie sont remplacés par des doublures de test : les tests tournent hors ligne.
+
+**Couverture.** La logique de l'app (`lib/services`, `lib/models`, `lib/utils`) est couverte à **94,9 %** des lignes (octobre 2026). Les écrans et widgets ne sont pas comptés. La CI lance `flutter test --coverage`, écrit un tableau par fichier dans le résumé de l'exécution et échoue sous 85 %. Aucun service tiers. En local :
+
+```bash
+flutter test --coverage
+dart run tools/coverage/coverage_summary.dart --min=85
+```
 
 ## Démarrage
 

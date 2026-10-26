@@ -79,16 +79,24 @@ Diagrams and details: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
 ## Tests
 
-**447 tests** in 29 test files (`flutter test`). They cover:
+**545 tests** in 40 test files (`flutter test`). They cover:
 
 - the vault: the Argon2id RFC 9106 test vector, encryption, key slots, v1 → v2 migration, tamper detection (ciphertext, wrapped key, header), session and lock behavior;
 - the encrypted backup: export/import round trip, wrong password, tampered file, unknown version, empty file, restore into a new vault;
 - **bit-for-bit parity** between the Dart and scikit-learn models on 30 fixtures (5 languages plus Unicode edge cases, tolerance 1e-9);
 - the k-anonymity client, using a fake HTTP client;
 - the app, device and Wi-Fi risk rules;
-- password health and the password generator.
+- password health and the password generator;
+- the Android bridges (firewall, protection, apps, biometrics, shared text): arguments sent, and every error code Android can return.
 
 Network and biometrics are replaced by test doubles, so the tests run offline.
+
+**Coverage.** The app logic (`lib/services`, `lib/models`, `lib/utils`) is at **94.9 %** line coverage (October 2026). Screens and widgets are not counted. The CI runs `flutter test --coverage`, writes a per-file table in the run summary and fails below 85 %. No third-party service. Locally:
+
+```bash
+flutter test --coverage
+dart run tools/coverage/coverage_summary.dart --min=85
+```
 
 ## Getting started
 
