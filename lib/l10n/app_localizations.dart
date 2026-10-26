@@ -220,6 +220,18 @@ abstract class AppLocalizations {
   /// **'sur 100'**
   String get commonOutOf100;
 
+  /// Lu par TalkBack sur les barres de chargement
+  ///
+  /// In fr, this message translates to:
+  /// **'Chargement en cours'**
+  String get commonLoading;
+
+  /// Lu par TalkBack sur l'arche du score
+  ///
+  /// In fr, this message translates to:
+  /// **'Score de sécurité : {score} sur 100'**
+  String scoreSemantics(int score);
+
   /// No description provided for @navHome.
   ///
   /// In fr, this message translates to:

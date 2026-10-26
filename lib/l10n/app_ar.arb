@@ -21,6 +21,8 @@
   "commonAnalysisFailedPull": "فشل التحليل. اسحب الشاشة إلى الأسفل لإعادة المحاولة.",
   "commonDateAtTime": "{date} على الساعة {time}",
   "commonOutOf100": "من 100",
+  "commonLoading": "جارٍ التحميل",
+  "scoreSemantics": "درجة الأمان: {score} من 100",
   "navHome": "الرئيسية",
   "navApps": "التطبيقات",
   "navMessages": "الرسائل",

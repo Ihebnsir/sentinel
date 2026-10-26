@@ -9,6 +9,8 @@ import '../../services/vault/vault_platform.dart';
 import '../../l10n/l10n.dart';
 import '../../services/vault/vault_session.dart';
 import '../../theme/app_colors.dart';
+import '../../widgets/actions_row.dart';
+import '../../widgets/loading_bar.dart';
 import '../../widgets/vault_fields.dart';
 
 /// Message clair pour un fichier qui n'est pas une sauvegarde lisible.
@@ -217,23 +219,18 @@ class _RestoreBackupViewState extends State<RestoreBackupView> {
           ),
         ],
         if (_busy)
-          Padding(
+          const Padding(
             padding: EdgeInsets.only(top: 16),
-            child: LinearProgressIndicator(
-              minHeight: 2,
-              color: context.colors.bleu,
-              backgroundColor: context.colors.ligne,
-            ),
+            child: LoadingBar(),
           ),
         const SizedBox(height: 16),
-        Row(
+        ActionsRow(
           children: [
             TextButton(
               style: TextButton.styleFrom(foregroundColor: muted),
               onPressed: _busy ? null : widget.onCancel,
               child: Text(l.commonCancel),
             ),
-            const Spacer(),
             FilledButton(
               style: FilledButton.styleFrom(
                 backgroundColor: context.colors.bleu,

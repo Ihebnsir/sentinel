@@ -10,6 +10,7 @@ import '../../services/vault/vault_item.dart';
 import '../../services/vault/vault_platform.dart';
 import '../../services/vault/vault_session.dart';
 import '../../theme/app_colors.dart';
+import '../../widgets/actions_row.dart';
 import '../../widgets/vault_copy.dart';
 import '../../widgets/vault_fields.dart';
 
@@ -308,7 +309,7 @@ class _VaultItemScreenState extends State<VaultItemScreen> {
           );
         },
       ),
-    Row(
+    ActionsRow(
       children: [
         TextButton.icon(
           style: TextButton.styleFrom(foregroundColor: context.colors.bleu),
@@ -316,7 +317,6 @@ class _VaultItemScreenState extends State<VaultItemScreen> {
           icon: const Icon(Icons.copy, size: 18),
           label: Text(l.vaultCopy),
         ),
-        const Spacer(),
         TextButton.icon(
           style: TextButton.styleFrom(foregroundColor: context.colors.bleu),
           onPressed: () {
@@ -365,20 +365,23 @@ class _GeneratorPanel extends StatelessWidget {
     bool value,
     ValueChanged<bool> onToggle,
   ) {
-    return Row(
-      children: [
-        Expanded(
-          child: Text(
-            label,
-            style: TextStyle(fontSize: 15, color: context.colors.encre),
+    // MergeSemantics : TalkBack lit le texte avec l'interrupteur.
+    return MergeSemantics(
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              label,
+              style: TextStyle(fontSize: 15, color: context.colors.encre),
+            ),
           ),
-        ),
-        Switch(
-          value: value,
-          activeTrackColor: context.colors.bleu,
-          onChanged: onToggle,
-        ),
-      ],
+          Switch(
+            value: value,
+            activeTrackColor: context.colors.bleu,
+            onChanged: onToggle,
+          ),
+        ],
+      ),
     );
   }
 

@@ -5,6 +5,8 @@ import '../../services/vault/vault_platform.dart';
 import '../../l10n/l10n.dart';
 import '../../services/vault/vault_session.dart';
 import '../../theme/app_colors.dart';
+import '../../widgets/actions_row.dart';
+import '../../widgets/loading_bar.dart';
 import '../../widgets/vault_fields.dart';
 
 /// Création du coffre : mot de passe maître, confirmation, avertissement.
@@ -119,51 +121,49 @@ class _CreateVaultViewState extends State<CreateVaultView> {
         const SizedBox(height: 16),
         Divider(height: 1, thickness: 1, color: context.colors.ligne),
         // Toute la ligne est cliquable, pas seulement la case.
-        InkWell(
-          onTap: _creating
-              ? null
-              : () => setState(() => _understood = !_understood),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8),
-            child: Row(
-              children: [
-                Checkbox(
-                  value: _understood,
-                  activeColor: context.colors.bleu,
-                  onChanged: _creating
-                      ? null
-                      : (value) => setState(() => _understood = value == true),
-                ),
-                const SizedBox(width: 4),
-                Expanded(
-                  child: Text(
-                    l.vaultUnderstood,
-                    style: TextStyle(fontSize: 15, color: context.colors.encre),
+        // MergeSemantics : TalkBack lit la case et son texte ensemble.
+        MergeSemantics(
+          child: InkWell(
+            onTap: _creating
+                ? null
+                : () => setState(() => _understood = !_understood),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              child: Row(
+                children: [
+                  Checkbox(
+                    value: _understood,
+                    activeColor: context.colors.bleu,
+                    onChanged: _creating
+                        ? null
+                        : (value) => setState(() => _understood = value == true),
                   ),
-                ),
-              ],
+                  const SizedBox(width: 4),
+                  Expanded(
+                    child: Text(
+                      l.vaultUnderstood,
+                      style: TextStyle(fontSize: 15, color: context.colors.encre),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
         Divider(height: 1, thickness: 1, color: context.colors.ligne),
         if (_creating)
-          Padding(
+          const Padding(
             padding: EdgeInsets.only(top: 16),
-            child: LinearProgressIndicator(
-              minHeight: 2,
-              color: context.colors.bleu,
-              backgroundColor: context.colors.ligne,
-            ),
+            child: LoadingBar(),
           ),
         const SizedBox(height: 16),
-        Row(
+        ActionsRow(
           children: [
             TextButton(
               style: TextButton.styleFrom(foregroundColor: muted),
               onPressed: _creating ? null : widget.onCancel,
               child: Text(l.commonCancel),
             ),
-            const Spacer(),
             FilledButton(
               style: FilledButton.styleFrom(
                 backgroundColor: context.colors.bleu,

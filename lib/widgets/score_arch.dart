@@ -27,17 +27,21 @@ class ScoreArch extends StatelessWidget {
   Widget build(BuildContext context) {
     final message = this.message;
     if (message != null) {
-      return _frame(
-        background: context.colors.bleu.withValues(alpha: 0.12),
-        children: [
-          Positioned(
-            bottom: 28,
-            child: Text(
-              message,
-              style: TextStyle(color: context.colors.secondaire),
+      // liveRegion : TalkBack annonce « Analyse en cours » sans toucher.
+      return Semantics(
+        liveRegion: true,
+        child: _frame(
+          background: context.colors.bleu.withValues(alpha: 0.12),
+          children: [
+            Positioned(
+              bottom: 28,
+              child: Text(
+                message,
+                style: TextStyle(color: context.colors.secondaire),
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       );
     }
 
@@ -46,53 +50,60 @@ class ScoreArch extends StatelessWidget {
     // TweenAnimationBuilder anime une valeur de 0 jusqu'au score.
     // La fonction builder est rappelée à chaque image de l'animation
     // avec la valeur actuelle (value).
-    return TweenAnimationBuilder<double>(
-      tween: Tween(begin: 0, end: score.toDouble()),
-      duration: const Duration(milliseconds: 1400),
-      curve: Curves.easeOutCubic,
-      builder: (context, value, _) {
-        // Le chiffre est sur la partie remplie à partir de 45 : texte le
-        // plus lisible sur cette couleur (contraste WCAG).
-        final onFill = value >= 45;
-        final textColor = onFill
-            ? context.colors.textOn(color)
-            : context.colors.encre;
+    // Une seule phrase pour TalkBack, avec le score final et non le
+    // chiffre animé : « Score de sécurité : 80 sur 100 ».
+    return Semantics(
+      label: context.l10n.scoreSemantics(score),
+      liveRegion: true,
+      excludeSemantics: true,
+      child: TweenAnimationBuilder<double>(
+        tween: Tween(begin: 0, end: score.toDouble()),
+        duration: const Duration(milliseconds: 1400),
+        curve: Curves.easeOutCubic,
+        builder: (context, value, _) {
+          // Le chiffre est sur la partie remplie à partir de 45 : texte le
+          // plus lisible sur cette couleur (contraste WCAG).
+          final onFill = value >= 45;
+          final textColor = onFill
+              ? context.colors.textOn(color)
+              : context.colors.encre;
 
-        return _frame(
-          background: color.withValues(alpha: 0.12),
-          children: [
-            // Partie remplie : sa hauteur suit la valeur animée.
-            FractionallySizedBox(
-              heightFactor: value / 100,
-              widthFactor: 1,
-              child: Container(color: color),
-            ),
-            // Le chiffre et « sur 100 », placés en bas.
-            Positioned(
-              bottom: 28,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    '${value.round()}',
-                    style: TextStyle(
-                      fontSize: 72,
-                      fontWeight: FontWeight.w300,
-                      color: textColor,
-                    ),
-                  ),
-                  Text(
-                    context.l10n.commonOutOf100,
-                    style: TextStyle(
-                      color: textColor.withValues(alpha: 0.8),
-                    ),
-                  ),
-                ],
+          return _frame(
+            background: color.withValues(alpha: 0.12),
+            children: [
+              // Partie remplie : sa hauteur suit la valeur animée.
+              FractionallySizedBox(
+                heightFactor: value / 100,
+                widthFactor: 1,
+                child: Container(color: color),
               ),
-            ),
-          ],
-        );
-      },
+              // Le chiffre et « sur 100 », placés en bas.
+              Positioned(
+                bottom: 28,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      '${value.round()}',
+                      style: TextStyle(
+                        fontSize: 72,
+                        fontWeight: FontWeight.w300,
+                        color: textColor,
+                      ),
+                    ),
+                    Text(
+                      context.l10n.commonOutOf100,
+                      style: TextStyle(
+                        color: textColor.withValues(alpha: 0.8),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          );
+        },
+      ),
     );
   }
 

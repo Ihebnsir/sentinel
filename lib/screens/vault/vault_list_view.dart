@@ -200,10 +200,7 @@ class _HealthRow extends StatelessWidget {
               toFix == 0 ? l.vaultAllGood : l.vaultToFix(l.number(toFix)),
               style: TextStyle(fontWeight: FontWeight.w600, color: color),
             ),
-            Icon(
-              Icons.chevron_right,
-              color: context.colors.encre.withValues(alpha: 0.3),
-            ),
+            Icon(Icons.chevron_right, color: context.colors.discret),
           ],
         ),
       ),
@@ -290,10 +287,7 @@ class _ItemRow extends StatelessWidget {
                 ],
               ),
             ),
-            Icon(
-              Icons.chevron_right,
-              color: context.colors.encre.withValues(alpha: 0.3),
-            ),
+            Icon(Icons.chevron_right, color: context.colors.discret),
           ],
         ),
       ),

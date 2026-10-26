@@ -75,11 +75,12 @@ void main() {
       expect(c.textOn(c.bleu), c.surCouleur); // bleu nuit sur bleu clair
     });
 
-    test('onglet inactif (texte à 50 %) lisible', () {
-      expect(
-        _sur(c.encre.withValues(alpha: 0.5), c.chaux),
-        greaterThanOrEqualTo(_texte),
-      );
+    test('onglet inactif (texte secondaire) lisible, dans les deux thèmes', () {
+      for (final theme in [AppTheme.light, AppTheme.dark]) {
+        final label = theme.navigationBarTheme.labelTextStyle!.resolve({})!;
+        final fond = theme.extension<AppColors>()!.chaux;
+        expect(_sur(label.color!, fond), greaterThanOrEqualTo(_texte));
+      }
     });
 
     test('lignes fines visibles, sans être criardes', () {
@@ -91,27 +92,32 @@ void main() {
 
   group('thème clair : paires principales', () {
     const c = AppColors.light;
-    test('texte, secondaire, bleu, vert, rouge au niveau AA', () {
-      for (final couleur in [
-        c.encre,
-        c.secondaire,
-        c.bleu,
-        c.zitouna,
-        c.rommen,
-      ]) {
-        expect(
-          _sur(couleur, c.chaux),
-          greaterThanOrEqualTo(_texte),
-          reason: '$couleur',
-        );
-      }
-    });
+    test(
+      'texte, secondaire, discret, ocre, bleu, vert, rouge au niveau AA',
+      () {
+        for (final couleur in [
+          c.encre,
+          c.secondaire,
+          c.discret,
+          c.ocre,
+          c.bleu,
+          c.zitouna,
+          c.rommen,
+        ]) {
+          expect(
+            _sur(couleur, c.chaux),
+            greaterThanOrEqualTo(_texte),
+            reason: '$couleur',
+          );
+        }
+      },
+    );
 
     test('texte sur couleurs pleines : le plus lisible est choisi', () {
       expect(c.textOn(c.bleu), c.surCouleur); // blanc sur bleu
       expect(c.textOn(c.rommen), c.surCouleur);
-      // Blanc sur ocre : 2,2:1 seulement ; l'encre donne 7,3:1.
-      expect(c.textOn(c.ocre), c.encre);
+      // Ambre foncé : le blanc y est lisible (5,5:1).
+      expect(c.textOn(c.ocre), c.surCouleur);
       for (final fond in [c.bleu, c.rommen, c.ocre]) {
         expect(
           contrastRatio(c.textOn(fond), fond),
@@ -119,8 +125,6 @@ void main() {
         );
       }
     });
-    // Écarts connus du thème clair, non modifiés (voir NOTES_AUTONOMES) :
-    // ocre en texte (2,0:1) et texte discret (2,7:1).
   });
 
   group('AppTheme', () {
@@ -199,12 +203,15 @@ void main() {
       );
     });
 
-    testWidgets('clair : blanc sur bleu, encre sur ocre', (tester) async {
+    testWidgets('clair : blanc sur bleu et sur ocre', (tester) async {
       expect(
         await chiffre(tester, AppTheme.light, 80),
         AppColors.light.surCouleur,
       );
-      expect(await chiffre(tester, AppTheme.light, 60), AppColors.light.encre);
+      expect(
+        await chiffre(tester, AppTheme.light, 60),
+        AppColors.light.surCouleur,
+      );
     });
 
     testWidgets('score bas : chiffre sur le fond, couleur du texte', (

@@ -128,10 +128,7 @@ class AppAnalysisSection extends StatelessWidget {
                         ],
                       ),
                     ),
-                    Icon(
-                      Icons.chevron_right,
-                      color: context.colors.encre.withValues(alpha: 0.4),
-                    ),
+                    Icon(Icons.chevron_right, color: context.colors.discret),
                   ],
                 ),
               ),

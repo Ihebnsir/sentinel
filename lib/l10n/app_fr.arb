@@ -44,6 +44,19 @@
   "@commonOutOf100": {
     "description": "Sous le score de l'arche"
   },
+  "commonLoading": "Chargement en cours",
+  "@commonLoading": {
+    "description": "Lu par TalkBack sur les barres de chargement"
+  },
+  "scoreSemantics": "Score de sécurité : {score} sur 100",
+  "@scoreSemantics": {
+    "description": "Lu par TalkBack sur l'arche du score",
+    "placeholders": {
+      "score": {
+        "type": "int"
+      }
+    }
+  },
   "navHome": "Accueil",
   "navApps": "Applications",
   "navMessages": "Messages",

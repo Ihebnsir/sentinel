@@ -9,6 +9,7 @@ import '../services/qr/qr_safety.dart';
 import '../services/qr/qr_scanner_service.dart';
 import '../services/wifi_risk.dart';
 import '../theme/app_colors.dart';
+import '../widgets/loading_bar.dart';
 import '../widgets/verdict_section.dart';
 import '../widgets/wifi_section.dart';
 
@@ -143,12 +144,8 @@ class _QrResultScreenState extends State<QrResultScreen> {
               _InfoRow(label: label, value: value),
             if (assessment == null && !_failed)
               Padding(
-                padding: EdgeInsets.only(top: 24),
-                child: LinearProgressIndicator(
-                  minHeight: 2,
-                  color: context.colors.bleu,
-                  backgroundColor: context.colors.ligne,
-                ),
+                padding: const EdgeInsets.only(top: 24),
+                child: LoadingBar(label: context.l10n.homeAnalyzing),
               ),
             if (_failed)
               Padding(
@@ -301,7 +298,7 @@ class _RawContent extends StatelessWidget {
         empty ? context.l10n.qrEmpty : raw,
         style: TextStyle(
           fontSize: 14,
-          color: context.colors.encre.withValues(alpha: empty ? 0.45 : 1),
+          color: empty ? context.colors.discret : context.colors.encre,
         ),
       ),
     );

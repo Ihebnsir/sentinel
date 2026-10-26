@@ -159,3 +159,20 @@ Choix faits sans demander :
   - les tests utilisent une largeur de 800 dp : à 360 dp, la police de test (glyphes carrés) déborde alors que Readex Pro tient.
 
 Non vérifié : l'app n'a pas été lancée sur un téléphone (règle : pas de `flutter run`). À regarder à la main en sombre : rendu réel de Readex Pro, page des licences (écran système de Flutter), sélecteur de fichiers et fenêtre d'empreinte (écrans d'Android), notifications.
+
+## Accessibilité : TalkBack, zones tactiles, contraste, police à 200 % (2026-10-26)
+
+Détail de ce qui a été vérifié et corrigé : [ACCESSIBILITE.md](ACCESSIBILITE.md). Choix faits sans demander :
+
+- **Ocre du thème clair foncé** : #E0A526 → #8A6100 (2,0:1 → 5,2:1), partout, y compris l'arche d'un score de 45 à 69. Ça règle l'écart noté au thème sombre. Plutôt qu'une deuxième couleur « ocre pour le texte » : une seule couleur, rien à oublier dans les écrans. Sur l'arche ocre, le chiffre redevient blanc (choix automatique de `textOn`).
+- **Gris du thème clair** : `discret` 45 % → 64 % (4,8:1) et `secondaire` 64 % → 70 % (5,8:1), pour garder deux niveaux de gris distincts. Les gris codés en dur (`encre` à 30–50 %) passent aux couleurs du thème. L'onglet inactif prend `secondaire`.
+- **Bouton Réglages de l'accueil** : retrait de la forme compacte (40 dp → 48 dp). La roue dentée passe de 50 % d'encre à `secondaire`.
+- **Phrase de l'arche** : nouvelle clé `scoreSemantics` (« Score de sécurité : {score} sur 100 », en / ar traduits). C'est le score final qui est lu, pas le chiffre animé.
+- **Deux petits widgets partagés** plutôt que de répéter le même code : `ActionsRow` (rangée « Annuler … Valider » qui passe sur deux lignes, basée sur `OverflowBar`) et `LoadingBar` (barre de chargement nommée « Chargement en cours », nouvelle clé `commonLoading`, et annoncée).
+- **Interrupteurs et case à cocher** : `MergeSemantics` autour de la ligne (texte + interrupteur). La ligne entière n'est pas devenue cliquable : seule la lecture change, pas le comportement.
+- **Verdict annoncé** (*live region*) et marqué comme titre ; barre de force du mot de passe muette (la phrase en dessous suffit) ; icônes d'apps ignorées (nom écrit à côté).
+- **Test** : vraie police Readex Pro chargée dans `test/accessibility_test.dart` (glyphes carrés de la police de test trop larges à 200 %), écran de 360 dp, très haut pour que toute la liste soit construite. `isSemantics` plutôt que `containsSemantics` (déprécié dans cette version de Flutter).
+- **SEN-13 non touché** : `VaultProtection.kt` inchangé, aucun libellé ne contient de secret.
+- **Mise en forme** : `dart format` appliqué en entier seulement aux fichiers qui étaient déjà au format ; ailleurs, seuls les blocs modifiés sont indentés à la main.
+
+Non vérifié : pas d'essai avec TalkBack sur un téléphone (règle : pas de `flutter run`). Feuilles du bas, boîtes de dialogue et écrans d'Android hors du test automatique. Voir « Limites » dans ACCESSIBILITE.md.

@@ -128,11 +128,14 @@ class PasswordStrengthLine extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        LinearProgressIndicator(
-          value: (strength.index + 1) / PasswordStrength.values.length,
-          minHeight: 2,
-          color: _color(context.colors, strength),
-          backgroundColor: context.colors.ligne,
+        // Barre muette pour TalkBack : la phrase en dessous dit la force.
+        ExcludeSemantics(
+          child: LinearProgressIndicator(
+            value: (strength.index + 1) / PasswordStrength.values.length,
+            minHeight: 2,
+            color: _color(context.colors, strength),
+            backgroundColor: context.colors.ligne,
+          ),
         ),
         const SizedBox(height: 6),
         Text(

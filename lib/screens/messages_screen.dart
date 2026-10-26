@@ -10,7 +10,9 @@ import '../services/apps_scanner_service.dart';
 import '../services/qr/qr_scanner_service.dart';
 import '../services/share_service.dart';
 import '../theme/app_colors.dart';
+import '../widgets/actions_row.dart';
 import '../widgets/auto_protection_section.dart';
+import '../widgets/loading_bar.dart';
 import '../widgets/verdict_section.dart';
 import 'qr_result_screen.dart';
 
@@ -212,21 +214,20 @@ class _MessagesScreenState extends State<MessagesScreen> {
                 _actions(l),
                 if (_analyzing)
                   Padding(
-                    padding: EdgeInsets.only(top: 24),
-                    child: LinearProgressIndicator(
-                      minHeight: 2,
-                      color: context.colors.bleu,
-                      backgroundColor: context.colors.ligne,
-                    ),
+                    padding: const EdgeInsets.only(top: 24),
+                    child: LoadingBar(label: context.l10n.homeAnalyzing),
                   ),
                 if (_failed)
                   Padding(
                     padding: const EdgeInsets.only(top: 24),
-                    child: Text(
-                      l.messagesFailed,
-                      style: TextStyle(
-                        fontSize: 15,
-                        color: context.colors.secondaire,
+                    child: Semantics(
+                      liveRegion: true,
+                      child: Text(
+                        l.messagesFailed,
+                        style: TextStyle(
+                          fontSize: 15,
+                          color: context.colors.secondaire,
+                        ),
                       ),
                     ),
                   ),
@@ -255,28 +256,34 @@ class _MessagesScreenState extends State<MessagesScreen> {
 
   /// « Coller » à gauche ; « Effacer » et « Analyser » à droite.
   Widget _actions(AppLocalizations l) {
-    return Row(
+    return ActionsRow(
       children: [
         TextButton(
           style: TextButton.styleFrom(foregroundColor: context.colors.bleu),
           onPressed: _paste,
           child: Text(l.messagesPaste),
         ),
-        const Spacer(),
-        if (_controller.text.isNotEmpty)
-          TextButton(
-            style: TextButton.styleFrom(
-              foregroundColor: context.colors.secondaire,
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (_controller.text.isNotEmpty)
+              TextButton(
+                style: TextButton.styleFrom(
+                  foregroundColor: context.colors.secondaire,
+                ),
+                onPressed: _clear,
+                child: Text(l.messagesClear),
+              ),
+            const SizedBox(width: 8),
+            FilledButton(
+              style: FilledButton.styleFrom(
+                backgroundColor: context.colors.bleu,
+              ),
+              // null = bouton désactivé (champ vide ou analyse en cours).
+              onPressed: _hasText && !_analyzing ? _analyze : null,
+              child: Text(l.messagesAnalyze),
             ),
-            onPressed: _clear,
-            child: Text(l.messagesClear),
-          ),
-        const SizedBox(width: 8),
-        FilledButton(
-          style: FilledButton.styleFrom(backgroundColor: context.colors.bleu),
-          // null = bouton désactivé (champ vide ou analyse en cours).
-          onPressed: _hasText && !_analyzing ? _analyze : null,
-          child: Text(l.messagesAnalyze),
+          ],
         ),
       ],
     );

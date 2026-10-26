@@ -36,12 +36,13 @@ class AppColors extends ThemeExtension<AppColors> {
     bleu: Color(0xFF1F5FA8),
     encre: Color(0xFF14213D),
     zitouna: Color(0xFF5B7A3A),
-    ocre: Color(0xFFE0A526),
+    // Ambre foncé : lisible en texte (5,2:1 ; l'ancien #E0A526 : 2,0:1).
+    ocre: Color(0xFF8A6100),
     rommen: Color(0xFFC2263A),
     ligne: Color(0xFFE3E8EC),
-    // Encre à 64 % (60 % avant le thème sombre : 4,2:1, sous le seuil AA).
-    secondaire: Color(0xA314213D),
-    discret: Color(0x7314213D), // encre à 45 %
+    // Niveau AA (4,5:1) : secondaire à 70 % (5,8:1), discret à 64 % (4,8:1).
+    secondaire: Color(0xB314213D),
+    discret: Color(0xA314213D),
     surCouleur: Color(0xFFFFFFFF),
   );
 

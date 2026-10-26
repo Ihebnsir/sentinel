@@ -10,6 +10,7 @@ import '../../services/vault/vault_platform.dart';
 import '../../services/vault/vault_session.dart';
 import '../../theme/app_colors.dart';
 import '../../widgets/breach_consent_sheet.dart';
+import '../../widgets/loading_bar.dart';
 import '../../widgets/vault_fields.dart';
 
 // Couleur : celle du thème (dividerTheme, ligne fine).
@@ -212,68 +213,74 @@ class _VaultSettingsScreenState extends State<VaultSettingsScreen>
               _divider,
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8),
-                child: Row(
-                  children: [
-                    Icon(Icons.fingerprint, color: context.colors.bleu),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            l.vaultOpenWithFingerprint,
-                            style: TextStyle(
-                              fontSize: 15,
-                              color: context.colors.encre,
+                // MergeSemantics : TalkBack lit le texte avec l'interrupteur.
+                child: MergeSemantics(
+                  child: Row(
+                    children: [
+                      Icon(Icons.fingerprint, color: context.colors.bleu),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              l.vaultOpenWithFingerprint,
+                              style: TextStyle(
+                                fontSize: 15,
+                                color: context.colors.encre,
+                              ),
                             ),
-                          ),
-                          Text(
-                            l.vaultFingerprintWeekly,
-                            style: TextStyle(fontSize: 13, color: muted),
-                          ),
-                        ],
+                            Text(
+                              l.vaultFingerprintWeekly,
+                              style: TextStyle(fontSize: 13, color: muted),
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                    Switch(
-                      value: session.biometricEnabled,
-                      activeTrackColor: context.colors.bleu,
-                      onChanged: _busy ? null : _toggleBiometric,
-                    ),
-                  ],
+                      Switch(
+                        value: session.biometricEnabled,
+                        activeTrackColor: context.colors.bleu,
+                        onChanged: _busy ? null : _toggleBiometric,
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ],
             _divider,
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 8),
-              child: Row(
-                children: [
-                  Icon(Icons.travel_explore, color: context.colors.bleu),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          l.healthCheckButton,
-                          style: TextStyle(
-                            fontSize: 15,
-                            color: context.colors.encre,
+              // MergeSemantics : TalkBack lit le texte avec l'interrupteur.
+              child: MergeSemantics(
+                child: Row(
+                  children: [
+                    Icon(Icons.travel_explore, color: context.colors.bleu),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            l.healthCheckButton,
+                            style: TextStyle(
+                              fontSize: 15,
+                              color: context.colors.encre,
+                            ),
                           ),
-                        ),
-                        Text(
-                          l.vaultBreachSettingDetail,
-                          style: TextStyle(fontSize: 13, color: muted),
-                        ),
-                      ],
+                          Text(
+                            l.vaultBreachSettingDetail,
+                            style: TextStyle(fontSize: 13, color: muted),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                  Switch(
-                    value: widget.breaches.consent,
-                    activeTrackColor: context.colors.bleu,
-                    onChanged: _busy ? null : _toggleBreaches,
-                  ),
-                ],
+                    Switch(
+                      value: widget.breaches.consent,
+                      activeTrackColor: context.colors.bleu,
+                      onChanged: _busy ? null : _toggleBreaches,
+                    ),
+                  ],
+                ),
               ),
             ),
             _divider,
@@ -306,13 +313,9 @@ class _VaultSettingsScreenState extends State<VaultSettingsScreen>
             ),
             _divider,
             if (_busy)
-              Padding(
+              const Padding(
                 padding: EdgeInsets.only(top: 16),
-                child: LinearProgressIndicator(
-                  minHeight: 2,
-                  color: context.colors.bleu,
-                  backgroundColor: context.colors.ligne,
-                ),
+                child: LoadingBar(),
               ),
           ],
         ),
@@ -356,7 +359,7 @@ class _SettingsRow extends StatelessWidget {
             ),
             Icon(
               Icons.chevron_right,
-              color: context.colors.encre.withValues(alpha: 0.3),
+              color: context.colors.discret,
             ),
           ],
         ),
@@ -539,13 +542,9 @@ class _ChangePasswordScreenState extends State<_ChangePasswordScreen>
               onChanged: (_) => setState(() {}),
             ),
             if (_saving)
-              Padding(
+              const Padding(
                 padding: EdgeInsets.only(top: 16),
-                child: LinearProgressIndicator(
-                  minHeight: 2,
-                  color: context.colors.bleu,
-                  backgroundColor: context.colors.ligne,
-                ),
+                child: LoadingBar(),
               ),
             const SizedBox(height: 16),
             SizedBox(
@@ -682,13 +681,9 @@ class _ExportBackupScreenState extends State<_ExportBackupScreen>
               onChanged: (_) => setState(() {}),
             ),
             if (_saving)
-              Padding(
+              const Padding(
                 padding: EdgeInsets.only(top: 16),
-                child: LinearProgressIndicator(
-                  minHeight: 2,
-                  color: context.colors.bleu,
-                  backgroundColor: context.colors.ligne,
-                ),
+                child: LoadingBar(),
               ),
             const SizedBox(height: 16),
             SizedBox(

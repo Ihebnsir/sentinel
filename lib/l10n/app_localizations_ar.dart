@@ -73,6 +73,14 @@ class AppLocalizationsAr extends AppLocalizations {
   String get commonOutOf100 => 'من 100';
 
   @override
+  String get commonLoading => 'جارٍ التحميل';
+
+  @override
+  String scoreSemantics(int score) {
+    return 'درجة الأمان: $score من 100';
+  }
+
+  @override
   String get navHome => 'الرئيسية';
 
   @override

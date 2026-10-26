@@ -120,9 +120,16 @@ class SpywareAdviceScreen extends StatelessWidget {
                   // auprès des organismes eux-mêmes. Ne jamais recopier un
                   // numéro sans source officielle.
                   _Paragraph(l.spywareCoalition),
-                  SelectableText(
-                    stopStalkerwareUrl,
-                    style: TextStyle(fontSize: 15, color: context.colors.bleu),
+                  // 48 dp de haut : zone tactile minimale (appui long).
+                  ConstrainedBox(
+                    constraints: const BoxConstraints(minHeight: 48),
+                    child: SelectableText(
+                      stopStalkerwareUrl,
+                      style: TextStyle(
+                        fontSize: 15,
+                        color: context.colors.bleu,
+                      ),
+                    ),
                   ),
                   const SizedBox(height: 8),
                   Text(
@@ -160,7 +167,7 @@ class SpywareAdviceScreen extends StatelessWidget {
                     l.spywareIocCredit,
                     style: TextStyle(
                       fontSize: 12,
-                      color: context.colors.encre.withValues(alpha: 0.5),
+                      color: context.colors.discret,
                     ),
                   ),
                 ],

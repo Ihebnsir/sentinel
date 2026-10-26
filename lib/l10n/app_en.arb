@@ -21,6 +21,8 @@
   "commonAnalysisFailedPull": "The analysis failed. Pull down to try again.",
   "commonDateAtTime": "{date} at {time}",
   "commonOutOf100": "out of 100",
+  "commonLoading": "Loading",
+  "scoreSemantics": "Security score: {score} out of 100",
   "navHome": "Home",
   "navApps": "Apps",
   "navMessages": "Messages",

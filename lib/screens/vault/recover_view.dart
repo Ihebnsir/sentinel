@@ -4,6 +4,8 @@ import '../../services/vault/password_strength.dart';
 import '../../l10n/l10n.dart';
 import '../../services/vault/vault_session.dart';
 import '../../theme/app_colors.dart';
+import '../../widgets/actions_row.dart';
+import '../../widgets/loading_bar.dart';
 import '../../widgets/vault_fields.dart';
 
 /// « Mot de passe oublié ? » : clé de récupération, puis nouveau mot de
@@ -141,23 +143,18 @@ class _RecoverViewState extends State<RecoverView> {
           ),
         ],
         if (_busy)
-          Padding(
+          const Padding(
             padding: EdgeInsets.only(top: 16),
-            child: LinearProgressIndicator(
-              minHeight: 2,
-              color: context.colors.bleu,
-              backgroundColor: context.colors.ligne,
-            ),
+            child: LoadingBar(),
           ),
         const SizedBox(height: 16),
-        Row(
+        ActionsRow(
           children: [
             TextButton(
               style: TextButton.styleFrom(foregroundColor: muted),
               onPressed: _busy ? null : widget.onCancel,
               child: Text(l.commonCancel),
             ),
-            const Spacer(),
             if (!_keyChecked)
               FilledButton(
                 style: FilledButton.styleFrom(

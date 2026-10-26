@@ -203,8 +203,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                     ),
                     IconButton(
                       tooltip: l.settingsTitle,
-                      visualDensity: VisualDensity.compact,
-                      color: context.colors.encre.withValues(alpha: 0.5),
+                      color: context.colors.secondaire,
                       icon: const Icon(Icons.settings_outlined, size: 22),
                       onPressed: () => Navigator.of(context).push(
                         MaterialPageRoute<void>(
@@ -265,10 +264,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       Center(
         child: Text(
           _versionLine(l, status),
-          style: TextStyle(
-            fontSize: 13,
-            color: context.colors.encre.withValues(alpha: 0.5),
-          ),
+          style: TextStyle(fontSize: 13, color: context.colors.discret),
         ),
       ),
       const SizedBox(height: 40),

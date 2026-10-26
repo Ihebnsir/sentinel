@@ -5,6 +5,7 @@ import 'package:material_ui/material_ui.dart';
 import '../../l10n/l10n.dart';
 import '../../services/vault/vault_session.dart';
 import '../../theme/app_colors.dart';
+import '../../widgets/loading_bar.dart';
 import '../../widgets/vault_fields.dart';
 
 /// Déverrouillage : empreinte si elle est activée (Android), sinon mot
@@ -205,14 +206,7 @@ class _UnlockViewState extends State<UnlockView> {
             ),
           ),
         if (_opening)
-          Padding(
-            padding: EdgeInsets.only(top: 16),
-            child: LinearProgressIndicator(
-              minHeight: 2,
-              color: context.colors.bleu,
-              backgroundColor: context.colors.ligne,
-            ),
-          ),
+          const Padding(padding: EdgeInsets.only(top: 16), child: LoadingBar()),
         const SizedBox(height: 16),
         Align(
           alignment: Alignment.centerRight,

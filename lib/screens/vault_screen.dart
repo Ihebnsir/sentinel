@@ -127,32 +127,42 @@ class _VaultScreenState extends State<VaultScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Row(
+            // Wrap : avec une grande police, les boutons passent sous le
+            // titre au lieu de déborder.
+            Wrap(
+              alignment: WrapAlignment.spaceBetween,
+              crossAxisAlignment: WrapCrossAlignment.center,
               children: [
-                Text(
-                  l.navVault,
-                  style: TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.w600,
-                    color: context.colors.encre,
+                Semantics(
+                  header: true,
+                  child: Text(
+                    l.navVault,
+                    style: TextStyle(
+                      fontSize: 28,
+                      fontWeight: FontWeight.w600,
+                      color: context.colors.encre,
+                    ),
                   ),
                 ),
-                const Spacer(),
                 if (opened)
-                  IconButton(
-                    tooltip: l.vaultSettingsTitle,
-                    color: context.colors.bleu,
-                    icon: const Icon(Icons.settings_outlined),
-                    onPressed: _openSettings,
-                  ),
-                if (opened)
-                  TextButton.icon(
-                    style: TextButton.styleFrom(
-                      foregroundColor: context.colors.bleu,
-                    ),
-                    onPressed: _session.lock,
-                    icon: const Icon(Icons.lock_outline, size: 18),
-                    label: Text(l.vaultLock),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        tooltip: l.vaultSettingsTitle,
+                        color: context.colors.bleu,
+                        icon: const Icon(Icons.settings_outlined),
+                        onPressed: _openSettings,
+                      ),
+                      TextButton.icon(
+                        style: TextButton.styleFrom(
+                          foregroundColor: context.colors.bleu,
+                        ),
+                        onPressed: _session.lock,
+                        icon: const Icon(Icons.lock_outline, size: 18),
+                        label: Text(l.vaultLock),
+                      ),
+                    ],
                   ),
               ],
             ),

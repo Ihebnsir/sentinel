@@ -66,35 +66,41 @@ class _SwitchRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 12),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                    color: context.colors.encre,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(subtitle, style: _muted(context)),
-                if (warning != null) ...[
-                  const SizedBox(height: 2),
+      // MergeSemantics : TalkBack lit le texte avec l'interrupteur.
+      child: MergeSemantics(
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
                   Text(
-                    warning!,
-                    style: TextStyle(fontSize: 13, color: context.colors.ocre),
+                    title,
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                      color: context.colors.encre,
+                    ),
                   ),
+                  const SizedBox(height: 2),
+                  Text(subtitle, style: _muted(context)),
+                  if (warning != null) ...[
+                    const SizedBox(height: 2),
+                    Text(
+                      warning!,
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: context.colors.ocre,
+                      ),
+                    ),
+                  ],
                 ],
-              ],
+              ),
             ),
-          ),
-          const SizedBox(width: 12),
-          Switch(value: value, onChanged: onChanged),
-        ],
+            const SizedBox(width: 12),
+            Switch(value: value, onChanged: onChanged),
+          ],
+        ),
       ),
     );
   }

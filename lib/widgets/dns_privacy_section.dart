@@ -74,17 +74,23 @@ class UpstreamSection extends StatelessWidget {
           _divider,
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 8),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    l.upstreamAllowPlain,
-                    style: TextStyle(fontSize: 15, color: context.colors.encre),
+            // MergeSemantics : TalkBack lit le texte avec l'interrupteur.
+            child: MergeSemantics(
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      l.upstreamAllowPlain,
+                      style: TextStyle(
+                        fontSize: 15,
+                        color: context.colors.encre,
+                      ),
+                    ),
                   ),
-                ),
-                const SizedBox(width: 12),
-                Switch(value: plainAllowed, onChanged: onPlainChanged),
-              ],
+                  const SizedBox(width: 12),
+                  Switch(value: plainAllowed, onChanged: onPlainChanged),
+                ],
+              ),
             ),
           ),
         ],

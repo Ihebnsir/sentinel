@@ -9,6 +9,7 @@ import '../theme/app_colors.dart';
 import '../utils/debug_log.dart';
 import '../widgets/app_icon.dart';
 import '../widgets/empty_state.dart';
+import '../widgets/loading_bar.dart';
 import '../widgets/risk_level_text.dart';
 import 'app_detail_screen.dart';
 import 'spyware_advice_screen.dart';
@@ -218,19 +219,22 @@ class _AppsScreenState extends State<AppsScreen> with WidgetsBindingObserver {
         style: TextStyle(fontSize: 15, color: context.colors.secondaire),
       ),
       const SizedBox(height: 16),
-      Row(
-        children: [
-          Expanded(
-            child: Text(
-              l.appsShowSystem,
-              style: TextStyle(fontSize: 15, color: context.colors.encre),
+      // MergeSemantics : TalkBack lit le texte avec l'interrupteur.
+      MergeSemantics(
+        child: Row(
+          children: [
+            Expanded(
+              child: Text(
+                l.appsShowSystem,
+                style: TextStyle(fontSize: 15, color: context.colors.encre),
+              ),
             ),
-          ),
-          Switch(
-            value: _showSystemApps,
-            onChanged: (value) => setState(() => _showSystemApps = value),
-          ),
-        ],
+            Switch(
+              value: _showSystemApps,
+              onChanged: (value) => setState(() => _showSystemApps = value),
+            ),
+          ],
+        ),
       ),
       const SizedBox(height: 8),
       // Une ligne par app, avec un séparateur fin entre deux lignes.
@@ -346,11 +350,7 @@ class _ScanProgress extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          LinearProgressIndicator(
-            minHeight: 2,
-            color: context.colors.bleu,
-            backgroundColor: context.colors.ligne,
-          ),
+          const LoadingBar(),
           const SizedBox(height: 16),
           Text(
             context.l10n.appsScanning,

@@ -34,6 +34,8 @@ class AppIcon extends StatelessWidget {
               height: size,
               fit: BoxFit.cover,
               gaplessPlayback: true,
+              // Décorative : le nom de l'app est toujours écrit à côté.
+              excludeFromSemantics: true,
             ),
     );
   }

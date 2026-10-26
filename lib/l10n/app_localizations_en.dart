@@ -73,6 +73,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get commonOutOf100 => 'out of 100';
 
   @override
+  String get commonLoading => 'Loading';
+
+  @override
+  String scoreSemantics(int score) {
+    return 'Security score: $score out of 100';
+  }
+
+  @override
   String get navHome => 'Home';
 
   @override

@@ -62,7 +62,7 @@ class AppTheme {
         shadowColor: Colors.transparent,
         surfaceTintColor: Colors.transparent,
         // resolveWith choisit le style selon l'état (actif ou non) :
-        // bleu si l'onglet est actif, texte à 50 % sinon.
+        // bleu si l'onglet est actif, texte secondaire sinon (AA).
         iconTheme: WidgetStateProperty.resolveWith(
           (states) => IconThemeData(color: _navColor(c, states)),
         ),
@@ -76,7 +76,5 @@ class AppTheme {
       );
 
   static Color _navColor(AppColors c, Set<WidgetState> states) =>
-      states.contains(WidgetState.selected)
-      ? c.bleu
-      : c.encre.withValues(alpha: 0.5);
+      states.contains(WidgetState.selected) ? c.bleu : c.secondaire;
 }

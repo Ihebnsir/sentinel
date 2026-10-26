@@ -3,6 +3,7 @@ import 'package:material_ui/material_ui.dart';
 import '../l10n/l10n.dart';
 import '../services/protection_service.dart';
 import '../theme/app_colors.dart';
+import 'actions_row.dart';
 
 /// Ligne « Protection automatique » de l'onglet Messages.
 /// Le Switch reflète toujours l'état RÉEL lu côté Android.
@@ -104,31 +105,34 @@ class _AutoProtectionSectionState extends State<AutoProtectionSection> {
         Divider(height: 1, thickness: 1, color: context.colors.ligne),
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 12),
-          child: Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      l.autoProtectionTitle,
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
-                        color: context.colors.encre,
+          // MergeSemantics : TalkBack lit le texte avec l'interrupteur.
+          child: MergeSemantics(
+            child: Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        l.autoProtectionTitle,
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                          color: context.colors.encre,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      _statusSentence(l, status),
-                      style: TextStyle(fontSize: 13, color: muted),
-                    ),
-                  ],
+                      const SizedBox(height: 2),
+                      Text(
+                        _statusSentence(l, status),
+                        style: TextStyle(fontSize: 13, color: muted),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-              const SizedBox(width: 12),
-              Switch(value: active, onChanged: _onSwitch),
-            ],
+                const SizedBox(width: 12),
+                Switch(value: active, onChanged: _onSwitch),
+              ],
+            ),
           ),
         ),
         if (active && !status.notificationsAllowed)
@@ -221,7 +225,7 @@ class _ExplanationSheet extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 24),
-            Row(
+            ActionsRow(
               children: [
                 TextButton(
                   style: TextButton.styleFrom(
@@ -230,7 +234,6 @@ class _ExplanationSheet extends StatelessWidget {
                   onPressed: () => Navigator.of(context).pop(false),
                   child: Text(l.commonLater),
                 ),
-                const Spacer(),
                 FilledButton(
                   style: FilledButton.styleFrom(
                     backgroundColor: context.colors.bleu,

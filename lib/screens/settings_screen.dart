@@ -253,7 +253,7 @@ class _Row extends StatelessWidget {
               subtitle!,
               style: TextStyle(
                 fontSize: 13,
-                color: context.colors.encre.withValues(alpha: 0.5),
+                color: context.colors.discret,
               ),
             ),
       onTap: onTap,

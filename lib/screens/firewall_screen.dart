@@ -8,6 +8,7 @@ import '../services/firewall_service.dart';
 import '../services/protection_service.dart';
 import '../services/wifi_service.dart';
 import '../theme/app_colors.dart';
+import '../widgets/actions_row.dart';
 import '../widgets/app_analysis_section.dart';
 import '../widgets/blocklist_sections.dart';
 import '../widgets/dns_privacy_section.dart';
@@ -268,36 +269,39 @@ class _FirewallScreenState extends State<FirewallScreen> {
             Divider(height: 1, thickness: 1, color: context.colors.ligne),
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 12),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          l.firewallTitle,
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w500,
-                            color: context.colors.encre,
+              // MergeSemantics : TalkBack lit le texte avec l'interrupteur.
+              child: MergeSemantics(
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            l.firewallTitle,
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                              color: context.colors.encre,
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          status == null
-                              ? l.commonAndroidOnly
-                              : (active ? l.commonOn : l.commonOff),
-                          style: TextStyle(fontSize: 13, color: muted),
-                        ),
-                      ],
+                          const SizedBox(height: 2),
+                          Text(
+                            status == null
+                                ? l.commonAndroidOnly
+                                : (active ? l.commonOn : l.commonOff),
+                            style: TextStyle(fontSize: 13, color: muted),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 12),
-                  Switch(
-                    value: active,
-                    onChanged: status == null || _busy ? null : _onSwitch,
-                  ),
-                ],
+                    const SizedBox(width: 12),
+                    Switch(
+                      value: active,
+                      onChanged: status == null || _busy ? null : _onSwitch,
+                    ),
+                  ],
+                ),
               ),
             ),
             Divider(height: 1, thickness: 1, color: context.colors.ligne),
@@ -471,7 +475,7 @@ class _ExplanationSheet extends StatelessWidget {
               ),
             ],
             const SizedBox(height: 24),
-            Row(
+            ActionsRow(
               children: [
                 TextButton(
                   style: TextButton.styleFrom(
@@ -480,7 +484,6 @@ class _ExplanationSheet extends StatelessWidget {
                   onPressed: () => Navigator.of(context).pop(false),
                   child: Text(l.commonLater),
                 ),
-                const Spacer(),
                 FilledButton(
                   style: FilledButton.styleFrom(
                     backgroundColor: context.colors.bleu,
@@ -532,7 +535,7 @@ class _UpdateConsentSheet extends StatelessWidget {
               ),
             ],
             const SizedBox(height: 24),
-            Row(
+            ActionsRow(
               children: [
                 TextButton(
                   style: TextButton.styleFrom(
@@ -541,7 +544,6 @@ class _UpdateConsentSheet extends StatelessWidget {
                   onPressed: () => Navigator.of(context).pop(false),
                   child: Text(l.commonLater),
                 ),
-                const Spacer(),
                 FilledButton(
                   style: FilledButton.styleFrom(
                     backgroundColor: context.colors.bleu,

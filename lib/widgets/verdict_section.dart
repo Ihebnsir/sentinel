@@ -35,18 +35,31 @@ class VerdictSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SizedBox(height: 28),
-        Text(
-          verdict.label(l),
-          style: TextStyle(
-            fontSize: 28,
-            fontWeight: FontWeight.w600,
-            color: verdictColor(context.colors, verdict),
+        // liveRegion : TalkBack annonce le verdict dès qu'il s'affiche,
+        // titre et probabilité ensemble.
+        MergeSemantics(
+          child: Semantics(
+            liveRegion: true,
+            header: true,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  verdict.label(l),
+                  style: TextStyle(
+                    fontSize: 28,
+                    fontWeight: FontWeight.w600,
+                    color: verdictColor(context.colors, verdict),
+                  ),
+                ),
+                if (subtitle != null) ...[
+                  const SizedBox(height: 4),
+                  Text(subtitle!, style: TextStyle(fontSize: 15, color: muted)),
+                ],
+              ],
+            ),
           ),
         ),
-        if (subtitle != null) ...[
-          const SizedBox(height: 4),
-          Text(subtitle!, style: TextStyle(fontSize: 15, color: muted)),
-        ],
         const SizedBox(height: 12),
         for (final reason in reasons) ...[
           Divider(height: 1, thickness: 1, color: context.colors.ligne),

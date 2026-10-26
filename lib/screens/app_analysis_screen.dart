@@ -6,6 +6,7 @@ import '../services/app_analysis.dart';
 import '../services/apps_scanner_service.dart';
 import '../services/firewall_service.dart';
 import '../theme/app_colors.dart';
+import '../widgets/actions_row.dart';
 import '../widgets/app_icon.dart';
 
 // Couleur : celle du thème (dividerTheme, ligne fine).
@@ -119,9 +120,13 @@ class _AppAnalysisScreenState extends State<AppAnalysisScreen> {
                 child: Text(l.analysisListFailed, style: muted),
               )
             else if (apps == null || _starting)
-              const Padding(
-                padding: EdgeInsets.symmetric(vertical: 48),
-                child: Center(child: CircularProgressIndicator()),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 48),
+                child: Center(
+                  child: CircularProgressIndicator(
+                    semanticsLabel: l.commonLoading,
+                  ),
+                ),
               )
             else if (apps.isEmpty)
               Padding(
@@ -246,7 +251,7 @@ class _AnalysisSheetState extends State<_AnalysisSheet> {
               ),
             ],
             const SizedBox(height: 24),
-            Row(
+            ActionsRow(
               children: [
                 TextButton(
                   style: TextButton.styleFrom(
@@ -255,7 +260,6 @@ class _AnalysisSheetState extends State<_AnalysisSheet> {
                   onPressed: () => Navigator.of(context).pop(),
                   child: Text(l.commonCancel),
                 ),
-                const Spacer(),
                 FilledButton(
                   style: FilledButton.styleFrom(
                     backgroundColor: context.colors.bleu,

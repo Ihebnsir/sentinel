@@ -91,6 +91,7 @@ Diagrams and details: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 - password health and the password generator;
 - the Android bridges (firewall, protection, apps, biometrics, shared text): arguments sent, and every error code Android can return;
 - the themes: WCAG contrast of the main color pairs, and the main screens rendered in dark mode;
+- accessibility: 48 dp tap targets, TalkBack labels, AA contrast and 200 % font size without overflow on 19 screens (see [docs/ACCESSIBILITE.md](docs/ACCESSIBILITE.md), in French);
 - QR codes: parsing of every supported format (link, `WIFI:`, `tel:`, `sms:`, payments, text), the security decisions, and that nothing opens without confirmation.
 
 Network and biometrics are replaced by test doubles, so the tests run offline.

@@ -91,6 +91,7 @@ Schémas et détails : [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) (en anglais)
 - le bilan de santé des mots de passe et le générateur ;
 - les ponts vers Android (pare-feu, protection, applications, biométrie, texte partagé) : arguments envoyés et chaque code d'erreur qu'Android peut renvoyer ;
 - les thèmes : contraste WCAG des principales paires de couleurs, et écrans principaux affichés en sombre ;
+- l'accessibilité : zones tactiles de 48 dp, libellés TalkBack, contraste AA et police à 200 % sans débordement sur 19 écrans (voir [docs/ACCESSIBILITE.md](docs/ACCESSIBILITE.md)) ;
 - les QR codes : lecture de chaque format (lien, `WIFI:`, `tel:`, `sms:`, paiements, texte), décisions de sécurité, et rien ne s'ouvre sans confirmation.
 
 Le réseau et la biométrie sont remplacés par des doublures de test : les tests tournent hors ligne.

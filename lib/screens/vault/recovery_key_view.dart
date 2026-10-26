@@ -4,6 +4,7 @@ import '../../l10n/l10n.dart';
 import '../../services/vault/recovery_key.dart';
 import '../../services/vault/vault_platform.dart';
 import '../../theme/app_colors.dart';
+import '../../widgets/actions_row.dart';
 import '../../widgets/vault_copy.dart';
 import '../../widgets/vault_fields.dart';
 
@@ -200,14 +201,13 @@ class _RecoveryKeyOfferViewState extends State<RecoveryKeyOfferView> {
           style: TextStyle(fontSize: 15, color: muted),
         ),
         const SizedBox(height: 24),
-        Row(
+        ActionsRow(
           children: [
             TextButton(
               style: TextButton.styleFrom(foregroundColor: muted),
               onPressed: _creating ? null : widget.onLater,
               child: Text(l.commonLater),
             ),
-            const Spacer(),
             FilledButton(
               style: FilledButton.styleFrom(
                 backgroundColor: context.colors.bleu,
