@@ -333,7 +333,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get privacyNever1 =>
-      'نص الرسائل التي يتم تحليلها (الملصوقة أو المشارَكة أو المقروءة من الإشعارات): يُحلَّل في الذاكرة ثم يُنسى.';
+      'نص الرسائل ورموز QR التي يتم تحليلها (الملصوقة أو المشارَكة أو الممسوحة أو المقروءة من الإشعارات): يُحلَّل في الذاكرة ثم يُنسى. لا تُحفظ صورة الكاميرا أبدًا.';
 
   @override
   String get privacyNever2 =>
@@ -365,6 +365,10 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get privacyPermissions5 =>
       'البصمة: فقط إذا اخترت فتح الخزنة دون كتابة كلمة مرورك الرئيسية.';
+
+  @override
+  String get privacyPermissions6 =>
+      'الكاميرا: تُطلب عند الضغط على «مسح رمز QR»، فقط لقراءة الرمز، على الهاتف.';
 
   @override
   String get privacyEraseTitle => 'محو بياناتك';
@@ -2302,4 +2306,166 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get exportButton => 'تصدير';
+
+  @override
+  String get qrScanButton => 'مسح رمز QR';
+
+  @override
+  String get qrScanSubtitle =>
+      'تحقّق من رمز QR (ملصق، عدّاد وقوف، طرد) قبل فتحه';
+
+  @override
+  String get qrScanPrompt => 'ضع رمز QR داخل الإطار. لا يُفتح أي شيء تلقائيًا.';
+
+  @override
+  String get qrCameraTitle => 'السماح باستخدام الكاميرا؟';
+
+  @override
+  String get qrCameraText =>
+      'يستخدم Sentinel الكاميرا أثناء المسح فقط، لقراءة رمز QR. لا تُحفظ الصورة ولا تُرسل: كل شيء يبقى على الهاتف.';
+
+  @override
+  String get qrOpenSettings => 'الإعدادات';
+
+  @override
+  String get qrErrorNoCamera => 'لا توجد كاميرا متاحة على هذا الهاتف.';
+
+  @override
+  String get qrErrorPermissionDenied =>
+      'بدون الكاميرا، لا يستطيع Sentinel قراءة رمز QR.';
+
+  @override
+  String get qrErrorPermissionBlocked =>
+      'الكاميرا مرفوضة لـ Sentinel. اسمح بها من إعدادات أندرويد.';
+
+  @override
+  String get qrErrorFailed => 'فشل المسح. أعد المحاولة.';
+
+  @override
+  String get qrResultTitle => 'رمز QR الممسوح';
+
+  @override
+  String get qrRawContent => 'المحتوى الخام';
+
+  @override
+  String get qrEmpty => '(رمز QR فارغ)';
+
+  @override
+  String get qrKindLink => 'رابط';
+
+  @override
+  String get qrKindUnsafeLink => 'رابط من نوع خطير';
+
+  @override
+  String get qrKindWifi => 'شبكة Wi-Fi';
+
+  @override
+  String get qrKindPhone => 'رقم هاتف';
+
+  @override
+  String get qrKindSms => 'رسالة SMS للإرسال';
+
+  @override
+  String get qrKindPayment => 'طلب دفع';
+
+  @override
+  String get qrKindText => 'نص';
+
+  @override
+  String get qrWifiName => 'الشبكة';
+
+  @override
+  String get qrWifiSecurity => 'الحماية';
+
+  @override
+  String get qrWifiPassword => 'كلمة المرور';
+
+  @override
+  String get qrWifiPasswordYes => 'موجودة في رمز QR';
+
+  @override
+  String get qrWifiPasswordNo => 'لا توجد';
+
+  @override
+  String get qrPhoneNumber => 'الرقم';
+
+  @override
+  String get qrSmsRecipient => 'المستلم';
+
+  @override
+  String get qrSmsText => 'نص الرسالة';
+
+  @override
+  String get qrPaymentRecipient => 'المستفيد';
+
+  @override
+  String get qrPaymentAmount => 'المبلغ';
+
+  @override
+  String get qrNotSpecified => 'غير محدد';
+
+  @override
+  String get qrWarningUnsafeLink =>
+      'يحتوي رمز QR هذا على رابط قد يشغّل برمجية أو يفتح ملفًا، وليس صفحة ويب. لن يفتحه Sentinel.';
+
+  @override
+  String get qrWarningUssd =>
+      'يحتوي الرقم على * أو #: إنه رمز قد يغيّر إعدادات الهاتف (تحويل المكالمات، المسح). لا تطلبه.';
+
+  @override
+  String get qrWarningShortNumber =>
+      'رقم قصير: قد تكون رسالة إلى هذا النوع من الأرقام مكلفة أو تشترك بك في خدمة مدفوعة.';
+
+  @override
+  String get qrWarningPayment =>
+      'غالبًا ما تُلصق رموز دفع مزيفة فوق الرموز الحقيقية (عدّادات الوقوف، الملصقات). تحقّق من المستفيد والمبلغ قبل الدفع.';
+
+  @override
+  String get qrWarningWifiOpen =>
+      'شبكة مفتوحة: بدون كلمة مرور، يمكن للآخرين قراءة كل ما يُرسل دون تشفير.';
+
+  @override
+  String get qrWarningWifiWep => 'حماية WEP: يمكن كسرها في دقائق.';
+
+  @override
+  String get qrActionOpenLink => 'فتح الرابط';
+
+  @override
+  String get qrActionOpenAnyway => 'الفتح رغم ذلك';
+
+  @override
+  String get qrActionCall => 'الاتصال بهذا الرقم';
+
+  @override
+  String get qrActionSms => 'تحضير الرسالة';
+
+  @override
+  String get qrActionPayment => 'الفتح في تطبيق دفع';
+
+  @override
+  String get qrActionBlocked => 'حظره Sentinel: احتيال محتمل.';
+
+  @override
+  String get qrActionFailed =>
+      'تعذّر الفتح: لا يوجد تطبيق مناسب أو المحتوى مرفوض.';
+
+  @override
+  String qrConfirmLink(String url) {
+    return 'لا تُدخل أي رمز أو كلمة مرور إذا طلبتها الصفحة. الرابط الذي سيُفتح في المتصفح: $url';
+  }
+
+  @override
+  String qrConfirmCall(String number) {
+    return 'يفتح الهاتف شاشة الاتصال بالرقم $number. لا تبدأ المكالمة إلا إذا ضغطت على اتصال.';
+  }
+
+  @override
+  String qrConfirmSms(String number) {
+    return 'يُفتح تطبيق الرسائل برسالة إلى $number. لا يُرسل شيء حتى تضغط على إرسال.';
+  }
+
+  @override
+  String qrConfirmPayment(String recipient) {
+    return 'سيُفتح تطبيق دفع لـ: $recipient. تحقّق من المستفيد والمبلغ قبل التأكيد.';
+  }
 }

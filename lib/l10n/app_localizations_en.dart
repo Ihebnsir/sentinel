@@ -336,7 +336,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get privacyNever1 =>
-      'The text of analyzed messages (pasted, shared or read from notifications): it is analyzed in memory and then forgotten.';
+      'The text of analyzed messages and QR codes (pasted, shared, scanned or read from notifications): it is analyzed in memory and then forgotten. The camera image is never saved.';
 
   @override
   String get privacyNever2 =>
@@ -368,6 +368,10 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get privacyPermissions5 =>
       'Biometrics: only if you choose to unlock the vault without typing your master password.';
+
+  @override
+  String get privacyPermissions6 =>
+      'Camera: requested when you tap “Scan a QR code”, only to read the QR code, on the phone.';
 
   @override
   String get privacyEraseTitle => 'Erasing your data';
@@ -2248,4 +2252,168 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get exportButton => 'Export';
+
+  @override
+  String get qrScanButton => 'Scan a QR code';
+
+  @override
+  String get qrScanSubtitle =>
+      'Check a QR code (poster, parking meter, parcel) before opening it';
+
+  @override
+  String get qrScanPrompt =>
+      'Place the QR code inside the frame. Nothing opens on its own.';
+
+  @override
+  String get qrCameraTitle => 'Allow the camera?';
+
+  @override
+  String get qrCameraText =>
+      'Sentinel only uses the camera during the scan, to read the QR code. The image is neither saved nor sent: everything stays on the phone.';
+
+  @override
+  String get qrOpenSettings => 'Settings';
+
+  @override
+  String get qrErrorNoCamera => 'No camera available on this phone.';
+
+  @override
+  String get qrErrorPermissionDenied =>
+      'Without the camera, Sentinel cannot read the QR code.';
+
+  @override
+  String get qrErrorPermissionBlocked =>
+      'Camera access is denied for Sentinel. Allow it in the Android settings.';
+
+  @override
+  String get qrErrorFailed => 'The scan failed. Try again.';
+
+  @override
+  String get qrResultTitle => 'Scanned QR code';
+
+  @override
+  String get qrRawContent => 'Raw content';
+
+  @override
+  String get qrEmpty => '(empty QR code)';
+
+  @override
+  String get qrKindLink => 'Link';
+
+  @override
+  String get qrKindUnsafeLink => 'Dangerous type of link';
+
+  @override
+  String get qrKindWifi => 'Wi-Fi network';
+
+  @override
+  String get qrKindPhone => 'Phone number';
+
+  @override
+  String get qrKindSms => 'Text message to send';
+
+  @override
+  String get qrKindPayment => 'Payment request';
+
+  @override
+  String get qrKindText => 'Text';
+
+  @override
+  String get qrWifiName => 'Network';
+
+  @override
+  String get qrWifiSecurity => 'Protection';
+
+  @override
+  String get qrWifiPassword => 'Password';
+
+  @override
+  String get qrWifiPasswordYes => 'Included in the QR code';
+
+  @override
+  String get qrWifiPasswordNo => 'None';
+
+  @override
+  String get qrPhoneNumber => 'Number';
+
+  @override
+  String get qrSmsRecipient => 'Recipient';
+
+  @override
+  String get qrSmsText => 'Message text';
+
+  @override
+  String get qrPaymentRecipient => 'Payee';
+
+  @override
+  String get qrPaymentAmount => 'Amount';
+
+  @override
+  String get qrNotSpecified => 'Not specified';
+
+  @override
+  String get qrWarningUnsafeLink =>
+      'This QR code contains a link that can run code or open a file, not a web page. Sentinel will not open it.';
+
+  @override
+  String get qrWarningUssd =>
+      'The number contains * or #: it is a code that can change phone settings (call forwarding, wiping). Do not dial it.';
+
+  @override
+  String get qrWarningShortNumber =>
+      'Short number: a text to this kind of number may be charged extra or subscribe you to a paid service.';
+
+  @override
+  String get qrWarningPayment =>
+      'Fake payment QR codes are often stuck over real ones (parking meters, posters). Check the payee and the amount before paying.';
+
+  @override
+  String get qrWarningWifiOpen =>
+      'Open network: without a password, anything sent unencrypted can be read by others.';
+
+  @override
+  String get qrWarningWifiWep =>
+      'WEP protection: it can be broken in a few minutes.';
+
+  @override
+  String get qrActionOpenLink => 'Open the link';
+
+  @override
+  String get qrActionOpenAnyway => 'Open anyway';
+
+  @override
+  String get qrActionCall => 'Call this number';
+
+  @override
+  String get qrActionSms => 'Prepare the text message';
+
+  @override
+  String get qrActionPayment => 'Open in a payment app';
+
+  @override
+  String get qrActionBlocked => 'Blocked by Sentinel: likely scam.';
+
+  @override
+  String get qrActionFailed =>
+      'Cannot open: no compatible app, or content refused.';
+
+  @override
+  String qrConfirmLink(String url) {
+    return 'Do not enter any code or password if the page asks for one. Link that will open in your browser: $url';
+  }
+
+  @override
+  String qrConfirmCall(String number) {
+    return 'The phone opens the call screen with $number. The call only starts if you press Call.';
+  }
+
+  @override
+  String qrConfirmSms(String number) {
+    return 'Your messaging app opens with a message to $number. Nothing is sent until you press Send.';
+  }
+
+  @override
+  String qrConfirmPayment(String recipient) {
+    return 'A payment app will open for: $recipient. Check the payee and the amount before confirming.';
+  }
 }

@@ -343,7 +343,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get privacyNever1 =>
-      'Le texte des messages analysés (collés, partagés ou lus dans les notifications) : il est analysé en mémoire puis oublié.';
+      'Le texte des messages et des QR codes analysés (collés, partagés, scannés ou lus dans les notifications) : il est analysé en mémoire puis oublié. L\'image de la caméra n\'est jamais enregistrée.';
 
   @override
   String get privacyNever2 =>
@@ -375,6 +375,10 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get privacyPermissions5 =>
       'Biométrie : seulement si vous choisissez de déverrouiller le coffre sans taper votre mot de passe maître.';
+
+  @override
+  String get privacyPermissions6 =>
+      'Caméra : demandée quand vous touchez « Scanner un QR code », seulement pour lire le QR code, sur le téléphone.';
 
   @override
   String get privacyEraseTitle => 'Effacer vos données';
@@ -2277,4 +2281,168 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get exportButton => 'Exporter';
+
+  @override
+  String get qrScanButton => 'Scanner un QR code';
+
+  @override
+  String get qrScanSubtitle =>
+      'Vérifier un QR code (affiche, parcmètre, colis) avant de l\'ouvrir';
+
+  @override
+  String get qrScanPrompt =>
+      'Placez le QR code dans le cadre. Rien ne s\'ouvre tout seul.';
+
+  @override
+  String get qrCameraTitle => 'Autoriser la caméra ?';
+
+  @override
+  String get qrCameraText =>
+      'Sentinel utilise la caméra seulement pendant le scan, pour lire le QR code. L\'image n\'est ni enregistrée ni envoyée : tout reste sur le téléphone.';
+
+  @override
+  String get qrOpenSettings => 'Réglages';
+
+  @override
+  String get qrErrorNoCamera => 'Aucune caméra disponible sur ce téléphone.';
+
+  @override
+  String get qrErrorPermissionDenied =>
+      'Sans la caméra, Sentinel ne peut pas lire le QR code.';
+
+  @override
+  String get qrErrorPermissionBlocked =>
+      'La caméra est refusée pour Sentinel. Autorisez-la dans les réglages d\'Android.';
+
+  @override
+  String get qrErrorFailed => 'Le scan a échoué. Réessayez.';
+
+  @override
+  String get qrResultTitle => 'QR code scanné';
+
+  @override
+  String get qrRawContent => 'Contenu brut';
+
+  @override
+  String get qrEmpty => '(QR code vide)';
+
+  @override
+  String get qrKindLink => 'Lien';
+
+  @override
+  String get qrKindUnsafeLink => 'Lien d\'un type dangereux';
+
+  @override
+  String get qrKindWifi => 'Réseau Wi-Fi';
+
+  @override
+  String get qrKindPhone => 'Numéro de téléphone';
+
+  @override
+  String get qrKindSms => 'SMS à envoyer';
+
+  @override
+  String get qrKindPayment => 'Demande de paiement';
+
+  @override
+  String get qrKindText => 'Texte';
+
+  @override
+  String get qrWifiName => 'Réseau';
+
+  @override
+  String get qrWifiSecurity => 'Protection';
+
+  @override
+  String get qrWifiPassword => 'Mot de passe';
+
+  @override
+  String get qrWifiPasswordYes => 'Inclus dans le QR code';
+
+  @override
+  String get qrWifiPasswordNo => 'Aucun';
+
+  @override
+  String get qrPhoneNumber => 'Numéro';
+
+  @override
+  String get qrSmsRecipient => 'Destinataire';
+
+  @override
+  String get qrSmsText => 'Texte du SMS';
+
+  @override
+  String get qrPaymentRecipient => 'Bénéficiaire';
+
+  @override
+  String get qrPaymentAmount => 'Montant';
+
+  @override
+  String get qrNotSpecified => 'Non indiqué';
+
+  @override
+  String get qrWarningUnsafeLink =>
+      'Ce QR code contient un lien qui peut lancer du code ou ouvrir un fichier, pas une page web. Sentinel ne l\'ouvrira pas.';
+
+  @override
+  String get qrWarningUssd =>
+      'Le numéro contient * ou # : c\'est un code qui peut changer les réglages du téléphone (renvoi d\'appel, effacement). Ne le composez pas.';
+
+  @override
+  String get qrWarningShortNumber =>
+      'Numéro court : un SMS vers ce type de numéro peut être surtaxé ou vous abonner à un service payant.';
+
+  @override
+  String get qrWarningPayment =>
+      'Les faux QR codes de paiement sont souvent collés par-dessus les vrais (parcmètres, affiches). Vérifiez le bénéficiaire et le montant avant de payer.';
+
+  @override
+  String get qrWarningWifiOpen =>
+      'Réseau ouvert : sans mot de passe, tout ce qui passe en clair peut être lu par les autres.';
+
+  @override
+  String get qrWarningWifiWep =>
+      'Protection WEP : elle se casse en quelques minutes.';
+
+  @override
+  String get qrActionOpenLink => 'Ouvrir le lien';
+
+  @override
+  String get qrActionOpenAnyway => 'Ouvrir quand même';
+
+  @override
+  String get qrActionCall => 'Appeler ce numéro';
+
+  @override
+  String get qrActionSms => 'Préparer le SMS';
+
+  @override
+  String get qrActionPayment => 'Ouvrir dans une app de paiement';
+
+  @override
+  String get qrActionBlocked => 'Bloqué par Sentinel : arnaque probable.';
+
+  @override
+  String get qrActionFailed =>
+      'Impossible d\'ouvrir : aucune app compatible ou contenu refusé.';
+
+  @override
+  String qrConfirmLink(String url) {
+    return 'Ne saisissez aucun code ni mot de passe si la page vous le demande. Lien qui va s\'ouvrir dans votre navigateur : $url';
+  }
+
+  @override
+  String qrConfirmCall(String number) {
+    return 'Le téléphone ouvre l\'écran d\'appel avec le $number. L\'appel ne part que si vous appuyez sur Appeler.';
+  }
+
+  @override
+  String qrConfirmSms(String number) {
+    return 'Votre app SMS s\'ouvre avec un message pour le $number. Rien n\'est envoyé tant que vous n\'appuyez pas sur Envoyer.';
+  }
+
+  @override
+  String qrConfirmPayment(String recipient) {
+    return 'Une app de paiement va s\'ouvrir pour : $recipient. Vérifiez le bénéficiaire et le montant avant de valider.';
+  }
 }

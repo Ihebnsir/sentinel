@@ -55,6 +55,9 @@ class MainActivity : FlutterActivity() {
     // Pare-feu DNS (VpnService).
     private var firewall: FirewallChannel? = null
 
+    // Scanner de QR code (onglet Messages).
+    private var qrScanner: QrScanner? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         // savedInstanceState != null : l'app est recréée (rotation, retour
@@ -79,6 +82,7 @@ class MainActivity : FlutterActivity() {
         vaultProtection = VaultProtection(this, flutterEngine.dartExecutor.binaryMessenger)
         wifiChecker = WifiSecurityChecker(this, flutterEngine.dartExecutor.binaryMessenger)
         firewall = FirewallChannel(this, flutterEngine.dartExecutor.binaryMessenger)
+        qrScanner = QrScanner(this, flutterEngine.dartExecutor.binaryMessenger)
 
         shareChannel = MethodChannel(flutterEngine.dartExecutor.binaryMessenger, shareChannelName)
             .apply {
@@ -176,12 +180,16 @@ class MainActivity : FlutterActivity() {
         wifiChecker = null
         firewall?.dispose()
         firewall = null
+        qrScanner?.dispose()
+        qrScanner = null
         super.cleanUpFlutterEngine(flutterEngine)
     }
 
-    // Réponse de l'écran de consentement VPN ou du sélecteur de fichiers.
+    // Réponse de l'écran de consentement VPN, du sélecteur de fichiers
+    // ou du scanner de QR code.
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if (firewall?.onActivityResult(requestCode, resultCode) == true) return
+        if (qrScanner?.onActivityResult(requestCode, resultCode, data) == true) return
         if (vaultProtection?.onActivityResult(requestCode, resultCode, data) == true) return
         super.onActivityResult(requestCode, resultCode, data)
     }
@@ -234,6 +242,7 @@ class MainActivity : FlutterActivity() {
         grantResults: IntArray,
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (qrScanner?.onRequestPermissionsResult(requestCode, grantResults) == true) return
         if (requestCode != REQUEST_NOTIFICATIONS) return
         pendingPermissionResult?.success(ProtectionSettings.notificationsAllowed(this))
         pendingPermissionResult = null

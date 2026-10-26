@@ -119,6 +119,12 @@ dependencies {
         implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:2.4.0")
     }
 
+    // Lecture des QR codes (Messages > Scanner un QR code). Apache 2.0.
+    // Décodage ZXing sur le téléphone : ni réseau, ni modèle téléchargé.
+    // ZXing core 3.5.3 (dernière version) au lieu du 3.4.1 tiré par défaut.
+    implementation("com.journeyapps:zxing-android-embedded:4.3.0")
+    implementation("com.google.zxing:core:3.5.3")
+
     // Tests unitaires JVM du pare-feu DNS (./gradlew testDebugUnitTest).
     testImplementation("junit:junit:4.13.2")
     // Vrai org.json pour les tests JVM (celui d'Android n'y existe pas).

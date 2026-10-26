@@ -32,6 +32,7 @@ List<TextSection> privacySections(AppLocalizations l) => [
     l.privacyPermissions3,
     l.privacyPermissions4,
     l.privacyPermissions5,
+    l.privacyPermissions6,
   ]),
   TextSection(l.privacyEraseTitle, [l.privacyErase1]),
 ];

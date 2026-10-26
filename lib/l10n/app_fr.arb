@@ -156,7 +156,7 @@
   "privacyLocal4": "Les rapports « Analyser une application » : la liste des sites contactés par l'application choisie, effacés au plus tard 24 h après l'analyse.",
   "privacyLocal5": "La sauvegarde Android est désactivée : rien ne part dans le cloud. Une sauvegarde du coffre (fichier .sentinel chiffré) n'est créée que si vous la demandez, à l'endroit que vous choisissez.",
   "privacyNeverTitle": "Ce que Sentinel n'enregistre jamais",
-  "privacyNever1": "Le texte des messages analysés (collés, partagés ou lus dans les notifications) : il est analysé en mémoire puis oublié.",
+  "privacyNever1": "Le texte des messages et des QR codes analysés (collés, partagés, scannés ou lus dans les notifications) : il est analysé en mémoire puis oublié. L'image de la caméra n'est jamais enregistrée.",
   "privacyNever2": "Votre historique de navigation : le pare-feu ne garde que des compteurs, jamais un nom de site (sauf pendant une analyse d'application que vous lancez).",
   "privacyNever3": "Le nom du Wi-Fi et votre position : Sentinel ne demande pas la localisation.",
   "privacyPermissionsTitle": "Les autorisations",
@@ -165,6 +165,7 @@
   "privacyPermissions3": "Accès aux notifications : réglage Android que vous ouvrez vous-même pour la protection automatique ; Sentinel lit les messages reçus pour y chercher des arnaques.",
   "privacyPermissions4": "VPN : demandé quand vous activez le pare-feu. Il ne capte que le DNS, pas le reste du trafic.",
   "privacyPermissions5": "Biométrie : seulement si vous choisissez de déverrouiller le coffre sans taper votre mot de passe maître.",
+  "privacyPermissions6": "Caméra : demandée quand vous touchez « Scanner un QR code », seulement pour lire le QR code, sur le téléphone.",
   "privacyEraseTitle": "Effacer vos données",
   "privacyErase1": "Désinstaller Sentinel efface tout ce qu'il a enregistré sur le téléphone. Il n'existe aucune copie ailleurs.",
   "auditFrameTitle": "Le cadre",
@@ -1442,5 +1443,85 @@
   "exportStore": "Rangez le fichier où vous voulez (Drive, clé USB, ordinateur) et ne le perdez pas avec son mot de passe.",
   "exportPasswordLabel": "Mot de passe d'export",
   "exportEncrypting": "Chiffrement…",
-  "exportButton": "Exporter"
+  "exportButton": "Exporter",
+  "qrScanButton": "Scanner un QR code",
+  "qrScanSubtitle": "Vérifier un QR code (affiche, parcmètre, colis) avant de l'ouvrir",
+  "qrScanPrompt": "Placez le QR code dans le cadre. Rien ne s'ouvre tout seul.",
+  "qrCameraTitle": "Autoriser la caméra ?",
+  "qrCameraText": "Sentinel utilise la caméra seulement pendant le scan, pour lire le QR code. L'image n'est ni enregistrée ni envoyée : tout reste sur le téléphone.",
+  "qrOpenSettings": "Réglages",
+  "qrErrorNoCamera": "Aucune caméra disponible sur ce téléphone.",
+  "qrErrorPermissionDenied": "Sans la caméra, Sentinel ne peut pas lire le QR code.",
+  "qrErrorPermissionBlocked": "La caméra est refusée pour Sentinel. Autorisez-la dans les réglages d'Android.",
+  "qrErrorFailed": "Le scan a échoué. Réessayez.",
+  "qrResultTitle": "QR code scanné",
+  "qrRawContent": "Contenu brut",
+  "qrEmpty": "(QR code vide)",
+  "qrKindLink": "Lien",
+  "qrKindUnsafeLink": "Lien d'un type dangereux",
+  "qrKindWifi": "Réseau Wi-Fi",
+  "qrKindPhone": "Numéro de téléphone",
+  "qrKindSms": "SMS à envoyer",
+  "qrKindPayment": "Demande de paiement",
+  "qrKindText": "Texte",
+  "qrWifiName": "Réseau",
+  "qrWifiSecurity": "Protection",
+  "qrWifiPassword": "Mot de passe",
+  "qrWifiPasswordYes": "Inclus dans le QR code",
+  "qrWifiPasswordNo": "Aucun",
+  "qrPhoneNumber": "Numéro",
+  "qrSmsRecipient": "Destinataire",
+  "qrSmsText": "Texte du SMS",
+  "qrPaymentRecipient": "Bénéficiaire",
+  "qrPaymentAmount": "Montant",
+  "qrNotSpecified": "Non indiqué",
+  "qrWarningUnsafeLink": "Ce QR code contient un lien qui peut lancer du code ou ouvrir un fichier, pas une page web. Sentinel ne l'ouvrira pas.",
+  "qrWarningUssd": "Le numéro contient * ou # : c'est un code qui peut changer les réglages du téléphone (renvoi d'appel, effacement). Ne le composez pas.",
+  "qrWarningShortNumber": "Numéro court : un SMS vers ce type de numéro peut être surtaxé ou vous abonner à un service payant.",
+  "qrWarningPayment": "Les faux QR codes de paiement sont souvent collés par-dessus les vrais (parcmètres, affiches). Vérifiez le bénéficiaire et le montant avant de payer.",
+  "qrWarningWifiOpen": "Réseau ouvert : sans mot de passe, tout ce qui passe en clair peut être lu par les autres.",
+  "qrWarningWifiWep": "Protection WEP : elle se casse en quelques minutes.",
+  "qrActionOpenLink": "Ouvrir le lien",
+  "qrActionOpenAnyway": "Ouvrir quand même",
+  "qrActionCall": "Appeler ce numéro",
+  "qrActionSms": "Préparer le SMS",
+  "qrActionPayment": "Ouvrir dans une app de paiement",
+  "qrActionBlocked": "Bloqué par Sentinel : arnaque probable.",
+  "qrActionFailed": "Impossible d'ouvrir : aucune app compatible ou contenu refusé.",
+  "qrConfirmLink": "Ne saisissez aucun code ni mot de passe si la page vous le demande. Lien qui va s'ouvrir dans votre navigateur : {url}",
+  "@qrConfirmLink": {
+    "placeholders": {
+      "url": {
+        "type": "String",
+        "description": "Le lien scanné"
+      }
+    }
+  },
+  "qrConfirmCall": "Le téléphone ouvre l'écran d'appel avec le {number}. L'appel ne part que si vous appuyez sur Appeler.",
+  "@qrConfirmCall": {
+    "placeholders": {
+      "number": {
+        "type": "String",
+        "description": "Le numéro de téléphone scanné"
+      }
+    }
+  },
+  "qrConfirmSms": "Votre app SMS s'ouvre avec un message pour le {number}. Rien n'est envoyé tant que vous n'appuyez pas sur Envoyer.",
+  "@qrConfirmSms": {
+    "placeholders": {
+      "number": {
+        "type": "String",
+        "description": "Le numéro de téléphone scanné"
+      }
+    }
+  },
+  "qrConfirmPayment": "Une app de paiement va s'ouvrir pour : {recipient}. Vérifiez le bénéficiaire et le montant avant de valider.",
+  "@qrConfirmPayment": {
+    "placeholders": {
+      "recipient": {
+        "type": "String",
+        "description": "Nom, IBAN ou adresse du bénéficiaire"
+      }
+    }
+  }
 }

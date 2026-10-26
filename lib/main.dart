@@ -21,6 +21,7 @@ Future<void> main() async {
   LicenseRegistry.addLicense(readexProLicense);
   LicenseRegistry.addLicense(blocklistsLicense);
   LicenseRegistry.addLicense(stalkerwareLicense);
+  LicenseRegistry.addLicense(zxingLicense);
   WidgetsFlutterBinding.ensureInitialized();
   // Noms des mois en anglais et en arabe (données dans l'app).
   await initializeDateFormatting();
@@ -53,6 +54,20 @@ Stream<LicenseEntry> stalkerwareLicense() async* {
   yield LicenseEntryWithLineBreaks([
     'Stalkerware Indicators (Echap)',
   ], '${json['attribution']}\n\n${json['license']} : ${json['licenseUrl']}');
+}
+
+/// Lecteur de QR code côté Android (Kotlin), absent des licences Dart.
+Stream<LicenseEntry> zxingLicense() async* {
+  yield const LicenseEntryWithLineBreaks(
+    ['ZXing (zxing-android-embedded 4.3.0, core 3.5.3)'],
+    'Copyright (C) 2008 ZXing authors, Copyright (C) 2012-2021 JourneyApps.\n\n'
+    'Licensed under the Apache License, Version 2.0. '
+    'You may obtain a copy of the License at '
+    'https://www.apache.org/licenses/LICENSE-2.0\n\n'
+    'Unless required by applicable law or agreed to in writing, software '
+    'distributed under the License is distributed on an "AS IS" BASIS, '
+    'WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND.',
+  );
 }
 
 /// Le widget racine : il configure le thème, la langue et l'écran de départ.

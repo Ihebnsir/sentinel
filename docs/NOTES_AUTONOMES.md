@@ -71,3 +71,45 @@ Choix faits sans demander :
 - **Script de résumé** : `tools/coverage/coverage_summary.dart`, en Dart (déjà installé en CI, rien à ajouter), plutôt que `lcov`/`genhtml` ou un service comme Codecov/Coveralls. Il affiche un tableau Markdown du moins au plus couvert, l'ajoute au résumé GitHub (`GITHUB_STEP_SUMMARY`) et sort en erreur sous `--min`.
 - **CI** : `flutter test` devient `flutter test --coverage`, puis l'étape « Coverage (logic, min 85 %) ». Seuil à 85 % (demandé) et non au chiffre actuel, pour ne pas bloquer un petit ajout de code non testé. Pas d'envoi du fichier lcov en artefact (évite d'ajouter une action de plus à épingler).
 - **README** (anglais et français) : nombre de tests mis à jour (545 tests, 40 fichiers ; l'ancien chiffre 447/29 datait d'avant la traduction), paragraphe « Couverture » avec la commande locale. Le pourcentage du README est écrit à la main : à remettre à jour de temps en temps.
+
+## Scanner de QR code anti-hameçonnage (« quishing ») (2026-10-26)
+
+Choix faits sans demander :
+
+- **Bibliothèque** : [zxing-android-embedded](https://github.com/journeyapps/zxing-android-embedded) 4.3.0 (JourneyApps, Apache 2.0) côté Kotlin, avec ZXing core 3.5.3 (Apache 2.0, dernière version, au lieu du 3.4.1 tiré par défaut). Décodage ZXing classique (pas d'IA) : aucun modèle à télécharger, aucun accès réseau. Vérifié dans l'AAR : le manifeste n'ajoute que `CAMERA` et des `uses-feature` non obligatoires.
+  - **Écarté : `mobile_scanner` / ML Kit.** Le modèle peut être inclus dans l'app, mais d'après les conditions de Google ML Kit (developers.google.com/ml-kit/terms), les API « peuvent contacter les serveurs de Google » et « envoient des statistiques d'utilisation ». C'est contraire à la promesse « aucun échange réseau hors des 3 fonctions facultatives ». De plus, ML Kit n'est pas open source.
+  - **Écarté : `flutter_zxing`.** Il compile zxing-cpp avec le NDK (build plus lourd) pour le même décodeur.
+  - **Limite** : zxing-android-embedded n'a plus de nouvelle version depuis 2021 (stable, en maintenance). Le décodeur ZXing core est à jour.
+- **Écran de scan** : celui de la bibliothèque (`CaptureActivity`), non exporté. Il suit le sens du téléphone (`fullSensor`, au lieu du paysage par défaut) ; pas de bip ; aucune image enregistrée (`setBarcodeImageEnabled(false)`) ; QR codes seulement. La phrase sous le viseur vient des fichiers de langues de Sentinel.
+- **Permission caméra** : demandée seulement au moment du scan. Avant la demande d'Android, Sentinel explique pourquoi (« seulement pendant le scan, l'image n'est ni enregistrée ni envoyée ») ; « Annuler » n'appelle pas Android. En cas de refus définitif (« Ne plus demander »), un message s'affiche avec un bouton « Réglages » qui ouvre la page Android de Sentinel. Caméra non obligatoire à l'installation (`required="false"`).
+- **Lecture des formats** (`lib/services/qr/qr_content.dart`, pur Dart) :
+  - lien http/https seul ;
+  - types dangereux (`javascript:`, `vbscript:`, `data:`, `file:`, `content:`, `intent:`, `android-app:`, `jar:`) ;
+  - `WIFI:` (champs dans n'importe quel ordre, caractères protégés par `\`) ;
+  - `tel:`, `sms:`/`smsto:`/`mmsto:` ;
+  - paiements : crypto (`bitcoin:`, `ethereum:`…), UPI, virement SEPA (EPC, « BCD »), QR EMVCo des banques (TLV, devise ISO 4217 traduite pour TND, EUR, USD, MAD, DZD, GBP, INR) ;
+  - tout le reste (texte, `mailto:`, lien suivi d'un texte) est du texte analysé comme un message.
+
+  Un format abîmé ne lève jamais d'exception : il devient du texte.
+- **Wi-Fi** : « T:WPA » devient « WPA2 ou WPA » (le QR ne les distingue pas), SAE devient WPA3, EAP entreprise, nopass ou rien devient réseau ouvert. Le niveau et les conseils viennent de `assessWifi` (`wifi_risk.dart`, mêmes textes que l'accueil). Réseau ouvert ou WEP : avertissement en plus. Pas de verdict « arnaque » (c'est un risque réseau, pas une escroquerie), pas de bouton « se connecter » (il faudrait d'autres permissions). Le nom du réseau n'est pas envoyé à l'IA.
+- **Décisions** (`qr_safety.dart`, pur Dart, testé) :
+  - le verdict est le pire entre l'analyseur existant (`analyzeMessage` : IA + règles des liens) et les règles propres aux QR codes ;
+  - lien dangereux et code USSD (`*` ou `#` dans un numéro, ex. effacement ou renvoi d'appel) : « Arnaque probable » ;
+  - SMS vers un numéro court (6 chiffres ou moins, souvent surtaxé) : au moins « Suspect » ;
+  - paiement : avertissement « faux QR collés sur les vrais », sans changer le verdict ;
+  - numéro ou Wi-Fi sans problème : pas de verdict affiché (rien à juger).
+- **Actions**, toujours après une boîte de confirmation qui dit exactement ce qui va se passer :
+  - lien : « Ouvrir le lien » si rien de suspect, sinon « Ouvrir quand même » ;
+  - « Appeler ce numéro » ouvre le composeur, sans appeler ;
+  - « Préparer le SMS » ouvre l'app SMS avec le texte, sans envoyer ;
+  - « Ouvrir dans une app de paiement », seulement pour les paiements sous forme de lien (crypto, UPI). SEPA et EMVCo : affichage seul, à payer depuis l'app de la banque.
+
+  Bouton visible mais désactivé si « Arnaque probable », avec « Bloqué par Sentinel ». Si l'IA ne se charge pas, aucune action n'est proposée.
+- **Double vérification Kotlin** (`QrActions.kt`, testé par `QrActionsTest`) : seulement http/https (catégorie BROWSABLE), numéros sans `*`/`#`, et schémas de paiement connus. Le reste est refusé (`NOT_ALLOWED`). L'arobase dans un lien reste permis côté Kotlin : l'analyseur Dart la signale déjà (Suspect) et l'utilisateur a confirmé.
+- **Canal** : `com.iheb.sentinel/qr` (classe `QrScanner.kt`), codes de demande 5 et 6 (1 à 4 déjà pris). Le contenu scanné n'est jamais journalisé.
+- **Interface** : ligne « Scanner un QR code » entre deux traits fins, sous la protection automatique, dans l'onglet Messages. Résultat sur un écran à part (`qr_result_screen.dart`) : type, contenu brut sélectionnable dans un cadre fin, détails, niveau Wi-Fi ou verdict, action. Le bloc verdict de l'onglet Messages est devenu un widget partagé (`widgets/verdict_section.dart`), même rendu.
+- **Textes** : 48 clés `qr…` en français, anglais et arabe (à relire, comme les autres traductions), plus « Caméra » dans la politique de confidentialité (autorisations) et « QR codes scannés » dans « Ce que Sentinel n'enregistre jamais ». Aucun retour à la ligne dans les textes (la police n'a pas de caractère U+000A, vérifié par `l10n_keys_test`).
+- **Licence** : entrée « ZXing » ajoutée à la page Licences (code Kotlin, absent des licences Dart) et section « Données tierces » des README.
+- **Tests** : `qr_content_test.dart` (tous les formats et cas abîmés), `qr_safety_test.dart` (verdicts et actions), `qr_screens_test.dart` (rien ne s'ouvre sans confirmation, bouton désactivé, Wi-Fi ouvert, USSD, échec de l'IA, arabe de droite à gauche, explication avant la caméra, refus définitif), `QrActionsTest.kt`. Couverture de la logique : 95,4 %.
+
+Non vérifié : l'interface n'a pas été lancée sur un téléphone (règle : pas de `flutter run`). À tester à la main : le scan réel, la demande de caméra et son refus définitif, la rotation de l'écran de scan, l'ouverture des apps (navigateur, composeur, SMS, portefeuille), un QR de paiement réel d'une banque tunisienne (EMVCo supposé).

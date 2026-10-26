@@ -37,6 +37,7 @@ The app's interface is in French. Everything runs on the phone. Nothing goes ove
 - **App scanner.** Lists installed apps and gives each a 0–100 risk score from explainable rules: accessibility service, install source, device admin, SMS access, notification listener, overlay, microphone, background location, old `targetSdk`, and more. Pre-installed system apps are only flagged for accessibility or device admin.
 - **Fake apps and stalkerware.** Reads each app's signing certificate (SHA-256/SHA-1, subject) and whether its launcher icon was hidden. Flags apps that use the name of a popular app (WhatsApp, Facebook, Instagram, TikTok…) with another package, official packages signed by someone else (once reference fingerprints are filled in), known WhatsApp mods (GB WhatsApp, FM WhatsApp…), test-key signatures, and known stalkerware from the public [Stalkerware Indicators](https://github.com/AssoEchap/stalkerware-indicators) list, even when disguised as a system app. When spyware is suspected, Sentinel shows safety advice **before** offering to uninstall, and never sends a notification about it.
 - **Scam message detection.** Paste a message, share it from another app, or select text and choose "Vérifier avec Sentinel". An on-device model (TF-IDF over character n-grams + logistic regression) is combined with link rules: brand impersonation, raw IP address, punycode, `@` in the URL, URL shorteners, suspicious TLDs, too many subdomains, plain `http`. The verdict comes with the reasons.
+- **QR code check (quishing).** "Scan a QR code" in the Messages tab reads the code on the phone with ZXing (no network, no downloaded model). The camera is requested only at scan time, after an explanation. Sentinel shows the raw content, then checks links and text with the same analyzer. Wi-Fi codes show the encryption (open network alert); phone numbers, text messages and payment codes (crypto, UPI, SEPA, EMVCo) show the exact action and ask for confirmation. `javascript:`/`intent:` links and USSD codes (`*`, `#`) are blocked. Nothing opens automatically, and "Open anyway" is disabled for a likely scam.
 - **Automatic protection (opt-in).** A notification listener reads incoming messages from SMS apps, WhatsApp, WhatsApp Business, Messenger, Telegram and Viber. They are analyzed by the same Dart model in a headless Flutter engine, and a "likely scam" alert is shown when the verdict is a scam.
 - **Wi-Fi check.** Shows the encryption type (open, WEP, WPA2, WPA3, OWE, enterprise), captive portal and Private DNS status, without the location permission and without reading the network name.
 - **Encrypted vault.** Stores passwords and secure notes, encrypted with Argon2id + AES-256-GCM. You can unlock it with the master password, a recovery key, or a fingerprint (Android Keystore). An encrypted backup file (`.sentinel`) moves it to a new phone.
@@ -79,7 +80,7 @@ Diagrams and details: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
 ## Tests
 
-**545 tests** in 40 test files (`flutter test`). They cover:
+**598 tests** in 43 test files (`flutter test`). They cover:
 
 - the vault: the Argon2id RFC 9106 test vector, encryption, key slots, v1 → v2 migration, tamper detection (ciphertext, wrapped key, header), session and lock behavior;
 - the encrypted backup: export/import round trip, wrong password, tampered file, unknown version, empty file, restore into a new vault;
@@ -87,11 +88,12 @@ Diagrams and details: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 - the k-anonymity client, using a fake HTTP client;
 - the app, device and Wi-Fi risk rules;
 - password health and the password generator;
-- the Android bridges (firewall, protection, apps, biometrics, shared text): arguments sent, and every error code Android can return.
+- the Android bridges (firewall, protection, apps, biometrics, shared text): arguments sent, and every error code Android can return;
+- QR codes: parsing of every supported format (link, `WIFI:`, `tel:`, `sms:`, payments, text), the security decisions, and that nothing opens without confirmation.
 
 Network and biometrics are replaced by test doubles, so the tests run offline.
 
-**Coverage.** The app logic (`lib/services`, `lib/models`, `lib/utils`) is at **94.9 %** line coverage (October 2026). Screens and widgets are not counted. The CI runs `flutter test --coverage`, writes a per-file table in the run summary and fails below 85 %. No third-party service. Locally:
+**Coverage.** The app logic (`lib/services`, `lib/models`, `lib/utils`) is at **95.4 %** line coverage (October 2026). Screens and widgets are not counted. The CI runs `flutter test --coverage`, writes a per-file table in the run summary and fails below 85 %. No third-party service. Locally:
 
 ```bash
 flutter test --coverage
@@ -155,6 +157,8 @@ Please report vulnerabilities privately. See [SECURITY.md](SECURITY.md).
 The app was audited against OWASP MASVS v2 (static and dynamic analysis, 17 findings and their fixes): see the [audit report](docs/audit/RAPPORT_AUDIT.md) (in French). Release builds are documented in [docs/RELEASE.md](docs/RELEASE.md).
 
 ## Third-party data
+
+QR codes are decoded by [zxing-android-embedded](https://github.com/journeyapps/zxing-android-embedded) 4.3.0 and [ZXing](https://github.com/zxing/zxing) core 3.5.3, licensed under [Apache 2.0](https://www.apache.org/licenses/LICENSE-2.0).
 
 `assets/data/stalkerware_ioc.json` is derived from [Stalkerware Indicators of Compromise](https://github.com/AssoEchap/stalkerware-indicators) by [Echap](https://echap.eu.org/) (Julien Voisin, Tek and contributors), licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Changes: only app names, package names and SHA-1 certificate fingerprints are kept, converted to JSON by `tools/stalkerware/update_ioc.py` at a pinned commit. The list is not exhaustive: no match does not mean no stalkerware.
 

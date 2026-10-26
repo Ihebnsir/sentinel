@@ -685,7 +685,7 @@ abstract class AppLocalizations {
   /// No description provided for @privacyNever1.
   ///
   /// In fr, this message translates to:
-  /// **'Le texte des messages analysés (collés, partagés ou lus dans les notifications) : il est analysé en mémoire puis oublié.'**
+  /// **'Le texte des messages et des QR codes analysés (collés, partagés, scannés ou lus dans les notifications) : il est analysé en mémoire puis oublié. L\'image de la caméra n\'est jamais enregistrée.'**
   String get privacyNever1;
 
   /// No description provided for @privacyNever2.
@@ -735,6 +735,12 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Biométrie : seulement si vous choisissez de déverrouiller le coffre sans taper votre mot de passe maître.'**
   String get privacyPermissions5;
+
+  /// No description provided for @privacyPermissions6.
+  ///
+  /// In fr, this message translates to:
+  /// **'Caméra : demandée quand vous touchez « Scanner un QR code », seulement pour lire le QR code, sur le téléphone.'**
+  String get privacyPermissions6;
 
   /// No description provided for @privacyEraseTitle.
   ///
@@ -3771,6 +3777,294 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Exporter'**
   String get exportButton;
+
+  /// No description provided for @qrScanButton.
+  ///
+  /// In fr, this message translates to:
+  /// **'Scanner un QR code'**
+  String get qrScanButton;
+
+  /// No description provided for @qrScanSubtitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vérifier un QR code (affiche, parcmètre, colis) avant de l\'ouvrir'**
+  String get qrScanSubtitle;
+
+  /// No description provided for @qrScanPrompt.
+  ///
+  /// In fr, this message translates to:
+  /// **'Placez le QR code dans le cadre. Rien ne s\'ouvre tout seul.'**
+  String get qrScanPrompt;
+
+  /// No description provided for @qrCameraTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Autoriser la caméra ?'**
+  String get qrCameraTitle;
+
+  /// No description provided for @qrCameraText.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sentinel utilise la caméra seulement pendant le scan, pour lire le QR code. L\'image n\'est ni enregistrée ni envoyée : tout reste sur le téléphone.'**
+  String get qrCameraText;
+
+  /// No description provided for @qrOpenSettings.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réglages'**
+  String get qrOpenSettings;
+
+  /// No description provided for @qrErrorNoCamera.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune caméra disponible sur ce téléphone.'**
+  String get qrErrorNoCamera;
+
+  /// No description provided for @qrErrorPermissionDenied.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sans la caméra, Sentinel ne peut pas lire le QR code.'**
+  String get qrErrorPermissionDenied;
+
+  /// No description provided for @qrErrorPermissionBlocked.
+  ///
+  /// In fr, this message translates to:
+  /// **'La caméra est refusée pour Sentinel. Autorisez-la dans les réglages d\'Android.'**
+  String get qrErrorPermissionBlocked;
+
+  /// No description provided for @qrErrorFailed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le scan a échoué. Réessayez.'**
+  String get qrErrorFailed;
+
+  /// No description provided for @qrResultTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'QR code scanné'**
+  String get qrResultTitle;
+
+  /// No description provided for @qrRawContent.
+  ///
+  /// In fr, this message translates to:
+  /// **'Contenu brut'**
+  String get qrRawContent;
+
+  /// No description provided for @qrEmpty.
+  ///
+  /// In fr, this message translates to:
+  /// **'(QR code vide)'**
+  String get qrEmpty;
+
+  /// No description provided for @qrKindLink.
+  ///
+  /// In fr, this message translates to:
+  /// **'Lien'**
+  String get qrKindLink;
+
+  /// No description provided for @qrKindUnsafeLink.
+  ///
+  /// In fr, this message translates to:
+  /// **'Lien d\'un type dangereux'**
+  String get qrKindUnsafeLink;
+
+  /// No description provided for @qrKindWifi.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réseau Wi-Fi'**
+  String get qrKindWifi;
+
+  /// No description provided for @qrKindPhone.
+  ///
+  /// In fr, this message translates to:
+  /// **'Numéro de téléphone'**
+  String get qrKindPhone;
+
+  /// No description provided for @qrKindSms.
+  ///
+  /// In fr, this message translates to:
+  /// **'SMS à envoyer'**
+  String get qrKindSms;
+
+  /// No description provided for @qrKindPayment.
+  ///
+  /// In fr, this message translates to:
+  /// **'Demande de paiement'**
+  String get qrKindPayment;
+
+  /// No description provided for @qrKindText.
+  ///
+  /// In fr, this message translates to:
+  /// **'Texte'**
+  String get qrKindText;
+
+  /// No description provided for @qrWifiName.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réseau'**
+  String get qrWifiName;
+
+  /// No description provided for @qrWifiSecurity.
+  ///
+  /// In fr, this message translates to:
+  /// **'Protection'**
+  String get qrWifiSecurity;
+
+  /// No description provided for @qrWifiPassword.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mot de passe'**
+  String get qrWifiPassword;
+
+  /// No description provided for @qrWifiPasswordYes.
+  ///
+  /// In fr, this message translates to:
+  /// **'Inclus dans le QR code'**
+  String get qrWifiPasswordYes;
+
+  /// No description provided for @qrWifiPasswordNo.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun'**
+  String get qrWifiPasswordNo;
+
+  /// No description provided for @qrPhoneNumber.
+  ///
+  /// In fr, this message translates to:
+  /// **'Numéro'**
+  String get qrPhoneNumber;
+
+  /// No description provided for @qrSmsRecipient.
+  ///
+  /// In fr, this message translates to:
+  /// **'Destinataire'**
+  String get qrSmsRecipient;
+
+  /// No description provided for @qrSmsText.
+  ///
+  /// In fr, this message translates to:
+  /// **'Texte du SMS'**
+  String get qrSmsText;
+
+  /// No description provided for @qrPaymentRecipient.
+  ///
+  /// In fr, this message translates to:
+  /// **'Bénéficiaire'**
+  String get qrPaymentRecipient;
+
+  /// No description provided for @qrPaymentAmount.
+  ///
+  /// In fr, this message translates to:
+  /// **'Montant'**
+  String get qrPaymentAmount;
+
+  /// No description provided for @qrNotSpecified.
+  ///
+  /// In fr, this message translates to:
+  /// **'Non indiqué'**
+  String get qrNotSpecified;
+
+  /// No description provided for @qrWarningUnsafeLink.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce QR code contient un lien qui peut lancer du code ou ouvrir un fichier, pas une page web. Sentinel ne l\'ouvrira pas.'**
+  String get qrWarningUnsafeLink;
+
+  /// No description provided for @qrWarningUssd.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le numéro contient * ou # : c\'est un code qui peut changer les réglages du téléphone (renvoi d\'appel, effacement). Ne le composez pas.'**
+  String get qrWarningUssd;
+
+  /// No description provided for @qrWarningShortNumber.
+  ///
+  /// In fr, this message translates to:
+  /// **'Numéro court : un SMS vers ce type de numéro peut être surtaxé ou vous abonner à un service payant.'**
+  String get qrWarningShortNumber;
+
+  /// No description provided for @qrWarningPayment.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les faux QR codes de paiement sont souvent collés par-dessus les vrais (parcmètres, affiches). Vérifiez le bénéficiaire et le montant avant de payer.'**
+  String get qrWarningPayment;
+
+  /// No description provided for @qrWarningWifiOpen.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réseau ouvert : sans mot de passe, tout ce qui passe en clair peut être lu par les autres.'**
+  String get qrWarningWifiOpen;
+
+  /// No description provided for @qrWarningWifiWep.
+  ///
+  /// In fr, this message translates to:
+  /// **'Protection WEP : elle se casse en quelques minutes.'**
+  String get qrWarningWifiWep;
+
+  /// No description provided for @qrActionOpenLink.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ouvrir le lien'**
+  String get qrActionOpenLink;
+
+  /// No description provided for @qrActionOpenAnyway.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ouvrir quand même'**
+  String get qrActionOpenAnyway;
+
+  /// No description provided for @qrActionCall.
+  ///
+  /// In fr, this message translates to:
+  /// **'Appeler ce numéro'**
+  String get qrActionCall;
+
+  /// No description provided for @qrActionSms.
+  ///
+  /// In fr, this message translates to:
+  /// **'Préparer le SMS'**
+  String get qrActionSms;
+
+  /// No description provided for @qrActionPayment.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ouvrir dans une app de paiement'**
+  String get qrActionPayment;
+
+  /// No description provided for @qrActionBlocked.
+  ///
+  /// In fr, this message translates to:
+  /// **'Bloqué par Sentinel : arnaque probable.'**
+  String get qrActionBlocked;
+
+  /// No description provided for @qrActionFailed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Impossible d\'ouvrir : aucune app compatible ou contenu refusé.'**
+  String get qrActionFailed;
+
+  /// No description provided for @qrConfirmLink.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ne saisissez aucun code ni mot de passe si la page vous le demande. Lien qui va s\'ouvrir dans votre navigateur : {url}'**
+  String qrConfirmLink(String url);
+
+  /// No description provided for @qrConfirmCall.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le téléphone ouvre l\'écran d\'appel avec le {number}. L\'appel ne part que si vous appuyez sur Appeler.'**
+  String qrConfirmCall(String number);
+
+  /// No description provided for @qrConfirmSms.
+  ///
+  /// In fr, this message translates to:
+  /// **'Votre app SMS s\'ouvre avec un message pour le {number}. Rien n\'est envoyé tant que vous n\'appuyez pas sur Envoyer.'**
+  String qrConfirmSms(String number);
+
+  /// No description provided for @qrConfirmPayment.
+  ///
+  /// In fr, this message translates to:
+  /// **'Une app de paiement va s\'ouvrir pour : {recipient}. Vérifiez le bénéficiaire et le montant avant de valider.'**
+  String qrConfirmPayment(String recipient);
 }
 
 class _AppLocalizationsDelegate

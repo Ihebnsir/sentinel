@@ -34,6 +34,12 @@
     <!-- Permission « normale » : après un redémarrage, reprogrammer la
          suppression des rapports d'analyse à 24 h (BootReceiver). -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <!-- Caméra : seulement pour « Scanner un QR code » (onglet Messages),
+         demandée au moment du scan. L'image n'est ni enregistrée ni envoyée.
+         Déjà ajoutée par zxing-android-embedded ; écrite ici pour être vue.
+         Pas exigée : l'app s'installe aussi sans caméra. -->
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-feature android:name="android.hardware.camera" android:required="false" />
     <!-- Pas de sauvegarde Android : le coffre (même chiffré) ne doit pas
          partir dans le cloud ni vers un autre téléphone.
          allowBackup="false" suffit jusqu'à Android 11 ; à partir d'Android 12,
@@ -92,6 +98,14 @@
             android:noHistory="true"
             android:taskAffinity=""
             android:theme="@android:style/Theme.NoDisplay" />
+        <!-- Écran de scan de QR code (zxing-android-embedded). Non exporté :
+             seul Sentinel l'ouvre. Suit le sens du téléphone (paysage par
+             défaut dans la bibliothèque). -->
+        <activity
+            android:name="com.journeyapps.barcodescanner.CaptureActivity"
+            android:exported="false"
+            android:screenOrientation="fullSensor"
+            tools:replace="android:screenOrientation" />
         <!-- Protection automatique : lit les notifications des messageries.
              Seul Android peut s'y connecter (permission BIND_NOTIFICATION_LISTENER_SERVICE),
              et seulement si l'utilisateur l'a autorisé dans les réglages. -->

@@ -6,9 +6,13 @@ import '../l10n/l10n.dart';
 import '../services/phishing/known_brands.dart';
 import '../services/phishing/message_analyzer.dart';
 import '../services/phishing/phishing_model.dart';
+import '../services/apps_scanner_service.dart';
+import '../services/qr/qr_scanner_service.dart';
 import '../services/share_service.dart';
 import '../theme/app_colors.dart';
 import '../widgets/auto_protection_section.dart';
+import '../widgets/verdict_section.dart';
+import 'qr_result_screen.dart';
 
 /// Onglet « Messages » : l'utilisateur colle un SMS ou un lien,
 /// l'IA et les règles sur les liens disent s'il s'agit d'une arnaque.
@@ -25,6 +29,8 @@ class MessagesScreen extends StatefulWidget {
 class _MessagesScreenState extends State<MessagesScreen> {
   final _controller = TextEditingController();
 
+  final _qr = QrScannerService();
+  bool _scanning = false;
   bool _analyzing = false;
   bool _failed = false; // le modèle n'a pas pu être chargé
   MessageAnalysis? _analysis;
@@ -104,6 +110,74 @@ class _MessagesScreenState extends State<MessagesScreen> {
     }
   }
 
+  /// Scan d'un QR code : explication avant la première demande de caméra,
+  /// puis écran de résultat. Rien n'est ouvert sans l'utilisateur.
+  Future<void> _scanQr() async {
+    final l = context.l10n;
+    if (!await _qr.hasCameraPermission()) {
+      if (!mounted || !await _explainCamera()) return;
+    }
+    setState(() => _scanning = true);
+    final result = await _qr.scan(l.qrScanPrompt);
+    if (!mounted) return;
+    setState(() => _scanning = false);
+    final error = result.error;
+    final text = result.text;
+    if (error != null) {
+      _showScanError(error);
+    } else if (text != null) {
+      await Navigator.of(context).push(
+        MaterialPageRoute<void>(builder: (_) => QrResultScreen(raw: text)),
+      );
+    }
+  }
+
+  // Pourquoi la caméra, avant la demande d'Android. true : continuer.
+  Future<bool> _explainCamera() async {
+    final l = context.l10n;
+    final accepted = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: AppColors.chaux,
+        surfaceTintColor: Colors.transparent,
+        title: Text(l.qrCameraTitle),
+        content: Text(l.qrCameraText),
+        actions: [
+          TextButton(
+            style: TextButton.styleFrom(
+              foregroundColor: AppColors.encre.withValues(alpha: 0.6),
+            ),
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text(l.commonCancel),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(backgroundColor: AppColors.bleu),
+            onPressed: () => Navigator.of(context).pop(true),
+            child: Text(l.commonContinue),
+          ),
+        ],
+      ),
+    );
+    return accepted == true;
+  }
+
+  void _showScanError(QrScanError error) {
+    final l = context.l10n;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(error.message(l)),
+        // Refus définitif : seuls les réglages d'Android peuvent le changer.
+        action: error == QrScanError.permissionBlocked
+            ? SnackBarAction(
+                label: l.qrOpenSettings,
+                onPressed: () =>
+                    AppsScannerService().openAppSettings('com.iheb.sentinel'),
+              )
+            : null,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final l = context.l10n;
@@ -127,6 +201,8 @@ class _MessagesScreenState extends State<MessagesScreen> {
                 const SizedBox(height: 16),
                 // Masquée hors Android (rien ne s'affiche).
                 const AutoProtectionSection(),
+                const SizedBox(height: 8),
+                _QrScanRow(onTap: _scanning ? null : _scanQr),
                 const SizedBox(height: 20),
                 _MessageField(
                   controller: _controller,
@@ -155,7 +231,12 @@ class _MessagesScreenState extends State<MessagesScreen> {
                     ),
                   ),
                 if (analysis != null && !_analyzing)
-                  _AnalysisResult(analysis: analysis),
+                  VerdictSection(
+                    verdict: analysis.verdict,
+                    subtitle: l.messagesProbability('${analysis.percent}'),
+                    reasons: analysis.reasons(l),
+                    advice: analysis.advice(l),
+                  ),
               ],
             ),
           ),
@@ -240,62 +321,54 @@ class _MessageField extends StatelessWidget {
   }
 }
 
-/// Verdict en grand, probabilité, raisons séparées par des traits, conseil.
-class _AnalysisResult extends StatelessWidget {
-  const _AnalysisResult({required this.analysis});
+/// Ligne « Scanner un QR code », entre deux traits fins.
+class _QrScanRow extends StatelessWidget {
+  const _QrScanRow({required this.onTap});
 
-  final MessageAnalysis analysis;
-
-  static Color _colorFor(Verdict verdict) => switch (verdict) {
-        Verdict.arnaque => AppColors.rommen,
-        Verdict.suspect => AppColors.ocre,
-        Verdict.rien => AppColors.zitouna,
-      };
+  final VoidCallback? onTap; // null pendant un scan
 
   @override
   Widget build(BuildContext context) {
     final l = context.l10n;
-    final muted = AppColors.encre.withValues(alpha: 0.6);
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SizedBox(height: 28),
-        Text(
-          analysis.verdict.label(l),
-          style: TextStyle(
-            fontSize: 28,
-            fontWeight: FontWeight.w600,
-            color: _colorFor(analysis.verdict),
-          ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          l.messagesProbability('${analysis.percent}'),
-          style: TextStyle(fontSize: 15, color: muted),
-        ),
-        const SizedBox(height: 12),
-        for (final reason in analysis.reasons(l)) ...[
-          const Divider(height: 1, thickness: 1, color: AppColors.ligne),
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 14),
-            child: Text(
-              reason,
-              style: const TextStyle(fontSize: 15, color: AppColors.encre),
-            ),
-          ),
-        ],
         const Divider(height: 1, thickness: 1, color: AppColors.ligne),
-        Padding(
-          padding: const EdgeInsets.only(top: 16),
-          child: Text(
-            analysis.advice(l),
-            style: const TextStyle(
-              fontSize: 15,
-              fontWeight: FontWeight.w500,
-              color: AppColors.encre,
+        InkWell(
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 14),
+            child: Row(
+              children: [
+                const Icon(Icons.qr_code_scanner, color: AppColors.bleu),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        l.qrScanButton,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                          color: AppColors.bleu,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        l.qrScanSubtitle,
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: AppColors.encre.withValues(alpha: 0.6),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
           ),
         ),
+        const Divider(height: 1, thickness: 1, color: AppColors.ligne),
       ],
     );
   }

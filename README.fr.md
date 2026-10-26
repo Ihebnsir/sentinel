@@ -37,6 +37,7 @@ L'interface de l'application est en français. Tout se passe sur le téléphone.
 - **Analyse des applications.** Liste les applications installées et leur donne un score de risque de 0 à 100 avec des règles explicables : service d'accessibilité, source d'installation, administrateur de l'appareil, accès aux SMS, lecture des notifications, superposition, micro, localisation en arrière-plan, `targetSdk` ancien, etc. Les applications système préinstallées ne sont signalées que pour l'accessibilité ou l'administration de l'appareil.
 - **Fausses applications et logiciels espions.** Lit le certificat de signature de chaque application (SHA-256/SHA-1, sujet) et vérifie si son icône a été cachée. Signale les applications qui prennent le nom d'une application connue (WhatsApp, Facebook, Instagram, TikTok…) avec un autre package, les packages officiels signés par quelqu'un d'autre (une fois les empreintes de référence remplies), les versions modifiées de WhatsApp (GB WhatsApp, FM WhatsApp…), les signatures de test et les stalkerwares connus de la liste publique [Stalkerware Indicators](https://github.com/AssoEchap/stalkerware-indicators), même déguisés en application système. En cas de logiciel espion possible, Sentinel affiche des conseils de sécurité **avant** de proposer la désinstallation, et n'envoie jamais de notification à ce sujet.
 - **Détection des arnaques.** On colle un message, on le partage depuis une autre application, ou on sélectionne du texte puis « Vérifier avec Sentinel ». Un modèle embarqué (TF-IDF sur n-grammes de caractères + régression logistique) est combiné à des règles sur les liens : usurpation de marque, adresse IP, punycode, `@` dans l'URL, raccourcisseurs, extensions suspectes, trop de sous-domaines, `http` sans chiffrement. Le verdict est accompagné de ses raisons.
+- **Vérification des QR codes (quishing).** « Scanner un QR code », dans l'onglet Messages, lit le code sur le téléphone avec ZXing (sans réseau ni modèle téléchargé). La caméra n'est demandée qu'au moment du scan, après une explication. Sentinel affiche le contenu brut, puis vérifie liens et texte avec le même analyseur. Les QR Wi-Fi montrent la protection (alerte si réseau ouvert) ; numéros, SMS et paiements (crypto, UPI, SEPA, EMVCo) affichent l'action exacte et demandent confirmation. Les liens `javascript:`/`intent:` et les codes USSD (`*`, `#`) sont bloqués. Rien ne s'ouvre tout seul, et « Ouvrir quand même » est désactivé pour une arnaque probable.
 - **Protection automatique (facultative).** Un service d'écoute des notifications lit les messages reçus dans les applications SMS, WhatsApp, WhatsApp Business, Messenger, Telegram et Viber. Ils sont analysés par le même modèle Dart, dans un moteur Flutter sans écran (headless), et une alerte « Arnaque probable » s'affiche quand le verdict est une arnaque.
 - **Analyse du Wi-Fi.** Affiche le type de chiffrement (ouvert, WEP, WPA2, WPA3, OWE, entreprise), la présence d'un portail captif et l'état du DNS privé, sans permission de localisation et sans lire le nom du réseau.
 - **Coffre chiffré.** Range des mots de passe et des notes secrètes, chiffrés avec Argon2id + AES-256-GCM. On l'ouvre avec le mot de passe maître, une clé de récupération ou l'empreinte digitale (Android Keystore). Une sauvegarde chiffrée (fichier `.sentinel`) permet de le transférer sur un nouveau téléphone.
@@ -79,7 +80,7 @@ Schémas et détails : [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) (en anglais)
 
 ## Tests
 
-**545 tests** répartis dans 40 fichiers (`flutter test`). Ils couvrent :
+**598 tests** répartis dans 43 fichiers (`flutter test`). Ils couvrent :
 
 - le coffre : vecteur de test Argon2id de la RFC 9106, chiffrement, emplacements de clé, migration v1 → v2, détection des modifications (chiffré, clé enveloppée, en-tête), session et verrouillage ;
 - la sauvegarde chiffrée : aller-retour export/import, mauvais mot de passe, fichier altéré, version inconnue, fichier vide, restauration dans un coffre neuf ;
@@ -87,11 +88,12 @@ Schémas et détails : [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) (en anglais)
 - le client k-anonymity, avec un faux client HTTP ;
 - les règles de risque des applications, du téléphone et du Wi-Fi ;
 - le bilan de santé des mots de passe et le générateur ;
-- les ponts vers Android (pare-feu, protection, applications, biométrie, texte partagé) : arguments envoyés et chaque code d'erreur qu'Android peut renvoyer.
+- les ponts vers Android (pare-feu, protection, applications, biométrie, texte partagé) : arguments envoyés et chaque code d'erreur qu'Android peut renvoyer ;
+- les QR codes : lecture de chaque format (lien, `WIFI:`, `tel:`, `sms:`, paiements, texte), décisions de sécurité, et rien ne s'ouvre sans confirmation.
 
 Le réseau et la biométrie sont remplacés par des doublures de test : les tests tournent hors ligne.
 
-**Couverture.** La logique de l'app (`lib/services`, `lib/models`, `lib/utils`) est couverte à **94,9 %** des lignes (octobre 2026). Les écrans et widgets ne sont pas comptés. La CI lance `flutter test --coverage`, écrit un tableau par fichier dans le résumé de l'exécution et échoue sous 85 %. Aucun service tiers. En local :
+**Couverture.** La logique de l'app (`lib/services`, `lib/models`, `lib/utils`) est couverte à **95,4 %** des lignes (octobre 2026). Les écrans et widgets ne sont pas comptés. La CI lance `flutter test --coverage`, écrit un tableau par fichier dans le résumé de l'exécution et échoue sous 85 %. Aucun service tiers. En local :
 
 ```bash
 flutter test --coverage
@@ -155,6 +157,8 @@ Merci de signaler les vulnérabilités en privé. Voir [SECURITY.md](SECURITY.md
 L'application a été auditée selon l'OWASP MASVS v2 (analyse statique et dynamique, 17 constats et leurs corrections) : voir le [rapport d'audit](docs/audit/RAPPORT_AUDIT.md). La publication d'une version est décrite dans [docs/RELEASE.md](docs/RELEASE.md).
 
 ## Données tierces
+
+Les QR codes sont décodés par [zxing-android-embedded](https://github.com/journeyapps/zxing-android-embedded) 4.3.0 et [ZXing](https://github.com/zxing/zxing) core 3.5.3, sous licence [Apache 2.0](https://www.apache.org/licenses/LICENSE-2.0).
 
 `assets/data/stalkerware_ioc.json` est dérivé de [Stalkerware Indicators of Compromise](https://github.com/AssoEchap/stalkerware-indicators) par [Echap](https://echap.eu.org/) (Julien Voisin, Tek et contributeurs), sous licence [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/deed.fr). Modifications : seuls les noms d'applications, les noms de packages et les empreintes SHA-1 des certificats sont conservés, convertis en JSON par `tools/stalkerware/update_ioc.py` à un commit épinglé. La liste n'est pas exhaustive : aucune correspondance ne veut pas dire aucun stalkerware.
 
