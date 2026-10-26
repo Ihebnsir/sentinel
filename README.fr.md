@@ -41,6 +41,7 @@ L'interface de l'application est en français. Tout se passe sur le téléphone.
 - **Protection automatique (facultative).** Un service d'écoute des notifications lit les messages reçus dans les applications SMS, WhatsApp, WhatsApp Business, Messenger, Telegram et Viber. Ils sont analysés par le même modèle Dart, dans un moteur Flutter sans écran (headless), et une alerte « Arnaque probable » s'affiche quand le verdict est une arnaque.
 - **Analyse du Wi-Fi.** Affiche le type de chiffrement (ouvert, WEP, WPA2, WPA3, OWE, entreprise), la présence d'un portail captif et l'état du DNS privé, sans permission de localisation et sans lire le nom du réseau.
 - **Coffre chiffré.** Range des mots de passe et des notes secrètes, chiffrés avec Argon2id + AES-256-GCM. On l'ouvre avec le mot de passe maître, une clé de récupération ou l'empreinte digitale (Android Keystore). Une sauvegarde chiffrée (fichier `.sentinel`) permet de le transférer sur un nouveau téléphone.
+- **Thème sombre.** Une palette « nuit » assortie à l'icône (fond bleu nuit, textes clairs, couleurs d'état ajustées au contraste WCAG AA). Il suit le réglage du téléphone, ou se choisit (Clair / Sombre) dans les Réglages.
 - **Outils mots de passe.** Générateur aléatoire (12 à 64 caractères), estimation de la force et bilan de santé des mots de passe : fuites (Have I Been Pwned), réutilisés et faibles.
 
 ## Points forts en sécurité
@@ -80,7 +81,7 @@ Schémas et détails : [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) (en anglais)
 
 ## Tests
 
-**598 tests** répartis dans 43 fichiers (`flutter test`). Ils couvrent :
+**631 tests** répartis dans 45 fichiers (`flutter test`). Ils couvrent :
 
 - le coffre : vecteur de test Argon2id de la RFC 9106, chiffrement, emplacements de clé, migration v1 → v2, détection des modifications (chiffré, clé enveloppée, en-tête), session et verrouillage ;
 - la sauvegarde chiffrée : aller-retour export/import, mauvais mot de passe, fichier altéré, version inconnue, fichier vide, restauration dans un coffre neuf ;
@@ -89,11 +90,12 @@ Schémas et détails : [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) (en anglais)
 - les règles de risque des applications, du téléphone et du Wi-Fi ;
 - le bilan de santé des mots de passe et le générateur ;
 - les ponts vers Android (pare-feu, protection, applications, biométrie, texte partagé) : arguments envoyés et chaque code d'erreur qu'Android peut renvoyer ;
+- les thèmes : contraste WCAG des principales paires de couleurs, et écrans principaux affichés en sombre ;
 - les QR codes : lecture de chaque format (lien, `WIFI:`, `tel:`, `sms:`, paiements, texte), décisions de sécurité, et rien ne s'ouvre sans confirmation.
 
 Le réseau et la biométrie sont remplacés par des doublures de test : les tests tournent hors ligne.
 
-**Couverture.** La logique de l'app (`lib/services`, `lib/models`, `lib/utils`) est couverte à **95,4 %** des lignes (octobre 2026). Les écrans et widgets ne sont pas comptés. La CI lance `flutter test --coverage`, écrit un tableau par fichier dans le résumé de l'exécution et échoue sous 85 %. Aucun service tiers. En local :
+**Couverture.** La logique de l'app (`lib/services`, `lib/models`, `lib/utils`) est couverte à **95,6 %** des lignes (octobre 2026). Les écrans et widgets ne sont pas comptés. La CI lance `flutter test --coverage`, écrit un tableau par fichier dans le résumé de l'exécution et échoue sous 85 %. Aucun service tiers. En local :
 
 ```bash
 flutter test --coverage

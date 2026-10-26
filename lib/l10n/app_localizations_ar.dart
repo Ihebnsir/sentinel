@@ -191,6 +191,18 @@ class AppLocalizationsAr extends AppLocalizations {
   String get settingsLanguageSystem => 'لغة الهاتف';
 
   @override
+  String get settingsTheme => 'المظهر';
+
+  @override
+  String get settingsThemeSystem => 'مثل الهاتف';
+
+  @override
+  String get settingsThemeLight => 'فاتح';
+
+  @override
+  String get settingsThemeDark => 'داكن';
+
+  @override
   String get settingsReplayOnboarding => 'إعادة عرض التعريف بالتطبيق';
 
   @override
@@ -315,7 +327,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get privacyLocal2 =>
-      'اختياراتك: الموافقة على التحقق من التسريبات، إعدادات جدار الحماية وقائمة المواقع المسموح بها، تفعيل الحماية التلقائية أو عدمه، مشاهدة التعريف بالتطبيق، اللغة.';
+      'اختياراتك: الموافقة على التحقق من التسريبات، إعدادات جدار الحماية وقائمة المواقع المسموح بها، تفعيل الحماية التلقائية أو عدمه، مشاهدة التعريف بالتطبيق، اللغة، المظهر.';
 
   @override
   String get privacyLocal3 => 'قوائم الحظر وتحديثاتها.';

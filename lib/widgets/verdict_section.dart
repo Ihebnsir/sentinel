@@ -5,10 +5,10 @@ import '../services/phishing/message_analyzer.dart';
 import '../theme/app_colors.dart';
 
 /// Couleur d'un verdict : rouge, ocre ou vert.
-Color verdictColor(Verdict verdict) => switch (verdict) {
-  Verdict.arnaque => AppColors.rommen,
-  Verdict.suspect => AppColors.ocre,
-  Verdict.rien => AppColors.zitouna,
+Color verdictColor(AppColors c, Verdict verdict) => switch (verdict) {
+  Verdict.arnaque => c.rommen,
+  Verdict.suspect => c.ocre,
+  Verdict.rien => c.zitouna,
 };
 
 /// Verdict en grand, sous-titre, raisons séparées par des traits, conseil.
@@ -30,7 +30,7 @@ class VerdictSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l = context.l10n;
-    final muted = AppColors.encre.withValues(alpha: 0.6);
+    final muted = context.colors.secondaire;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -40,7 +40,7 @@ class VerdictSection extends StatelessWidget {
           style: TextStyle(
             fontSize: 28,
             fontWeight: FontWeight.w600,
-            color: verdictColor(verdict),
+            color: verdictColor(context.colors, verdict),
           ),
         ),
         if (subtitle != null) ...[
@@ -49,24 +49,24 @@ class VerdictSection extends StatelessWidget {
         ],
         const SizedBox(height: 12),
         for (final reason in reasons) ...[
-          const Divider(height: 1, thickness: 1, color: AppColors.ligne),
+          Divider(height: 1, thickness: 1, color: context.colors.ligne),
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 14),
             child: Text(
               reason,
-              style: const TextStyle(fontSize: 15, color: AppColors.encre),
+              style: TextStyle(fontSize: 15, color: context.colors.encre),
             ),
           ),
         ],
-        const Divider(height: 1, thickness: 1, color: AppColors.ligne),
+        Divider(height: 1, thickness: 1, color: context.colors.ligne),
         Padding(
           padding: const EdgeInsets.only(top: 16),
           child: Text(
             advice,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.w500,
-              color: AppColors.encre,
+              color: context.colors.encre,
             ),
           ),
         ),

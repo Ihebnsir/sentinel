@@ -53,7 +53,7 @@ class _VaultListViewState extends State<VaultListView> {
     final type = await showModalBottomSheet<VaultItemType>(
       context: context,
       showDragHandle: true,
-      backgroundColor: AppColors.chaux,
+      backgroundColor: context.colors.chaux,
       builder: (_) => const _TypeChooser(),
     );
     if (type == null || !mounted) return;
@@ -89,7 +89,7 @@ class _VaultListViewState extends State<VaultListView> {
   @override
   Widget build(BuildContext context) {
     final l = context.l10n;
-    final muted = AppColors.encre.withValues(alpha: 0.6);
+    final muted = context.colors.secondaire;
     final items = _visibleItems;
     final empty = widget.session.items.isEmpty;
     return Column(
@@ -103,7 +103,9 @@ class _VaultListViewState extends State<VaultListView> {
             ),
             const SizedBox(width: 12),
             FilledButton.icon(
-              style: FilledButton.styleFrom(backgroundColor: AppColors.bleu),
+              style: FilledButton.styleFrom(
+                backgroundColor: context.colors.bleu,
+              ),
               onPressed: _add,
               icon: const Icon(Icons.add),
               label: Text(l.vaultAdd),
@@ -135,20 +137,20 @@ class _VaultListViewState extends State<VaultListView> {
               : ListView(
                   children: [
                     for (final item in items) ...[
-                      const Divider(
+                      Divider(
                         height: 1,
                         thickness: 1,
-                        color: AppColors.ligne,
+                        color: context.colors.ligne,
                       ),
                       _ItemRow(
                         item: item,
                         onTap: () => _open(item: item),
                       ),
                     ],
-                    const Divider(
+                    Divider(
                       height: 1,
                       thickness: 1,
-                      color: AppColors.ligne,
+                      color: context.colors.ligne,
                     ),
                   ],
                 ),
@@ -172,10 +174,10 @@ class _HealthRow extends StatelessWidget {
     final l = context.l10n;
     final toFix = report.toFix;
     final color = report.breached.isNotEmpty
-        ? AppColors.rommen
+        ? context.colors.rommen
         : toFix > 0
-        ? AppColors.ocre
-        : AppColors.zitouna;
+        ? context.colors.ocre
+        : context.colors.zitouna;
     return InkWell(
       onTap: onTap,
       child: Padding(
@@ -187,10 +189,10 @@ class _HealthRow extends StatelessWidget {
             Expanded(
               child: Text(
                 l.vaultHealthTitle,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.w500,
-                  color: AppColors.encre,
+                  color: context.colors.encre,
                 ),
               ),
             ),
@@ -200,7 +202,7 @@ class _HealthRow extends StatelessWidget {
             ),
             Icon(
               Icons.chevron_right,
-              color: AppColors.encre.withValues(alpha: 0.3),
+              color: context.colors.encre.withValues(alpha: 0.3),
             ),
           ],
         ),
@@ -223,19 +225,19 @@ class _SearchField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final muted = AppColors.encre.withValues(alpha: 0.45);
+    final muted = context.colors.discret;
     return TextField(
       controller: controller,
       onChanged: onChanged,
-      style: const TextStyle(fontSize: 15, color: AppColors.encre),
+      style: TextStyle(fontSize: 15, color: context.colors.encre),
       decoration: InputDecoration(
         isDense: true,
         hintText: context.l10n.vaultSearch,
         hintStyle: TextStyle(fontSize: 15, color: muted),
         prefixIcon: Icon(Icons.search, color: muted),
         contentPadding: const EdgeInsets.symmetric(vertical: 12),
-        enabledBorder: _border(AppColors.ligne),
-        focusedBorder: _border(AppColors.bleu),
+        enabledBorder: _border(context.colors.ligne),
+        focusedBorder: _border(context.colors.bleu),
       ),
     );
   }
@@ -259,7 +261,7 @@ class _ItemRow extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: 14),
         child: Row(
           children: [
-            Icon(iconFor(item.type), color: AppColors.bleu),
+            Icon(iconFor(item.type), color: context.colors.bleu),
             const SizedBox(width: 16),
             Expanded(
               child: Column(
@@ -269,10 +271,10 @@ class _ItemRow extends StatelessWidget {
                     item.titre,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w500,
-                      color: AppColors.encre,
+                      color: context.colors.encre,
                     ),
                   ),
                   if (subtitle.isNotEmpty)
@@ -282,7 +284,7 @@ class _ItemRow extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
                         fontSize: 13,
-                        color: AppColors.encre.withValues(alpha: 0.6),
+                        color: context.colors.secondaire,
                       ),
                     ),
                 ],
@@ -290,7 +292,7 @@ class _ItemRow extends StatelessWidget {
             ),
             Icon(
               Icons.chevron_right,
-              color: AppColors.encre.withValues(alpha: 0.3),
+              color: context.colors.encre.withValues(alpha: 0.3),
             ),
           ],
         ),
@@ -320,28 +322,28 @@ class _TypeChooser extends StatelessWidget {
           children: [
             Text(
               context.l10n.vaultAdd,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.w600,
-                color: AppColors.encre,
+                color: context.colors.encre,
               ),
             ),
             const SizedBox(height: 12),
             for (final type in VaultItemType.values) ...[
-              const Divider(height: 1, thickness: 1, color: AppColors.ligne),
+              Divider(height: 1, thickness: 1, color: context.colors.ligne),
               InkWell(
                 onTap: () => Navigator.of(context).pop(type),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   child: Row(
                     children: [
-                      Icon(iconFor(type), color: AppColors.bleu),
+                      Icon(iconFor(type), color: context.colors.bleu),
                       const SizedBox(width: 16),
                       Text(
                         type.label(context.l10n),
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 15,
-                          color: AppColors.encre,
+                          color: context.colors.encre,
                         ),
                       ),
                     ],
@@ -349,7 +351,7 @@ class _TypeChooser extends StatelessWidget {
                 ),
               ),
             ],
-            const Divider(height: 1, thickness: 1, color: AppColors.ligne),
+            Divider(height: 1, thickness: 1, color: context.colors.ligne),
           ],
         ),
       ),

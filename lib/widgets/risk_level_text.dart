@@ -12,12 +12,12 @@ class RiskLevelText extends StatelessWidget {
   final double fontSize;
 
   /// Couleur selon le niveau.
-  static Color colorFor(RiskLevel level) => switch (level) {
-        RiskLevel.eleve => AppColors.rommen,
-        RiskLevel.modere => AppColors.ocre,
-        RiskLevel.faible => AppColors.zitouna,
-        RiskLevel.systeme => AppColors.encre.withValues(alpha: 0.45),
-      };
+  static Color colorFor(AppColors c, RiskLevel level) => switch (level) {
+    RiskLevel.eleve => c.rommen,
+    RiskLevel.modere => c.ocre,
+    RiskLevel.faible => c.zitouna,
+    RiskLevel.systeme => c.discret,
+  };
 
   @override
   Widget build(BuildContext context) {
@@ -26,7 +26,7 @@ class RiskLevelText extends StatelessWidget {
       style: TextStyle(
         fontSize: fontSize,
         fontWeight: FontWeight.w600,
-        color: colorFor(level),
+        color: colorFor(context.colors, level),
       ),
     );
   }

@@ -155,20 +155,20 @@ class _VaultItemScreenState extends State<VaultItemScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: AppColors.chaux,
+        backgroundColor: context.colors.chaux,
         surfaceTintColor: Colors.transparent,
         title: Text(context.l10n.vaultDeleteItemTitle(widget.item!.titre)),
         content: Text(context.l10n.vaultDeleteItemText),
         actions: [
           TextButton(
             style: TextButton.styleFrom(
-              foregroundColor: AppColors.encre.withValues(alpha: 0.6),
+              foregroundColor: context.colors.secondaire,
             ),
             onPressed: () => Navigator.of(context).pop(false),
             child: Text(context.l10n.commonCancel),
           ),
           TextButton(
-            style: TextButton.styleFrom(foregroundColor: AppColors.rommen),
+            style: TextButton.styleFrom(foregroundColor: context.colors.rommen),
             onPressed: () => Navigator.of(context).pop(true),
             child: Text(context.l10n.vaultDelete),
           ),
@@ -205,12 +205,12 @@ class _VaultItemScreenState extends State<VaultItemScreen> {
   @override
   Widget build(BuildContext context) {
     final l = context.l10n;
-    final muted = AppColors.encre.withValues(alpha: 0.6);
+    final muted = context.colors.secondaire;
     return Scaffold(
       // Barre du haut discrète, sans ombre (comme le détail d'une app).
       appBar: AppBar(
-        backgroundColor: AppColors.chaux,
-        foregroundColor: AppColors.encre,
+        backgroundColor: context.colors.chaux,
+        foregroundColor: context.colors.encre,
         elevation: 0,
         scrolledUnderElevation: 0,
         surfaceTintColor: Colors.transparent,
@@ -235,10 +235,10 @@ class _VaultItemScreenState extends State<VaultItemScreen> {
                     widget.item == null
                         ? (_isPassword ? l.vaultNewPassword : l.vaultNewNote)
                         : widget.type.label(l),
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.w600,
-                      color: AppColors.encre,
+                      color: context.colors.encre,
                     ),
                   ),
                   const SizedBox(height: 24),
@@ -261,7 +261,7 @@ class _VaultItemScreenState extends State<VaultItemScreen> {
                 width: double.infinity,
                 child: FilledButton(
                   style: FilledButton.styleFrom(
-                    backgroundColor: AppColors.bleu,
+                    backgroundColor: context.colors.bleu,
                   ),
                   onPressed: _saving ? null : _save,
                   child: Text(_saving ? l.vaultSaving : l.vaultSave),
@@ -299,10 +299,10 @@ class _VaultItemScreenState extends State<VaultItemScreen> {
             padding: const EdgeInsets.only(top: 8),
             child: Text(
               breachMessage(l, count),
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
-                color: AppColors.rommen,
+                color: context.colors.rommen,
               ),
             ),
           );
@@ -311,14 +311,14 @@ class _VaultItemScreenState extends State<VaultItemScreen> {
     Row(
       children: [
         TextButton.icon(
-          style: TextButton.styleFrom(foregroundColor: AppColors.bleu),
+          style: TextButton.styleFrom(foregroundColor: context.colors.bleu),
           onPressed: _copyPassword,
           icon: const Icon(Icons.copy, size: 18),
           label: Text(l.vaultCopy),
         ),
         const Spacer(),
         TextButton.icon(
-          style: TextButton.styleFrom(foregroundColor: AppColors.bleu),
+          style: TextButton.styleFrom(foregroundColor: context.colors.bleu),
           onPressed: () {
             setState(() => _showGenerator = !_showGenerator);
             if (_showGenerator) _generate();
@@ -356,24 +356,26 @@ class _GeneratorPanel extends StatelessWidget {
   final ValueChanged<GeneratorOptions> onChanged;
   final VoidCallback onRegenerate;
 
-  static const _divider = Divider(
-    height: 1,
-    thickness: 1,
-    color: AppColors.ligne,
-  );
+  // Couleur : celle du thème (ligne fine).
+  static const _divider = Divider(height: 1, thickness: 1);
 
-  Widget _switch(String label, bool value, ValueChanged<bool> onToggle) {
+  Widget _switch(
+    BuildContext context,
+    String label,
+    bool value,
+    ValueChanged<bool> onToggle,
+  ) {
     return Row(
       children: [
         Expanded(
           child: Text(
             label,
-            style: const TextStyle(fontSize: 15, color: AppColors.encre),
+            style: TextStyle(fontSize: 15, color: context.colors.encre),
           ),
         ),
         Switch(
           value: value,
-          activeTrackColor: AppColors.bleu,
+          activeTrackColor: context.colors.bleu,
           onChanged: onToggle,
         ),
       ],
@@ -391,7 +393,7 @@ class _GeneratorPanel extends StatelessWidget {
           padding: const EdgeInsets.only(top: 12),
           child: Text(
             l.generatorLength(options.length, l.number(options.length)),
-            style: const TextStyle(fontSize: 15, color: AppColors.encre),
+            style: TextStyle(fontSize: 15, color: context.colors.encre),
           ),
         ),
         Slider(
@@ -399,26 +401,29 @@ class _GeneratorPanel extends StatelessWidget {
           min: GeneratorOptions.minLength.toDouble(),
           max: GeneratorOptions.maxLength.toDouble(),
           divisions: GeneratorOptions.maxLength - GeneratorOptions.minLength,
-          activeColor: AppColors.bleu,
-          inactiveColor: AppColors.ligne,
+          activeColor: context.colors.bleu,
+          inactiveColor: context.colors.ligne,
           label: '${options.length}',
           onChanged: (value) =>
               onChanged(options.copyWith(length: value.round())),
         ),
         _divider,
         _switch(
+          context,
           l.generatorUppercase,
           options.uppercase,
           (v) => onChanged(options.copyWith(uppercase: v)),
         ),
         _divider,
         _switch(
+          context,
           l.generatorDigits,
           options.digits,
           (v) => onChanged(options.copyWith(digits: v)),
         ),
         _divider,
         _switch(
+          context,
           l.generatorSymbols,
           options.symbols,
           (v) => onChanged(options.copyWith(symbols: v)),
@@ -427,7 +432,7 @@ class _GeneratorPanel extends StatelessWidget {
         Align(
           alignment: Alignment.centerRight,
           child: TextButton(
-            style: TextButton.styleFrom(foregroundColor: AppColors.bleu),
+            style: TextButton.styleFrom(foregroundColor: context.colors.bleu),
             onPressed: onRegenerate,
             child: Text(l.generatorNewPassword),
           ),

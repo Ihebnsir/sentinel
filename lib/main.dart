@@ -10,6 +10,7 @@ import 'screens/main_shell.dart';
 import 'screens/startup_gate.dart';
 import 'services/language_store.dart';
 import 'services/onboarding_store.dart';
+import 'services/theme_store.dart';
 import 'theme/app_theme.dart';
 
 // Le point d'entrée d'arrière-plan doit être relié à main.dart, sinon
@@ -28,7 +29,10 @@ Future<void> main() async {
   // Langue choisie dans Réglages, lue avant le premier écran.
   final language = LanguageController();
   await language.load();
-  runApp(SentinelApp(language: language));
+  // Thème choisi (clair, sombre ou celui du téléphone), lu lui aussi avant.
+  final theme = ThemeController();
+  await theme.load();
+  runApp(SentinelApp(language: language, theme: theme));
 }
 
 /// Licence OFL de la police embarquée (lue seulement si on l'affiche).
@@ -76,30 +80,48 @@ class SentinelApp extends StatelessWidget {
     super.key,
     OnboardingStore? onboardingStore,
     LanguageController? language,
+    ThemeController? theme,
   }) : onboardingStore = onboardingStore ?? OnboardingStore(),
-       language = language ?? LanguageController();
+       language = language ?? LanguageController(),
+       theme = theme ?? ThemeController();
 
   final OnboardingStore onboardingStore;
 
   /// Langue choisie (null : celle du téléphone, sinon le français).
   final LanguageController language;
 
+  /// Thème choisi (system : celui du téléphone).
+  final ThemeController theme;
+
   @override
   Widget build(BuildContext context) {
-    // Au-dessus de MaterialApp : Réglages peut changer la langue.
+    // Au-dessus de MaterialApp : Réglages peut changer langue et thème.
     return LanguageScope(
       controller: language,
-      child: ValueListenableBuilder<Locale?>(
-        valueListenable: language,
-        builder: (context, locale, _) => MaterialApp(
-          onGenerateTitle: (context) => context.l10n.appTitle,
-          debugShowCheckedModeBanner: false,
-          theme: AppTheme.light,
-          locale: locale,
-          supportedLocales: appSupportedLocales,
-          localizationsDelegates: appLocalizationsDelegates,
-          // Présentation au premier lancement, puis l'app.
-          home: StartupGate(store: onboardingStore, home: const MainShell()),
+      child: ThemeScope(
+        controller: theme,
+        child: ListenableBuilder(
+          listenable: Listenable.merge([language, theme]),
+          builder: (context, _) => MaterialApp(
+            onGenerateTitle: (context) => context.l10n.appTitle,
+            debugShowCheckedModeBanner: false,
+            theme: AppTheme.light,
+            darkTheme: AppTheme.dark,
+            themeMode: theme.value,
+            locale: language.value,
+            supportedLocales: appSupportedLocales,
+            localizationsDelegates: appLocalizationsDelegates,
+            // Icônes de la barre d'état lisibles sur le fond, même sans
+            // AppBar (onglets) : claires la nuit, foncées le jour.
+            builder: (context, child) => AnnotatedRegion<SystemUiOverlayStyle>(
+              value: Theme.of(context).brightness == Brightness.dark
+                  ? SystemUiOverlayStyle.light
+                  : SystemUiOverlayStyle.dark,
+              child: child!,
+            ),
+            // Présentation au premier lancement, puis l'app.
+            home: StartupGate(store: onboardingStore, home: const MainShell()),
+          ),
         ),
       ),
     );

@@ -57,7 +57,7 @@ class _VaultTextFieldState extends State<VaultTextField> {
 
   @override
   Widget build(BuildContext context) {
-    final muted = AppColors.encre.withValues(alpha: 0.6);
+    final muted = context.colors.secondaire;
     return TextField(
       controller: widget.controller,
       autofocus: widget.autofocus,
@@ -75,18 +75,18 @@ class _VaultTextFieldState extends State<VaultTextField> {
           : widget.keyboardType,
       onChanged: widget.onChanged,
       onSubmitted: widget.onSubmitted,
-      style: const TextStyle(fontSize: 15, color: AppColors.encre),
+      style: TextStyle(fontSize: 15, color: context.colors.encre),
       decoration: InputDecoration(
         labelText: widget.label,
         labelStyle: TextStyle(fontSize: 15, color: muted),
-        floatingLabelStyle: const TextStyle(color: AppColors.bleu),
+        floatingLabelStyle: TextStyle(color: context.colors.bleu),
         errorText: widget.errorText,
         contentPadding: const EdgeInsets.all(14),
-        enabledBorder: _border(AppColors.ligne),
-        disabledBorder: _border(AppColors.ligne),
-        focusedBorder: _border(AppColors.bleu),
-        errorBorder: _border(AppColors.rommen),
-        focusedErrorBorder: _border(AppColors.rommen),
+        enabledBorder: _border(context.colors.ligne),
+        disabledBorder: _border(context.colors.ligne),
+        focusedBorder: _border(context.colors.bleu),
+        errorBorder: _border(context.colors.rommen),
+        focusedErrorBorder: _border(context.colors.rommen),
         suffixIcon: widget.secret
             ? IconButton(
                 tooltip: _hidden
@@ -112,11 +112,12 @@ class PasswordStrengthLine extends StatelessWidget {
 
   final String password;
 
-  static Color _color(PasswordStrength strength) => switch (strength) {
-    PasswordStrength.faible => AppColors.rommen,
-    PasswordStrength.moyen => AppColors.ocre,
-    PasswordStrength.fort => AppColors.zitouna,
-  };
+  static Color _color(AppColors c, PasswordStrength strength) =>
+      switch (strength) {
+        PasswordStrength.faible => c.rommen,
+        PasswordStrength.moyen => c.ocre,
+        PasswordStrength.fort => c.zitouna,
+      };
 
   @override
   Widget build(BuildContext context) {
@@ -130,8 +131,8 @@ class PasswordStrengthLine extends StatelessWidget {
         LinearProgressIndicator(
           value: (strength.index + 1) / PasswordStrength.values.length,
           minHeight: 2,
-          color: _color(strength),
-          backgroundColor: AppColors.ligne,
+          color: _color(context.colors, strength),
+          backgroundColor: context.colors.ligne,
         ),
         const SizedBox(height: 6),
         Text(
@@ -142,7 +143,10 @@ class PasswordStrengthLine extends StatelessWidget {
                   '$masterPasswordMinLength',
                 )
               : l.strengthLine(strength.label(l)),
-          style: TextStyle(fontSize: 13, color: _color(strength)),
+          style: TextStyle(
+            fontSize: 13,
+            color: _color(context.colors, strength),
+          ),
         ),
       ],
     );

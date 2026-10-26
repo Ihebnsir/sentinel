@@ -26,7 +26,7 @@ Future<Duration?> copyFromVault(
             child: Text(context.l10n.commonCancel),
           ),
           FilledButton(
-            style: FilledButton.styleFrom(backgroundColor: AppColors.bleu),
+            style: FilledButton.styleFrom(backgroundColor: context.colors.bleu),
             onPressed: () => Navigator.pop(context, true),
             child: Text(context.l10n.clipboardCopyAnyway),
           ),

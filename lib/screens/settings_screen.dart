@@ -4,6 +4,7 @@ import '../app_info.dart';
 import '../l10n/l10n.dart';
 import '../services/apps_scanner_service.dart';
 import '../services/language_store.dart';
+import '../services/theme_store.dart';
 import '../theme/app_colors.dart';
 import '../widgets/arch_icon.dart';
 import 'audit_summary_screen.dart';
@@ -30,9 +31,9 @@ class SettingsScreen extends StatelessWidget {
       context: context,
       applicationName: 'Sentinel',
       applicationVersion: appVersion,
-      applicationIcon: const Padding(
+      applicationIcon: Padding(
         padding: EdgeInsets.all(12),
-        child: ArchIcon(filled: true, size: 48, color: AppColors.bleu),
+        child: ArchIcon(filled: true, size: 48, color: context.colors.bleu),
       ),
       applicationLegalese: l.settingsLicenseLegalese,
     );
@@ -48,7 +49,7 @@ class SettingsScreen extends StatelessWidget {
     final choice = await showModalBottomSheet<_LanguageChoice>(
       context: context,
       showDragHandle: true,
-      backgroundColor: AppColors.chaux,
+      backgroundColor: context.colors.chaux,
       builder: (context) => SafeArea(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -58,10 +59,10 @@ class SettingsScreen extends StatelessWidget {
                 contentPadding: const EdgeInsets.symmetric(horizontal: 28),
                 title: Text(
                   code == null ? l.settingsLanguageSystem : languageNames[code]!,
-                  style: const TextStyle(fontSize: 15, color: AppColors.encre),
+                  style: TextStyle(fontSize: 15, color: context.colors.encre),
                 ),
                 trailing: code == current
-                    ? const Icon(Icons.check, color: AppColors.bleu)
+                    ? Icon(Icons.check, color: context.colors.bleu)
                     : null,
                 onTap: () => Navigator.of(context).pop(_LanguageChoice(code)),
               ),
@@ -72,11 +73,43 @@ class SettingsScreen extends StatelessWidget {
     if (choice != null) await language.choose(choice.code);
   }
 
+  // Clair, sombre ou comme le téléphone.
+  Future<void> _chooseTheme(BuildContext context, ThemeController theme) async {
+    final l = context.l10n;
+    final choice = await showModalBottomSheet<ThemeMode>(
+      context: context,
+      showDragHandle: true,
+      backgroundColor: context.colors.chaux,
+      builder: (context) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            for (final mode in themeModes)
+              ListTile(
+                contentPadding: const EdgeInsets.symmetric(horizontal: 28),
+                title: Text(
+                  themeModeLabel(l, mode),
+                  style: TextStyle(fontSize: 15, color: context.colors.encre),
+                ),
+                trailing: mode == theme.value
+                    ? Icon(Icons.check, color: context.colors.bleu)
+                    : null,
+                onTap: () => Navigator.of(context).pop(mode),
+              ),
+          ],
+        ),
+      ),
+    );
+    if (choice != null) await theme.choose(choice);
+  }
+
   @override
   Widget build(BuildContext context) {
     final l = context.l10n;
-    // Absent quand l'écran est testé seul : la ligne Langue est masquée.
+    // Absents quand l'écran est testé seul : lignes Langue et Apparence
+    // masquées.
     final language = LanguageScope.maybeOf(context);
+    final theme = ThemeScope.maybeOf(context);
     final code = language?.value?.languageCode;
     final rows = <Widget>[
       if (language != null)
@@ -87,6 +120,13 @@ class SettingsScreen extends StatelessWidget {
               ? l.settingsLanguageSystem
               : languageNames[code] ?? code,
           onTap: () => _chooseLanguage(context, language),
+        ),
+      if (theme != null)
+        _Row(
+          icon: Icons.dark_mode_outlined,
+          title: l.settingsTheme,
+          subtitle: themeModeLabel(l, theme.value),
+          onTap: () => _chooseTheme(context, theme),
         ),
       _Row(
         icon: Icons.replay,
@@ -122,8 +162,8 @@ class SettingsScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: AppColors.chaux,
-        foregroundColor: AppColors.encre,
+        backgroundColor: context.colors.chaux,
+        foregroundColor: context.colors.encre,
         elevation: 0,
         scrolledUnderElevation: 0,
         surfaceTintColor: Colors.transparent,
@@ -135,27 +175,27 @@ class SettingsScreen extends StatelessWidget {
           children: [
             Text(
               l.settingsTitle,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.w600,
-                color: AppColors.encre,
+                color: context.colors.encre,
               ),
             ),
             const SizedBox(height: 24),
             Row(
               children: [
-                const ArchIcon(filled: true, size: 32, color: AppColors.bleu),
+                ArchIcon(filled: true, size: 32, color: context.colors.bleu),
                 const SizedBox(width: 16),
                 Text(
                   l.settingsAppVersion(appVersion),
-                  style: const TextStyle(fontSize: 16, color: AppColors.encre),
+                  style: TextStyle(fontSize: 16, color: context.colors.encre),
                 ),
               ],
             ),
             const SizedBox(height: 16),
             // Une ligne fine entre deux réglages, comme sur l'accueil.
             for (final row in rows) ...[
-              const Divider(height: 1, thickness: 1, color: AppColors.ligne),
+              Divider(height: 1, thickness: 1, color: context.colors.ligne),
               row,
             ],
           ],
@@ -167,6 +207,15 @@ class SettingsScreen extends StatelessWidget {
 
 /// Noms des langues, chacun écrit dans sa propre langue.
 const languageNames = {'fr': 'Français', 'ar': 'العربية', 'en': 'English'};
+
+/// Choix du thème, dans l'ordre affiché.
+const themeModes = [ThemeMode.system, ThemeMode.light, ThemeMode.dark];
+
+String themeModeLabel(AppLocalizations l, ThemeMode mode) => switch (mode) {
+  ThemeMode.system => l.settingsThemeSystem,
+  ThemeMode.light => l.settingsThemeLight,
+  ThemeMode.dark => l.settingsThemeDark,
+};
 
 /// Choix dans la liste des langues (code null : langue du téléphone).
 class _LanguageChoice {
@@ -193,10 +242,10 @@ class _Row extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListTile(
       contentPadding: EdgeInsets.zero,
-      leading: Icon(icon, color: AppColors.encre.withValues(alpha: 0.6)),
+      leading: Icon(icon, color: context.colors.secondaire),
       title: Text(
         title,
-        style: const TextStyle(fontSize: 15, color: AppColors.encre),
+        style: TextStyle(fontSize: 15, color: context.colors.encre),
       ),
       subtitle: subtitle == null
           ? null
@@ -204,7 +253,7 @@ class _Row extends StatelessWidget {
               subtitle!,
               style: TextStyle(
                 fontSize: 13,
-                color: AppColors.encre.withValues(alpha: 0.5),
+                color: context.colors.encre.withValues(alpha: 0.5),
               ),
             ),
       onTap: onTap,

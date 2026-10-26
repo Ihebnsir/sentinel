@@ -103,7 +103,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 width: double.infinity,
                 child: FilledButton(
                   style: FilledButton.styleFrom(
-                    backgroundColor: AppColors.bleu,
+                    backgroundColor: context.colors.bleu,
                   ),
                   onPressed: _next,
                   child: Text(_isLast ? l.onboardingStart : l.onboardingNext),
@@ -127,16 +127,16 @@ class _PageContent extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.fromLTRB(28, 48, 28, 24),
       children: [
-        const Center(
-          child: ArchIcon(filled: true, size: 72, color: AppColors.bleu),
+        Center(
+          child: ArchIcon(filled: true, size: 72, color: context.colors.bleu),
         ),
         const SizedBox(height: 32),
         Text(
           page.title,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 24,
             fontWeight: FontWeight.w600,
-            color: AppColors.encre,
+            color: context.colors.encre,
           ),
         ),
         const SizedBox(height: 20),
@@ -148,7 +148,7 @@ class _PageContent extends StatelessWidget {
               style: TextStyle(
                 fontSize: 15,
                 height: 1.4,
-                color: AppColors.encre.withValues(alpha: 0.8),
+                color: context.colors.encre.withValues(alpha: 0.8),
               ),
             ),
           ),
@@ -176,7 +176,7 @@ class _Dots extends StatelessWidget {
             margin: const EdgeInsets.symmetric(horizontal: 4),
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: i == current ? AppColors.bleu : AppColors.ligne,
+              color: i == current ? context.colors.bleu : context.colors.ligne,
             ),
           ),
       ],

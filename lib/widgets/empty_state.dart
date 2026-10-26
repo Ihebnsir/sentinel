@@ -35,30 +35,29 @@ class EmptyState extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, size: 72, color: AppColors.bleu),
+            Icon(icon, size: 72, color: context.colors.bleu),
             const SizedBox(height: 24),
             Text(
               title,
               textAlign: TextAlign.center,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.w600,
-                color: AppColors.encre,
+                color: context.colors.encre,
               ),
             ),
             const SizedBox(height: 12),
             Text(
               message,
               textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 15,
-                color: AppColors.encre.withValues(alpha: 0.6),
-              ),
+              style: TextStyle(fontSize: 15, color: context.colors.secondaire),
             ),
             if (buttonLabel case final label?) ...[
               const SizedBox(height: 28),
               FilledButton(
-                style: FilledButton.styleFrom(backgroundColor: AppColors.bleu),
+                style: FilledButton.styleFrom(
+                  backgroundColor: context.colors.bleu,
+                ),
                 onPressed: onPressed ?? () => _showComingSoon(context),
                 child: Text(label),
               ),

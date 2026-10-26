@@ -131,24 +131,24 @@ class _VaultScreenState extends State<VaultScreen> {
               children: [
                 Text(
                   l.navVault,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 28,
                     fontWeight: FontWeight.w600,
-                    color: AppColors.encre,
+                    color: context.colors.encre,
                   ),
                 ),
                 const Spacer(),
                 if (opened)
                   IconButton(
                     tooltip: l.vaultSettingsTitle,
-                    color: AppColors.bleu,
+                    color: context.colors.bleu,
                     icon: const Icon(Icons.settings_outlined),
                     onPressed: _openSettings,
                   ),
                 if (opened)
                   TextButton.icon(
                     style: TextButton.styleFrom(
-                      foregroundColor: AppColors.bleu,
+                      foregroundColor: context.colors.bleu,
                     ),
                     onPressed: _session.lock,
                     icon: const Icon(Icons.lock_outline, size: 18),

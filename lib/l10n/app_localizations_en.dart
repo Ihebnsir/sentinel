@@ -194,6 +194,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsLanguageSystem => 'Phone language';
 
   @override
+  String get settingsTheme => 'Appearance';
+
+  @override
+  String get settingsThemeSystem => 'Same as the phone';
+
+  @override
+  String get settingsThemeLight => 'Light';
+
+  @override
+  String get settingsThemeDark => 'Dark';
+
+  @override
   String get settingsReplayOnboarding => 'View the introduction again';
 
   @override
@@ -318,7 +330,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get privacyLocal2 =>
-      'Your choices: consent to the leak check, firewall settings and list of allowed sites, automatic protection on or off, introduction already seen, language.';
+      'Your choices: consent to the leak check, firewall settings and list of allowed sites, automatic protection on or off, introduction already seen, language, theme.';
 
   @override
   String get privacyLocal3 => 'The blocklists and their updates.';

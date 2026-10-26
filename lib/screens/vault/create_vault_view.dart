@@ -68,17 +68,17 @@ class _CreateVaultViewState extends State<CreateVaultView> {
   @override
   Widget build(BuildContext context) {
     final l = context.l10n;
-    final muted = AppColors.encre.withValues(alpha: 0.6);
+    final muted = context.colors.secondaire;
     final showMismatch = _confirmation.text.isNotEmpty && !_matches;
     return ListView(
       padding: const EdgeInsets.only(top: 16, bottom: 24),
       children: [
         Text(
           l.vaultCreate,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.w600,
-            color: AppColors.encre,
+            color: context.colors.encre,
           ),
         ),
         const SizedBox(height: 8),
@@ -89,10 +89,10 @@ class _CreateVaultViewState extends State<CreateVaultView> {
         const SizedBox(height: 8),
         Text(
           l.vaultCreateWarning,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 15,
             fontWeight: FontWeight.w500,
-            color: AppColors.encre,
+            color: context.colors.encre,
           ),
         ),
         const SizedBox(height: 24),
@@ -117,7 +117,7 @@ class _CreateVaultViewState extends State<CreateVaultView> {
           onChanged: (_) => setState(() {}),
         ),
         const SizedBox(height: 16),
-        const Divider(height: 1, thickness: 1, color: AppColors.ligne),
+        Divider(height: 1, thickness: 1, color: context.colors.ligne),
         // Toute la ligne est cliquable, pas seulement la case.
         InkWell(
           onTap: _creating
@@ -129,7 +129,7 @@ class _CreateVaultViewState extends State<CreateVaultView> {
               children: [
                 Checkbox(
                   value: _understood,
-                  activeColor: AppColors.bleu,
+                  activeColor: context.colors.bleu,
                   onChanged: _creating
                       ? null
                       : (value) => setState(() => _understood = value == true),
@@ -138,21 +138,21 @@ class _CreateVaultViewState extends State<CreateVaultView> {
                 Expanded(
                   child: Text(
                     l.vaultUnderstood,
-                    style: const TextStyle(fontSize: 15, color: AppColors.encre),
+                    style: TextStyle(fontSize: 15, color: context.colors.encre),
                   ),
                 ),
               ],
             ),
           ),
         ),
-        const Divider(height: 1, thickness: 1, color: AppColors.ligne),
+        Divider(height: 1, thickness: 1, color: context.colors.ligne),
         if (_creating)
-          const Padding(
+          Padding(
             padding: EdgeInsets.only(top: 16),
             child: LinearProgressIndicator(
               minHeight: 2,
-              color: AppColors.bleu,
-              backgroundColor: AppColors.ligne,
+              color: context.colors.bleu,
+              backgroundColor: context.colors.ligne,
             ),
           ),
         const SizedBox(height: 16),
@@ -165,7 +165,9 @@ class _CreateVaultViewState extends State<CreateVaultView> {
             ),
             const Spacer(),
             FilledButton(
-              style: FilledButton.styleFrom(backgroundColor: AppColors.bleu),
+              style: FilledButton.styleFrom(
+                backgroundColor: context.colors.bleu,
+              ),
               onPressed: _canCreate ? _create : null,
               child: Text(_creating ? l.vaultCreating : l.vaultCreate),
             ),
@@ -174,10 +176,10 @@ class _CreateVaultViewState extends State<CreateVaultView> {
         // Nouveau téléphone : reprendre un coffre exporté.
         if (widget.onRestore != null && VaultPlatform.supportsDocuments) ...[
           const SizedBox(height: 24),
-          const Divider(height: 1, thickness: 1, color: AppColors.ligne),
+          Divider(height: 1, thickness: 1, color: context.colors.ligne),
           const SizedBox(height: 8),
           TextButton.icon(
-            style: TextButton.styleFrom(foregroundColor: AppColors.bleu),
+            style: TextButton.styleFrom(foregroundColor: context.colors.bleu),
             onPressed: _creating ? null : widget.onRestore,
             icon: const Icon(Icons.restore, size: 18),
             label: Text(l.vaultRestoreBackup),

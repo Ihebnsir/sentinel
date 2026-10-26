@@ -101,7 +101,7 @@ class _FirewallScreenState extends State<FirewallScreen> {
       context: context,
       isScrollControlled: true,
       showDragHandle: true,
-      backgroundColor: AppColors.chaux,
+      backgroundColor: context.colors.chaux,
       builder: (_) => const _UpdateConsentSheet(),
     );
     return accepted == true && mounted;
@@ -180,7 +180,7 @@ class _FirewallScreenState extends State<FirewallScreen> {
             child: Text(context.l10n.commonCancel),
           ),
           FilledButton(
-            style: FilledButton.styleFrom(backgroundColor: AppColors.bleu),
+            style: FilledButton.styleFrom(backgroundColor: context.colors.bleu),
             onPressed: () => Navigator.pop(context, true),
             child: Text(context.l10n.commonOpenSettings),
           ),
@@ -208,7 +208,7 @@ class _FirewallScreenState extends State<FirewallScreen> {
         context: context,
         isScrollControlled: true,
         showDragHandle: true,
-        backgroundColor: AppColors.chaux,
+        backgroundColor: context.colors.chaux,
         builder: (_) => const _ExplanationSheet(),
       );
       if (accepted != true || !mounted) return;
@@ -235,13 +235,13 @@ class _FirewallScreenState extends State<FirewallScreen> {
     final l = context.l10n;
     final status = _status;
     final config = _config;
-    final muted = AppColors.encre.withValues(alpha: 0.6);
+    final muted = context.colors.secondaire;
     final active = status?.active ?? false;
 
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: AppColors.chaux,
-        foregroundColor: AppColors.encre,
+        backgroundColor: context.colors.chaux,
+        foregroundColor: context.colors.encre,
         elevation: 0,
         scrolledUnderElevation: 0,
         surfaceTintColor: Colors.transparent,
@@ -253,19 +253,19 @@ class _FirewallScreenState extends State<FirewallScreen> {
           children: [
             Text(
               l.firewallTitle,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.w600,
-                color: AppColors.encre,
+                color: context.colors.encre,
               ),
             ),
             const SizedBox(height: 12),
             Text(
               l.firewallIntro,
-              style: const TextStyle(fontSize: 15, color: AppColors.encre),
+              style: TextStyle(fontSize: 15, color: context.colors.encre),
             ),
             const SizedBox(height: 24),
-            const Divider(height: 1, thickness: 1, color: AppColors.ligne),
+            Divider(height: 1, thickness: 1, color: context.colors.ligne),
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 12),
               child: Row(
@@ -276,10 +276,10 @@ class _FirewallScreenState extends State<FirewallScreen> {
                       children: [
                         Text(
                           l.firewallTitle,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w500,
-                            color: AppColors.encre,
+                            color: context.colors.encre,
                           ),
                         ),
                         const SizedBox(height: 2),
@@ -300,13 +300,13 @@ class _FirewallScreenState extends State<FirewallScreen> {
                 ],
               ),
             ),
-            const Divider(height: 1, thickness: 1, color: AppColors.ligne),
+            Divider(height: 1, thickness: 1, color: context.colors.ligne),
             if (status?.strictPrivateDns case final server?) ...[
               StrictPrivateDnsWarning(
                 server: server,
                 onOpenSettings: _wifiService.openPrivateDnsSettings,
               ),
-              const Divider(height: 1, thickness: 1, color: AppColors.ligne),
+              Divider(height: 1, thickness: 1, color: context.colors.ligne),
             ],
             if (active && status != null) ...[
               UpstreamSection(
@@ -314,14 +314,14 @@ class _FirewallScreenState extends State<FirewallScreen> {
                 plainAllowed: status.plainDnsAllowed,
                 onPlainChanged: _busy ? null : _onPlainDnsChanged,
               ),
-              const Divider(height: 1, thickness: 1, color: AppColors.ligne),
+              Divider(height: 1, thickness: 1, color: context.colors.ligne),
               const SizedBox(height: 24),
               Text(
                 l.firewallSinceActivation,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w600,
-                  color: AppColors.encre,
+                  color: context.colors.encre,
                 ),
               ),
               const SizedBox(height: 4),
@@ -329,7 +329,7 @@ class _FirewallScreenState extends State<FirewallScreen> {
                 label: l.firewallQueriesAnalyzed,
                 value: status.totalQueries,
               ),
-              const Divider(height: 1, thickness: 1, color: AppColors.ligne),
+              Divider(height: 1, thickness: 1, color: context.colors.ligne),
               _CountRow(
                 label: l.firewallQueriesBlocked,
                 value: status.blockedQueries,
@@ -339,11 +339,7 @@ class _FirewallScreenState extends State<FirewallScreen> {
                   in config?.categories ?? const <BlocklistCategory>[])
                 if (category.enabled ||
                     (status.blockedByCategory[category.id] ?? 0) > 0) ...[
-                  const Divider(
-                    height: 1,
-                    thickness: 1,
-                    color: AppColors.ligne,
-                  ),
+                  Divider(height: 1, thickness: 1, color: context.colors.ligne),
                   _CountRow(
                     label: category.displayName(l),
                     value: status.blockedByCategory[category.id] ?? 0,
@@ -416,18 +412,15 @@ class _CountRow extends StatelessWidget {
           Expanded(
             child: Text(
               label,
-              style: TextStyle(
-                fontSize: 15,
-                color: AppColors.encre.withValues(alpha: 0.6),
-              ),
+              style: TextStyle(fontSize: 15, color: context.colors.secondaire),
             ),
           ),
           Text(
             context.l10n.number(value),
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.w500,
-              color: AppColors.encre,
+              color: context.colors.encre,
             ),
           ),
         ],
@@ -460,20 +453,20 @@ class _ExplanationSheet extends StatelessWidget {
           children: [
             Text(
               l.firewallTitle,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.w600,
-                color: AppColors.encre,
+                color: context.colors.encre,
               ),
             ),
             const SizedBox(height: 12),
             for (final line in lines) ...[
-              const Divider(height: 1, thickness: 1, color: AppColors.ligne),
+              Divider(height: 1, thickness: 1, color: context.colors.ligne),
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 10),
                 child: Text(
                   line,
-                  style: const TextStyle(fontSize: 15, color: AppColors.encre),
+                  style: TextStyle(fontSize: 15, color: context.colors.encre),
                 ),
               ),
             ],
@@ -482,7 +475,7 @@ class _ExplanationSheet extends StatelessWidget {
               children: [
                 TextButton(
                   style: TextButton.styleFrom(
-                    foregroundColor: AppColors.encre.withValues(alpha: 0.6),
+                    foregroundColor: context.colors.secondaire,
                   ),
                   onPressed: () => Navigator.of(context).pop(false),
                   child: Text(l.commonLater),
@@ -490,7 +483,7 @@ class _ExplanationSheet extends StatelessWidget {
                 const Spacer(),
                 FilledButton(
                   style: FilledButton.styleFrom(
-                    backgroundColor: AppColors.bleu,
+                    backgroundColor: context.colors.bleu,
                   ),
                   onPressed: () => Navigator.of(context).pop(true),
                   child: Text(l.commonContinue),
@@ -521,20 +514,20 @@ class _UpdateConsentSheet extends StatelessWidget {
           children: [
             Text(
               l.firewallUpdateTitle,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.w600,
-                color: AppColors.encre,
+                color: context.colors.encre,
               ),
             ),
             const SizedBox(height: 12),
             for (final line in lines) ...[
-              const Divider(height: 1, thickness: 1, color: AppColors.ligne),
+              Divider(height: 1, thickness: 1, color: context.colors.ligne),
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 10),
                 child: Text(
                   line,
-                  style: const TextStyle(fontSize: 15, color: AppColors.encre),
+                  style: TextStyle(fontSize: 15, color: context.colors.encre),
                 ),
               ),
             ],
@@ -543,7 +536,7 @@ class _UpdateConsentSheet extends StatelessWidget {
               children: [
                 TextButton(
                   style: TextButton.styleFrom(
-                    foregroundColor: AppColors.encre.withValues(alpha: 0.6),
+                    foregroundColor: context.colors.secondaire,
                   ),
                   onPressed: () => Navigator.of(context).pop(false),
                   child: Text(l.commonLater),
@@ -551,7 +544,7 @@ class _UpdateConsentSheet extends StatelessWidget {
                 const Spacer(),
                 FilledButton(
                   style: FilledButton.styleFrom(
-                    backgroundColor: AppColors.bleu,
+                    backgroundColor: context.colors.bleu,
                   ),
                   onPressed: () => Navigator.of(context).pop(true),
                   child: Text(l.commonAccept),

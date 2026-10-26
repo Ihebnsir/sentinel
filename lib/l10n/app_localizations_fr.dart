@@ -197,6 +197,18 @@ class AppLocalizationsFr extends AppLocalizations {
   String get settingsLanguageSystem => 'Langue du téléphone';
 
   @override
+  String get settingsTheme => 'Apparence';
+
+  @override
+  String get settingsThemeSystem => 'Comme le téléphone';
+
+  @override
+  String get settingsThemeLight => 'Clair';
+
+  @override
+  String get settingsThemeDark => 'Sombre';
+
+  @override
   String get settingsReplayOnboarding => 'Revoir la présentation';
 
   @override
@@ -325,7 +337,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get privacyLocal2 =>
-      'Vos choix : accord pour la vérification des fuites, réglages du pare-feu et liste des sites autorisés, protection automatique activée ou non, présentation déjà vue, langue.';
+      'Vos choix : accord pour la vérification des fuites, réglages du pare-feu et liste des sites autorisés, protection automatique activée ou non, présentation déjà vue, langue, thème.';
 
   @override
   String get privacyLocal3 => 'Les listes de blocage et leurs mises à jour.';

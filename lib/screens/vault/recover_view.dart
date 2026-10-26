@@ -81,16 +81,16 @@ class _RecoverViewState extends State<RecoverView> {
   @override
   Widget build(BuildContext context) {
     final l = context.l10n;
-    final muted = AppColors.encre.withValues(alpha: 0.6);
+    final muted = context.colors.secondaire;
     return ListView(
       padding: const EdgeInsets.only(top: 16, bottom: 24),
       children: [
         Text(
           l.vaultForgotTitle,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.w600,
-            color: AppColors.encre,
+            color: context.colors.encre,
           ),
         ),
         const SizedBox(height: 8),
@@ -141,12 +141,12 @@ class _RecoverViewState extends State<RecoverView> {
           ),
         ],
         if (_busy)
-          const Padding(
+          Padding(
             padding: EdgeInsets.only(top: 16),
             child: LinearProgressIndicator(
               minHeight: 2,
-              color: AppColors.bleu,
-              backgroundColor: AppColors.ligne,
+              color: context.colors.bleu,
+              backgroundColor: context.colors.ligne,
             ),
           ),
         const SizedBox(height: 16),
@@ -160,7 +160,9 @@ class _RecoverViewState extends State<RecoverView> {
             const Spacer(),
             if (!_keyChecked)
               FilledButton(
-                style: FilledButton.styleFrom(backgroundColor: AppColors.bleu),
+                style: FilledButton.styleFrom(
+                  backgroundColor: context.colors.bleu,
+                ),
                 onPressed: !_busy && _recoveryKey.text.trim().isNotEmpty
                     ? _checkKey
                     : null,
@@ -168,7 +170,9 @@ class _RecoverViewState extends State<RecoverView> {
               )
             else
               FilledButton(
-                style: FilledButton.styleFrom(backgroundColor: AppColors.bleu),
+                style: FilledButton.styleFrom(
+                  backgroundColor: context.colors.bleu,
+                ),
                 onPressed: _canSave ? _save : null,
                 child: Text(_busy ? l.vaultSaving : l.vaultSave),
               ),

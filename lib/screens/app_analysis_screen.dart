@@ -8,7 +8,8 @@ import '../services/firewall_service.dart';
 import '../theme/app_colors.dart';
 import '../widgets/app_icon.dart';
 
-const _divider = Divider(height: 1, thickness: 1, color: AppColors.ligne);
+// Couleur : celle du thème (dividerTheme, ligne fine).
+const _divider = Divider(height: 1, thickness: 1);
 
 const _ownPackage = 'com.iheb.sentinel';
 
@@ -59,7 +60,7 @@ class _AppAnalysisScreenState extends State<AppAnalysisScreen> {
       context: context,
       isScrollControlled: true,
       showDragHandle: true,
-      backgroundColor: AppColors.chaux,
+      backgroundColor: context.colors.chaux,
       builder: (_) => _AnalysisSheet(app: app),
     );
     if (minutes == null || !mounted) return;
@@ -83,14 +84,11 @@ class _AppAnalysisScreenState extends State<AppAnalysisScreen> {
   Widget build(BuildContext context) {
     final l = context.l10n;
     final apps = _apps;
-    final muted = TextStyle(
-      fontSize: 15,
-      color: AppColors.encre.withValues(alpha: 0.6),
-    );
+    final muted = TextStyle(fontSize: 15, color: context.colors.secondaire);
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: AppColors.chaux,
-        foregroundColor: AppColors.encre,
+        backgroundColor: context.colors.chaux,
+        foregroundColor: context.colors.encre,
         elevation: 0,
         scrolledUnderElevation: 0,
         surfaceTintColor: Colors.transparent,
@@ -102,16 +100,16 @@ class _AppAnalysisScreenState extends State<AppAnalysisScreen> {
           children: [
             Text(
               l.analysisSectionTitle,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.w600,
-                color: AppColors.encre,
+                color: context.colors.encre,
               ),
             ),
             const SizedBox(height: 12),
             Text(
               l.analysisScreenIntro,
-              style: const TextStyle(fontSize: 15, color: AppColors.encre),
+              style: TextStyle(fontSize: 15, color: context.colors.encre),
             ),
             const SizedBox(height: 24),
             _divider,
@@ -145,10 +143,10 @@ class _AppAnalysisScreenState extends State<AppAnalysisScreen> {
                             app.label,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w500,
-                              color: AppColors.encre,
+                              color: context.colors.encre,
                             ),
                           ),
                         ),
@@ -204,10 +202,10 @@ class _AnalysisSheetState extends State<_AnalysisSheet> {
                 Expanded(
                   child: Text(
                     l.analysisSheetTitle(name),
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.w600,
-                      color: AppColors.encre,
+                      color: context.colors.encre,
                     ),
                   ),
                 ),
@@ -240,7 +238,9 @@ class _AnalysisSheetState extends State<_AnalysisSheet> {
                   style: TextStyle(
                     fontSize: 15,
                     // La fenêtre sans protection est mise en avant.
-                    color: index == 1 ? AppColors.ocre : AppColors.encre,
+                    color: index == 1
+                        ? context.colors.ocre
+                        : context.colors.encre,
                   ),
                 ),
               ),
@@ -250,7 +250,7 @@ class _AnalysisSheetState extends State<_AnalysisSheet> {
               children: [
                 TextButton(
                   style: TextButton.styleFrom(
-                    foregroundColor: AppColors.encre.withValues(alpha: 0.6),
+                    foregroundColor: context.colors.secondaire,
                   ),
                   onPressed: () => Navigator.of(context).pop(),
                   child: Text(l.commonCancel),
@@ -258,7 +258,7 @@ class _AnalysisSheetState extends State<_AnalysisSheet> {
                 const Spacer(),
                 FilledButton(
                   style: FilledButton.styleFrom(
-                    backgroundColor: AppColors.bleu,
+                    backgroundColor: context.colors.bleu,
                   ),
                   onPressed: () => Navigator.of(context).pop(_minutes),
                   child: Text(l.appsStartScan),

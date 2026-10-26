@@ -125,7 +125,7 @@ class _UnlockViewState extends State<UnlockView> {
   @override
   Widget build(BuildContext context) {
     final l = context.l10n;
-    final muted = AppColors.encre.withValues(alpha: 0.6);
+    final muted = context.colors.secondaire;
     final waitSeconds = (_wait.inMilliseconds / 1000).ceil();
     final session = widget.session;
     final biometric = session.canUnlockWithBiometrics;
@@ -139,14 +139,14 @@ class _UnlockViewState extends State<UnlockView> {
     return ListView(
       padding: const EdgeInsets.only(top: 16, bottom: 24),
       children: [
-        const Icon(Icons.lock_outline, size: 48, color: AppColors.bleu),
+        Icon(Icons.lock_outline, size: 48, color: context.colors.bleu),
         const SizedBox(height: 16),
         Text(
           l.vaultLockedTitle,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.w600,
-            color: AppColors.encre,
+            color: context.colors.encre,
           ),
         ),
         const SizedBox(height: 8),
@@ -161,7 +161,7 @@ class _UnlockViewState extends State<UnlockView> {
             padding: const EdgeInsets.only(top: 12),
             child: Text(
               info,
-              style: const TextStyle(fontSize: 15, color: AppColors.encre),
+              style: TextStyle(fontSize: 15, color: context.colors.encre),
             ),
           ),
         if (biometric) ...[
@@ -169,7 +169,9 @@ class _UnlockViewState extends State<UnlockView> {
           SizedBox(
             width: double.infinity,
             child: FilledButton.icon(
-              style: FilledButton.styleFrom(backgroundColor: AppColors.bleu),
+              style: FilledButton.styleFrom(
+                backgroundColor: context.colors.bleu,
+              ),
               onPressed: _opening ? null : _openWithBiometrics,
               icon: const Icon(Icons.fingerprint),
               label: Text(l.vaultOpenWithFingerprint),
@@ -199,23 +201,23 @@ class _UnlockViewState extends State<UnlockView> {
                 if (_wrong) l.vaultWrongPassword,
                 if (waitSeconds > 0) l.vaultRetryIn('$waitSeconds'),
               ].join(' '),
-              style: const TextStyle(fontSize: 15, color: AppColors.rommen),
+              style: TextStyle(fontSize: 15, color: context.colors.rommen),
             ),
           ),
         if (_opening)
-          const Padding(
+          Padding(
             padding: EdgeInsets.only(top: 16),
             child: LinearProgressIndicator(
               minHeight: 2,
-              color: AppColors.bleu,
-              backgroundColor: AppColors.ligne,
+              color: context.colors.bleu,
+              backgroundColor: context.colors.ligne,
             ),
           ),
         const SizedBox(height: 16),
         Align(
           alignment: Alignment.centerRight,
           child: FilledButton(
-            style: FilledButton.styleFrom(backgroundColor: AppColors.bleu),
+            style: FilledButton.styleFrom(backgroundColor: context.colors.bleu),
             onPressed:
                 !_opening && waitSeconds == 0 && _password.text.isNotEmpty
                 ? _open
@@ -226,11 +228,11 @@ class _UnlockViewState extends State<UnlockView> {
         // Les vieux coffres migrés n'ont pas toujours de clé.
         if (session.hasRecoveryKey) ...[
           const SizedBox(height: 8),
-          const Divider(height: 1, thickness: 1, color: AppColors.ligne),
+          Divider(height: 1, thickness: 1, color: context.colors.ligne),
           Align(
             alignment: Alignment.centerLeft,
             child: TextButton(
-              style: TextButton.styleFrom(foregroundColor: AppColors.bleu),
+              style: TextButton.styleFrom(foregroundColor: context.colors.bleu),
               onPressed: _opening ? null : widget.onForgotPassword,
               child: Text(l.vaultForgotPassword),
             ),

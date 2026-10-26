@@ -41,6 +41,7 @@ The app's interface is in French. Everything runs on the phone. Nothing goes ove
 - **Automatic protection (opt-in).** A notification listener reads incoming messages from SMS apps, WhatsApp, WhatsApp Business, Messenger, Telegram and Viber. They are analyzed by the same Dart model in a headless Flutter engine, and a "likely scam" alert is shown when the verdict is a scam.
 - **Wi-Fi check.** Shows the encryption type (open, WEP, WPA2, WPA3, OWE, enterprise), captive portal and Private DNS status, without the location permission and without reading the network name.
 - **Encrypted vault.** Stores passwords and secure notes, encrypted with Argon2id + AES-256-GCM. You can unlock it with the master password, a recovery key, or a fingerprint (Android Keystore). An encrypted backup file (`.sentinel`) moves it to a new phone.
+- **Dark theme.** A "night" palette matching the app icon (navy background, light text, status colors adjusted to WCAG AA contrast). It follows the phone setting, or Light / Dark can be chosen in Settings.
 - **Password tools.** Random password generator (12–64 characters), strength estimate, and a password health report: breached (Have I Been Pwned), reused and weak passwords.
 
 ## Security highlights
@@ -80,7 +81,7 @@ Diagrams and details: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
 ## Tests
 
-**598 tests** in 43 test files (`flutter test`). They cover:
+**631 tests** in 45 test files (`flutter test`). They cover:
 
 - the vault: the Argon2id RFC 9106 test vector, encryption, key slots, v1 → v2 migration, tamper detection (ciphertext, wrapped key, header), session and lock behavior;
 - the encrypted backup: export/import round trip, wrong password, tampered file, unknown version, empty file, restore into a new vault;
@@ -89,11 +90,12 @@ Diagrams and details: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 - the app, device and Wi-Fi risk rules;
 - password health and the password generator;
 - the Android bridges (firewall, protection, apps, biometrics, shared text): arguments sent, and every error code Android can return;
+- the themes: WCAG contrast of the main color pairs, and the main screens rendered in dark mode;
 - QR codes: parsing of every supported format (link, `WIFI:`, `tel:`, `sms:`, payments, text), the security decisions, and that nothing opens without confirmation.
 
 Network and biometrics are replaced by test doubles, so the tests run offline.
 
-**Coverage.** The app logic (`lib/services`, `lib/models`, `lib/utils`) is at **95.4 %** line coverage (October 2026). Screens and widgets are not counted. The CI runs `flutter test --coverage`, writes a per-file table in the run summary and fails below 85 %. No third-party service. Locally:
+**Coverage.** The app logic (`lib/services`, `lib/models`, `lib/utils`) is at **95.6 %** line coverage (October 2026). Screens and widgets are not counted. The CI runs `flutter test --coverage`, writes a per-file table in the run summary and fails below 85 %. No third-party service. Locally:
 
 ```bash
 flutter test --coverage

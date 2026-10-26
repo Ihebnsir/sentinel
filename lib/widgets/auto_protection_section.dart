@@ -71,7 +71,7 @@ class _AutoProtectionSectionState extends State<AutoProtectionSection> {
         context: context,
         isScrollControlled: true,
         showDragHandle: true,
-        backgroundColor: AppColors.chaux,
+        backgroundColor: context.colors.chaux,
         builder: (_) => const _ExplanationSheet(),
       );
       if (accepted != true || !mounted) return;
@@ -95,13 +95,13 @@ class _AutoProtectionSectionState extends State<AutoProtectionSection> {
     final l = context.l10n;
     final status = _status;
     if (status == null) return const SizedBox.shrink();
-    final muted = AppColors.encre.withValues(alpha: 0.6);
+    final muted = context.colors.secondaire;
     final active = status.isActive;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Divider(height: 1, thickness: 1, color: AppColors.ligne),
+        Divider(height: 1, thickness: 1, color: context.colors.ligne),
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 12),
           child: Row(
@@ -112,10 +112,10 @@ class _AutoProtectionSectionState extends State<AutoProtectionSection> {
                   children: [
                     Text(
                       l.autoProtectionTitle,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w500,
-                        color: AppColors.encre,
+                        color: context.colors.encre,
                       ),
                     ),
                     const SizedBox(height: 2),
@@ -141,7 +141,7 @@ class _AutoProtectionSectionState extends State<AutoProtectionSection> {
             label: l.autoProtectionRemoveAccess,
             onPressed: _service.openListenerSettings,
           ),
-        const Divider(height: 1, thickness: 1, color: AppColors.ligne),
+        Divider(height: 1, thickness: 1, color: context.colors.ligne),
       ],
     );
   }
@@ -168,7 +168,7 @@ class _Link extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 8),
       child: TextButton(
         style: TextButton.styleFrom(
-          foregroundColor: AppColors.bleu,
+          foregroundColor: context.colors.bleu,
           padding: EdgeInsets.zero,
           alignment: Alignment.centerLeft,
         ),
@@ -196,10 +196,10 @@ class _ExplanationSheet extends StatelessWidget {
           children: [
             Text(
               l.autoProtectionTitle,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.w600,
-                color: AppColors.encre,
+                color: context.colors.encre,
               ),
             ),
             const SizedBox(height: 20),
@@ -225,7 +225,7 @@ class _ExplanationSheet extends StatelessWidget {
               children: [
                 TextButton(
                   style: TextButton.styleFrom(
-                    foregroundColor: AppColors.encre.withValues(alpha: 0.6),
+                    foregroundColor: context.colors.secondaire,
                   ),
                   onPressed: () => Navigator.of(context).pop(false),
                   child: Text(l.commonLater),
@@ -233,7 +233,7 @@ class _ExplanationSheet extends StatelessWidget {
                 const Spacer(),
                 FilledButton(
                   style: FilledButton.styleFrom(
-                    backgroundColor: AppColors.bleu,
+                    backgroundColor: context.colors.bleu,
                   ),
                   onPressed: () => Navigator.of(context).pop(true),
                   child: Text(l.commonContinue),
@@ -261,20 +261,20 @@ class _SheetSection extends StatelessWidget {
       children: [
         Text(
           title,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 15,
             fontWeight: FontWeight.w600,
-            color: AppColors.encre,
+            color: context.colors.encre,
           ),
         ),
         const SizedBox(height: 8),
         for (final line in lines) ...[
-          const Divider(height: 1, thickness: 1, color: AppColors.ligne),
+          Divider(height: 1, thickness: 1, color: context.colors.ligne),
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 10),
             child: Text(
               line,
-              style: const TextStyle(fontSize: 15, color: AppColors.encre),
+              style: TextStyle(fontSize: 15, color: context.colors.encre),
             ),
           ),
         ],

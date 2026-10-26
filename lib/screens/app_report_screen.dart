@@ -14,10 +14,11 @@ import '../widgets/app_icon.dart';
 import '../widgets/blocklist_sections.dart';
 import 'app_detail_screen.dart';
 
-const _divider = Divider(height: 1, thickness: 1, color: AppColors.ligne);
+// Couleur : celle du thème (dividerTheme, ligne fine).
+const _divider = Divider(height: 1, thickness: 1);
 
-TextStyle get _muted =>
-    TextStyle(fontSize: 13, color: AppColors.encre.withValues(alpha: 0.6));
+TextStyle _muted(BuildContext context) =>
+    TextStyle(fontSize: 13, color: context.colors.secondaire);
 
 /// Rapport d'une analyse : résumé, compteurs, domaines par catégorie.
 /// Renvoie true (Navigator.pop) si le rapport a été supprimé ou a expiré.
@@ -113,8 +114,8 @@ class _AppReportScreenState extends State<AppReportScreen> {
     final app = _app;
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: AppColors.chaux,
-        foregroundColor: AppColors.encre,
+        backgroundColor: context.colors.chaux,
+        foregroundColor: context.colors.encre,
         elevation: 0,
         scrolledUnderElevation: 0,
         surfaceTintColor: Colors.transparent,
@@ -133,10 +134,10 @@ class _AppReportScreenState extends State<AppReportScreen> {
                 Expanded(
                   child: Text(
                     report.appLabel,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.w600,
-                      color: AppColors.encre,
+                      color: context.colors.encre,
                     ),
                   ),
                 ),
@@ -148,12 +149,12 @@ class _AppReportScreenState extends State<AppReportScreen> {
                 l.dateTime(report.startedAt),
                 report.durationLabel(l),
               ),
-              style: _muted,
+              style: _muted(context),
             ),
             const SizedBox(height: 16),
             Text(
               report.summary(l),
-              style: const TextStyle(fontSize: 17, color: AppColors.encre),
+              style: TextStyle(fontSize: 17, color: context.colors.encre),
             ),
             const SizedBox(height: 16),
             _divider,
@@ -162,7 +163,7 @@ class _AppReportScreenState extends State<AppReportScreen> {
             _CountRow(
               l.reportDangerousSites,
               report.dangerousCount,
-              color: report.dangerousCount > 0 ? AppColors.rommen : null,
+              color: report.dangerousCount > 0 ? context.colors.rommen : null,
             ),
             _divider,
             _CountRow(
@@ -175,7 +176,7 @@ class _AppReportScreenState extends State<AppReportScreen> {
             if (report.truncated)
               Padding(
                 padding: const EdgeInsets.only(top: 8),
-                child: Text(l.reportTruncated, style: _muted),
+                child: Text(l.reportTruncated, style: _muted(context)),
               ),
             for (final group in report.groups) ...[
               BlocklistSectionTitle(
@@ -192,7 +193,7 @@ class _AppReportScreenState extends State<AppReportScreen> {
                 alignment: Alignment.centerLeft,
                 child: TextButton(
                   style: TextButton.styleFrom(
-                    foregroundColor: AppColors.bleu,
+                    foregroundColor: context.colors.bleu,
                     padding: EdgeInsets.zero,
                   ),
                   onPressed: _openDetail,
@@ -203,7 +204,7 @@ class _AppReportScreenState extends State<AppReportScreen> {
               alignment: Alignment.centerLeft,
               child: TextButton(
                 style: TextButton.styleFrom(
-                  foregroundColor: AppColors.rommen,
+                  foregroundColor: context.colors.rommen,
                   padding: EdgeInsets.zero,
                 ),
                 onPressed: _delete,
@@ -213,10 +214,10 @@ class _AppReportScreenState extends State<AppReportScreen> {
             const SizedBox(height: 8),
             Text(
               l.reportLocalOnly(l.dateTime(report.expiresAt)),
-              style: _muted,
+              style: _muted(context),
             ),
             const SizedBox(height: 8),
-            Text(l.reportApproximate, style: _muted),
+            Text(l.reportApproximate, style: _muted(context)),
           ],
         ),
       ),
@@ -241,10 +242,7 @@ class _CountRow extends StatelessWidget {
           Expanded(
             child: Text(
               label,
-              style: TextStyle(
-                fontSize: 15,
-                color: AppColors.encre.withValues(alpha: 0.6),
-              ),
+              style: TextStyle(fontSize: 15, color: context.colors.secondaire),
             ),
           ),
           Text(
@@ -252,7 +250,7 @@ class _CountRow extends StatelessWidget {
             style: TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.w500,
-              color: color ?? AppColors.encre,
+              color: color ?? context.colors.encre,
             ),
           ),
         ],
@@ -282,14 +280,14 @@ class _DomainRow extends StatelessWidget {
               children: [
                 Text(
                   domain.name,
-                  style: const TextStyle(fontSize: 15, color: AppColors.encre),
+                  style: TextStyle(fontSize: 15, color: context.colors.encre),
                 ),
                 if (brand != null)
                   Text(
                     l.reportImitates(brand),
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 13,
-                      color: AppColors.rommen,
+                      color: context.colors.rommen,
                     ),
                   ),
               ],
@@ -299,14 +297,11 @@ class _DomainRow extends StatelessWidget {
           Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              Text(count, style: _muted),
+              Text(count, style: _muted(context)),
               if (domain.blocked)
                 Text(
                   l.reportBlocked,
-                  style: const TextStyle(
-                    fontSize: 13,
-                    color: AppColors.zitouna,
-                  ),
+                  style: TextStyle(fontSize: 13, color: context.colors.zitouna),
                 ),
             ],
           ),

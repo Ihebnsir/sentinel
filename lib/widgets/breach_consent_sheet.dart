@@ -9,7 +9,7 @@ Future<bool> askBreachConsent(BuildContext context) async {
   final accepted = await showModalBottomSheet<bool>(
     context: context,
     showDragHandle: true,
-    backgroundColor: AppColors.chaux,
+    backgroundColor: context.colors.chaux,
     elevation: 0,
     isScrollControlled: true,
     builder: (context) => const _ConsentSheet(),
@@ -23,7 +23,7 @@ class _ConsentSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l = context.l10n;
-    final muted = AppColors.encre.withValues(alpha: 0.6);
+    final muted = context.colors.secondaire;
     return SafeArea(
       child: SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(28, 0, 28, 16),
@@ -32,16 +32,16 @@ class _ConsentSheet extends StatelessWidget {
           children: [
             Text(
               l.breachConsentTitle,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.w600,
-                color: AppColors.encre,
+                color: context.colors.encre,
               ),
             ),
             const SizedBox(height: 12),
             Text(
               l.breachConsentText,
-              style: const TextStyle(fontSize: 15, color: AppColors.encre),
+              style: TextStyle(fontSize: 15, color: context.colors.encre),
             ),
             const SizedBox(height: 12),
             Text(
@@ -52,7 +52,9 @@ class _ConsentSheet extends StatelessWidget {
             SizedBox(
               width: double.infinity,
               child: FilledButton(
-                style: FilledButton.styleFrom(backgroundColor: AppColors.bleu),
+                style: FilledButton.styleFrom(
+                  backgroundColor: context.colors.bleu,
+                ),
                 onPressed: () => Navigator.of(context).pop(true),
                 child: Text(l.breachConsentCheck),
               ),

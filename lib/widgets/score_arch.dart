@@ -17,10 +17,10 @@ class ScoreArch extends StatelessWidget {
   static const _height = 300.0;
 
   /// Couleur selon le niveau de sécurité.
-  static Color colorFor(int score) {
-    if (score >= 70) return AppColors.bleu;
-    if (score >= 45) return AppColors.ocre;
-    return AppColors.rommen;
+  static Color colorFor(AppColors c, int score) {
+    if (score >= 70) return c.bleu;
+    if (score >= 45) return c.ocre;
+    return c.rommen;
   }
 
   @override
@@ -28,20 +28,20 @@ class ScoreArch extends StatelessWidget {
     final message = this.message;
     if (message != null) {
       return _frame(
-        background: AppColors.bleu.withValues(alpha: 0.12),
+        background: context.colors.bleu.withValues(alpha: 0.12),
         children: [
           Positioned(
             bottom: 28,
             child: Text(
               message,
-              style: TextStyle(color: AppColors.encre.withValues(alpha: 0.6)),
+              style: TextStyle(color: context.colors.secondaire),
             ),
           ),
         ],
       );
     }
 
-    final color = colorFor(score);
+    final color = colorFor(context.colors, score);
 
     // TweenAnimationBuilder anime une valeur de 0 jusqu'au score.
     // La fonction builder est rappelée à chaque image de l'animation
@@ -51,9 +51,12 @@ class ScoreArch extends StatelessWidget {
       duration: const Duration(milliseconds: 1400),
       curve: Curves.easeOutCubic,
       builder: (context, value, _) {
-        // Le chiffre est sur la partie remplie à partir de 45 : texte blanc.
+        // Le chiffre est sur la partie remplie à partir de 45 : texte le
+        // plus lisible sur cette couleur (contraste WCAG).
         final onFill = value >= 45;
-        final textColor = onFill ? Colors.white : AppColors.encre;
+        final textColor = onFill
+            ? context.colors.textOn(color)
+            : context.colors.encre;
 
         return _frame(
           background: color.withValues(alpha: 0.12),

@@ -156,16 +156,16 @@ class _RestoreBackupViewState extends State<RestoreBackupView> {
   @override
   Widget build(BuildContext context) {
     final l = context.l10n;
-    final muted = AppColors.encre.withValues(alpha: 0.6);
+    final muted = context.colors.secondaire;
     return ListView(
       padding: const EdgeInsets.only(top: 16, bottom: 24),
       children: [
         Text(
           l.vaultRestoreBackup,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.w600,
-            color: AppColors.encre,
+            color: context.colors.encre,
           ),
         ),
         const SizedBox(height: 8),
@@ -213,16 +213,16 @@ class _RestoreBackupViewState extends State<RestoreBackupView> {
           const SizedBox(height: 12),
           Text(
             _error!,
-            style: const TextStyle(fontSize: 14, color: AppColors.rommen),
+            style: TextStyle(fontSize: 14, color: context.colors.rommen),
           ),
         ],
         if (_busy)
-          const Padding(
+          Padding(
             padding: EdgeInsets.only(top: 16),
             child: LinearProgressIndicator(
               minHeight: 2,
-              color: AppColors.bleu,
-              backgroundColor: AppColors.ligne,
+              color: context.colors.bleu,
+              backgroundColor: context.colors.ligne,
             ),
           ),
         const SizedBox(height: 16),
@@ -235,7 +235,9 @@ class _RestoreBackupViewState extends State<RestoreBackupView> {
             ),
             const Spacer(),
             FilledButton(
-              style: FilledButton.styleFrom(backgroundColor: AppColors.bleu),
+              style: FilledButton.styleFrom(
+                backgroundColor: context.colors.bleu,
+              ),
               onPressed: switch (_step) {
                 _Step.fichier => _busy ? null : _pickFile,
                 _Step.motDePasse =>

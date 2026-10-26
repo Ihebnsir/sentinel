@@ -4,7 +4,8 @@ import '../l10n/l10n.dart';
 import '../services/firewall_service.dart';
 import '../theme/app_colors.dart';
 
-const _divider = Divider(height: 1, thickness: 1, color: AppColors.ligne);
+// Couleur : celle du thème (dividerTheme, ligne fine).
+const _divider = Divider(height: 1, thickness: 1);
 
 /// Texte de l'état du DNS vers Quad9 (SEN-10).
 String upstreamLabel(AppLocalizations l, UpstreamMode mode) => switch (mode) {
@@ -32,7 +33,7 @@ class UpstreamSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l = context.l10n;
-    final muted = AppColors.encre.withValues(alpha: 0.6);
+    final muted = context.colors.secondaire;
     final warning = mode == UpstreamMode.failing || mode == UpstreamMode.plain;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -44,7 +45,7 @@ class UpstreamSection extends StatelessWidget {
               Expanded(
                 child: Text(
                   l.upstreamLabel,
-                  style: const TextStyle(fontSize: 15, color: AppColors.encre),
+                  style: TextStyle(fontSize: 15, color: context.colors.encre),
                 ),
               ),
               Flexible(
@@ -54,7 +55,7 @@ class UpstreamSection extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
-                    color: warning ? AppColors.rommen : muted,
+                    color: warning ? context.colors.rommen : muted,
                   ),
                 ),
               ),
@@ -78,10 +79,7 @@ class UpstreamSection extends StatelessWidget {
                 Expanded(
                   child: Text(
                     l.upstreamAllowPlain,
-                    style: const TextStyle(
-                      fontSize: 15,
-                      color: AppColors.encre,
-                    ),
+                    style: TextStyle(fontSize: 15, color: context.colors.encre),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -116,20 +114,20 @@ class StrictPrivateDnsWarning extends StatelessWidget {
         children: [
           Text(
             l.dnsStrictTitle,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w500,
-              color: AppColors.rommen,
+              color: context.colors.rommen,
             ),
           ),
           const SizedBox(height: 4),
           Text(
             l.dnsStrictMessage(server),
-            style: const TextStyle(fontSize: 14, color: AppColors.encre),
+            style: TextStyle(fontSize: 14, color: context.colors.encre),
           ),
           TextButton(
             style: TextButton.styleFrom(
-              foregroundColor: AppColors.bleu,
+              foregroundColor: context.colors.bleu,
               padding: EdgeInsets.zero,
             ),
             onPressed: onOpenSettings,

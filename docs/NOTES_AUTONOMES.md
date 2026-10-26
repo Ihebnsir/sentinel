@@ -113,3 +113,49 @@ Choix faits sans demander :
 - **Tests** : `qr_content_test.dart` (tous les formats et cas abîmés), `qr_safety_test.dart` (verdicts et actions), `qr_screens_test.dart` (rien ne s'ouvre sans confirmation, bouton désactivé, Wi-Fi ouvert, USSD, échec de l'IA, arabe de droite à gauche, explication avant la caméra, refus définitif), `QrActionsTest.kt`. Couverture de la logique : 95,4 %.
 
 Non vérifié : l'interface n'a pas été lancée sur un téléphone (règle : pas de `flutter run`). À tester à la main : le scan réel, la demande de caméra et son refus définitif, la rotation de l'écran de scan, l'ouverture des apps (navigateur, composeur, SMS, portefeuille), un QR de paiement réel d'une banque tunisienne (EMVCo supposé).
+
+## Thème sombre « nuit » (2026-10-26)
+
+Choix faits sans demander :
+
+- **Tokens de couleur** : `AppColors` est maintenant une `ThemeExtension` avec deux palettes, `AppColors.light` (couleurs d'origine) et `AppColors.dark`. Les écrans lisent `context.colors.x` ; il ne reste aucune couleur en dur dans `lib/` hors de `lib/theme/` (vérifié par recherche de `Colors.`/`Color(0x`, sauf `Colors.transparent`). Les noms restent ceux d'avant (`chaux` = fond, `encre` = texte) pour garder un diff lisible. Nouveaux tokens :
+  - `secondaire` (texte atténué, remplace `encre` à 60 %) ;
+  - `discret` (remplace `encre` à 45 %) ;
+  - `surCouleur` (texte sur un fond plein).
+- **Palette nuit** (fond = celui de l'icône, #0E1A33). Contraste sur le fond :
+
+  | Rôle | Couleur | Contraste |
+  |---|---|---|
+  | Texte (`encre`) | #E8EEF7 | 14,8:1 |
+  | Bleu | #6EA8FF | 7,2:1 |
+  | Vert (`zitouna`) | #8CC063 | 8,1:1 |
+  | Ocre | #F2B84B | 9,7:1 |
+  | Rouge (`rommen`) | #FF7A88 | 6,9:1 |
+  | Texte secondaire (70 %) | | 7,8:1 |
+  | Texte discret (58 %) | | 5,7:1 |
+  | Lignes fines (`ligne`) | #25365C | 1,45:1 (décoratif) |
+
+  Sur le bleu plein (boutons), le texte est bleu nuit, pas blanc (blanc sur #6EA8FF : 2,4:1).
+- **Texte sur couleur pleine** : `textOn(fond)` choisit `surCouleur` ou `encre` selon le meilleur contraste WCAG. Il sert à l'arche du score (chiffre sur la partie remplie) et au bandeau d'alerte Wi-Fi. Effet aussi en clair : le chiffre sur l'arche ocre (score 45 à 69) passe de blanc (2,2:1) à encre (7,3:1).
+- **Thème clair, une seule retouche** : `secondaire` passe de 60 % à 64 % d'encre (4,2:1 → 4,76:1, niveau AA). Le thème clair reçoit aussi les thèmes globaux :
+  - boutons pleins bleu `#1F5FA8` (avant : bleu généré par Material, très proche) ;
+  - séparateurs `ligne` ;
+  - fond des boîtes de dialogue et des feuilles du bas en `chaux` (déjà le cas pour presque toutes).
+- **Écarts restants du thème clair, signalés et non corrigés** (changer l'ambre de la marque dépasse la demande) :
+  - ocre en texte (« Suspect », « Modéré », force « moyen ») : 2,0:1 ;
+  - texte `discret` : 2,7:1 ;
+  - piste : un ocre texte #8A6100 (5,2:1) et un discret à 64 %.
+- **Choix du thème** : `ThemeStore`/`ThemeController` (`lib/services/theme_store.dart`), même modèle que la langue : fichier `theme.json`, lu avant le premier écran ; un fichier abîmé ou absent donne « Comme le téléphone ». Ligne « Apparence » dans Réglages, sous Langue : Comme le téléphone / Clair / Sombre. Changement immédiat, sans relancer. « thème » ajouté à « Vos choix » dans la politique de confidentialité.
+- **Barre d'état** : icônes claires en sombre, foncées en clair (`AnnotatedRegion` autour de l'app), y compris sur les onglets sans AppBar. L'écran de lancement Android était déjà en bleu nuit (`values-night`, flutter_native_splash).
+- **Conversion** : script (remplacement de `AppColors.x` et retrait des `const` englobants), puis reprise à la main des cas sans `context` :
+  - fonctions de couleur d'état : `verdictColor`, `wifiLevelColor`, `RiskLevelText.colorFor`, `ScoreArch.colorFor` et la force du mot de passe reçoivent la palette ;
+  - séparateurs `const Divider` sans couleur (`dividerTheme`) ;
+  - `_muted(context)`.
+
+  `dart format` appliqué seulement aux blocs modifiés dans les fichiers qui n'étaient pas déjà au format.
+- **Tests** :
+  - `theme_test.dart` : calcul WCAG (valeurs de référence 21:1 et #777 = 4,48:1), paires principales des deux palettes, texte sur couleurs pleines, chiffre de l'arche, fichier du thème, choix dans Réglages appliqué tout de suite ;
+  - `dark_screens_test.dart` : accueil (arche), alerte Wi-Fi, Messages avec verdict, QR code, rapport d'analyse, détail d'une app, pare-feu, Réglages, politique, présentation, création du coffre, mot de passe du coffre. Sur chaque écran : fond nuit, et chaque texte affiché est vérifié (aucune couleur du thème clair, contraste d'au moins 3:1 sur le fond, sauf texte posé sur une couleur pleine) ;
+  - les tests utilisent une largeur de 800 dp : à 360 dp, la police de test (glyphes carrés) déborde alors que Readex Pro tient.
+
+Non vérifié : l'app n'a pas été lancée sur un téléphone (règle : pas de `flutter run`). À regarder à la main en sombre : rendu réel de Readex Pro, page des licences (écran système de Flutter), sélecteur de fichiers et fenêtre d'empreinte (écrans d'Android), notifications.

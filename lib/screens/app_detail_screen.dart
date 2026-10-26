@@ -29,39 +29,36 @@ class AppDetailScreen extends StatelessWidget {
       date == null ? l.commonUnknownFeminine : l.date(date);
 
   /// Conclusion sur la signature : texte et couleur, null si rien à dire.
-  (String, Color)? _signatureVerdict(AppLocalizations l) {
+  (String, Color)? _signatureVerdict(AppLocalizations l, AppColors c) {
     final brand = report.identity.brand ?? '';
     final stalkerware = report.stalkerwareName;
     if (stalkerware != null) {
-      return (l.detailKnownSpyware(stalkerware), AppColors.rommen);
+      return (l.detailKnownSpyware(stalkerware), c.rommen);
     }
     switch (report.identity.verdict) {
       case IdentityVerdict.verified:
-        return (l.detailSignatureVerified(brand), AppColors.zitouna);
+        return (l.detailSignatureVerified(brand), c.zitouna);
       case IdentityVerdict.modifiedCopy:
-        return (l.detailSignatureDifferent(brand), AppColors.rommen);
+        return (l.detailSignatureDifferent(brand), c.rommen);
       case IdentityVerdict.impersonation:
-        return (l.detailNotOfficial(brand), AppColors.rommen);
+        return (l.detailNotOfficial(brand), c.rommen);
       case IdentityVerdict.knownMod:
-        return (l.detailKnownMod(brand), AppColors.rommen);
+        return (l.detailKnownMod(brand), c.rommen);
       case IdentityVerdict.officialUnchecked:
-        return (
-          l.detailUnchecked(brand),
-          AppColors.encre.withValues(alpha: 0.6),
-        );
+        return (l.detailUnchecked(brand), c.secondaire);
       case IdentityVerdict.unknown:
         break;
     }
     if (app.debugCert) {
-      return (l.riskDebugCert, AppColors.ocre);
+      return (l.riskDebugCert, c.ocre);
     }
     return null;
   }
 
   /// Les lignes de la section « Signature ».
-  List<Widget> _signatureRows(AppLocalizations l) {
+  List<Widget> _signatureRows(AppLocalizations l, AppColors c) {
     final cert = app.mainCert;
-    final verdict = _signatureVerdict(l);
+    final verdict = _signatureVerdict(l, c);
     final others = app.signingCerts.length - 1;
     return _withSeparators([
       if (cert == null)
@@ -98,7 +95,7 @@ class AppDetailScreen extends StatelessWidget {
     if (report.spywareSuspected) {
       return [
         FilledButton(
-          style: FilledButton.styleFrom(backgroundColor: AppColors.rommen),
+          style: FilledButton.styleFrom(backgroundColor: context.colors.rommen),
           onPressed: () => _openAdvice(context),
           child: Text(l.detailWhatToDo),
         ),
@@ -106,14 +103,14 @@ class AppDetailScreen extends StatelessWidget {
     }
     return [
       FilledButton(
-        style: FilledButton.styleFrom(backgroundColor: AppColors.bleu),
+        style: FilledButton.styleFrom(backgroundColor: context.colors.bleu),
         onPressed: () => AppsScannerService().openAppSettings(app.packageName),
         child: Text(l.detailManagePermissions),
       ),
       // Une app système ne peut pas être désinstallée.
       if (!app.isSystemApp)
         TextButton(
-          style: TextButton.styleFrom(foregroundColor: AppColors.rommen),
+          style: TextButton.styleFrom(foregroundColor: context.colors.rommen),
           onPressed: () => _uninstall(context),
           child: Text(l.detailUninstall),
         ),
@@ -143,8 +140,8 @@ class AppDetailScreen extends StatelessWidget {
     return Scaffold(
       // Barre du haut discrète : juste la flèche retour, sans ombre.
       appBar: AppBar(
-        backgroundColor: AppColors.chaux,
-        foregroundColor: AppColors.encre,
+        backgroundColor: context.colors.chaux,
+        foregroundColor: context.colors.encre,
         elevation: 0,
         scrolledUnderElevation: 0,
         surfaceTintColor: Colors.transparent,
@@ -166,10 +163,10 @@ class AppDetailScreen extends StatelessWidget {
                   const SizedBox(height: 16),
                   Text(
                     app.label,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.w600,
-                      color: AppColors.encre,
+                      color: context.colors.encre,
                     ),
                   ),
                   const SizedBox(height: 4),
@@ -177,7 +174,7 @@ class AppDetailScreen extends StatelessWidget {
                     app.packageName,
                     style: TextStyle(
                       fontSize: 13,
-                      color: AppColors.encre.withValues(alpha: 0.6),
+                      color: context.colors.secondaire,
                     ),
                   ),
                   const SizedBox(height: 24),
@@ -208,7 +205,7 @@ class AppDetailScreen extends StatelessWidget {
                   else
                     ..._withSeparators(report.reasons(l).map(_TextRow.new)),
                   _SectionTitle(l.detailSignature),
-                  ..._signatureRows(l),
+                  ..._signatureRows(l, context.colors),
                   _SectionTitle(l.detailGrantedPermissions),
                   if (labels.isEmpty && technicalCount == 0)
                     _TextRow(l.detailNoPermissions),
@@ -256,7 +253,7 @@ class _Separator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Divider(height: 1, thickness: 1, color: AppColors.ligne);
+    return Divider(height: 1, thickness: 1, color: context.colors.ligne);
   }
 }
 
@@ -271,10 +268,10 @@ class _SectionTitle extends StatelessWidget {
       padding: const EdgeInsets.only(top: 32, bottom: 4),
       child: Text(
         text,
-        style: const TextStyle(
+        style: TextStyle(
           fontSize: 18,
           fontWeight: FontWeight.w600,
-          color: AppColors.encre,
+          color: context.colors.encre,
         ),
       ),
     );
@@ -298,16 +295,13 @@ class _InfoRow extends StatelessWidget {
           Expanded(
             child: Text(
               label,
-              style: TextStyle(
-                fontSize: 15,
-                color: AppColors.encre.withValues(alpha: 0.6),
-              ),
+              style: TextStyle(fontSize: 15, color: context.colors.secondaire),
             ),
           ),
           trailing ??
               Text(
                 value ?? '',
-                style: const TextStyle(fontSize: 15, color: AppColors.encre),
+                style: TextStyle(fontSize: 15, color: context.colors.encre),
               ),
         ],
       ),
@@ -331,15 +325,12 @@ class _StackedRow extends StatelessWidget {
         children: [
           Text(
             label,
-            style: TextStyle(
-              fontSize: 13,
-              color: AppColors.encre.withValues(alpha: 0.6),
-            ),
+            style: TextStyle(fontSize: 13, color: context.colors.secondaire),
           ),
           const SizedBox(height: 2),
           SelectableText(
             value,
-            style: const TextStyle(fontSize: 15, color: AppColors.encre),
+            style: TextStyle(fontSize: 15, color: context.colors.encre),
           ),
         ],
       ),
@@ -365,9 +356,7 @@ class _TextRow extends StatelessWidget {
           fontSize: 15,
           color:
               color ??
-              (muted
-                  ? AppColors.encre.withValues(alpha: 0.6)
-                  : AppColors.encre),
+              (muted ? context.colors.secondaire : context.colors.encre),
         ),
       ),
     );

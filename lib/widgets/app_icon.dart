@@ -20,11 +20,11 @@ class AppIcon extends StatelessWidget {
           ? Container(
               width: size,
               height: size,
-              color: AppColors.ligne,
+              color: context.colors.ligne,
               child: Icon(
                 Icons.android,
                 size: size * 0.6,
-                color: AppColors.encre.withValues(alpha: 0.4),
+                color: context.colors.encre.withValues(alpha: 0.4),
               ),
             )
           // gaplessPlayback : pas de clignotement quand la liste se recharge.

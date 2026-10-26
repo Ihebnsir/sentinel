@@ -20,7 +20,7 @@ class ActionTile extends StatelessWidget {
         // Row aligne ses enfants horizontalement, de gauche à droite.
         child: Row(
           children: [
-            Icon(action.icon, color: AppColors.bleu),
+            Icon(action.icon, color: context.colors.bleu),
             const SizedBox(width: 16),
             // Expanded prend toute la place restante au milieu,
             // ce qui pousse les points tout à droite.
@@ -30,10 +30,10 @@ class ActionTile extends StatelessWidget {
                 children: [
                   Text(
                     action.title,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w500,
-                      color: AppColors.encre,
+                      color: context.colors.encre,
                     ),
                   ),
                   const SizedBox(height: 2),
@@ -41,7 +41,7 @@ class ActionTile extends StatelessWidget {
                     action.description,
                     style: TextStyle(
                       fontSize: 13,
-                      color: AppColors.encre.withValues(alpha: 0.6),
+                      color: context.colors.secondaire,
                     ),
                   ),
                 ],
@@ -50,9 +50,9 @@ class ActionTile extends StatelessWidget {
             const SizedBox(width: 12),
             Text(
               '+${action.points}',
-              style: const TextStyle(
+              style: TextStyle(
                 fontWeight: FontWeight.w600,
-                color: AppColors.zitouna,
+                color: context.colors.zitouna,
               ),
             ),
           ],

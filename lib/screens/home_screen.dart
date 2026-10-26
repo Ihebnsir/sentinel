@@ -180,7 +180,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       body: SafeArea(
         // RefreshIndicator : tirer vers le bas relance l'analyse.
         child: RefreshIndicator(
-          color: AppColors.bleu,
+          color: context.colors.bleu,
           onRefresh: _refreshAll,
           // AlwaysScrollable : on peut tirer même si l'écran ne déborde pas.
           child: SingleChildScrollView(
@@ -197,14 +197,14 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                         l.homeGreeting,
                         style: TextStyle(
                           fontSize: 16,
-                          color: AppColors.encre.withValues(alpha: 0.6),
+                          color: context.colors.secondaire,
                         ),
                       ),
                     ),
                     IconButton(
                       tooltip: l.settingsTitle,
                       visualDensity: VisualDensity.compact,
-                      color: AppColors.encre.withValues(alpha: 0.5),
+                      color: context.colors.encre.withValues(alpha: 0.5),
                       icon: const Icon(Icons.settings_outlined, size: 22),
                       onPressed: () => Navigator.of(context).push(
                         MaterialPageRoute<void>(
@@ -217,10 +217,10 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                 const SizedBox(height: 6),
                 Text(
                   _title(l, report),
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 28,
                     fontWeight: FontWeight.w600,
-                    color: AppColors.encre,
+                    color: context.colors.encre,
                   ),
                 ),
                 const SizedBox(height: 40),
@@ -267,17 +267,17 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           _versionLine(l, status),
           style: TextStyle(
             fontSize: 13,
-            color: AppColors.encre.withValues(alpha: 0.5),
+            color: context.colors.encre.withValues(alpha: 0.5),
           ),
         ),
       ),
       const SizedBox(height: 40),
       Text(
         l.homeToGainPoints,
-        style: const TextStyle(
+        style: TextStyle(
           fontSize: 18,
           fontWeight: FontWeight.w600,
-          color: AppColors.encre,
+          color: context.colors.encre,
         ),
       ),
       const SizedBox(height: 8),
@@ -286,17 +286,14 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           padding: const EdgeInsets.symmetric(vertical: 16),
           child: Text(
             l.homeNothingToFix,
-            style: TextStyle(
-              fontSize: 15,
-              color: AppColors.encre.withValues(alpha: 0.6),
-            ),
+            style: TextStyle(fontSize: 15, color: context.colors.secondaire),
           ),
         ),
       // Boucle for dans la liste : on crée une ligne par action,
       // avec un séparateur fin entre deux lignes (pas avant la première).
       for (var i = 0; i < actions.length; i++) ...[
         if (i > 0)
-          const Divider(height: 1, thickness: 1, color: AppColors.ligne),
+          Divider(height: 1, thickness: 1, color: context.colors.ligne),
         ActionTile(action: actions[i], onTap: _onTapFor(actions[i])),
       ],
     ];
@@ -325,10 +322,7 @@ class _InfoMessage extends StatelessWidget {
         child: Text(
           text,
           textAlign: TextAlign.center,
-          style: TextStyle(
-            fontSize: 16,
-            color: AppColors.encre.withValues(alpha: 0.6),
-          ),
+          style: TextStyle(fontSize: 16, color: context.colors.secondaire),
         ),
       ),
     );

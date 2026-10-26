@@ -12,7 +12,8 @@ import '../../theme/app_colors.dart';
 import '../../widgets/breach_consent_sheet.dart';
 import '../../widgets/vault_fields.dart';
 
-const _divider = Divider(height: 1, thickness: 1, color: AppColors.ligne);
+// Couleur : celle du thème (dividerTheme, ligne fine).
+const _divider = Divider(height: 1, thickness: 1);
 
 /// Ferme l'écran (et une boîte de dialogue éventuelle) si le coffre se
 /// verrouille ou est supprimé.
@@ -47,20 +48,20 @@ mixin _ClosesWhenLocked<T extends StatefulWidget> on State<T> {
 }
 
 /// Barre du haut discrète, comme le détail d'un élément.
-AppBar _appBar() => AppBar(
-  backgroundColor: AppColors.chaux,
-  foregroundColor: AppColors.encre,
+AppBar _appBar(BuildContext context) => AppBar(
+  backgroundColor: context.colors.chaux,
+  foregroundColor: context.colors.encre,
   elevation: 0,
   scrolledUnderElevation: 0,
   surfaceTintColor: Colors.transparent,
 );
 
-Widget _title(String text) => Text(
+Widget _title(BuildContext context, String text) => Text(
   text,
-  style: const TextStyle(
+  style: TextStyle(
     fontSize: 24,
     fontWeight: FontWeight.w600,
-    color: AppColors.encre,
+    color: context.colors.encre,
   ),
 );
 
@@ -144,20 +145,20 @@ class _VaultSettingsScreenState extends State<VaultSettingsScreen>
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: AppColors.chaux,
+        backgroundColor: context.colors.chaux,
         surfaceTintColor: Colors.transparent,
         title: Text(context.l10n.vaultNewKeyTitle),
         content: Text(context.l10n.vaultNewKeyText),
         actions: [
           TextButton(
             style: TextButton.styleFrom(
-              foregroundColor: AppColors.encre.withValues(alpha: 0.6),
+              foregroundColor: context.colors.secondaire,
             ),
             onPressed: () => Navigator.of(context).pop(false),
             child: Text(context.l10n.commonCancel),
           ),
           TextButton(
-            style: TextButton.styleFrom(foregroundColor: AppColors.bleu),
+            style: TextButton.styleFrom(foregroundColor: context.colors.bleu),
             onPressed: () => Navigator.of(context).pop(true),
             child: Text(context.l10n.vaultGenerate),
           ),
@@ -196,15 +197,15 @@ class _VaultSettingsScreenState extends State<VaultSettingsScreen>
   @override
   Widget build(BuildContext context) {
     final l = context.l10n;
-    final muted = AppColors.encre.withValues(alpha: 0.6);
+    final muted = context.colors.secondaire;
     return Scaffold(
-      appBar: _appBar(),
+      appBar: _appBar(context),
       body: SafeArea(
         top: false,
         child: ListView(
           padding: const EdgeInsets.fromLTRB(28, 8, 28, 24),
           children: [
-            _title(l.vaultSettingsTitle),
+            _title(context, l.vaultSettingsTitle),
             const SizedBox(height: 24),
             // Empreinte : Android avec capteur seulement (masqué sur Windows).
             if (session.biometricsAvailable) ...[
@@ -213,7 +214,7 @@ class _VaultSettingsScreenState extends State<VaultSettingsScreen>
                 padding: const EdgeInsets.symmetric(vertical: 8),
                 child: Row(
                   children: [
-                    const Icon(Icons.fingerprint, color: AppColors.bleu),
+                    Icon(Icons.fingerprint, color: context.colors.bleu),
                     const SizedBox(width: 16),
                     Expanded(
                       child: Column(
@@ -221,9 +222,9 @@ class _VaultSettingsScreenState extends State<VaultSettingsScreen>
                         children: [
                           Text(
                             l.vaultOpenWithFingerprint,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 15,
-                              color: AppColors.encre,
+                              color: context.colors.encre,
                             ),
                           ),
                           Text(
@@ -235,7 +236,7 @@ class _VaultSettingsScreenState extends State<VaultSettingsScreen>
                     ),
                     Switch(
                       value: session.biometricEnabled,
-                      activeTrackColor: AppColors.bleu,
+                      activeTrackColor: context.colors.bleu,
                       onChanged: _busy ? null : _toggleBiometric,
                     ),
                   ],
@@ -247,7 +248,7 @@ class _VaultSettingsScreenState extends State<VaultSettingsScreen>
               padding: const EdgeInsets.symmetric(vertical: 8),
               child: Row(
                 children: [
-                  const Icon(Icons.travel_explore, color: AppColors.bleu),
+                  Icon(Icons.travel_explore, color: context.colors.bleu),
                   const SizedBox(width: 16),
                   Expanded(
                     child: Column(
@@ -255,9 +256,9 @@ class _VaultSettingsScreenState extends State<VaultSettingsScreen>
                       children: [
                         Text(
                           l.healthCheckButton,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 15,
-                            color: AppColors.encre,
+                            color: context.colors.encre,
                           ),
                         ),
                         Text(
@@ -269,7 +270,7 @@ class _VaultSettingsScreenState extends State<VaultSettingsScreen>
                   ),
                   Switch(
                     value: widget.breaches.consent,
-                    activeTrackColor: AppColors.bleu,
+                    activeTrackColor: context.colors.bleu,
                     onChanged: _busy ? null : _toggleBreaches,
                   ),
                 ],
@@ -300,17 +301,17 @@ class _VaultSettingsScreenState extends State<VaultSettingsScreen>
             _SettingsRow(
               icon: Icons.delete_outline,
               label: l.vaultDeleteVault,
-              color: AppColors.rommen,
+              color: context.colors.rommen,
               onTap: _busy ? null : _deleteVault,
             ),
             _divider,
             if (_busy)
-              const Padding(
+              Padding(
                 padding: EdgeInsets.only(top: 16),
                 child: LinearProgressIndicator(
                   minHeight: 2,
-                  color: AppColors.bleu,
-                  backgroundColor: AppColors.ligne,
+                  color: context.colors.bleu,
+                  backgroundColor: context.colors.ligne,
                 ),
               ),
           ],
@@ -326,13 +327,13 @@ class _SettingsRow extends StatelessWidget {
     required this.icon,
     required this.label,
     required this.onTap,
-    this.color = AppColors.encre,
+    this.color,
   });
 
   final IconData icon;
   final String label;
   final VoidCallback? onTap;
-  final Color color;
+  final Color? color; // null : couleur du texte (icône bleue)
 
   @override
   Widget build(BuildContext context) {
@@ -342,17 +343,20 @@ class _SettingsRow extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: 16),
         child: Row(
           children: [
-            Icon(
-              icon,
-              color: color == AppColors.encre ? AppColors.bleu : color,
-            ),
+            Icon(icon, color: color ?? context.colors.bleu),
             const SizedBox(width: 16),
             Expanded(
-              child: Text(label, style: TextStyle(fontSize: 15, color: color)),
+              child: Text(
+                label,
+                style: TextStyle(
+                  fontSize: 15,
+                  color: color ?? context.colors.encre,
+                ),
+              ),
             ),
             Icon(
               Icons.chevron_right,
-              color: AppColors.encre.withValues(alpha: 0.3),
+              color: context.colors.encre.withValues(alpha: 0.3),
             ),
           ],
         ),
@@ -384,7 +388,7 @@ class _DeleteDialogState extends State<_DeleteDialog> {
     // Mot à taper, dans la langue de l'app (« SUPPRIMER »).
     final word = l.vaultDeleteWord;
     return AlertDialog(
-      backgroundColor: AppColors.chaux,
+      backgroundColor: context.colors.chaux,
       surfaceTintColor: Colors.transparent,
       title: Text(l.vaultDeleteVaultTitle),
       content: Column(
@@ -404,13 +408,13 @@ class _DeleteDialogState extends State<_DeleteDialog> {
       actions: [
         TextButton(
           style: TextButton.styleFrom(
-            foregroundColor: AppColors.encre.withValues(alpha: 0.6),
+            foregroundColor: context.colors.secondaire,
           ),
           onPressed: () => Navigator.of(context).pop(false),
           child: Text(l.commonCancel),
         ),
         TextButton(
-          style: TextButton.styleFrom(foregroundColor: AppColors.rommen),
+          style: TextButton.styleFrom(foregroundColor: context.colors.rommen),
           onPressed: _typed.text.trim() == word
               ? () => Navigator.of(context).pop(true)
               : null,
@@ -495,13 +499,13 @@ class _ChangePasswordScreenState extends State<_ChangePasswordScreen>
   Widget build(BuildContext context) {
     final l = context.l10n;
     return Scaffold(
-      appBar: _appBar(),
+      appBar: _appBar(context),
       body: SafeArea(
         top: false,
         child: ListView(
           padding: const EdgeInsets.fromLTRB(28, 8, 28, 24),
           children: [
-            _title(l.vaultChangeMaster),
+            _title(context, l.vaultChangeMaster),
             const SizedBox(height: 24),
             VaultTextField(
               controller: _old,
@@ -535,19 +539,21 @@ class _ChangePasswordScreenState extends State<_ChangePasswordScreen>
               onChanged: (_) => setState(() {}),
             ),
             if (_saving)
-              const Padding(
+              Padding(
                 padding: EdgeInsets.only(top: 16),
                 child: LinearProgressIndicator(
                   minHeight: 2,
-                  color: AppColors.bleu,
-                  backgroundColor: AppColors.ligne,
+                  color: context.colors.bleu,
+                  backgroundColor: context.colors.ligne,
                 ),
               ),
             const SizedBox(height: 16),
             SizedBox(
               width: double.infinity,
               child: FilledButton(
-                style: FilledButton.styleFrom(backgroundColor: AppColors.bleu),
+                style: FilledButton.styleFrom(
+                  backgroundColor: context.colors.bleu,
+                ),
                 onPressed: _canSave ? _save : null,
                 child: Text(_saving ? l.vaultSaving : l.vaultChange),
               ),
@@ -629,15 +635,15 @@ class _ExportBackupScreenState extends State<_ExportBackupScreen>
   @override
   Widget build(BuildContext context) {
     final l = context.l10n;
-    final muted = AppColors.encre.withValues(alpha: 0.6);
+    final muted = context.colors.secondaire;
     return Scaffold(
-      appBar: _appBar(),
+      appBar: _appBar(context),
       body: SafeArea(
         top: false,
         child: ListView(
           padding: const EdgeInsets.fromLTRB(28, 8, 28, 24),
           children: [
-            _title(l.vaultExport),
+            _title(context, l.vaultExport),
             const SizedBox(height: 8),
             Text(
               l.exportIntro,
@@ -646,10 +652,10 @@ class _ExportBackupScreenState extends State<_ExportBackupScreen>
             const SizedBox(height: 8),
             Text(
               l.exportStore,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 15,
                 fontWeight: FontWeight.w500,
-                color: AppColors.encre,
+                color: context.colors.encre,
               ),
             ),
             const SizedBox(height: 24),
@@ -676,19 +682,21 @@ class _ExportBackupScreenState extends State<_ExportBackupScreen>
               onChanged: (_) => setState(() {}),
             ),
             if (_saving)
-              const Padding(
+              Padding(
                 padding: EdgeInsets.only(top: 16),
                 child: LinearProgressIndicator(
                   minHeight: 2,
-                  color: AppColors.bleu,
-                  backgroundColor: AppColors.ligne,
+                  color: context.colors.bleu,
+                  backgroundColor: context.colors.ligne,
                 ),
               ),
             const SizedBox(height: 16),
             SizedBox(
               width: double.infinity,
               child: FilledButton(
-                style: FilledButton.styleFrom(backgroundColor: AppColors.bleu),
+                style: FilledButton.styleFrom(
+                  backgroundColor: context.colors.bleu,
+                ),
                 onPressed: _canExport ? _export : null,
                 child: Text(_saving ? l.exportEncrypting : l.exportButton),
               ),

@@ -5,10 +5,11 @@ import '../services/apps_scanner_service.dart';
 import '../services/firewall_service.dart';
 import '../theme/app_colors.dart';
 
-const _divider = Divider(height: 1, thickness: 1, color: AppColors.ligne);
+// Couleur : celle du thème (dividerTheme, ligne fine).
+const _divider = Divider(height: 1, thickness: 1);
 
-TextStyle get _muted =>
-    TextStyle(fontSize: 13, color: AppColors.encre.withValues(alpha: 0.6));
+TextStyle _muted(BuildContext context) =>
+    TextStyle(fontSize: 13, color: context.colors.secondaire);
 
 /// Phrase discrète sous les catégories et la liste blanche.
 class _CacheNote extends StatelessWidget {
@@ -18,7 +19,7 @@ class _CacheNote extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(top: 8),
-      child: Text(context.l10n.blocklistCacheNote, style: _muted),
+      child: Text(context.l10n.blocklistCacheNote, style: _muted(context)),
     );
   }
 }
@@ -35,10 +36,10 @@ class BlocklistSectionTitle extends StatelessWidget {
       padding: const EdgeInsets.only(top: 32, bottom: 4),
       child: Text(
         text,
-        style: const TextStyle(
+        style: TextStyle(
           fontSize: 18,
           fontWeight: FontWeight.w600,
-          color: AppColors.encre,
+          color: context.colors.encre,
         ),
       ),
     );
@@ -73,19 +74,19 @@ class _SwitchRow extends StatelessWidget {
               children: [
                 Text(
                   title,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w500,
-                    color: AppColors.encre,
+                    color: context.colors.encre,
                   ),
                 ),
                 const SizedBox(height: 2),
-                Text(subtitle, style: _muted),
+                Text(subtitle, style: _muted(context)),
                 if (warning != null) ...[
                   const SizedBox(height: 2),
                   Text(
                     warning!,
-                    style: const TextStyle(fontSize: 13, color: AppColors.ocre),
+                    style: TextStyle(fontSize: 13, color: context.colors.ocre),
                   ),
                 ],
               ],
@@ -169,12 +170,12 @@ class AutoUpdateSection extends StatelessWidget {
         ),
         _divider,
         const SizedBox(height: 8),
-        Text(l.blocklistUpdateNote, style: _muted),
+        Text(l.blocklistUpdateNote, style: _muted(context)),
         Align(
           alignment: Alignment.centerLeft,
           child: TextButton(
             style: TextButton.styleFrom(
-              foregroundColor: AppColors.bleu,
+              foregroundColor: context.colors.bleu,
               padding: EdgeInsets.zero,
             ),
             onPressed: busy ? null : onUpdateNow,
@@ -215,7 +216,7 @@ class AllowlistSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         BlocklistSectionTitle(l.allowlistTitle),
-        Text(l.allowlistIntro, style: _muted),
+        Text(l.allowlistIntro, style: _muted(context)),
         const SizedBox(height: 12),
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -227,20 +228,20 @@ class AllowlistSection extends StatelessWidget {
                 autocorrect: false,
                 textInputAction: TextInputAction.done,
                 onSubmitted: (_) => onAdd(),
-                style: const TextStyle(fontSize: 15, color: AppColors.encre),
+                style: TextStyle(fontSize: 15, color: context.colors.encre),
                 decoration: InputDecoration(
                   hintText: l.allowlistHint,
                   hintStyle: TextStyle(
                     fontSize: 15,
-                    color: AppColors.encre.withValues(alpha: 0.45),
+                    color: context.colors.discret,
                   ),
                   errorText: error,
                   isDense: true,
                   contentPadding: const EdgeInsets.all(12),
-                  enabledBorder: _border(AppColors.ligne),
-                  focusedBorder: _border(AppColors.bleu),
-                  errorBorder: _border(AppColors.rommen),
-                  focusedErrorBorder: _border(AppColors.rommen),
+                  enabledBorder: _border(context.colors.ligne),
+                  focusedBorder: _border(context.colors.bleu),
+                  errorBorder: _border(context.colors.rommen),
+                  focusedErrorBorder: _border(context.colors.rommen),
                 ),
               ),
             ),
@@ -248,7 +249,9 @@ class AllowlistSection extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.only(top: 2),
               child: TextButton(
-                style: TextButton.styleFrom(foregroundColor: AppColors.bleu),
+                style: TextButton.styleFrom(
+                  foregroundColor: context.colors.bleu,
+                ),
                 onPressed: onAdd,
                 child: Text(l.allowlistAdd),
               ),
@@ -259,7 +262,7 @@ class AllowlistSection extends StatelessWidget {
         if (domains.isEmpty)
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 8),
-            child: Text(l.allowlistEmpty, style: _muted),
+            child: Text(l.allowlistEmpty, style: _muted(context)),
           ),
         for (final domain in domains) ...[
           Row(
@@ -267,12 +270,12 @@ class AllowlistSection extends StatelessWidget {
               Expanded(
                 child: Text(
                   domain,
-                  style: const TextStyle(fontSize: 15, color: AppColors.encre),
+                  style: TextStyle(fontSize: 15, color: context.colors.encre),
                 ),
               ),
               IconButton(
                 tooltip: l.allowlistRemove(domain),
-                color: AppColors.encre.withValues(alpha: 0.6),
+                color: context.colors.secondaire,
                 icon: const Icon(Icons.close, size: 20),
                 onPressed: () => onRemove(domain),
               ),
@@ -304,21 +307,21 @@ class BlocklistSourcesSection extends StatelessWidget {
             padding: const EdgeInsets.only(top: 12),
             child: Text(
               '${source.name} · ${source.license}',
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 15,
                 fontWeight: FontWeight.w500,
-                color: AppColors.encre,
+                color: context.colors.encre,
               ),
             ),
           ),
           const SizedBox(height: 4),
-          Text(source.attribution, style: _muted),
+          Text(source.attribution, style: _muted(context)),
           if (source.homepage.startsWith('https://'))
             Align(
               alignment: Alignment.centerLeft,
               child: TextButton(
                 style: TextButton.styleFrom(
-                  foregroundColor: AppColors.bleu,
+                  foregroundColor: context.colors.bleu,
                   padding: EdgeInsets.zero,
                 ),
                 onPressed: () =>

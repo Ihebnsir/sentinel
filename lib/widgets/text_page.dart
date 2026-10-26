@@ -31,12 +31,12 @@ class TextPage extends StatelessWidget {
     final body = TextStyle(
       fontSize: 15,
       height: 1.45,
-      color: AppColors.encre.withValues(alpha: 0.8),
+      color: context.colors.encre.withValues(alpha: 0.8),
     );
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: AppColors.chaux,
-        foregroundColor: AppColors.encre,
+        backgroundColor: context.colors.chaux,
+        foregroundColor: context.colors.encre,
         elevation: 0,
         scrolledUnderElevation: 0,
         surfaceTintColor: Colors.transparent,
@@ -48,10 +48,10 @@ class TextPage extends StatelessWidget {
           children: [
             Text(
               title,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.w600,
-                color: AppColors.encre,
+                color: context.colors.encre,
               ),
             ),
             if (intro != null) ...[
@@ -60,14 +60,14 @@ class TextPage extends StatelessWidget {
             ],
             for (final section in sections) ...[
               const SizedBox(height: 20),
-              const Divider(height: 1, thickness: 1, color: AppColors.ligne),
+              Divider(height: 1, thickness: 1, color: context.colors.ligne),
               const SizedBox(height: 20),
               Text(
                 section.title,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 17,
                   fontWeight: FontWeight.w600,
-                  color: AppColors.encre,
+                  color: context.colors.encre,
                 ),
               ),
               const SizedBox(height: 10),

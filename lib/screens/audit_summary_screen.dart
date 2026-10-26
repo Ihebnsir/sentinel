@@ -30,7 +30,7 @@ class AuditSummaryScreen extends StatelessWidget {
         alignment: Alignment.centerLeft,
         child: TextButton(
           style: TextButton.styleFrom(
-            foregroundColor: AppColors.bleu,
+            foregroundColor: context.colors.bleu,
             padding: EdgeInsets.zero,
           ),
           onPressed: () => AppsScannerService().openWebPage(auditReportUrl),

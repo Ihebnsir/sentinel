@@ -75,20 +75,20 @@ class _QrResultScreenState extends State<QrResultScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: AppColors.chaux,
+        backgroundColor: context.colors.chaux,
         surfaceTintColor: Colors.transparent,
         title: Text(_actionTitle(l, assessment)),
         content: Text(_confirmText(l, assessment.content)),
         actions: [
           TextButton(
             style: TextButton.styleFrom(
-              foregroundColor: AppColors.encre.withValues(alpha: 0.6),
+              foregroundColor: context.colors.secondaire,
             ),
             onPressed: () => Navigator.of(context).pop(false),
             child: Text(l.commonCancel),
           ),
           FilledButton(
-            style: FilledButton.styleFrom(backgroundColor: AppColors.bleu),
+            style: FilledButton.styleFrom(backgroundColor: context.colors.bleu),
             onPressed: () => Navigator.of(context).pop(true),
             child: Text(l.commonContinue),
           ),
@@ -107,11 +107,11 @@ class _QrResultScreenState extends State<QrResultScreen> {
   Widget build(BuildContext context) {
     final l = context.l10n;
     final assessment = _assessment;
-    final muted = AppColors.encre.withValues(alpha: 0.6);
+    final muted = context.colors.secondaire;
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: AppColors.chaux,
-        foregroundColor: AppColors.encre,
+        backgroundColor: context.colors.chaux,
+        foregroundColor: context.colors.encre,
         elevation: 0,
         scrolledUnderElevation: 0,
         surfaceTintColor: Colors.transparent,
@@ -123,10 +123,10 @@ class _QrResultScreenState extends State<QrResultScreen> {
           children: [
             Text(
               l.qrResultTitle,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.w600,
-                color: AppColors.encre,
+                color: context.colors.encre,
               ),
             ),
             const SizedBox(height: 4),
@@ -142,12 +142,12 @@ class _QrResultScreenState extends State<QrResultScreen> {
             for (final (label, value) in qrDetails(l, _content))
               _InfoRow(label: label, value: value),
             if (assessment == null && !_failed)
-              const Padding(
+              Padding(
                 padding: EdgeInsets.only(top: 24),
                 child: LinearProgressIndicator(
                   minHeight: 2,
-                  color: AppColors.bleu,
-                  backgroundColor: AppColors.ligne,
+                  color: context.colors.bleu,
+                  backgroundColor: context.colors.ligne,
                 ),
               ),
             if (_failed)
@@ -191,10 +191,10 @@ class _QrResultScreenState extends State<QrResultScreen> {
           const SizedBox(height: 12),
           Text(
             reason,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.w500,
-              color: AppColors.encre,
+              color: context.colors.encre,
             ),
           ),
         ],
@@ -203,7 +203,7 @@ class _QrResultScreenState extends State<QrResultScreen> {
         SizedBox(
           width: double.infinity,
           child: FilledButton(
-            style: FilledButton.styleFrom(backgroundColor: AppColors.bleu),
+            style: FilledButton.styleFrom(backgroundColor: context.colors.bleu),
             // null : désactivé (arnaque probable).
             onPressed: assessment.actionAllowed
                 ? () => _onAction(assessment)
@@ -216,10 +216,7 @@ class _QrResultScreenState extends State<QrResultScreen> {
             padding: const EdgeInsets.only(top: 8),
             child: Text(
               l.qrActionBlocked,
-              style: TextStyle(
-                fontSize: 13,
-                color: AppColors.encre.withValues(alpha: 0.6),
-              ),
+              style: TextStyle(fontSize: 13, color: context.colors.secondaire),
             ),
           ),
       ],
@@ -297,14 +294,14 @@ class _RawContent extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        border: Border.all(color: AppColors.ligne),
+        border: Border.all(color: context.colors.ligne),
         borderRadius: BorderRadius.circular(8),
       ),
       child: SelectableText(
         empty ? context.l10n.qrEmpty : raw,
         style: TextStyle(
           fontSize: 14,
-          color: AppColors.encre.withValues(alpha: empty ? 0.45 : 1),
+          color: context.colors.encre.withValues(alpha: empty ? 0.45 : 1),
         ),
       ),
     );
@@ -322,7 +319,7 @@ class _InfoRow extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Divider(height: 1, thickness: 1, color: AppColors.ligne),
+        Divider(height: 1, thickness: 1, color: context.colors.ligne),
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 12),
           child: Row(
@@ -333,7 +330,7 @@ class _InfoRow extends StatelessWidget {
                   label,
                   style: TextStyle(
                     fontSize: 15,
-                    color: AppColors.encre.withValues(alpha: 0.6),
+                    color: context.colors.secondaire,
                   ),
                 ),
               ),
@@ -342,7 +339,7 @@ class _InfoRow extends StatelessWidget {
                 flex: 2,
                 child: Text(
                   value,
-                  style: const TextStyle(fontSize: 15, color: AppColors.encre),
+                  style: TextStyle(fontSize: 15, color: context.colors.encre),
                 ),
               ),
             ],
@@ -365,28 +362,28 @@ class _WifiBlock extends StatelessWidget {
     final body = TextStyle(
       fontSize: 15,
       height: 1.45,
-      color: AppColors.encre.withValues(alpha: 0.8),
+      color: context.colors.encre.withValues(alpha: 0.8),
     );
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Divider(height: 1, thickness: 1, color: AppColors.ligne),
+        Divider(height: 1, thickness: 1, color: context.colors.ligne),
         const SizedBox(height: 20),
         Text(
           report.level.label(l),
           style: TextStyle(
             fontSize: 28,
             fontWeight: FontWeight.w600,
-            color: wifiLevelColor(report.level),
+            color: wifiLevelColor(context.colors, report.level),
           ),
         ),
         const SizedBox(height: 4),
         Text(
           report.title,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w500,
-            color: AppColors.encre,
+            color: context.colors.encre,
           ),
         ),
         const SizedBox(height: 8),

@@ -138,20 +138,20 @@ class _MessagesScreenState extends State<MessagesScreen> {
     final accepted = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: AppColors.chaux,
+        backgroundColor: context.colors.chaux,
         surfaceTintColor: Colors.transparent,
         title: Text(l.qrCameraTitle),
         content: Text(l.qrCameraText),
         actions: [
           TextButton(
             style: TextButton.styleFrom(
-              foregroundColor: AppColors.encre.withValues(alpha: 0.6),
+              foregroundColor: context.colors.secondaire,
             ),
             onPressed: () => Navigator.of(context).pop(false),
             child: Text(l.commonCancel),
           ),
           FilledButton(
-            style: FilledButton.styleFrom(backgroundColor: AppColors.bleu),
+            style: FilledButton.styleFrom(backgroundColor: context.colors.bleu),
             onPressed: () => Navigator.of(context).pop(true),
             child: Text(l.commonContinue),
           ),
@@ -192,10 +192,10 @@ class _MessagesScreenState extends State<MessagesScreen> {
               children: [
                 Text(
                   l.navMessages,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 28,
                     fontWeight: FontWeight.w600,
-                    color: AppColors.encre,
+                    color: context.colors.encre,
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -211,12 +211,12 @@ class _MessagesScreenState extends State<MessagesScreen> {
                 const SizedBox(height: 8),
                 _actions(l),
                 if (_analyzing)
-                  const Padding(
+                  Padding(
                     padding: EdgeInsets.only(top: 24),
                     child: LinearProgressIndicator(
                       minHeight: 2,
-                      color: AppColors.bleu,
-                      backgroundColor: AppColors.ligne,
+                      color: context.colors.bleu,
+                      backgroundColor: context.colors.ligne,
                     ),
                   ),
                 if (_failed)
@@ -226,7 +226,7 @@ class _MessagesScreenState extends State<MessagesScreen> {
                       l.messagesFailed,
                       style: TextStyle(
                         fontSize: 15,
-                        color: AppColors.encre.withValues(alpha: 0.6),
+                        color: context.colors.secondaire,
                       ),
                     ),
                   ),
@@ -245,10 +245,7 @@ class _MessagesScreenState extends State<MessagesScreen> {
             padding: const EdgeInsets.fromLTRB(28, 0, 28, 16),
             child: Text(
               l.messagesLocalNote,
-              style: TextStyle(
-                fontSize: 12,
-                color: AppColors.encre.withValues(alpha: 0.45),
-              ),
+              style: TextStyle(fontSize: 12, color: context.colors.discret),
             ),
           ),
         ],
@@ -261,7 +258,7 @@ class _MessagesScreenState extends State<MessagesScreen> {
     return Row(
       children: [
         TextButton(
-          style: TextButton.styleFrom(foregroundColor: AppColors.bleu),
+          style: TextButton.styleFrom(foregroundColor: context.colors.bleu),
           onPressed: _paste,
           child: Text(l.messagesPaste),
         ),
@@ -269,14 +266,14 @@ class _MessagesScreenState extends State<MessagesScreen> {
         if (_controller.text.isNotEmpty)
           TextButton(
             style: TextButton.styleFrom(
-              foregroundColor: AppColors.encre.withValues(alpha: 0.6),
+              foregroundColor: context.colors.secondaire,
             ),
             onPressed: _clear,
             child: Text(l.messagesClear),
           ),
         const SizedBox(width: 8),
         FilledButton(
-          style: FilledButton.styleFrom(backgroundColor: AppColors.bleu),
+          style: FilledButton.styleFrom(backgroundColor: context.colors.bleu),
           // null = bouton désactivé (champ vide ou analyse en cours).
           onPressed: _hasText && !_analyzing ? _analyze : null,
           child: Text(l.messagesAnalyze),
@@ -306,16 +303,13 @@ class _MessageField extends StatelessWidget {
       minLines: 4,
       maxLines: 8,
       keyboardType: TextInputType.multiline,
-      style: const TextStyle(fontSize: 15, color: AppColors.encre),
+      style: TextStyle(fontSize: 15, color: context.colors.encre),
       decoration: InputDecoration(
         hintText: context.l10n.messagesHint,
-        hintStyle: TextStyle(
-          fontSize: 15,
-          color: AppColors.encre.withValues(alpha: 0.45),
-        ),
+        hintStyle: TextStyle(fontSize: 15, color: context.colors.discret),
         contentPadding: const EdgeInsets.all(14),
-        enabledBorder: _border(AppColors.ligne),
-        focusedBorder: _border(AppColors.bleu),
+        enabledBorder: _border(context.colors.ligne),
+        focusedBorder: _border(context.colors.bleu),
       ),
     );
   }
@@ -332,14 +326,14 @@ class _QrScanRow extends StatelessWidget {
     final l = context.l10n;
     return Column(
       children: [
-        const Divider(height: 1, thickness: 1, color: AppColors.ligne),
+        Divider(height: 1, thickness: 1, color: context.colors.ligne),
         InkWell(
           onTap: onTap,
           child: Padding(
             padding: const EdgeInsets.symmetric(vertical: 14),
             child: Row(
               children: [
-                const Icon(Icons.qr_code_scanner, color: AppColors.bleu),
+                Icon(Icons.qr_code_scanner, color: context.colors.bleu),
                 const SizedBox(width: 16),
                 Expanded(
                   child: Column(
@@ -347,10 +341,10 @@ class _QrScanRow extends StatelessWidget {
                     children: [
                       Text(
                         l.qrScanButton,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w500,
-                          color: AppColors.bleu,
+                          color: context.colors.bleu,
                         ),
                       ),
                       const SizedBox(height: 2),
@@ -358,7 +352,7 @@ class _QrScanRow extends StatelessWidget {
                         l.qrScanSubtitle,
                         style: TextStyle(
                           fontSize: 13,
-                          color: AppColors.encre.withValues(alpha: 0.6),
+                          color: context.colors.secondaire,
                         ),
                       ),
                     ],
@@ -368,7 +362,7 @@ class _QrScanRow extends StatelessWidget {
             ),
           ),
         ),
-        const Divider(height: 1, thickness: 1, color: AppColors.ligne),
+        Divider(height: 1, thickness: 1, color: context.colors.ligne),
       ],
     );
   }

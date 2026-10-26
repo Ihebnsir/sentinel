@@ -436,6 +436,30 @@ abstract class AppLocalizations {
   /// **'Langue du téléphone'**
   String get settingsLanguageSystem;
 
+  /// No description provided for @settingsTheme.
+  ///
+  /// In fr, this message translates to:
+  /// **'Apparence'**
+  String get settingsTheme;
+
+  /// No description provided for @settingsThemeSystem.
+  ///
+  /// In fr, this message translates to:
+  /// **'Comme le téléphone'**
+  String get settingsThemeSystem;
+
+  /// No description provided for @settingsThemeLight.
+  ///
+  /// In fr, this message translates to:
+  /// **'Clair'**
+  String get settingsThemeLight;
+
+  /// No description provided for @settingsThemeDark.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sombre'**
+  String get settingsThemeDark;
+
   /// No description provided for @settingsReplayOnboarding.
   ///
   /// In fr, this message translates to:
@@ -655,7 +679,7 @@ abstract class AppLocalizations {
   /// No description provided for @privacyLocal2.
   ///
   /// In fr, this message translates to:
-  /// **'Vos choix : accord pour la vérification des fuites, réglages du pare-feu et liste des sites autorisés, protection automatique activée ou non, présentation déjà vue, langue.'**
+  /// **'Vos choix : accord pour la vérification des fuites, réglages du pare-feu et liste des sites autorisés, protection automatique activée ou non, présentation déjà vue, langue, thème.'**
   String get privacyLocal2;
 
   /// No description provided for @privacyLocal3.

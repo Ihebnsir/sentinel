@@ -1,5 +1,7 @@
 import 'package:material_ui/material_ui.dart';
 
+import '../theme/app_colors.dart';
+
 /// L'arche de Sentinel avec son trou de serrure, dessinée comme une icône.
 /// [filled] : arche pleine (serrure découpée) ou simple contour.
 /// Taille et couleur par défaut : celles de l'IconTheme, comme une Icon.
@@ -19,7 +21,7 @@ class ArchIcon extends StatelessWidget {
       child: CustomPaint(
         painter: _ArchPainter(
           filled: filled,
-          color: color ?? theme.color ?? const Color(0xFF000000),
+          color: color ?? theme.color ?? context.colors.encre,
         ),
       ),
     );

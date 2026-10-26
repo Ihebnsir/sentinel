@@ -5,10 +5,11 @@ import '../services/app_analysis.dart';
 import '../theme/app_colors.dart';
 import 'blocklist_sections.dart';
 
-const _divider = Divider(height: 1, thickness: 1, color: AppColors.ligne);
+// Couleur : celle du thème (dividerTheme, ligne fine).
+const _divider = Divider(height: 1, thickness: 1);
 
-TextStyle get _muted =>
-    TextStyle(fontSize: 13, color: AppColors.encre.withValues(alpha: 0.6));
+TextStyle _muted(BuildContext context) =>
+    TextStyle(fontSize: 13, color: context.colors.secondaire);
 
 /// « Analyser une application » sur l'écran du pare-feu : lancement,
 /// analyse en cours et rapports des dernières 24 heures.
@@ -46,18 +47,21 @@ class AppAnalysisSection extends StatelessWidget {
               children: [
                 Text(
                   l.analysisRunning(running.appLabel),
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w500,
-                    color: AppColors.encre,
+                    color: context.colors.encre,
                   ),
                 ),
                 const SizedBox(height: 2),
-                Text(running.progressAt(l, DateTime.now()), style: _muted),
+                Text(
+                  running.progressAt(l, DateTime.now()),
+                  style: _muted(context),
+                ),
                 const SizedBox(height: 4),
                 Text(
                   l.analysisUnprotectedWarning,
-                  style: const TextStyle(fontSize: 13, color: AppColors.ocre),
+                  style: TextStyle(fontSize: 13, color: context.colors.ocre),
                 ),
               ],
             ),
@@ -66,7 +70,7 @@ class AppAnalysisSection extends StatelessWidget {
             alignment: Alignment.centerLeft,
             child: TextButton(
               style: TextButton.styleFrom(
-                foregroundColor: AppColors.rommen,
+                foregroundColor: context.colors.rommen,
                 padding: EdgeInsets.zero,
               ),
               onPressed: onStop,
@@ -76,14 +80,14 @@ class AppAnalysisSection extends StatelessWidget {
         ] else ...[
           Text(
             firewallActive ? l.analysisIntroActive : l.analysisIntroInactive,
-            style: _muted,
+            style: _muted(context),
           ),
           if (firewallActive)
             Align(
               alignment: Alignment.centerLeft,
               child: TextButton(
                 style: TextButton.styleFrom(
-                  foregroundColor: AppColors.bleu,
+                  foregroundColor: context.colors.bleu,
                   padding: EdgeInsets.zero,
                 ),
                 onPressed: onChoose,
@@ -93,7 +97,7 @@ class AppAnalysisSection extends StatelessWidget {
         ],
         if (reports.isNotEmpty) ...[
           const SizedBox(height: 8),
-          Text(l.analysisRecentReports, style: _muted),
+          Text(l.analysisRecentReports, style: _muted(context)),
           const SizedBox(height: 4),
           _divider,
           for (final report in reports) ...[
@@ -109,24 +113,24 @@ class AppAnalysisSection extends StatelessWidget {
                         children: [
                           Text(
                             report.appLabel,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w500,
-                              color: AppColors.encre,
+                              color: context.colors.encre,
                             ),
                           ),
                           const SizedBox(height: 2),
                           Text(
                             '${_domains(l, report.domains.length)} · '
                             '${l.dateTime(report.endedAt)}',
-                            style: _muted,
+                            style: _muted(context),
                           ),
                         ],
                       ),
                     ),
                     Icon(
                       Icons.chevron_right,
-                      color: AppColors.encre.withValues(alpha: 0.4),
+                      color: context.colors.encre.withValues(alpha: 0.4),
                     ),
                   ],
                 ),

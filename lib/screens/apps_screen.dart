@@ -154,7 +154,7 @@ class _AppsScreenState extends State<AppsScreen> with WidgetsBindingObserver {
     return SafeArea(
       // RefreshIndicator : tirer vers le bas relance l'analyse.
       child: RefreshIndicator(
-        color: AppColors.bleu,
+        color: context.colors.bleu,
         onRefresh: _scan,
         // AlwaysScrollable : on peut tirer même si la liste est courte.
         child: ListView(
@@ -215,10 +215,7 @@ class _AppsScreenState extends State<AppsScreen> with WidgetsBindingObserver {
       const SizedBox(height: 8),
       Text(
         appsScanSummary(l, [for (final s in visible) s.report]),
-        style: TextStyle(
-          fontSize: 15,
-          color: AppColors.encre.withValues(alpha: 0.6),
-        ),
+        style: TextStyle(fontSize: 15, color: context.colors.secondaire),
       ),
       const SizedBox(height: 16),
       Row(
@@ -226,7 +223,7 @@ class _AppsScreenState extends State<AppsScreen> with WidgetsBindingObserver {
           Expanded(
             child: Text(
               l.appsShowSystem,
-              style: const TextStyle(fontSize: 15, color: AppColors.encre),
+              style: TextStyle(fontSize: 15, color: context.colors.encre),
             ),
           ),
           Switch(
@@ -239,7 +236,7 @@ class _AppsScreenState extends State<AppsScreen> with WidgetsBindingObserver {
       // Une ligne par app, avec un séparateur fin entre deux lignes.
       for (var i = 0; i < visible.length; i++) ...[
         if (i > 0)
-          const Divider(height: 1, thickness: 1, color: AppColors.ligne),
+          Divider(height: 1, thickness: 1, color: context.colors.ligne),
         _AppTile(
           scanned: visible[i],
           onTap: () => _openDetail(visible[i]),
@@ -256,10 +253,10 @@ class _PageTitle extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       context.l10n.navApps,
-      style: const TextStyle(
+      style: TextStyle(
         fontSize: 28,
         fontWeight: FontWeight.w600,
-        color: AppColors.encre,
+        color: context.colors.encre,
       ),
     );
   }
@@ -281,14 +278,14 @@ class _SpywareBlock extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Divider(height: 1, thickness: 1, color: AppColors.rommen),
+          Divider(height: 1, thickness: 1, color: context.colors.rommen),
           const SizedBox(height: 14),
           Text(
             l.appsSpywareFound,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w600,
-              color: AppColors.rommen,
+              color: context.colors.rommen,
             ),
           ),
           const SizedBox(height: 4),
@@ -296,7 +293,7 @@ class _SpywareBlock extends StatelessWidget {
             l.appsSpywareReadAdvice,
             style: TextStyle(
               fontSize: 14,
-              color: AppColors.encre.withValues(alpha: 0.7),
+              color: context.colors.encre.withValues(alpha: 0.7),
             ),
           ),
           for (final scanned in apps)
@@ -313,17 +310,17 @@ class _SpywareBlock extends StatelessWidget {
                         scanned.app.label,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 15,
-                          color: AppColors.encre,
+                          color: context.colors.encre,
                         ),
                       ),
                     ),
                     Text(
                       l.appsSeeAdvice,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 14,
-                        color: AppColors.rommen,
+                        color: context.colors.rommen,
                       ),
                     ),
                   ],
@@ -331,7 +328,7 @@ class _SpywareBlock extends StatelessWidget {
               ),
             ),
           const SizedBox(height: 4),
-          const Divider(height: 1, thickness: 1, color: AppColors.rommen),
+          Divider(height: 1, thickness: 1, color: context.colors.rommen),
         ],
       ),
     );
@@ -349,18 +346,15 @@ class _ScanProgress extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const LinearProgressIndicator(
+          LinearProgressIndicator(
             minHeight: 2,
-            color: AppColors.bleu,
-            backgroundColor: AppColors.ligne,
+            color: context.colors.bleu,
+            backgroundColor: context.colors.ligne,
           ),
           const SizedBox(height: 16),
           Text(
             context.l10n.appsScanning,
-            style: TextStyle(
-              fontSize: 15,
-              color: AppColors.encre.withValues(alpha: 0.6),
-            ),
+            style: TextStyle(fontSize: 15, color: context.colors.secondaire),
           ),
         ],
       ),
@@ -395,10 +389,10 @@ class _AppTile extends StatelessWidget {
                     scanned.app.label,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w500,
-                      color: AppColors.encre,
+                      color: context.colors.encre,
                     ),
                   ),
                   const SizedBox(height: 2),
@@ -410,7 +404,7 @@ class _AppTile extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                       fontSize: 13,
-                      color: AppColors.encre.withValues(alpha: 0.6),
+                      color: context.colors.secondaire,
                     ),
                   ),
                 ],
@@ -439,10 +433,7 @@ class _InfoMessage extends StatelessWidget {
         child: Text(
           text,
           textAlign: TextAlign.center,
-          style: TextStyle(
-            fontSize: 16,
-            color: AppColors.encre.withValues(alpha: 0.6),
-          ),
+          style: TextStyle(fontSize: 16, color: context.colors.secondaire),
         ),
       ),
     );

@@ -10,7 +10,8 @@ import '../../theme/app_colors.dart';
 import '../../widgets/breach_consent_sheet.dart';
 import 'vault_item_screen.dart';
 
-const _divider = Divider(height: 1, thickness: 1, color: AppColors.ligne);
+// Couleur : celle du thème (dividerTheme, ligne fine).
+const _divider = Divider(height: 1, thickness: 1);
 
 /// « Santé des mots de passe » : fuites, réutilisés, trop faibles.
 /// Se ferme tout seul si le coffre se verrouille.
@@ -86,8 +87,8 @@ class _PasswordHealthScreenState extends State<PasswordHealthScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: AppColors.chaux,
-        foregroundColor: AppColors.encre,
+        backgroundColor: context.colors.chaux,
+        foregroundColor: context.colors.encre,
         elevation: 0,
         scrolledUnderElevation: 0,
         surfaceTintColor: Colors.transparent,
@@ -110,16 +111,16 @@ class _PasswordHealthScreenState extends State<PasswordHealthScreen> {
       widget.session.items,
       breachCount: breaches.countFor,
     );
-    final muted = AppColors.encre.withValues(alpha: 0.6);
+    final muted = context.colors.secondaire;
     return ListView(
       padding: const EdgeInsets.fromLTRB(28, 8, 28, 24),
       children: [
         Text(
           l.vaultHealthTitle,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 24,
             fontWeight: FontWeight.w600,
-            color: AppColors.encre,
+            color: context.colors.encre,
           ),
         ),
         const SizedBox(height: 8),
@@ -139,7 +140,7 @@ class _PasswordHealthScreenState extends State<PasswordHealthScreen> {
               : null,
           items: report.breached,
           subtitle: (item) => breachShort(l, report.breachCounts[item.id]!),
-          color: AppColors.rommen,
+          color: context.colors.rommen,
           onTap: _open,
         ),
         _Section(
@@ -149,7 +150,7 @@ class _PasswordHealthScreenState extends State<PasswordHealthScreen> {
           subtitle: (item) => l.healthAlsoUsedFor(
             report.reusedWith[item.id]!.join(l.listSeparator),
           ),
-          color: AppColors.ocre,
+          color: context.colors.ocre,
           onTap: _open,
         ),
         _Section(
@@ -157,7 +158,7 @@ class _PasswordHealthScreenState extends State<PasswordHealthScreen> {
           emptyText: l.healthNoWeak,
           items: report.weak,
           subtitle: (_) => l.healthEasyToGuess,
-          color: AppColors.ocre,
+          color: context.colors.ocre,
           onTap: _open,
         ),
       ],
@@ -177,7 +178,7 @@ class _PasswordHealthScreenState extends State<PasswordHealthScreen> {
           ),
           TextButton(
             style: TextButton.styleFrom(
-              foregroundColor: AppColors.bleu,
+              foregroundColor: context.colors.bleu,
               padding: EdgeInsets.zero,
             ),
             onPressed: _askAndCheck,
@@ -201,8 +202,8 @@ class _PasswordHealthScreenState extends State<PasswordHealthScreen> {
             LinearProgressIndicator(
               minHeight: 2,
               value: total == 0 ? null : done / total,
-              color: AppColors.bleu,
-              backgroundColor: AppColors.ligne,
+              color: context.colors.bleu,
+              backgroundColor: context.colors.ligne,
             ),
           ],
         ),
@@ -215,11 +216,11 @@ class _PasswordHealthScreenState extends State<PasswordHealthScreen> {
         children: [
           Text(
             error.message(l),
-            style: const TextStyle(fontSize: 13, color: AppColors.rommen),
+            style: TextStyle(fontSize: 13, color: context.colors.rommen),
           ),
           TextButton(
             style: TextButton.styleFrom(
-              foregroundColor: AppColors.bleu,
+              foregroundColor: context.colors.bleu,
               padding: EdgeInsets.zero,
             ),
             onPressed: () => breaches.check(widget.session.items),
@@ -254,7 +255,7 @@ class _Section extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final muted = AppColors.encre.withValues(alpha: 0.6);
+    final muted = context.colors.secondaire;
     final header = this.header;
     final emptyText = this.emptyText;
     return Padding(
@@ -267,10 +268,10 @@ class _Section extends StatelessWidget {
               Expanded(
                 child: Text(
                   title,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w600,
-                    color: AppColors.encre,
+                    color: context.colors.encre,
                   ),
                 ),
               ),
@@ -309,10 +310,10 @@ class _Section extends StatelessWidget {
                             item.titre,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 15,
                               fontWeight: FontWeight.w500,
-                              color: AppColors.encre,
+                              color: context.colors.encre,
                             ),
                           ),
                           Text(
@@ -326,7 +327,7 @@ class _Section extends StatelessWidget {
                     ),
                     Icon(
                       Icons.chevron_right,
-                      color: AppColors.encre.withValues(alpha: 0.3),
+                      color: context.colors.encre.withValues(alpha: 0.3),
                     ),
                   ],
                 ),

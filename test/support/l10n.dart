@@ -7,10 +7,15 @@ final en = l10nFor('en');
 final ar = l10nFor('ar');
 
 /// Comme MaterialApp(home: …), avec les traductions (français par défaut).
-Widget testApp({required Widget home, Locale locale = const Locale('fr')}) =>
-    MaterialApp(
-      locale: locale,
-      supportedLocales: appSupportedLocales,
-      localizationsDelegates: appLocalizationsDelegates,
-      home: home,
-    );
+/// [theme] : AppTheme.dark pour vérifier un écran en sombre.
+Widget testApp({
+  required Widget home,
+  Locale locale = const Locale('fr'),
+  ThemeData? theme,
+}) => MaterialApp(
+  theme: theme,
+  locale: locale,
+  supportedLocales: appSupportedLocales,
+  localizationsDelegates: appLocalizationsDelegates,
+  home: home,
+);

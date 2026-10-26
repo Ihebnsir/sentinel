@@ -43,8 +43,8 @@ class SpywareAdviceScreen extends StatelessWidget {
     final name = report.stalkerwareName;
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: AppColors.chaux,
-        foregroundColor: AppColors.encre,
+        backgroundColor: context.colors.chaux,
+        foregroundColor: context.colors.encre,
         elevation: 0,
         scrolledUnderElevation: 0,
         surfaceTintColor: Colors.transparent,
@@ -59,10 +59,10 @@ class SpywareAdviceScreen extends StatelessWidget {
                 children: [
                   Text(
                     l.spywareTitle,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.w600,
-                      color: AppColors.encre,
+                      color: context.colors.encre,
                     ),
                   ),
                   const SizedBox(height: 20),
@@ -76,10 +76,10 @@ class SpywareAdviceScreen extends StatelessWidget {
                           children: [
                             Text(
                               app.label,
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w500,
-                                color: AppColors.encre,
+                                color: context.colors.encre,
                               ),
                             ),
                             const SizedBox(height: 2),
@@ -87,9 +87,9 @@ class SpywareAdviceScreen extends StatelessWidget {
                               name != null
                                   ? l.detailKnownSpyware(name)
                                   : l.riskSpyProfile,
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 13,
-                                color: AppColors.rommen,
+                                color: context.colors.rommen,
                               ),
                             ),
                           ],
@@ -98,32 +98,20 @@ class SpywareAdviceScreen extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 20),
-                  const Divider(
-                    height: 1,
-                    thickness: 1,
-                    color: AppColors.ligne,
-                  ),
+                  Divider(height: 1, thickness: 1, color: context.colors.ligne),
                   _Paragraph(l.spywareParagraph1, strong: true),
-                  const Divider(
-                    height: 1,
-                    thickness: 1,
-                    color: AppColors.ligne,
-                  ),
+                  Divider(height: 1, thickness: 1, color: context.colors.ligne),
                   _Paragraph(l.spywareParagraph2),
-                  const Divider(
-                    height: 1,
-                    thickness: 1,
-                    color: AppColors.ligne,
-                  ),
+                  Divider(height: 1, thickness: 1, color: context.colors.ligne),
                   _Paragraph(l.spywareParagraph3),
                   Padding(
                     padding: const EdgeInsets.only(top: 28, bottom: 4),
                     child: Text(
                       l.spywareGetHelp,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w600,
-                        color: AppColors.encre,
+                        color: context.colors.encre,
                       ),
                     ),
                   ),
@@ -132,23 +120,23 @@ class SpywareAdviceScreen extends StatelessWidget {
                   // auprès des organismes eux-mêmes. Ne jamais recopier un
                   // numéro sans source officielle.
                   _Paragraph(l.spywareCoalition),
-                  const SelectableText(
+                  SelectableText(
                     stopStalkerwareUrl,
-                    style: TextStyle(fontSize: 15, color: AppColors.bleu),
+                    style: TextStyle(fontSize: 15, color: context.colors.bleu),
                   ),
                   const SizedBox(height: 8),
                   Text(
                     l.spywareBrowserNote,
                     style: TextStyle(
                       fontSize: 13,
-                      color: AppColors.encre.withValues(alpha: 0.6),
+                      color: context.colors.secondaire,
                     ),
                   ),
                   Row(
                     children: [
                       TextButton(
                         style: TextButton.styleFrom(
-                          foregroundColor: AppColors.bleu,
+                          foregroundColor: context.colors.bleu,
                           padding: EdgeInsets.zero,
                         ),
                         onPressed: () => AppsScannerService().openWebPage(
@@ -159,7 +147,7 @@ class SpywareAdviceScreen extends StatelessWidget {
                       const SizedBox(width: 24),
                       TextButton(
                         style: TextButton.styleFrom(
-                          foregroundColor: AppColors.bleu,
+                          foregroundColor: context.colors.bleu,
                           padding: EdgeInsets.zero,
                         ),
                         onPressed: () => _copyLink(context),
@@ -172,7 +160,7 @@ class SpywareAdviceScreen extends StatelessWidget {
                     l.spywareIocCredit,
                     style: TextStyle(
                       fontSize: 12,
-                      color: AppColors.encre.withValues(alpha: 0.5),
+                      color: context.colors.encre.withValues(alpha: 0.5),
                     ),
                   ),
                 ],
@@ -185,7 +173,7 @@ class SpywareAdviceScreen extends StatelessWidget {
                 children: [
                   FilledButton(
                     style: FilledButton.styleFrom(
-                      backgroundColor: AppColors.bleu,
+                      backgroundColor: context.colors.bleu,
                     ),
                     onPressed: () =>
                         AppsScannerService().openAppSettings(app.packageName),
@@ -195,7 +183,7 @@ class SpywareAdviceScreen extends StatelessWidget {
                   if (!app.isSystemApp)
                     TextButton(
                       style: TextButton.styleFrom(
-                        foregroundColor: AppColors.rommen,
+                        foregroundColor: context.colors.rommen,
                       ),
                       onPressed: () => _uninstall(context),
                       child: Text(l.detailUninstall),
@@ -227,7 +215,7 @@ class _Paragraph extends StatelessWidget {
           fontSize: 15,
           height: 1.4,
           fontWeight: strong ? FontWeight.w500 : FontWeight.normal,
-          color: AppColors.encre,
+          color: context.colors.encre,
         ),
       ),
     );

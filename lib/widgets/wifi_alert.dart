@@ -21,28 +21,25 @@ void showWifiAlert(
   final messenger = ScaffoldMessenger.of(context);
   final l = context.l10n;
   messenger.clearMaterialBanners();
+  // Texte lisible sur le rouge plein, en clair comme en sombre.
+  final colors = context.colors;
+  final onRed = colors.textOn(colors.rommen);
   final controller = messenger.showMaterialBanner(
     MaterialBanner(
-      backgroundColor: AppColors.rommen,
-      leading: const Icon(Icons.wifi_off, color: Colors.white),
-      content: Text(message, style: const TextStyle(color: Colors.white)),
+      backgroundColor: colors.rommen,
+      leading: Icon(Icons.wifi_off, color: onRed),
+      content: Text(message, style: TextStyle(color: onRed)),
       actions: [
         TextButton(
           onPressed: messenger.hideCurrentMaterialBanner,
-          child: Text(
-            l.commonClose,
-            style: const TextStyle(color: Colors.white),
-          ),
+          child: Text(l.commonClose, style: TextStyle(color: onRed)),
         ),
         TextButton(
           onPressed: () {
             messenger.hideCurrentMaterialBanner();
             onDetails();
           },
-          child: Text(
-            l.commonDetails,
-            style: const TextStyle(color: Colors.white),
-          ),
+          child: Text(l.commonDetails, style: TextStyle(color: onRed)),
         ),
       ],
     ),

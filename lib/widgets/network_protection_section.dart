@@ -53,18 +53,18 @@ class _NetworkProtectionSectionState extends State<NetworkProtectionSection> {
     final status = _status;
     if (status == null) return const SizedBox.shrink();
     final color = status.active
-        ? AppColors.zitouna
-        : AppColors.encre.withValues(alpha: 0.45);
+        ? context.colors.zitouna
+        : context.colors.discret;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           l.networkProtectionTitle,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.w600,
-            color: AppColors.encre,
+            color: context.colors.encre,
           ),
         ),
         const SizedBox(height: 8),
@@ -82,10 +82,10 @@ class _NetworkProtectionSectionState extends State<NetworkProtectionSection> {
                     children: [
                       Text(
                         l.firewallTitle,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w500,
-                          color: AppColors.encre,
+                          color: context.colors.encre,
                         ),
                       ),
                       const SizedBox(height: 2),
@@ -93,17 +93,14 @@ class _NetworkProtectionSectionState extends State<NetworkProtectionSection> {
                         status.summary(l),
                         style: TextStyle(
                           fontSize: 13,
-                          color: AppColors.encre.withValues(alpha: 0.6),
+                          color: context.colors.secondaire,
                         ),
                       ),
                     ],
                   ),
                 ),
                 const SizedBox(width: 12),
-                Icon(
-                  Icons.chevron_right,
-                  color: AppColors.encre.withValues(alpha: 0.45),
-                ),
+                Icon(Icons.chevron_right, color: context.colors.discret),
               ],
             ),
           ),

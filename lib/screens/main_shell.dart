@@ -2,7 +2,7 @@ import 'package:material_ui/material_ui.dart';
 
 import '../l10n/l10n.dart';
 import '../services/share_service.dart';
-import '../theme/app_theme.dart';
+import '../theme/app_colors.dart';
 import '../widgets/arch_icon.dart';
 import 'apps_screen.dart';
 import 'home_screen.dart';
@@ -65,8 +65,8 @@ class _MainShellState extends State<MainShell> {
       body: IndexedStack(index: _selectedIndex, children: _pages),
       // Fine ligne de séparation au-dessus de la barre.
       bottomNavigationBar: DecoratedBox(
-        decoration: const BoxDecoration(
-          border: Border(top: AppTheme.navigationBarBorder),
+        decoration: BoxDecoration(
+          border: Border(top: BorderSide(color: context.colors.ligne)),
         ),
         child: NavigationBar(
           selectedIndex: _selectedIndex,
