@@ -35,4 +35,10 @@
     <string name="biometric_use_password">Utiliser le mot de passe</string>
     <string name="biometric_cancel">Annuler</string>
     <string name="biometric_subtitle">Posez votre doigt sur le capteur</string>
+    <!-- Tuile des Paramètres rapides (FirewallTileService). -->
+    <string name="tile_label">Pare-feu Sentinel</string>
+    <string name="tile_on">Actif</string>
+    <string name="tile_off">Inactif</string>
+    <string name="tile_needs_permission">Autorisation à donner</string>
+    <string name="tile_strict_dns">DNS privé strict</string>
 </resources>

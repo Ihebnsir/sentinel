@@ -37,6 +37,9 @@ class MainActivity : FlutterActivity() {
     // Texte reçu au lancement, en attente que Dart le demande.
     private var initialSharedText: String? = null
 
+    // Lancement par la tuile du pare-feu, en attente que Dart le demande.
+    private var initialOpenFirewall = false
+
     // Même nom que dans lib/services/protection_service.dart.
     private val protectionChannelName = "com.iheb.sentinel/protection"
     // Langue choisie dans Réglages (lib/services/language_store.dart).
@@ -64,6 +67,7 @@ class MainActivity : FlutterActivity() {
         // depuis les apps récentes…) ; le texte a déjà été traité.
         if (savedInstanceState == null && !launchedFromHistory(intent)) {
             initialSharedText = sharedTextFrom(intent)
+            initialOpenFirewall = intent?.action == ACTION_OPEN_FIREWALL
         }
     }
 
@@ -72,6 +76,10 @@ class MainActivity : FlutterActivity() {
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         setIntent(intent)
+        if (intent.action == ACTION_OPEN_FIREWALL) {
+            shareChannel?.invokeMethod("onOpenFirewall", null)
+            return
+        }
         val text = sharedTextFrom(intent) ?: return
         shareChannel?.invokeMethod("onSharedText", text)
     }
@@ -92,6 +100,11 @@ class MainActivity : FlutterActivity() {
                         "getInitialSharedText" -> {
                             result.success(initialSharedText)
                             initialSharedText = null
+                        }
+                        // Idem pour la tuile du pare-feu.
+                        "getInitialOpenFirewall" -> {
+                            result.success(initialOpenFirewall)
+                            initialOpenFirewall = false
                         }
                         else -> result.notImplemented()
                     }

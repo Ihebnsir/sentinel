@@ -176,3 +176,22 @@ Détail de ce qui a été vérifié et corrigé : [ACCESSIBILITE.md](ACCESSIBILI
 - **Mise en forme** : `dart format` appliqué en entier seulement aux fichiers qui étaient déjà au format ; ailleurs, seuls les blocs modifiés sont indentés à la main.
 
 Non vérifié : pas d'essai avec TalkBack sur un téléphone (règle : pas de `flutter run`). Feuilles du bas, boîtes de dialogue et écrans d'Android hors du test automatique. Voir « Limites » dans ACCESSIBILITE.md.
+
+## Tuile Paramètres rapides « Pare-feu Sentinel » (2026-10-27)
+
+Choix faits sans demander :
+
+- **Logique pure à part** : `FirewallTilePolicy` (`firewall/FirewallTilePolicy.kt`) décide quoi faire d'un appui (démarrer, arrêter, ouvrir l'app) et quoi afficher, sans Android. Testée par `FirewallTilePolicyTest` (8 tests, dont « l'affichage annonce toujours ce que fera l'appui » sur les 8 combinaisons).
+- **Ordre des règles** : pare-feu actif → l'appui coupe, toujours (même avec un DNS privé strict ou une autorisation retirée : couper ne doit jamais échouer). Sinon, autorisation VPN manquante → ouvrir l'app (seule l'app peut afficher la demande d'Android). Sinon, DNS privé strict (SEN-11) → ouvrir l'app (démarrer filtrerait du vide). Sinon → démarrer.
+- **« Autorisation VPN »** = `VpnService.prepare()` renvoie null. Il renvoie aussi une demande quand un autre VPN a pris la place : la tuile ouvre alors l'app, qui refait la demande.
+- **Petite ligne sous le nom** (Android 10+) : « Actif », « Inactif », « Autorisation à donner » ou « DNS privé strict ». Elle dit pourquoi l'app va s'ouvrir. Textes en français, anglais et arabe (`tile_*` dans les trois `strings.xml`), dans la langue choisie dans Réglages (`AppLanguage.localized`), comme la notification du VPN.
+- **Écran verrouillé** : `unlockAndRun` avant tout appui. Sinon, quelqu'un qui tient le téléphone verrouillé pourrait couper la protection.
+- **Synchronisation** : tuile en mode normal (pas « active »), donc relue à chaque ouverture du panneau. En plus, `SentinelVpnService` appelle `FirewallTileService.refresh()` au démarrage et à l'arrêt (y compris un autre VPN qui prend la place). Si le panneau est ouvert, la tuile se met à jour tout de suite. Sinon : `requestListeningState`.
+- **Android 14+** : `startActivityAndCollapse(PendingIntent)` (PendingIntent immuable). Avant 14 : la version avec Intent, seule disponible.
+- **Démarrage refusé par Android** (règles des services au premier plan lancés en arrière-plan, Android 12+) : l'exception est attrapée et la tuile ouvre l'écran du pare-feu, au lieu d'échouer en silence. Je ne suis pas sûr qu'un appui sur une tuile compte toujours comme une action de l'utilisateur chez tous les fabricants : d'où ce repli.
+- **Ouvrir l'écran du pare-feu** : Intent explicite vers `MainActivity`, action `com.iheb.sentinel.action.OPEN_FIREWALL` (constante dans `IncomingText.kt`), sans intent-filter : la liste des actions de `MainActivity` vérifiée par `ManifestTest` ne change pas. `MainActivity` est exportée, donc une autre app peut envoyer cette action. Elle n'ouvre qu'un écran, sans données, et ne démarre rien : sans risque.
+- **Côté Dart** : canal existant `com.iheb.sentinel/share` (`getInitialOpenFirewall` au lancement, `onOpenFirewall` app ouverte), plutôt qu'un nouveau canal. `ShareService.firewallRequests` compte les demandes. `MainShell` revient à l'accueil, referme les écrans ouverts et pousse `FirewallScreen` (une seule fois, même après deux appuis). Au premier lancement, la présentation passe d'abord, puis l'écran du pare-feu s'ouvre.
+- **Manifeste** : service exporté protégé par `BIND_QUICK_SETTINGS_TILE` (seul le panneau d'Android s'y connecte), icône `@drawable/ic_stat_arch`, nom `@string/tile_label`. `ManifestTest` vérifie la permission, l'action `QS_TILE` et l'icône.
+- **Petite correction en passant** : `ShareService.start()` s'arrête si l'écran est fermé pendant l'attente (sinon la deuxième question à Android touchait un objet fermé).
+
+Non vérifié : la tuile n'a pas été essayée sur un téléphone (règle : pas de `flutter run`). À tester à la main : ajout de la tuile dans le panneau, appui écran verrouillé, démarrage depuis la tuile sur Android 12, 13, 14 et 15 (repli vers l'app si Android refuse), mise à jour quand on coupe depuis la notification.

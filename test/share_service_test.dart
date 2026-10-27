@@ -77,4 +77,50 @@ void main() {
     expect(service.received.value, isNull);
     service.dispose();
   });
+
+  group('tuile du pare-feu', () {
+    Future<void> tuile() => messenger.handlePlatformMessage(
+      channel.name,
+      channel.codec.encodeMethodCall(const MethodCall('onOpenFirewall')),
+      (_) {},
+    );
+
+    test('lancement par la tuile : une demande', () async {
+      android((call) => call.method == 'getInitialOpenFirewall' ? true : null);
+      final service = ShareService();
+      await service.start();
+      expect(service.firewallRequests.value, 1);
+      expect(service.received.value, isNull);
+      service.dispose();
+    });
+
+    test('lancement normal : aucune demande', () async {
+      android((call) => call.method == 'getInitialOpenFirewall' ? false : null);
+      final service = ShareService();
+      await service.start();
+      expect(service.firewallRequests.value, 0);
+      service.dispose();
+    });
+
+    test('app déjà ouverte : chaque appui prévient', () async {
+      android((call) => null);
+      final service = ShareService();
+      var avertissements = 0;
+      service.firewallRequests.addListener(() => avertissements++);
+      await service.start();
+      await tuile();
+      await tuile();
+      expect(avertissements, 2);
+      service.dispose();
+    });
+
+    test('réponse inattendue ou après fermeture : ignorée', () async {
+      android((call) => 'pas un booléen');
+      final service = ShareService();
+      await service.start();
+      expect(service.firewallRequests.value, 0);
+      service.dispose();
+      await tuile(); // ne doit pas toucher au notifier fermé
+    });
+  });
 }

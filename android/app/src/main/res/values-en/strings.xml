@@ -25,4 +25,9 @@
     <string name="biometric_use_password">Use the password</string>
     <string name="biometric_cancel">Cancel</string>
     <string name="biometric_subtitle">Place your finger on the sensor</string>
+    <string name="tile_label">Sentinel firewall</string>
+    <string name="tile_on">On</string>
+    <string name="tile_off">Off</string>
+    <string name="tile_needs_permission">Permission needed</string>
+    <string name="tile_strict_dns">Strict private DNS</string>
 </resources>

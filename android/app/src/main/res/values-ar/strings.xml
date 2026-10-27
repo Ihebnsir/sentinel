@@ -25,4 +25,9 @@
     <string name="biometric_use_password">استخدام كلمة المرور</string>
     <string name="biometric_cancel">إلغاء</string>
     <string name="biometric_subtitle">ضع إصبعك على المستشعر</string>
+    <string name="tile_label">جدار حماية Sentinel</string>
+    <string name="tile_on">مفعّل</string>
+    <string name="tile_off">غير مفعّل</string>
+    <string name="tile_needs_permission">يلزم منح الإذن</string>
+    <string name="tile_strict_dns">DNS خاص صارم</string>
 </resources>

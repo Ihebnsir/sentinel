@@ -216,6 +216,7 @@ class SentinelVpnService : VpnService() {
         startReader(session)
         isRunning = true
         FirewallEngine.onVpnStarted(this)
+        FirewallTileService.refresh(this)
     }
 
     /** Ouvre une interface TUN selon [plan] ; null si Android refuse. */
@@ -543,7 +544,10 @@ class SentinelVpnService : VpnService() {
         current = null
         // Analyse interrompue (arrêt, autre VPN) : le rapport est gardé.
         if (session != null) saveReport(session)
-        if (wasRunning) FirewallEngine.onVpnStopped()
+        if (wasRunning) {
+            FirewallEngine.onVpnStopped()
+            FirewallTileService.refresh(this)
+        }
         forwarders?.shutdownNow()
         forwarders = null
         resolver?.close()

@@ -24,6 +24,12 @@ val alertInbox = AlertInbox()
 /** Action interne : « ouvre l'onglet Messages avec l'alerte en attente ». Sans texte. */
 const val ACTION_OPEN_ALERT = "com.iheb.sentinel.action.OPEN_ALERT"
 
+/**
+ * Action interne : « ouvre l'écran du pare-feu » (tuile des Paramètres
+ * rapides). Sans données : une autre app qui l'envoie ouvre seulement cet écran.
+ */
+const val ACTION_OPEN_FIREWALL = "com.iheb.sentinel.action.OPEN_FIREWALL"
+
 const val ACTION_SEND = "android.intent.action.SEND"
 const val ACTION_PROCESS_TEXT = "android.intent.action.PROCESS_TEXT"
 

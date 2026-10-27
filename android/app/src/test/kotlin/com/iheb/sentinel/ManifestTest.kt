@@ -49,6 +49,14 @@ class ManifestTest {
     }
 
     @Test
+    fun `tuile du pare-feu - reservee au panneau d'Android`() {
+        val tile = component(".firewall.FirewallTileService")
+        assertEquals("android.permission.BIND_QUICK_SETTINGS_TILE", tile.attr("permission"))
+        assertEquals(listOf("android.service.quicksettings.action.QS_TILE"), actionsOf(tile))
+        assertEquals("@drawable/ic_stat_arch", tile.attr("icon"))
+    }
+
+    @Test
     fun `tout composant exporte est protege par une permission systeme`() {
         // Exceptions justifiées : l'activité du lanceur (partage public), et
         // BOOT_COMPLETED, diffusé par le système seul (broadcast protégé).

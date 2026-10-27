@@ -5,6 +5,7 @@ import '../services/share_service.dart';
 import '../theme/app_colors.dart';
 import '../widgets/arch_icon.dart';
 import 'apps_screen.dart';
+import 'firewall_screen.dart';
 import 'home_screen.dart';
 import 'messages_screen.dart';
 import 'vault_screen.dart';
@@ -41,12 +42,14 @@ class _MainShellState extends State<MainShell> {
   void initState() {
     super.initState();
     _share.received.addListener(_showMessages);
+    _share.firewallRequests.addListener(_showFirewall);
     _share.start();
   }
 
   @override
   void dispose() {
     _share.received.removeListener(_showMessages);
+    _share.firewallRequests.removeListener(_showFirewall);
     _share.dispose();
     super.dispose();
   }
@@ -54,6 +57,18 @@ class _MainShellState extends State<MainShell> {
   // Un texte arrive : on affiche l'onglet Messages qui va l'analyser.
   void _showMessages() {
     setState(() => _selectedIndex = _messagesIndex);
+  }
+
+  // Tuile du pare-feu : écran du pare-feu par-dessus l'accueil, une seule
+  // fois (les écrans ouverts avant sont refermés).
+  void _showFirewall() {
+    setState(() => _selectedIndex = 0);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      Navigator.of(context)
+        ..popUntil((route) => route.isFirst)
+        ..push(MaterialPageRoute<void>(builder: (_) => const FirewallScreen()));
+    });
   }
 
   @override
