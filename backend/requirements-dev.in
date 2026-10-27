@@ -1,0 +1,5 @@
+# Outils de test et d audit (CI et poste de travail).
+pytest
+httpx2
+bandit
+pip-audit
