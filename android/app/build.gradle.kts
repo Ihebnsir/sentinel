@@ -115,8 +115,8 @@ dependencies {
         implementation("androidx.savedstate:savedstate:1.5.0")
         implementation("androidx.tracing:tracing:2.0.3")
         // Anciens modules vides, alignés sur la bibliothèque standard.
-        implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk7:2.4.0")
-        implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:2.4.0")
+        implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk7:2.4.21")
+        implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:2.4.21")
     }
 
     // Lecture des QR codes (Messages > Scanner un QR code). Apache 2.0.
