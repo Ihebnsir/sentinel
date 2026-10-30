@@ -43,7 +43,7 @@ dependencies:
   cryptography: ^2.9.0
   path_provider: ^2.1.6
   http: ^1.6.0
-  crypto: ^3.0.7
+  crypto: ^3.0.8
 
 dev_dependencies:
   flutter_test:
