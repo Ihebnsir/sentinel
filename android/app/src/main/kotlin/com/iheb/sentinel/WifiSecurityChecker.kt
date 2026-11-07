@@ -101,15 +101,16 @@ class WifiSecurityChecker(private val activity: Activity, messenger: BinaryMesse
     // Cherche le réseau Wi-Fi parmi tous les réseaux connectés : avec un VPN
     // ou un Wi-Fi sans internet, le réseau « par défaut » n'est pas le Wi-Fi.
     private fun findWifiNetwork(): Network? {
-        val active = connectivity.activeNetwork
-        if (active != null && isWifi(active)) return active
         @Suppress("DEPRECATION") // pas de remplaçant sans écoute permanente
-        return connectivity.allNetworks.firstOrNull { isWifi(it) }
+        val all = connectivity.allNetworks.toList()
+        return pickWifiNetwork(connectivity.activeNetwork, all) { network ->
+            val caps = connectivity.getNetworkCapabilities(network)
+            Transports(
+                wifi = caps?.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) == true,
+                vpn = caps?.hasTransport(NetworkCapabilities.TRANSPORT_VPN) == true,
+            )
+        }
     }
-
-    private fun isWifi(network: Network): Boolean =
-        connectivity.getNetworkCapabilities(network)
-            ?.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) == true
 
     // Android 12+ : WifiInfo.getCurrentSecurityType(). Avant, le type de
     // sécurité n'est lisible qu'avec la localisation : « unknown ».
@@ -188,4 +189,15 @@ class WifiSecurityChecker(private val activity: Activity, messenger: BinaryMesse
             activity.startActivity(Intent(Settings.ACTION_SETTINGS))
         }
     }
+}
+
+// Types de transport d'un réseau (sans dépendre d'Android : testable).
+internal data class Transports(val wifi: Boolean, val vpn: Boolean)
+
+// Un VPN (notre pare-feu) hérite du transport WIFI de son réseau sous-jacent,
+// mais ses informations ne sont pas une WifiInfo : on l'écarte toujours.
+internal fun <N> pickWifiNetwork(active: N?, all: List<N>, transports: (N) -> Transports): N? {
+    fun isRealWifi(n: N) = transports(n).let { it.wifi && !it.vpn }
+    if (active != null && isRealWifi(active)) return active
+    return all.firstOrNull(::isRealWifi)
 }

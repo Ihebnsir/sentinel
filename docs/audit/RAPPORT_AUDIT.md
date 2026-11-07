@@ -6,7 +6,7 @@
 | Période | 21 au 24 octobre 2026 |
 | Référentiel | OWASP MASVS v2, méthodologie MASTG |
 | Auditeur | audit mené pour le propriétaire de l'application, sur son propre code |
-| Rapports détaillés | [P1 statique](P1_statique.md) · [P2 dynamique](P2_dynamique.md) · [P3a corrections](P3a_corrections.md) · [P3b corrections](P3b_corrections.md) |
+| Rapports détaillés | [P1 statique](P1_statique.md) · [P2 dynamique](P2_dynamique.md) · [P3a corrections](P3a_corrections.md) · [P3b corrections](P3b_corrections.md) · [P3c corrections](P3c_corrections.md) |
 
 ## 1. Résumé (non technique)
 
@@ -14,17 +14,18 @@ Sentinel protège le téléphone de son utilisateur : coffre de mots de passe, d
 
 **Ce qui était déjà solide.** Le coffre est réellement chiffré (Argon2id et AES-GCM). Aucun mot de passe n'apparaît en clair, ni dans les fichiers ni dans les journaux. L'écran du coffre est noir dans les captures et dans les apps récentes. Le coffre se verrouille quand l'écran s'éteint, et la vérification des fuites n'envoie que 5 caractères d'une empreinte.
 
-**Ce qui a été trouvé : 17 constats**, dont un de sévérité élevée et quatre moyens :
+**Ce qui a été trouvé : 18 constats**, dont un de sévérité élevée et cinq moyens :
 - les versions publiables étaient signées avec une clé de test (élevée) ;
 - au premier lancement, l'app contactait Google pour télécharger une police, sans accord ;
 - avec le pare-feu, les noms des sites visités partaient en clair sur le réseau ;
 - avec un « DNS privé » réglé en mode strict, activer le pare-feu coupait tous les sites ;
-- sur Android 9 et avant, un mot de passe copié depuis le coffre était lisible par toutes les apps.
+- sur Android 9 et avant, un mot de passe copié depuis le coffre était lisible par toutes les apps ;
+- avec le pare-feu actif, l'accueil n'avertissait plus d'un Wi-Fi ouvert (trouvé après l'audit, en test réel).
 
 S'y ajoutent des points plus faibles : un message piégé par des caractères invisibles trompait l'analyse, une autre app pouvait faire afficher « Rien de suspect », les rapports d'analyse restaient en clair sur le disque, etc.
 
 **Où on en est.**
-- **14 constats sont corrigés**, chacun avec un test automatique, et revérifiés sur un téléphone de test (émulateur rooté) quand c'était pertinent.
+- **15 constats sont corrigés**, chacun avec un test automatique, et revérifiés sur un téléphone de test (émulateur rooté) quand c'était pertinent.
 - **3 sont acceptés en connaissance de cause** : le modèle anti-arnaque est lisible (l'app est open source), pas d'épinglage de certificat, et le constat SEN-09, qui était déjà conforme.
 - **Une seule action reste à faire, par le propriétaire lui-même** : créer la clé de publication (la procédure est prête) et vérifier la signature de la première version.
 
@@ -43,7 +44,7 @@ Trois phases, selon OWASP MASVS v2 / MASTG :
 
 1. **Analyse statique (P1)** : décompilation de l'APK release, lecture du manifeste et des composants exportés, recherche de secrets, de journaux et de code de debug, dépendances comparées aux bases de vulnérabilités, analyse automatique MobSF puis tri manuel de ses alertes (10 faux positifs écartés).
 2. **Analyse dynamique (P2)** : APK release sur un émulateur rooté. Capture réseau dès le premier lancement, chaque connexion étant attribuée à l'app par son UID ; interception HTTPS de la vérification HIBP ; journaux pendant un scénario complet ; attaques des composants exportés depuis une app ordinaire ; inspection du stockage en root ; protections d'écran.
-3. **Corrections (P3a, P3b)** : pour chaque constat, une correction, un test automatique (Dart ou JUnit) et un nouveau test sur l'émulateur quand c'est pertinent. Aucun constat n'est déclaré corrigé sans preuve.
+3. **Corrections (P3a, P3b, P3c)** : pour chaque constat, une correction, un test automatique (Dart ou JUnit) et un nouveau test sur l'émulateur quand c'est pertinent. Aucun constat n'est déclaré corrigé sans preuve.
 
 **Outils et versions** (téléchargements vérifiés par somme de contrôle ou empreinte d'image) :
 
@@ -91,10 +92,11 @@ Sévérité selon l'impact pour l'utilisateur et la facilité d'exploitation (d�
 | SEN-15 | Pas d'épinglage de certificat | NETWORK-2 | Info | **Accepté** | [P3a](P3a_corrections.md#sen-15--pas-dépinglage-de-certificat--accepté) |
 | SEN-16 | Prénom du développeur écrit en dur | hors MASVS | Info | **Corrigé** | [P3a](P3a_corrections.md#sen-16---bonjour-iheb---corrigé) |
 | SEN-17 | Bandeau Wi-Fi qui cache des boutons | hors MASVS | Info | **Corrigé** | [P3a](P3a_corrections.md#sen-17--bandeau-wi-fi-qui-cache-des-boutons--corrigé) |
+| SEN-18 | Pare-feu actif : sécurité du Wi-Fi « inconnue » | hors MASVS | Moyenne | **Corrigé** | [P3c](P3c_corrections.md#sen-18--wi-fi--inconnu--quand-le-pare-feu-est-actif) |
 
-Bilan : **13 corrigés et vérifiés, 1 corrigé en attente de la vérification finale (SEN-01), 3 acceptés, 0 restant** (17 constats). Pendant les corrections, 10 faux positifs de MobSF ont été écartés (P1, §5), et 20 faux positifs de Gitleaks issus du rapport MobSF ont été documentés (P3a, §3).
+Bilan : **14 corrigés et vérifiés, 1 corrigé en attente de la vérification finale (SEN-01), 3 acceptés, 0 restant** (18 constats). Pendant les corrections, 10 faux positifs de MobSF ont été écartés (P1, §5), et 20 faux positifs de Gitleaks issus du rapport MobSF ont été documentés (P3a, §3).
 
-**Indicateurs finaux** : `flutter analyze` sans problème ; **436** tests Flutter et **125** tests JUnit réussis ; **0** vulnérabilité connue dans les 70 paquets Pub et les 67 composants Android (OSV.dev, 24/10/2026) ; **0** requête DNS en clair vers Quad9 sans accord de l'utilisateur (capture réseau).
+**Indicateurs finaux** : `flutter analyze` sans problème ; **436** tests Flutter et **125** tests JUnit réussis à la fin de l'audit (**703** et **144** après SEN-18, le 07/11/2026) ; **0** vulnérabilité connue dans les 70 paquets Pub et les 67 composants Android (OSV.dev, 24/10/2026) ; **0** requête DNS en clair vers Quad9 sans accord de l'utilisateur (capture réseau).
 
 ## 6. Risques résiduels
 
