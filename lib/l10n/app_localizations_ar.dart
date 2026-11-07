@@ -530,7 +530,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String messagesProbability(String percent) {
-    return 'احتمال الاحتيال: $percent٪';
+    return 'احتمال الاحتيال: ‎$percent%';
   }
 
   @override

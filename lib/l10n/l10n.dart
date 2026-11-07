@@ -7,6 +7,7 @@ import 'package:material_ui/material_ui.dart';
 
 import '../utils/french_date.dart';
 import '../utils/french_number.dart';
+import '../utils/maghreb_format.dart';
 import 'app_localizations.dart';
 
 export 'app_localizations.dart';
@@ -39,22 +40,31 @@ extension AppLocalizationsContext on BuildContext {
 
 /// Nombres et dates dans la langue des textes.
 /// Le français garde ses formats maison (« 1er mars », « 14 h 05 »).
+/// L'arabe suit l'usage tunisien : chiffres occidentaux, mois « جانفي ».
 extension AppFormats on AppLocalizations {
   bool get _fr => localeName == 'fr';
+  bool get _ar => localeName == 'ar';
 
   /// « 3 861 » en français, « 3,861 » en anglais et en arabe.
-  String number(int value) => _fr
-      ? formatFrenchNumber(value)
-      : NumberFormat.decimalPattern(localeName).format(value);
+  String number(int value) {
+    if (_fr) return formatFrenchNumber(value);
+    final text = NumberFormat.decimalPattern(localeName).format(value);
+    return _ar ? westernDigits(text) : text;
+  }
 
-  /// « 5 août 2026 », « August 5, 2026 », « 5 أغسطس 2026 ».
-  String date(DateTime date) =>
-      _fr ? formatFrenchDate(date) : _format(DateFormat.yMMMMd, date);
+  /// « 5 août 2026 », « August 5, 2026 », « 5 أوت 2026 ».
+  String date(DateTime date) {
+    if (_fr) return formatFrenchDate(date);
+    if (_ar) return formatMaghrebDate(date);
+    return _format(DateFormat.yMMMMd, date);
+  }
 
-  /// « 14 h 05 », « 2:05 PM ».
-  String time(DateTime date) => _fr
-      ? '${date.hour} h ${date.minute.toString().padLeft(2, '0')}'
-      : _format(DateFormat.jm, date);
+  /// « 14 h 05 », « 2:05 PM », « 14:05 ».
+  String time(DateTime date) {
+    if (_fr) return '${date.hour} h ${date.minute.toString().padLeft(2, '0')}';
+    if (_ar) return formatMaghrebTime(date);
+    return _format(DateFormat.jm, date);
+  }
 
   /// « 19 octobre 2026 à 14 h 05 ».
   String dateTime(DateTime date) =>

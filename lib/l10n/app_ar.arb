@@ -150,7 +150,7 @@
   "messagesAnalyze": "تحليل",
   "messagesFailed": "فشل التحليل. حاول مرة أخرى.",
   "messagesLocalNote": "يتم التحليل على هاتفك، ولا تُرسَل الرسالة إلى أي مكان.",
-  "messagesProbability": "احتمال الاحتيال: {percent}٪",
+  "messagesProbability": "احتمال الاحتيال: ‎{percent}%",
   "alertDefaultReason": "تشبه هذه الرسالة عمليات الاحتيال المعروفة. لا تضغط على أي رابط.",
   "alertTitleSms": "احتيال محتمل في رسالة SMS",
   "alertTitleMessage": "احتيال محتمل في رسالة",

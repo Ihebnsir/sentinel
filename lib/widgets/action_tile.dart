@@ -48,8 +48,10 @@ class ActionTile extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 12),
+            // Gauche-droite forcé : sinon l'arabe affiche « 10+ ».
             Text(
               '+${action.points}',
+              textDirection: TextDirection.ltr,
               style: TextStyle(
                 fontWeight: FontWeight.w600,
                 color: context.colors.zitouna,
