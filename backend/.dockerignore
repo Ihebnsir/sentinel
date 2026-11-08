@@ -1,0 +1,13 @@
+# Seul le nécessaire entre dans l'image (ni venv, ni base, ni secrets).
+.venv/
+.env
+data/
+*.db
+tests/
+.pytest_cache/
+.ruff_cache/
+**/__pycache__/
+requirements-dev.txt
+Dockerfile
+docker-compose.yml
+README.md

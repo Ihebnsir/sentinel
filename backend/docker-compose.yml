@@ -1,0 +1,26 @@
+# Lancement local du backend : docker compose up --build
+# Le port n'est ouvert que sur cette machine (127.0.0.1).
+services:
+  api:
+    build: .
+    image: sentinel-backend:local
+    ports:
+      - "127.0.0.1:8000:8000"
+    environment:
+      # prod par défaut ; SENTINEL_ENV=dev docker compose up pour ouvrir /docs.
+      SENTINEL_ENV: ${SENTINEL_ENV:-prod}
+      SENTINEL_LOG_LEVEL: INFO
+    volumes:
+      - sentinel-data:/data
+    # Système de fichiers en lecture seule, sauf /data et /tmp.
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    restart: unless-stopped
+
+volumes:
+  sentinel-data:
