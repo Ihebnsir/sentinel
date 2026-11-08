@@ -1,33 +1,43 @@
-"""Format d'un signalement, validé strictement (Pydantic)."""
+"""Formats d'entrée et de sortie de l'API (validation stricte)."""
 
-from typing import Literal
+import re
+import uuid
+from typing import Annotated
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
-# Mêmes valeurs que l'enum Verdict de l'app (message_analyzer.dart).
-Verdict = Literal["arnaque", "suspect", "rien"]
+from .models import Language, Source, Verdict
 
-# Langues de l'app ; « und » : langue du message inconnue.
-Language = Literal["fr", "en", "ar", "und"]
-
-MAX_TEXT_LENGTH = 2000
+# Caractères de contrôle refusés (sauf tabulation et retours à la ligne).
+_CONTROL = re.compile("[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]")
+_VERSION = r"^[0-9]{1,4}(\.[0-9]{1,4}){0,3}(\+[0-9]{1,9})?$"
 
 
 class ReportIn(BaseModel):
-    """Corps de POST /v1/reports. Tout champ en plus est refusé."""
+    # Champs inconnus refusés.
+    model_config = ConfigDict(extra="forbid", frozen=True)
 
-    model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
-
-    text: str = Field(min_length=1, max_length=MAX_TEXT_LENGTH)
+    # strict=True : pas de conversion implicite (« 0.5 » texte ≠ 0.5).
+    text: Annotated[str, Field(strict=True, min_length=1, max_length=2000)]
     verdict: Verdict
+    probability: Annotated[float, Field(strict=True, ge=0.0, le=1.0, allow_inf_nan=False)]
     language: Language
-    # Version de l'app : 1.2.3 ou 1.2.3+45, rien d'autre.
-    app_version: str = Field(
-        max_length=20, pattern=r"^\d{1,3}\.\d{1,3}\.\d{1,3}(\+\d{1,6})?$"
-    )
+    app_version: Annotated[str, Field(strict=True, max_length=32, pattern=_VERSION)]
+    source: Source
+
+    @field_validator("text")
+    @classmethod
+    def _clean_text(cls, value: str) -> str:
+        if not value.strip():
+            raise ValueError("texte vide")
+        if _CONTROL.search(value):
+            raise ValueError("caractère de contrôle interdit")
+        return value
 
 
-class ReportAccepted(BaseModel):
-    """Réponse : aucun identifiant, rien qui permette de relier l'envoi."""
+class ReportCreated(BaseModel):
+    id: uuid.UUID
 
-    status: str = "recu"
+
+class Health(BaseModel):
+    status: str

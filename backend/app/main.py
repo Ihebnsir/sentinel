@@ -1,85 +1,117 @@
-"""API de signalements volontaires de messages d'arnaque.
+"""Application FastAPI : santé et réception des signalements (/v1)."""
 
-Seule route utile : POST /v1/reports. Le texte est anonymisé avant d'être
-écrit ; ni adresse IP, ni identifiant d'appareil, ni heure précise ne sont
-stockés. Aucun journal des requêtes (voir README).
-"""
+import datetime
+import logging
+from typing import Annotated
 
-import datetime as dt
-
-from fastapi import FastAPI, Request
+from fastapi import APIRouter, Depends, FastAPI, Request, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
-from sqlalchemy.orm import sessionmaker
-from starlette.middleware.cors import CORSMiddleware
+from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.orm import Session
+from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from .anonymize import ANONYMIZER_VERSION, anonymize
-from .config import Settings
-from .db import make_engine
-from .middleware import (
-    BodySizeLimitMiddleware,
-    RateLimitMiddleware,
-    SecurityHeadersMiddleware,
-)
+from .config import Settings, get_settings
+from .db import get_session, make_sessionmaker
+from .middleware import SecurityMiddleware
 from .models import Report
-from .ratelimit import RateLimiter
-from .schemas import ReportAccepted, ReportIn
+from .rate_limit import RateLimiter
+from .schemas import Health, ReportCreated, ReportIn
+
+log = logging.getLogger("sentinel.reports")
+
+v1 = APIRouter(prefix="/v1")
+
+
+@v1.get("/health", response_model=Health)
+def health() -> Health:
+    # Aucune information interne (version, base, machine).
+    return Health(status="ok")
+
+
+@v1.post(
+    "/reports",
+    status_code=status.HTTP_201_CREATED,
+    response_model=ReportCreated,
+    responses={413: {}, 422: {}, 429: {}},
+)
+def create_report(
+    report: ReportIn, request: Request, session: Annotated[Session, Depends(get_session)]
+) -> ReportCreated | JSONResponse:
+    limiter: RateLimiter = request.app.state.rate_limiter
+    # L'adresse ne sert qu'ici, en mémoire, sous forme d'empreinte salée.
+    client = request.client.host if request.client else "inconnu"
+    decision = limiter.hit(client)
+    if not decision.allowed:
+        return JSONResponse(
+            {"detail": "trop de signalements, réessayez plus tard"},
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            headers={"Retry-After": str(decision.retry_after)},
+        )
+
+    row = Report(
+        text=anonymize(report.text),  # AVANT tout stockage
+        verdict=report.verdict,
+        probability=report.probability,
+        language=report.language,
+        source=report.source,
+        app_version=report.app_version,
+        received_on=datetime.datetime.now(datetime.UTC).date(),
+        anonymizer_version=ANONYMIZER_VERSION,
+    )
+    try:
+        session.add(row)
+        session.commit()
+    except SQLAlchemyError as exc:
+        session.rollback()
+        # Seulement le type : le message SQL contiendrait le texte.
+        log.error("enregistrement impossible: %s", type(exc).__name__)
+        return JSONResponse(
+            {"detail": "erreur interne"}, status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+    log.info("signalement reçu")
+    return ReportCreated(id=row.id)
+
+
+async def _validation_error(_request: Request, exc: RequestValidationError) -> JSONResponse:
+    # Ni « input » ni « ctx » : la réponse ne renvoie pas le texte reçu.
+    errors = [
+        {"loc": list(e.get("loc", ())), "type": e.get("type", ""), "msg": e.get("msg", "")}
+        for e in exc.errors()
+    ]
+    return JSONResponse({"detail": errors}, status_code=status.HTTP_422_UNPROCESSABLE_CONTENT)
+
+
+async def _http_error(_request: Request, exc: StarletteHTTPException) -> JSONResponse:
+    return JSONResponse(
+        {"detail": exc.detail}, status_code=exc.status_code, headers=getattr(exc, "headers", None)
+    )
 
 
 def create_app(settings: Settings | None = None) -> FastAPI:
-    settings = settings or Settings.from_env()
-    dev = settings.is_development
+    settings = settings or get_settings()
+    docs = settings.is_dev
     app = FastAPI(
-        title="Sentinel – signalements",
-        # Documentation interactive seulement en développement.
-        docs_url="/docs" if dev else None,
+        title="Sentinel API",
+        version="1",
+        # Documentation interactive : mode dev uniquement.
+        docs_url="/docs" if docs else None,
         redoc_url=None,
-        openapi_url="/openapi.json" if dev else None,
+        openapi_url="/openapi.json" if docs else None,
     )
-    engine = make_engine(settings.database_url)
-    sessions = sessionmaker(engine)
-    limiter = RateLimiter(
-        settings.rate_limit,
-        settings.rate_window_seconds,
-        settings.rate_max_clients,
+    app.state.sessionmaker = make_sessionmaker(settings.database_url)
+    app.state.rate_limiter = RateLimiter(
+        limit=settings.rate_limit_per_window,
+        window_seconds=settings.rate_limit_window_seconds,
+        max_keys=settings.rate_limit_max_keys,
     )
-    app.state.engine = engine
-    app.state.limiter = limiter
-
-    # Le dernier ajouté enveloppe les autres : en-têtes partout, puis CORS,
-    # limite de débit (avant de lire le corps), taille du corps.
-    app.add_middleware(BodySizeLimitMiddleware, max_bytes=settings.max_body_bytes)
-    app.add_middleware(RateLimitMiddleware, limiter=limiter)
-    # CORS fermé : aucune origine web autorisée (l'app mobile n'en a pas besoin).
-    app.add_middleware(CORSMiddleware, allow_origins=[], allow_methods=[])
-    app.add_middleware(SecurityHeadersMiddleware)
-
-    @app.exception_handler(RequestValidationError)
-    async def invalid_report(request: Request, exc: RequestValidationError) -> JSONResponse:
-        # Sans renvoyer les valeurs reçues (elles peuvent contenir le texte).
-        errors = [
-            {"champ": ".".join(str(p) for p in e["loc"]), "type": e["type"]}
-            for e in exc.errors()
-        ]
-        return JSONResponse(status_code=422, content={"detail": errors})
-
-    @app.post("/v1/reports", status_code=201, response_model=ReportAccepted)
-    def create_report(report: ReportIn) -> ReportAccepted:
-        with sessions.begin() as session:
-            session.add(
-                Report(
-                    text=anonymize(report.text),
-                    verdict=report.verdict,
-                    language=report.language,
-                    app_version=report.app_version,
-                    received_on=dt.datetime.now(dt.UTC).date(),
-                    anonymizer_version=ANONYMIZER_VERSION,
-                )
-            )
-        return ReportAccepted()
-
-    @app.get("/v1/health")
-    def health() -> dict[str, str]:
-        return {"status": "ok"}
-
+    app.include_router(v1)
+    app.add_exception_handler(RequestValidationError, _validation_error)
+    app.add_exception_handler(StarletteHTTPException, _http_error)
+    # Pas de CORSMiddleware : aucune page web d'un autre site ne peut appeler
+    # l'API depuis un navigateur. L'app mobile n'est pas concernée par CORS.
+    app.add_middleware(
+        SecurityMiddleware, max_body_bytes=settings.max_body_bytes, docs_enabled=docs
+    )
     return app

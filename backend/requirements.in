@@ -1,6 +1,0 @@
-# Dépendances directes du serveur. Le fichier épinglé (avec empreintes)
-# est requirements.txt, généré par pip-compile (voir README).
-fastapi
-uvicorn
-sqlalchemy
-alembic

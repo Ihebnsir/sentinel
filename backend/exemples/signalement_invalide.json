@@ -1,0 +1,9 @@
+{
+  "text": "Votre colis est bloqué",
+  "verdict": "arnaque",
+  "probability": 1.7,
+  "language": "fr",
+  "app_version": "1.4.0",
+  "source": "sms",
+  "device_id": "abc123"
+}

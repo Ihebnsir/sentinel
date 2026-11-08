@@ -1,6 +1,12 @@
-"""Limite de débit : fenêtre glissante, aucune adresse IP gardée."""
+"""Limite de débit : en mémoire, empreintes salées, jamais l'IP en clair."""
 
-from app.ratelimit import RateLimiter
+from collections.abc import Callable
+
+from fastapi.testclient import TestClient
+
+from app.rate_limit import RateLimiter
+
+from .conftest import CLIENT_IP, valid_report
 
 
 class FakeClock:
@@ -11,58 +17,58 @@ class FakeClock:
         return self.now
 
 
-def test_fenetre_glissante() -> None:
+def test_limite_par_adresse() -> None:
+    limiter = RateLimiter(limit=3, window_seconds=3600, max_keys=100, clock=FakeClock())
+    assert [limiter.hit("1.2.3.4").allowed for _ in range(4)] == [True, True, True, False]
+    # Une autre adresse a son propre compteur.
+    assert limiter.hit("5.6.7.8").allowed
+
+
+def test_nouvelle_fenetre_nouveau_sel() -> None:
     clock = FakeClock()
-    limiter = RateLimiter(limit=2, window_seconds=60, clock=clock)
-    assert limiter.allow("1.2.3.4")
-    assert limiter.allow("1.2.3.4")
-    assert not limiter.allow("1.2.3.4")
-    clock.now += 59
-    assert not limiter.allow("1.2.3.4")
-    clock.now += 2  # la première requête sort de la fenêtre
-    assert limiter.allow("1.2.3.4")
+    limiter = RateLimiter(limit=1, window_seconds=3600, max_keys=100, clock=clock)
+    assert limiter.hit("1.2.3.4").allowed
+    first = limiter.fingerprint("1.2.3.4")
+    assert not limiter.hit("1.2.3.4").allowed
+    clock.now += 3600
+    assert limiter.hit("1.2.3.4").allowed
+    # Le sel a changé : impossible de relier les deux heures.
+    assert limiter.fingerprint("1.2.3.4") != first
 
 
-def test_clients_independants() -> None:
-    limiter = RateLimiter(limit=1, window_seconds=60, clock=FakeClock())
-    assert limiter.allow("1.2.3.4")
-    assert limiter.allow("5.6.7.8")
-    assert not limiter.allow("1.2.3.4")
+def test_aucune_ip_en_memoire() -> None:
+    limiter = RateLimiter(limit=5, window_seconds=3600, max_keys=100, clock=FakeClock())
+    limiter.hit("203.0.113.9")
+    keys = limiter.tracked_keys()
+    assert len(keys) == 1
+    assert b"203.0.113.9" not in keys[0]
+    assert bytes([203, 0, 113, 9]) not in keys[0]
+    assert len(keys[0]) == 32  # HMAC-SHA256
 
 
-def test_aucune_adresse_en_memoire() -> None:
-    limiter = RateLimiter(limit=5, window_seconds=60, clock=FakeClock())
-    address = "197.15.42.200"
-    limiter.allow(address)
-    ids = limiter.tracked_clients()
-    assert len(ids) == 1
-    assert address.encode() not in ids[0]
-    assert len(ids[0]) == 32  # HMAC-SHA256
-
-
-def test_cle_differente_a_chaque_demarrage() -> None:
-    # Le même client n'a pas le même identifiant d'un démarrage à l'autre.
-    first = RateLimiter(limit=5, window_seconds=60, clock=FakeClock())
-    second = RateLimiter(limit=5, window_seconds=60, clock=FakeClock())
-    first.allow("1.2.3.4")
-    second.allow("1.2.3.4")
-    assert first.tracked_clients() != second.tracked_clients()
+def test_ipv6_meme_sous_reseau() -> None:
+    limiter = RateLimiter(limit=1, window_seconds=3600, max_keys=100, clock=FakeClock())
+    assert limiter.hit("2001:db8:1:2::1").allowed
+    # Même /64 : même compteur (changer d'adresse ne contourne pas la limite).
+    assert not limiter.hit("2001:db8:1:2::ffff").allowed
+    assert limiter.hit("2001:db8:1:3::1").allowed
 
 
 def test_memoire_bornee() -> None:
-    limiter = RateLimiter(limit=1, window_seconds=60, max_clients=100, clock=FakeClock())
-    for i in range(1000):
-        limiter.allow(f"10.0.{i // 256}.{i % 256}")
-    assert len(limiter.tracked_clients()) == 100
+    limiter = RateLimiter(limit=5, window_seconds=3600, max_keys=2, clock=FakeClock())
+    assert limiter.hit("1.1.1.1").allowed
+    assert limiter.hit("2.2.2.2").allowed
+    assert not limiter.hit("3.3.3.3").allowed  # table pleine
+    assert limiter.hit("1.1.1.1").allowed  # adresse déjà suivie
 
 
-def test_clients_expires_oublies() -> None:
-    clock = FakeClock()
-    limiter = RateLimiter(limit=1, window_seconds=60, clock=clock)
-    limiter.allow("1.2.3.4")
-    clock.now += 61
-    limiter.allow("5.6.7.8")
-    # 1.2.3.4 n'est plus suivi qu'à sa prochaine requête : la fenêtre
-    # vidée le fait disparaître.
-    limiter.allow("1.2.3.4")
-    assert len(limiter.tracked_clients()) == 2
+def test_api_repond_429(make_client: Callable[..., TestClient]) -> None:
+    client = make_client(rate_limit_per_window=2)
+    assert client.post("/v1/reports", json=valid_report()).status_code == 201
+    assert client.post("/v1/reports", json=valid_report()).status_code == 201
+    response = client.post("/v1/reports", json=valid_report())
+    assert response.status_code == 429
+    assert int(response.headers["retry-after"]) > 0
+    assert CLIENT_IP not in response.text
+    # La santé n'est pas limitée.
+    assert client.get("/v1/health").status_code == 200

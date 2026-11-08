@@ -1,1 +1,1 @@
-"""Backend Sentinel : signalements volontaires de messages d'arnaque."""
+"""Backend Sentinel : réception des signalements volontaires d'arnaques."""

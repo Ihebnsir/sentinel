@@ -1,35 +1,43 @@
-"""Réglages du serveur, lus dans les variables d'environnement."""
+"""Configuration par variables d'environnement (préfixe SENTINEL_).
 
-import os
-from dataclasses import dataclass
+Aucun secret : le sel de la limite de débit est tiré au hasard en mémoire.
+"""
+
+from functools import lru_cache
+from typing import Literal
+
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
-@dataclass(frozen=True)
-class Settings:
-    # « production » par défaut : pas de documentation interactive.
-    environment: str = "production"
-    database_url: str = "sqlite:///./data/reports.db"
-    # Corps de requête : 8 Kio suffisent pour 2000 caractères en JSON.
-    max_body_bytes: int = 8 * 1024
-    # Limite de débit : N signalements par fenêtre, par adresse.
-    rate_limit: int = 5
-    rate_window_seconds: int = 60
-    # Nombre max d'adresses suivies en mémoire (protège la mémoire).
-    rate_max_clients: int = 10_000
+class Settings(BaseSettings):
+    model_config = SettingsConfigDict(
+        env_prefix="SENTINEL_", env_file=".env", extra="ignore", frozen=True
+    )
+
+    # « prod » par défaut : /docs fermé si on oublie de configurer.
+    env: Literal["dev", "prod"] = "prod"
+    database_url: str = "sqlite:///./data/sentinel.db"
+    host: str = "127.0.0.1"
+    port: int = 8000
+    log_level: Literal["DEBUG", "INFO", "WARNING", "ERROR"] = "INFO"
+
+    # Limite de débit : signalements par fenêtre, par adresse.
+    rate_limit_per_window: int = 10
+    rate_limit_window_seconds: int = 3600
+    # Plafond d'adresses suivies (mémoire bornée face à un déni de service).
+    rate_limit_max_keys: int = 100_000
+
+    # Taille maximale d'une requête (octets).
+    max_body_bytes: int = 16_384
+
+    # Adresses des proxys de confiance pour X-Forwarded-For (uvicorn).
+    forwarded_allow_ips: str = "127.0.0.1"
 
     @property
-    def is_development(self) -> bool:
-        return self.environment == "development"
+    def is_dev(self) -> bool:
+        return self.env == "dev"
 
-    @classmethod
-    def from_env(cls) -> "Settings":
-        return cls(
-            environment=os.environ.get("SENTINEL_ENV", "production"),
-            database_url=os.environ.get(
-                "SENTINEL_DATABASE_URL", cls.database_url
-            ),
-            rate_limit=int(os.environ.get("SENTINEL_RATE_LIMIT", cls.rate_limit)),
-            rate_window_seconds=int(
-                os.environ.get("SENTINEL_RATE_WINDOW", cls.rate_window_seconds)
-            ),
-        )
+
+@lru_cache
+def get_settings() -> Settings:
+    return Settings()

@@ -1,0 +1,9 @@
+# Environnement Python local, configuration et base de données locales.
+.venv/
+.env
+data/
+*.db
+*.db-journal
+.ruff_cache/
+.pytest_cache/
+__pycache__/

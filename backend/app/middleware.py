@@ -1,137 +1,135 @@
-"""Protections communes à toutes les réponses (ASGI pur, sans dépendance)."""
+"""Middleware ASGI : taille maximale, en-têtes de sécurité, erreurs et journal
+d'accès SANS adresse IP ni contenu."""
+
+import json
+import logging
+import time
 
 from starlette.types import ASGIApp, Message, Receive, Scope, Send
 
-from .ratelimit import RateLimiter
+access_log = logging.getLogger("sentinel.access")
+error_log = logging.getLogger("sentinel.error")
 
-# Une API JSON ne doit rien afficher dans un navigateur ni être intégrée.
-SECURITY_HEADERS = {
-    "content-security-policy": "default-src 'none'; frame-ancestors 'none'",
-    "x-content-type-options": "nosniff",
-    "x-frame-options": "DENY",
-    "referrer-policy": "no-referrer",
-    "cache-control": "no-store",
-    "cross-origin-resource-policy": "same-origin",
-    "permissions-policy": "camera=(), microphone=(), geolocation=()",
-    # Utile seulement derrière HTTPS (ignoré en HTTP par les navigateurs).
-    "strict-transport-security": "max-age=63072000; includeSubDomains",
-}
+_STRICT_CSP = "default-src 'none'; frame-ancestors 'none'; base-uri 'none'; form-action 'none'"
+# /docs (mode dev seulement) charge Swagger UI depuis un CDN.
+_DOCS_CSP = (
+    "default-src 'none'; script-src https://cdn.jsdelivr.net 'unsafe-inline'; "
+    "style-src https://cdn.jsdelivr.net 'unsafe-inline'; "
+    "img-src https://fastapi.tiangolo.com data:; connect-src 'self'; frame-ancestors 'none'"
+)
+_DOCS_PATHS = ("/docs", "/docs/oauth2-redirect", "/openapi.json")
 
 
-class SecurityHeadersMiddleware:
-    def __init__(self, app: ASGIApp) -> None:
-        self.app = app
-
-    async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
-        if scope["type"] != "http":
-            await self.app(scope, receive, send)
-            return
-
-        async def send_with_headers(message: Message) -> None:
-            if message["type"] == "http.response.start":
-                headers = [
-                    (k, v)
-                    for k, v in message.get("headers", [])
-                    # Pas de nom de serveur : rien à apprendre sur la pile.
-                    if k.lower() != b"server"
-                ]
-                headers += [(k.encode(), v.encode()) for k, v in SECURITY_HEADERS.items()]
-                message["headers"] = headers
-            await send(message)
-
-        await self.app(scope, receive, send_with_headers)
+def _security_headers(path: str, docs_enabled: bool) -> list[tuple[bytes, bytes]]:
+    csp = _DOCS_CSP if docs_enabled and path in _DOCS_PATHS else _STRICT_CSP
+    return [
+        (b"x-content-type-options", b"nosniff"),
+        (b"x-frame-options", b"DENY"),
+        (b"referrer-policy", b"no-referrer"),
+        (b"content-security-policy", csp.encode()),
+        (b"cross-origin-resource-policy", b"same-origin"),
+        (b"cross-origin-opener-policy", b"same-origin"),
+        (b"permissions-policy", b"camera=(), microphone=(), geolocation=()"),
+        (b"cache-control", b"no-store"),
+        # Ignoré en HTTP simple ; utile derrière TLS (déploiement futur).
+        (b"strict-transport-security", b"max-age=31536000; includeSubDomains"),
+    ]
 
 
-class BodySizeLimitMiddleware:
-    """Refuse (413) un corps plus gros que [max_bytes], annoncé ou non
-    (Content-Length, ou envoi par morceaux)."""
-
-    def __init__(self, app: ASGIApp, max_bytes: int) -> None:
-        self.app = app
-        self.max_bytes = max_bytes
-
-    async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
-        if scope["type"] != "http":
-            await self.app(scope, receive, send)
-            return
-
-        for name, value in scope.get("headers", []):
-            if name == b"content-length":
-                try:
-                    too_big = int(value) > self.max_bytes
-                except ValueError:
-                    too_big = True
-                if too_big:
-                    await _reject(send)
-                    return
-
-        # Lecture complète, bornée, avant de passer la main à l'app.
-        body = b""
-        while True:
-            message = await receive()
-            if message["type"] == "http.disconnect":
-                return
-            body += message.get("body", b"")
-            if len(body) > self.max_bytes:
-                await _reject(send)
-                return
-            if not message.get("more_body", False):
-                break
-
-        replayed = False
-
-        async def replay() -> Message:
-            nonlocal replayed
-            if not replayed:
-                replayed = True
-                return {"type": "http.request", "body": body, "more_body": False}
-            return await receive()
-
-        await self.app(scope, replay, send)
-
-
-async def _reject(send: Send) -> None:
-    body = b'{"detail":"requete trop grande"}'
+async def _send_json(send: Send, status: int, body: dict) -> None:
+    payload = json.dumps(body).encode()
     await send(
         {
             "type": "http.response.start",
-            "status": 413,
+            "status": status,
             "headers": [
                 (b"content-type", b"application/json"),
-                (b"content-length", str(len(body)).encode()),
+                (b"content-length", str(len(payload)).encode()),
             ],
         }
     )
-    await send({"type": "http.response.body", "body": body})
+    await send({"type": "http.response.body", "body": payload})
 
 
-class RateLimitMiddleware:
-    """429 quand un client dépasse la limite. Le contrôle de santé n'est
-    pas compté (sondes de l'hébergeur)."""
-
-    def __init__(self, app: ASGIApp, limiter: RateLimiter) -> None:
+class SecurityMiddleware:
+    def __init__(self, app: ASGIApp, max_body_bytes: int, docs_enabled: bool) -> None:
         self.app = app
-        self.limiter = limiter
+        self.max_body_bytes = max_body_bytes
+        self.docs_enabled = docs_enabled
 
     async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
-        if scope["type"] != "http" or scope.get("path") == "/v1/health":
+        if scope["type"] != "http":
             await self.app(scope, receive, send)
             return
-        client = scope.get("client")
-        address = client[0] if client else "inconnu"
-        if not self.limiter.allow(address):
-            body = b'{"detail":"trop de requetes"}'
-            await send(
-                {
-                    "type": "http.response.start",
-                    "status": 429,
-                    "headers": [
-                        (b"content-type", b"application/json"),
-                        (b"content-length", str(len(body)).encode()),
-                        (b"retry-after", b"60"),
-                    ],
-                }
+
+        start = time.perf_counter()
+        path: str = scope["path"]
+        status_holder = {"status": 0, "started": False}
+        extra_headers = _security_headers(path, self.docs_enabled)
+
+        async def send_wrapper(message: Message) -> None:
+            if message["type"] == "http.response.start":
+                status_holder["status"] = message["status"]
+                status_holder["started"] = True
+                headers = [(k, v) for k, v in message.get("headers", []) if k.lower() != b"server"]
+                message = {**message, "headers": headers + extra_headers}
+            await send(message)
+
+        try:
+            body = await self._read_body(scope, receive)
+            if body is None:
+                await _send_json(send_wrapper, 413, {"detail": "requête trop grande"})
+                return
+            await self.app(scope, _replay(body, receive), send_wrapper)
+        except Exception as exc:  # dernier filet, sans détail
+            # Seulement le type : le message pourrait contenir le texte reçu.
+            error_log.error("erreur interne: %s", type(exc).__name__)
+            if not status_holder["started"]:
+                await _send_json(send_wrapper, 500, {"detail": "erreur interne"})
+        finally:
+            # Ni IP, ni paramètres de l'URL, ni contenu.
+            access_log.info(
+                "%s %s %s %.0fms",
+                scope["method"],
+                path[:64],
+                status_holder["status"],
+                (time.perf_counter() - start) * 1000,
             )
-            await send({"type": "http.response.body", "body": body})
-            return
-        await self.app(scope, receive, send)
+
+    async def _read_body(self, scope: Scope, receive: Receive) -> bytes | None:
+        """Corps complet, ou None s'il dépasse la limite (annoncée ou réelle)."""
+        for name, value in scope.get("headers", []):
+            if name == b"content-length":
+                try:
+                    if int(value) > self.max_body_bytes:
+                        return None
+                except ValueError:
+                    return None
+        chunks: list[bytes] = []
+        size = 0
+        while True:
+            message = await receive()
+            if message["type"] == "http.disconnect":
+                break
+            chunk = message.get("body", b"")
+            size += len(chunk)
+            if size > self.max_body_bytes:
+                return None
+            chunks.append(chunk)
+            if not message.get("more_body", False):
+                break
+        return b"".join(chunks)
+
+
+def _replay(body: bytes, original: Receive) -> Receive:
+    """Rejoue le corps déjà lu, puis rend la main au vrai canal."""
+    sent = False
+
+    async def receive() -> Message:
+        nonlocal sent
+        if not sent:
+            sent = True
+            return {"type": "http.request", "body": body, "more_body": False}
+        return await original()
+
+    return receive

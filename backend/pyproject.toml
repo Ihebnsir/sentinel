@@ -1,3 +1,31 @@
+[project]
+name = "sentinel-backend"
+version = "0.1.0"
+requires-python = ">=3.14,<3.15"
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["."]
+# Un avertissement de dépréciation devient une erreur : on le voit tout de suite.
+filterwarnings = ["error::DeprecationWarning"]
+
+[tool.ruff]
+target-version = "py314"
+line-length = 100
+extend-exclude = [".venv"]
+
+[tool.ruff.lint]
+# Erreurs, imports, modernisation, bugs probables, sécurité (bandit dans ruff).
+select = ["E", "F", "W", "I", "UP", "B", "S", "SIM", "RUF"]
+ignore = [
+  "RUF001", # caractères arabes et guillemets « » voulus dans les chaînes
+  "RUF002",
+  "RUF003",
+]
+
+[tool.ruff.lint.per-file-ignores]
+# assert est la base de pytest.
+"tests/**" = ["S101"]
+
+[tool.bandit]
+exclude_dirs = [".venv", "tests"]
