@@ -1,3 +1,8 @@
 # Listes de blocage : octets exacts, sans conversion CRLF
 # (leur SHA-256 est vérifié avec assets/blocklists/manifest.json).
 assets/blocklists/*.txt -text
+
+# Fichiers lus par Linux (CI, Docker, shell) : toujours LF.
+.github/** text eol=lf
+**/Dockerfile text eol=lf
+*.sh text eol=lf
