@@ -1,18 +1,57 @@
-# Lancement local du backend : docker compose up --build
-# Le port n'est ouvert que sur cette machine (127.0.0.1).
+# Backend en local, comme en production : API + PostgreSQL (TLS activé).
+#   docker compose up -d --build      → http://127.0.0.1:8000/v1/health
+#   docker compose down               → arrêt (les données restent dans le volume)
+# SQLite au lieu de PostgreSQL (sans le service db) :
+#   $env:SENTINEL_DATABASE_URL = "sqlite:////data/sentinel.db"
+#   docker compose up -d --build --no-deps api
+# Les mots de passe ci-dessous sont LOCAUX et publics : jamais en production.
 services:
+  db:
+    # Version ET empreinte épinglées (PostgreSQL 17, comme Neon par défaut).
+    image: postgres:17.10-trixie@sha256:7958605b474b3d264a969cb3a123d6aa00ad1e1fe9da8a69984dabb704d93317
+    environment:
+      POSTGRES_USER: sentinel
+      POSTGRES_PASSWORD: sentinel-local
+      POSTGRES_DB: sentinel
+    # TLS avec le certificat auto-signé fourni par l'image (« snakeoil ») :
+    # l'API se connecte en sslmode=require, comme chez Neon.
+    command:
+      - postgres
+      - -c
+      - ssl=on
+      - -c
+      - ssl_cert_file=/etc/ssl/certs/ssl-cert-snakeoil.pem
+      - -c
+      - ssl_key_file=/etc/ssl/private/ssl-cert-snakeoil.key
+    ports:
+      # Seulement sur cette machine (tests en PostgreSQL : voir README).
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - sentinel-pg:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sentinel -d sentinel"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
   api:
     build: .
     image: sentinel-backend:local
+    depends_on:
+      db:
+        condition: service_healthy
     ports:
       - "127.0.0.1:8000:8000"
     environment:
-      # prod par défaut ; SENTINEL_ENV=dev docker compose up pour ouvrir /docs.
       SENTINEL_ENV: ${SENTINEL_ENV:-prod}
       SENTINEL_LOG_LEVEL: INFO
+      SENTINEL_DATABASE_URL: ${SENTINEL_DATABASE_URL:-postgresql://sentinel:sentinel-local@db:5432/sentinel?sslmode=require}
+      # SQLite seulement si on le choisit (voir en haut) ; refusé en prod sinon.
+      SENTINEL_ALLOW_SQLITE: "true"
+      # Clé locale, publique : en production, une clé aléatoire secrète.
+      SENTINEL_FINGERPRINT_KEY: local-uniquement-pas-un-secret-0123456789abcdef
     volumes:
       - sentinel-data:/data
-    # Système de fichiers en lecture seule, sauf /data et /tmp.
     read_only: true
     tmpfs:
       - /tmp
@@ -24,3 +63,4 @@ services:
 
 volumes:
   sentinel-data:
+  sentinel-pg:

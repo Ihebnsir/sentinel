@@ -1,7 +1,8 @@
 # Dépendances du serveur, toutes épinglées (directes et transitives).
 # Testé avec Python 3.14.8. Versions publiées depuis au moins 2 semaines
-# (vérifié sur PyPI le 08/11/2026).
-# Directes : fastapi, uvicorn, pydantic, pydantic-settings, sqlalchemy, alembic.
+# (vérifié sur PyPI le 08/11/2026 ; psycopg et tzdata le 09/11/2026).
+# Directes : fastapi, uvicorn, pydantic, pydantic-settings, sqlalchemy, alembic,
+# psycopg (PostgreSQL, avec psycopg-binary : libpq incluse, pas de compilation).
 alembic==1.20.1
 annotated-doc==0.0.5
 annotated-types==0.8.0
@@ -14,6 +15,8 @@ idna==3.20
 mako==1.4.3
 markupsafe==3.0.4
 opentelemetry-api==1.45.1
+psycopg==3.3.6
+psycopg-binary==3.3.6 ; implementation_name != "pypy"
 pydantic==2.14.1
 pydantic-core==2.50.1
 pydantic-settings==2.16.1
@@ -22,4 +25,5 @@ sqlalchemy==2.1.6
 starlette==1.10.0
 typing-extensions==4.16.0
 typing-inspection==0.4.4
+tzdata==2026.5 ; sys_platform == "win32"
 uvicorn==0.54.0

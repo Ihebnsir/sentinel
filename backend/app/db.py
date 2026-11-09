@@ -1,4 +1,4 @@
-"""Connexion à la base (SQLite en local)."""
+"""Connexion à la base : PostgreSQL (production) ou SQLite (dev, tests)."""
 
 from collections.abc import Iterator
 
@@ -6,13 +6,14 @@ from fastapi import Request
 from sqlalchemy import Engine, create_engine, event
 from sqlalchemy.orm import Session, sessionmaker
 
+from .config import normalize_db_url
+
 
 def make_engine(url: str) -> Engine:
-    is_sqlite = url.startswith("sqlite")
-    connect_args = {"check_same_thread": False} if is_sqlite else {}
-    # echo=False : les requêtes SQL (et leurs paramètres) ne vont pas aux logs.
-    engine = create_engine(url, echo=False, connect_args=connect_args)
-    if is_sqlite:
+    url = normalize_db_url(url)
+    if url.startswith("sqlite"):
+        # echo=False : les requêtes SQL (et leurs paramètres) ne vont pas aux logs.
+        engine = create_engine(url, echo=False, connect_args={"check_same_thread": False})
 
         @event.listens_for(engine, "connect")
         def _sqlite_pragmas(conn, _record) -> None:
@@ -22,7 +23,18 @@ def make_engine(url: str) -> Engine:
             cursor.execute("PRAGMA foreign_keys=ON")
             cursor.close()
 
-    return engine
+        return engine
+    # PostgreSQL managé : la base s'endort (Neon) et coupe les connexions
+    # inactives. pre_ping vérifie la connexion avant usage ; recycle la renouvelle.
+    return create_engine(
+        url,
+        echo=False,
+        pool_pre_ping=True,
+        pool_recycle=300,
+        pool_size=3,
+        max_overflow=2,
+        connect_args={"connect_timeout": 10, "application_name": "sentinel"},
+    )
 
 
 def make_sessionmaker(url: str) -> sessionmaker[Session]:

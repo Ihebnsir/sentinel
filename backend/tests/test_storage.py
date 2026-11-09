@@ -2,17 +2,18 @@
 
 import datetime as dt
 import logging
-import sqlite3
 from collections.abc import Callable
 from pathlib import Path
+from typing import Any
 
 import pytest
 from fastapi.testclient import TestClient
+from sqlalchemy import inspect
 
 from app.anonymize import ANONYMIZER_VERSION
 from app.logging_config import RedactIpFilter
 
-from .conftest import CLIENT_IP, valid_report
+from .conftest import CLIENT_IP, engine_for, sqlite_only, valid_report
 
 PERSONAL_TEXT = (
     "Appelle 98 123 456 ou écris à sami.trabelsi@gmail.com, carte 4111 1111 1111 1111, "
@@ -30,9 +31,10 @@ PERSONAL_BITS = [
 ]
 
 
-def test_colonnes_attendues_seulement(db_path: Path, client: TestClient) -> None:
-    with sqlite3.connect(db_path) as connection:
-        columns = {row[1] for row in connection.execute("PRAGMA table_info(reports)")}
+def test_colonnes_attendues_seulement(db_url: str, client: TestClient) -> None:
+    engine = engine_for(db_url)
+    columns = {c["name"] for c in inspect(engine).get_columns("reports")}
+    engine.dispose()
     assert columns == {
         "id",
         "text",
@@ -45,11 +47,14 @@ def test_colonnes_attendues_seulement(db_path: Path, client: TestClient) -> None
         "received_on",
         "review_status",
         "anonymizer_version",
+        "fingerprint",
+        "count",
+        "exported_on",
     }
 
 
 def test_rien_de_personnel_en_base(
-    db_path: Path, client: TestClient, rows: Callable[[], list[sqlite3.Row]]
+    client: TestClient, rows: Callable[[], list[dict[str, Any]]]
 ) -> None:
     assert client.post("/v1/reports", json=valid_report(text=PERSONAL_TEXT)).status_code == 201
     (row,) = rows()
@@ -61,7 +66,17 @@ def test_rien_de_personnel_en_base(
     assert row["anonymizer_version"] == ANONYMIZER_VERSION
     # Jour seulement, sans heure.
     assert row["received_on"] == dt.datetime.now(dt.UTC).date().isoformat()
-    # Ni dans les lignes, ni nulle part dans le fichier (pages libres comprises).
+    for key, value in row.items():
+        if key in ("id", "fingerprint"):  # hexadécimal aléatoire / HMAC
+            continue
+        for bit in PERSONAL_BITS:
+            assert bit not in str(value), bit
+
+
+@sqlite_only
+def test_rien_de_personnel_dans_le_fichier(db_path: Path, client: TestClient) -> None:
+    assert client.post("/v1/reports", json=valid_report(text=PERSONAL_TEXT)).status_code == 201
+    # Nulle part dans le fichier (pages libres comprises).
     raw = db_path.read_bytes()
     for bit in PERSONAL_BITS:
         assert bit.encode() not in raw, bit
@@ -93,15 +108,17 @@ def test_filtre_efface_les_ip() -> None:
 
 
 def test_erreur_base_sans_detail(
-    make_client: Callable[..., TestClient], db_path: Path, caplog: pytest.LogCaptureFixture
+    make_client: Callable[..., TestClient],
+    sql: Callable[..., Any],
+    caplog: pytest.LogCaptureFixture,
 ) -> None:
     client = make_client()
-    with sqlite3.connect(db_path) as connection:
-        connection.execute("DROP TABLE reports")
+    sql("DROP TABLE reports")
     with caplog.at_level(logging.DEBUG):
         response = client.post("/v1/reports", json=valid_report(text=PERSONAL_TEXT))
     assert response.status_code == 500
     assert response.json() == {"detail": "erreur interne"}
     everything = "\n".join(r.getMessage() for r in caplog.records)
-    assert "OperationalError" in everything
+    # OperationalError (SQLite) ou ProgrammingError (PostgreSQL) : le type seul.
+    assert "Error" in everything
     assert "poste-tn" not in everything and "INSERT" not in everything
