@@ -36,6 +36,13 @@ class Source(enum.StrEnum):
     inconnue = "inconnue"
 
 
+class UserFeedback(enum.StrEnum):
+    # Avis de la personne qui signale (facultatif).
+    arnaque = "arnaque"
+    pas_arnaque = "pas_arnaque"
+    ne_sait_pas = "ne_sait_pas"
+
+
 class ReviewStatus(enum.StrEnum):
     nouveau = "nouveau"
     arnaque_confirmee = "arnaque_confirmee"
@@ -59,6 +66,10 @@ class Report(Base):
     language: Mapped[Language] = mapped_column(_enum(Language, "language"), nullable=False)
     source: Mapped[Source] = mapped_column(_enum(Source, "source"), nullable=False)
     app_version: Mapped[str] = mapped_column(String(32), nullable=False)
+    # Avis de l'utilisateur ; NULL pour les anciens clients (B1).
+    user_feedback: Mapped[UserFeedback | None] = mapped_column(
+        _enum(UserFeedback, "user_feedback"), nullable=True
+    )
     # Jour seulement (UTC) : l'heure exacte pourrait relier un signalement à
     # une personne.
     received_on: Mapped[datetime.date] = mapped_column(Date, nullable=False)

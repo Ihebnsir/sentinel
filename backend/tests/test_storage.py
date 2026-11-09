@@ -41,6 +41,7 @@ def test_colonnes_attendues_seulement(db_path: Path, client: TestClient) -> None
         "language",
         "source",
         "app_version",
+        "user_feedback",
         "received_on",
         "review_status",
         "anonymizer_version",

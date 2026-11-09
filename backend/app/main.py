@@ -57,6 +57,7 @@ def create_report(
         language=report.language,
         source=report.source,
         app_version=report.app_version,
+        user_feedback=report.user_feedback,
         received_on=datetime.datetime.now(datetime.UTC).date(),
         anonymizer_version=ANONYMIZER_VERSION,
     )

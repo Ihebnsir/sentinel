@@ -6,7 +6,7 @@ from typing import Annotated
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
-from .models import Language, Source, Verdict
+from .models import Language, Source, UserFeedback, Verdict
 
 # Caractères de contrôle refusés (sauf tabulation et retours à la ligne).
 _CONTROL = re.compile("[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]")
@@ -24,6 +24,8 @@ class ReportIn(BaseModel):
     language: Language
     app_version: Annotated[str, Field(strict=True, max_length=32, pattern=_VERSION)]
     source: Source
+    # Facultatif : les anciens clients ne l'envoient pas.
+    user_feedback: UserFeedback | None = None
 
     @field_validator("text")
     @classmethod

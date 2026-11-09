@@ -64,7 +64,7 @@ L'utilisateur choisit de signaler un message d'arnaque. L'app envoie le texte, s
 
 ### Empoisonnement des données (data poisoning)
 
-Le serveur ne peut pas savoir si un signalement bien formé dit vrai. Aucune donnée n'entre donc dans l'entraînement sans **revue humaine** : le statut `nouveau` est fixé par le serveur, le client ne peut pas le choisir, et il faut une revue pour le passer à `arnaque_confirmee` ou `pas_arnaque`. La limite de débit rend une attaque massive plus lente et plus visible.
+Le serveur ne peut pas savoir si un signalement bien formé dit vrai. Aucune donnée n'entre donc dans l'entraînement sans **revue humaine** : le statut `nouveau` est fixé par le serveur, le client ne peut pas le choisir, et il faut une revue pour le passer à `arnaque_confirmee` ou `pas_arnaque`. La limite de débit rend une attaque massive plus lente et plus visible. L'avis facultatif `user_feedback` (B2 : `arnaque`, `pas_arnaque`, `ne_sait_pas`) n'est qu'une indication pour la revue : il ne change jamais le statut tout seul.
 
 ## 5. Limites connues (et pistes)
 

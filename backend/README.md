@@ -72,6 +72,7 @@ Corps de `POST /v1/reports` (tout champ inconnu est refusé) :
 | `language` | `fr`, `ar`, `derja_latin`, `derja_arabe`, `en`, `autre` |
 | `app_version` | ex : `1.4.0` ou `1.4.0+12` |
 | `source` | `sms`, `whatsapp`, `messenger`, `telegram`, `autre`, `inconnue` |
+| `user_feedback` | facultatif : `arnaque`, `pas_arnaque`, `ne_sait_pas` (avis de l'utilisateur, B2) ; absent ou `null` pour les anciens clients |
 
 ## Anonymisation (`app/anonymize.py`)
 
