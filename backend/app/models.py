@@ -4,7 +4,7 @@ import datetime
 import enum
 import uuid
 
-from sqlalchemy import Date, Enum, Float, Integer, String, Text, Uuid
+from sqlalchemy import Date, Enum, Float, Integer, String, Text, UniqueConstraint, Uuid
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 
@@ -57,6 +57,7 @@ def _enum(cls: type[enum.Enum], name: str) -> Enum:
 
 class Report(Base):
     __tablename__ = "reports"
+    __table_args__ = (UniqueConstraint("fingerprint", name="uq_reports_fingerprint"),)
 
     id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True, default=uuid.uuid4)
     # Texte DÉJÀ anonymisé (app.anonymize).
@@ -80,3 +81,9 @@ class Report(Base):
     )
     # Version des règles d'anonymisation appliquées (app.anonymize).
     anonymizer_version: Mapped[int] = mapped_column(Integer, nullable=False)
+    # Empreinte HMAC du texte normalisé (app.fingerprint) : un doublon
+    # augmente count au lieu de créer une ligne. NULL pour les lignes < 0003.
+    fingerprint: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    count: Mapped[int] = mapped_column(Integer, nullable=False, default=1, server_default="1")
+    # Jour de l'export vers ml/data (tools.review) : « utilisé » pour la rétention.
+    exported_on: Mapped[datetime.date | None] = mapped_column(Date, nullable=True)

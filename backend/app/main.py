@@ -2,20 +2,25 @@
 
 import datetime
 import logging
+import uuid
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, FastAPI, Request, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
+from sqlalchemy import func, select
+from sqlalchemy.dialects import postgresql, sqlite
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from .anonymize import ANONYMIZER_VERSION, anonymize
+from .client_ip import client_ip
 from .config import Settings, get_settings
 from .db import get_session, make_sessionmaker
+from .fingerprint import fingerprint
 from .middleware import SecurityMiddleware
-from .models import Report
+from .models import Report, ReviewStatus
 from .rate_limit import RateLimiter
 from .schemas import Health, ReportCreated, ReportIn
 
@@ -39,30 +44,56 @@ def health() -> Health:
 def create_report(
     report: ReportIn, request: Request, session: Annotated[Session, Depends(get_session)]
 ) -> ReportCreated | JSONResponse:
+    settings: Settings = request.app.state.settings
     limiter: RateLimiter = request.app.state.rate_limiter
     # L'adresse ne sert qu'ici, en mémoire, sous forme d'empreinte salée.
-    client = request.client.host if request.client else "inconnu"
-    decision = limiter.hit(client)
+    decision = limiter.hit(client_ip(request, settings))
     if not decision.allowed:
-        return JSONResponse(
-            {"detail": "trop de signalements, réessayez plus tard"},
-            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
-            headers={"Retry-After": str(decision.retry_after)},
-        )
+        return _too_many(decision.retry_after)
 
-    row = Report(
-        text=anonymize(report.text),  # AVANT tout stockage
-        verdict=report.verdict,
-        probability=report.probability,
-        language=report.language,
-        source=report.source,
-        app_version=report.app_version,
-        user_feedback=report.user_feedback,
-        received_on=datetime.datetime.now(datetime.UTC).date(),
-        anonymizer_version=ANONYMIZER_VERSION,
-    )
+    text = anonymize(report.text)  # AVANT tout stockage
+    now = datetime.datetime.now(datetime.UTC)
+    today = now.date()
     try:
-        session.add(row)
+        # Limite globale : nouvelles lignes du jour (les doublons n'en créent pas).
+        received_today = session.scalar(
+            select(func.count()).select_from(Report).where(Report.received_on == today)
+        )
+        if (received_today or 0) >= settings.global_daily_limit:
+            log.warning("limite globale du jour atteinte")
+            tomorrow = datetime.datetime.combine(
+                today + datetime.timedelta(days=1), datetime.time(), datetime.UTC
+            )
+            return _too_many(max(1, int((tomorrow - now).total_seconds())))
+
+        values = {
+            "id": uuid.uuid4(),
+            "text": text,
+            "verdict": report.verdict,
+            "probability": report.probability,
+            "language": report.language,
+            "source": report.source,
+            "app_version": report.app_version,
+            "user_feedback": report.user_feedback,
+            "received_on": today,
+            "review_status": ReviewStatus.nouveau,
+            "anonymizer_version": ANONYMIZER_VERSION,
+            "fingerprint": fingerprint(text, settings.fingerprint_secret),
+            "count": 1,
+        }
+        # Même texte déjà reçu : une seule ligne, compteur + 1 (en une requête,
+        # sans lire le texte : le rôle « app » n'en a pas le droit).
+        insert = postgresql.insert if session.bind.dialect.name == "postgresql" else sqlite.insert
+        statement = (
+            insert(Report)
+            .values(values)
+            .on_conflict_do_update(
+                index_elements=[Report.fingerprint],
+                set_={"count": Report.count + 1},
+            )
+            .returning(Report.id)
+        )
+        report_id = session.execute(statement).scalar_one()
         session.commit()
     except SQLAlchemyError as exc:
         session.rollback()
@@ -72,7 +103,15 @@ def create_report(
             {"detail": "erreur interne"}, status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
     log.info("signalement reçu")
-    return ReportCreated(id=row.id)
+    return ReportCreated(id=report_id)
+
+
+def _too_many(retry_after: int) -> JSONResponse:
+    return JSONResponse(
+        {"detail": "trop de signalements, réessayez plus tard"},
+        status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+        headers={"Retry-After": str(retry_after)},
+    )
 
 
 async def _validation_error(_request: Request, exc: RequestValidationError) -> JSONResponse:
@@ -101,6 +140,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         redoc_url=None,
         openapi_url="/openapi.json" if docs else None,
     )
+    app.state.settings = settings
     app.state.sessionmaker = make_sessionmaker(settings.database_url)
     app.state.rate_limiter = RateLimiter(
         limit=settings.rate_limit_per_window,
@@ -113,6 +153,10 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     # Pas de CORSMiddleware : aucune page web d'un autre site ne peut appeler
     # l'API depuis un navigateur. L'app mobile n'est pas concernée par CORS.
     app.add_middleware(
-        SecurityMiddleware, max_body_bytes=settings.max_body_bytes, docs_enabled=docs
+        SecurityMiddleware,
+        max_body_bytes=settings.max_body_bytes,
+        docs_enabled=docs,
+        # HTTP refusé seulement si le proxy de confiance dit « http ».
+        require_https=not settings.is_dev and settings.trust_proxy,
     )
     return app

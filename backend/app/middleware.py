@@ -31,8 +31,9 @@ def _security_headers(path: str, docs_enabled: bool) -> list[tuple[bytes, bytes]
         (b"cross-origin-opener-policy", b"same-origin"),
         (b"permissions-policy", b"camera=(), microphone=(), geolocation=()"),
         (b"cache-control", b"no-store"),
-        # Ignoré en HTTP simple ; utile derrière TLS (déploiement futur).
-        (b"strict-transport-security", b"max-age=31536000; includeSubDomains"),
+        # HSTS : le navigateur n'utilise plus que HTTPS pendant 2 ans
+        # (ignoré en HTTP simple, donc sans effet en local).
+        (b"strict-transport-security", b"max-age=63072000; includeSubDomains"),
     ]
 
 
@@ -52,10 +53,17 @@ async def _send_json(send: Send, status: int, body: dict) -> None:
 
 
 class SecurityMiddleware:
-    def __init__(self, app: ASGIApp, max_body_bytes: int, docs_enabled: bool) -> None:
+    def __init__(
+        self,
+        app: ASGIApp,
+        max_body_bytes: int,
+        docs_enabled: bool,
+        require_https: bool = False,
+    ) -> None:
         self.app = app
         self.max_body_bytes = max_body_bytes
         self.docs_enabled = docs_enabled
+        self.require_https = require_https
 
     async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
         if scope["type"] != "http":
@@ -76,6 +84,12 @@ class SecurityMiddleware:
             await send(message)
 
         try:
+            if self.require_https and _plain_http(scope):
+                # L'hébergeur redirige déjà HTTP vers HTTPS ; second filet.
+                # Pas de redirection : un POST redirigé renverrait le texte
+                # en clair une seconde fois.
+                await _send_json(send_wrapper, 400, {"detail": "HTTPS obligatoire"})
+                return
             body = await self._read_body(scope, receive)
             if body is None:
                 await _send_json(send_wrapper, 413, {"detail": "requête trop grande"})
@@ -119,6 +133,16 @@ class SecurityMiddleware:
             if not message.get("more_body", False):
                 break
         return b"".join(chunks)
+
+
+def _plain_http(scope: Scope) -> bool:
+    """True si le proxy de confiance signale une requête reçue en HTTP.
+    Sans l'en-tête (contrôle de santé interne de l'hébergeur) : accepté."""
+    for name, value in scope.get("headers", []):
+        if name == b"x-forwarded-proto":
+            # Dernière valeur : celle ajoutée par le proxy le plus proche.
+            return value.decode("latin-1").split(",")[-1].strip().lower() != "https"
+    return False
 
 
 def _replay(body: bytes, original: Receive) -> Receive:
