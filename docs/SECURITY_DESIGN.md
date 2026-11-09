@@ -20,7 +20,7 @@ Sentinel is a personal project. It has **not** had an independent security audit
 
 ## 2. Principles
 
-- **Local first.** No backend, no account, no analytics. Every analysis runs on the device.
+- **Local first.** No account, no analytics. Every analysis runs on the device. The only Sentinel server receives scam reports, and only the messages the user chooses to report, one by one (see 3.10).
 - **Least data.** Message text is never logged or stored. Wi-Fi checks never read the SSID/BSSID and never ask for the location permission. The DNS firewall keeps two counters, never a domain name.
 - **Explicit consent** for the network features (breach check; DNS firewall, which forwards DNS queries to Quad9) and for the notification listener.
 - **Fail closed.** Wrong key, modified header or modified ciphertext all lead to an authentication error, never to partially decrypted data.
@@ -194,6 +194,21 @@ Android's resolver answers many queries from a cache shared by all apps, so the 
 
 **What this does not protect against.** Updates are not signed by Sentinel: a compromise of an upstream repository, of GitHub, or of the TLS chain can still push a list that passes the checks (e.g. a few hundred well-chosen extra entries, or the removal of a few). The consistency checks and the protected list limit the damage, they do not prove authenticity. Possible next step: publish reviewed lists from Sentinel's own repository with a detached signature verified against a key embedded in the APK.
 
+### 3.10 Scam reports (opt-in, one message at a time)
+
+A new network call, made only when the user taps "Report this message", reviews the text and taps "Send". Nothing is sent in the background, nothing is queued, nothing is retried automatically. The server side (anonymization again, no IP, day only, human review, rate limit) is described in [BACKEND_THREAT_MODEL.md](BACKEND_THREAT_MODEL.md).
+
+| Threat | Measure | Where |
+|---|---|---|
+| Personal data of the user or of people named in the message leaves the phone | Anonymized **on the phone** before the preview, with the same rules and version as the server (phones, emails, IBAN/RIB, cards, codes near a keyword, IPs, mentions, link paths). Parity test: identical output on the 96 shared cases | `lib/services/report/anonymizer.dart`, `test/report_anonymizer_parity_test.dart` |
+| A name or an address the rules miss | The preview is editable, with a reminder to remove names, addresses and personal details. The edited text is anonymized once more just before sending | `report_screen.dart`, `Report.clean` |
+| The report identifies the phone | Fixed list of fields: text, user opinion, verdict, probability, language, app version, `source: inconnue`. No phone number, no device ID, no account, no location | `Report.toJson`, `test/report_client_test.dart` |
+| Sending by mistake | Separate screen; "Send" stays disabled until an opinion is chosen; "Cancel" sends nothing | `report_screen.dart` |
+| Network observer | HTTPS required (`parseServerUrl`). Plain HTTP only in **debug** builds, only to `10.0.2.2` (the emulator's host, for the local backend), allowed by a network security config that exists only in `android/app/src/debug/`. Release builds have no exception: Android's default for API 28+ refuses cleartext, and the Dart client refuses `http://` too | `report_client.dart`, `android/app/src/debug/res/xml/network_security_config.xml` |
+| Server not deployed yet | `SENTINEL_API_URL` comes from `--dart-define`; empty (current release) means the button is hidden and no call is possible | `ReportClient.fromEnvironment` |
+| Flooding the server from the app | 5 reports per sliding hour on the phone; only send times are stored (never the content). The server enforces its own limit (429) | `report_limiter.dart` |
+| Hanging request | 10 s timeout; clear messages for offline, timeout, 429, rejected (413/422) and server errors | `report_client.dart` |
+
 ## 4. Known limitations
 
 These are real gaps. Some can't be fixed in this setup; others are on the roadmap.
@@ -233,3 +248,4 @@ These are real gaps. Some can't be fixed in this setup; others are on the roadma
 33. **No firewall for other apps during an app analysis.** For 2 to 15 minutes, only the analyzed app is filtered (see 3.8.1). A malicious link opened in another app during that window is not blocked.
 34. **App analysis reports are plain files.** They are private to the app and kept 24 h at most, but not encrypted: root access, or someone who opens Sentinel on the unlocked phone, can read which domains the analyzed app contacted. If Android kills the service during an analysis, that analysis and its report are lost. Query counts are approximate (cached answers are not seen again).
 35. **Brand rule false positives in the firewall.** See 3.9: a real site that contains a brand keyword but is not in the official list is blocked until allowlisted.
+36. **Report anonymization is rule-based.** Names, postal addresses and ID card numbers are not removed automatically; the user is asked to check the editable preview. The language sent with a report is a simple guess. Report traffic uses the system CA store (no pinning), like the HIBP call.

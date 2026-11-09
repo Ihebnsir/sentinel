@@ -19,7 +19,7 @@
 
 ---
 
-L'interface de l'application est en français. Tout se passe sur le téléphone. Rien ne passe par le réseau sans votre accord : les seuls appels réseau viennent de trois fonctions facultatives, la vérification des fuites auprès de Have I Been Pwned (5 caractères hexadécimaux d'une empreinte SHA-1, k-anonymity), le pare-feu DNS (transmet les requêtes DNS à Quad9, chiffrées en DNS-over-TLS ou HTTPS) et la mise à jour des listes de blocage (téléchargées depuis GitHub).
+L'interface de l'application est en français. Tout se passe sur le téléphone. Rien ne passe par le réseau sans votre accord : les seuls appels réseau viennent de quatre fonctions facultatives, la vérification des fuites auprès de Have I Been Pwned (5 caractères hexadécimaux d'une empreinte SHA-1, k-anonymity), le pare-feu DNS (transmet les requêtes DNS à Quad9, chiffrées en DNS-over-TLS ou HTTPS), la mise à jour des listes de blocage (téléchargées depuis GitHub) et le signalement d'arnaques (un message à la fois, anonymisé sur le téléphone, envoyé seulement quand vous touchez « Envoyer »).
 
 ## Captures d'écran
 
@@ -47,8 +47,9 @@ L'interface de l'application est en français. Tout se passe sur le téléphone.
 
 ## Points forts en sécurité
 
-- **Respect de la vie privée dès la conception.** Pas de compte, pas de statistiques d'usage, pas de serveur. Le texte des messages n'est jamais journalisé ni enregistré. Kotlin ne garde que des valeurs `hashCode()` pour ignorer les doublons.
+- **Respect de la vie privée dès la conception.** Pas de compte, pas de statistiques d'usage. Le seul serveur est celui, facultatif, des signalements (`backend/`) : il ne reçoit un message que si l'utilisateur le signale. Le texte des messages n'est jamais journalisé ni enregistré sur le téléphone. Kotlin ne garde que des valeurs `hashCode()` pour ignorer les doublons.
 - **Appels réseau sur accord uniquement.** Aucun appel réseau au démarrage (la police est embarquée). La vérification des fuites demande un consentement explicite. Elle utilise l'API « range » de Pwned Passwords (k-anonymity) : seuls les 5 premiers caractères hexadécimaux de l'empreinte SHA-1 quittent le téléphone, et l'en-tête `Add-Padding: true` masque la taille de la réponse. Les résultats restent en mémoire et sont effacés au verrouillage du coffre.
+- **Signalement d'arnaques (volontaire, un par un).** « Signaler ce message » n'apparaît sous un résultat de l'onglet Messages que si le build définit `--dart-define=SENTINEL_API_URL` (vide pour l'instant en release : bouton masqué). Le texte est anonymisé sur le téléphone avec les mêmes règles que le serveur (`anonymizer.dart`, test de parité sur les 96 cas communs de `backend/tests/fixtures/anonymize_cases.json`), montré à l'utilisateur, qui peut le modifier, puis envoyé avec son avis, le verdict, la probabilité, la langue et la version de l'app. Ni numéro, ni identifiant du téléphone. HTTPS obligatoire ; HTTP en clair permis seulement en debug, seulement vers `10.0.2.2` (l'ordinateur vu depuis l'émulateur), via `android/app/src/debug/res/xml/network_security_config.xml`. Délai de 10 s, pas de file d'attente, pas de nouvel essai automatique, 5 signalements par heure sur le téléphone (le serveur limite aussi).
 - **Cryptographie du coffre.** Une clé de données (DEK) aléatoire de 256 bits chiffre les éléments en AES-256-GCM, avec un nonce neuf de 12 octets à chaque écriture. La DEK est enveloppée par une clé de chiffrement de clé (KEK) pour chaque *emplacement de clé* (key slot) :
   - mot de passe : Argon2id, 46 Mio, 2 passes, parallélisme 1, sel aléatoire de 16 octets, calculé dans un isolate séparé ;
   - clé de récupération : 28 caractères parmi 32 symboles (140 bits), HKDF-SHA256 ;
@@ -76,7 +77,7 @@ Schémas et détails : [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) (en anglais)
 | Application | Flutter 3.47.7, Dart 3.13.5 |
 | Android | Kotlin, Java 17, Android Gradle Plugin 9.1.0, Gradle 9.3.1 |
 | Cryptographie | [`cryptography`](https://pub.dev/packages/cryptography) (Argon2id, AES-GCM, HKDF), [`crypto`](https://pub.dev/packages/crypto) (SHA-1), Android Keystore |
-| Réseau | [`http`](https://pub.dev/packages/http) (API Pwned Passwords uniquement) |
+| Réseau | [`http`](https://pub.dev/packages/http) (API Pwned Passwords et API de signalement de Sentinel) |
 | Apprentissage automatique | Python 3.14, scikit-learn 1.9.1, pandas, numpy (entraînement seulement ; l'inférence est en Dart) |
 | CI | GitHub Actions, Gitleaks, Dependabot |
 

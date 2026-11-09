@@ -19,7 +19,7 @@
 
 ---
 
-The app's interface is in French. Everything runs on the phone. Nothing goes over the network without your consent: the only network calls are three opt-in features, the breach check against Have I Been Pwned (5 hex characters of a SHA-1 hash, k-anonymity), the DNS firewall (forwards DNS queries to Quad9, encrypted with DNS over TLS or HTTPS) and the blocklist updates (downloads from GitHub).
+The app's interface is in French. Everything runs on the phone. Nothing goes over the network without your consent: the only network calls are four opt-in features, the breach check against Have I Been Pwned (5 hex characters of a SHA-1 hash, k-anonymity), the DNS firewall (forwards DNS queries to Quad9, encrypted with DNS over TLS or HTTPS), the blocklist updates (downloads from GitHub) and scam reports (one message at a time, anonymized on the phone, sent only when you tap "Send").
 
 ## Screenshots
 
@@ -47,8 +47,9 @@ The app's interface is in French. Everything runs on the phone. Nothing goes ove
 
 ## Security highlights
 
-- **Privacy by design.** No account, no analytics, no backend. Message text is never logged or stored. Kotlin keeps only `hashCode()` values to skip duplicates.
+- **Privacy by design.** No account, no analytics. The only server is the optional report backend (`backend/`), which receives a message only when the user reports it. Message text is never logged or stored on the phone. Kotlin keeps only `hashCode()` values to skip duplicates.
 - **Opt-in network calls only.** No network call at startup (the font is bundled). The breach check needs explicit consent. It uses the Pwned Passwords range API (k-anonymity): only the first 5 hex characters of the SHA-1 hash leave the device, and `Add-Padding: true` hides the response size. Results stay in memory and are cleared when the vault locks.
+- **Scam reports (opt-in, one by one).** "Report this message" appears under a Messages result only when the build sets `--dart-define=SENTINEL_API_URL` (empty today in release, so the button is hidden). The text is anonymized on the phone with the same rules as the server (`anonymizer.dart`, parity test on the 96 shared cases of `backend/tests/fixtures/anonymize_cases.json`), shown to the user, who can edit it, then sent with the user's opinion, the verdict, the probability, the language and the app version. No phone number, no device ID. HTTPS only; plain HTTP is allowed only in debug builds, only to `10.0.2.2` (the emulator's host), through `android/app/src/debug/res/xml/network_security_config.xml`. 10 s timeout, no queue, no automatic retry, 5 reports per hour on the phone (the server also limits).
 - **Vault cryptography.** A random 256-bit data key (DEK) encrypts the items with AES-256-GCM, using a fresh 12-byte nonce on every write. The DEK is wrapped by one key-encryption key (KEK) per *key slot*:
   - password: Argon2id, 46 MiB, 2 iterations, parallelism 1, 16-byte random salt, run in a separate isolate;
   - recovery key: 28 characters from a 32-symbol alphabet (140 bits), HKDF-SHA256;
@@ -76,7 +77,7 @@ Diagrams and details: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 | App | Flutter 3.47.7, Dart 3.13.5 |
 | Android | Kotlin, Java 17, Android Gradle Plugin 9.1.0, Gradle 9.3.1 |
 | Cryptography | [`cryptography`](https://pub.dev/packages/cryptography) (Argon2id, AES-GCM, HKDF), [`crypto`](https://pub.dev/packages/crypto) (SHA-1), Android Keystore |
-| Network | [`http`](https://pub.dev/packages/http) (Pwned Passwords API only) |
+| Network | [`http`](https://pub.dev/packages/http) (Pwned Passwords API and Sentinel report API) |
 | Machine learning | Python 3.14, scikit-learn 1.9.1, pandas, numpy (training only; inference is in Dart) |
 | CI | GitHub Actions, Gitleaks, Dependabot |
 
