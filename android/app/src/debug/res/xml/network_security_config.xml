@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Build DEBUG uniquement (src/debug/) : jamais dans l'APK de release.
+     HTTP en clair permis seulement vers 10.0.2.2, l'ordinateur vu depuis
+     l'émulateur (backend local, docker compose). Tout le reste : HTTPS. -->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="false" />
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="false">10.0.2.2</domain>
+    </domain-config>
+</network-security-config>
