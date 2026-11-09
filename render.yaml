@@ -1,0 +1,54 @@
+# Blueprint Render (Infrastructure as Code) : le service web du backend.
+# Guide pas à pas : docs/DEPLOIEMENT.md. Spécification :
+# https://render.com/docs/blueprint-spec
+#
+# Aucune valeur secrète ici. Les variables « sync: false » sont demandées par
+# Render à la création du Blueprint ; la clé d'empreinte est générée par Render.
+services:
+  - type: web
+    name: sentinel-api
+    runtime: docker
+    # Offre gratuite : mise en veille après 15 min sans requête (réveil ~1 min).
+    plan: free
+    # Seule région européenne de Render (proche de la Tunisie). Définitive.
+    region: frankfurt
+    dockerContext: ./backend
+    dockerfilePath: ./backend/Dockerfile
+    healthCheckPath: /v1/health
+    # Déploiement à chaque commit sur main, seulement si la CI est verte.
+    branch: main
+    autoDeployTrigger: checksPass
+    # Ne reconstruit que si le backend change (pas pour l'app Flutter).
+    buildFilter:
+      paths:
+        - backend/**
+    envVars:
+      - key: SENTINEL_ENV
+        value: prod
+      # Port écouté par le conteneur (Dockerfile : SENTINEL_PORT=8000).
+      - key: PORT
+        value: "8000"
+      # Le proxy de Render ajoute l'IP du client à la fin de X-Forwarded-For.
+      # Vérification au déploiement : docs/DEPLOIEMENT.md, étape 8.
+      - key: SENTINEL_TRUST_PROXY
+        value: "true"
+      - key: SENTINEL_CLIENT_IP_HEADER
+        value: x-forwarded-for
+      - key: SENTINEL_PROXY_HOPS
+        value: "1"
+      - key: SENTINEL_GLOBAL_DAILY_LIMIT
+        value: "500"
+      - key: SENTINEL_LOG_LEVEL
+        value: INFO
+      # Disque éphémère chez Render : SQLite interdit (données perdues).
+      - key: SENTINEL_ALLOW_SQLITE
+        value: "false"
+      # Neon, rôle sentinel_app (INSERT seulement), avec ?sslmode=require.
+      - key: SENTINEL_DATABASE_URL
+        sync: false
+      # Neon, rôle propriétaire (neondb_owner), pour les migrations au démarrage.
+      - key: SENTINEL_MIGRATION_DATABASE_URL
+        sync: false
+      # Clé HMAC des empreintes (doublons) : 256 bits aléatoires, générés par Render.
+      - key: SENTINEL_FINGERPRINT_KEY
+        generateValue: true
