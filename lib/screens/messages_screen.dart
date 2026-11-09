@@ -8,6 +8,8 @@ import '../services/phishing/message_analyzer.dart';
 import '../services/phishing/phishing_model.dart';
 import '../services/apps_scanner_service.dart';
 import '../services/qr/qr_scanner_service.dart';
+import '../services/report/report_client.dart';
+import '../services/report/report_limiter.dart';
 import '../services/share_service.dart';
 import '../theme/app_colors.dart';
 import '../widgets/actions_row.dart';
@@ -15,14 +17,25 @@ import '../widgets/auto_protection_section.dart';
 import '../widgets/loading_bar.dart';
 import '../widgets/verdict_section.dart';
 import 'qr_result_screen.dart';
+import 'report_screen.dart';
 
 /// Onglet « Messages » : l'utilisateur colle un SMS ou un lien,
 /// l'IA et les règles sur les liens disent s'il s'agit d'une arnaque.
 class MessagesScreen extends StatefulWidget {
-  const MessagesScreen({super.key, this.sharedText});
+  const MessagesScreen({
+    super.key,
+    this.sharedText,
+    this.reportClient,
+    this.reportLimiter,
+  });
 
   /// Texte reçu d'une autre app : il est collé puis analysé tout seul.
   final ValueListenable<SharedText?>? sharedText;
+
+  /// Remplacés dans les tests. Par défaut : SENTINEL_API_URL du build ;
+  /// vide = bouton « Signaler » masqué.
+  final ReportClient? reportClient;
+  final ReportLimiter? reportLimiter;
 
   @override
   State<MessagesScreen> createState() => _MessagesScreenState();
@@ -36,6 +49,13 @@ class _MessagesScreenState extends State<MessagesScreen> {
   bool _analyzing = false;
   bool _failed = false; // le modèle n'a pas pu être chargé
   MessageAnalysis? _analysis;
+  String _analyzedText = ''; // texte du résultat affiché
+
+  // Signalement : null si aucun serveur n'est configuré.
+  late final ReportClient? _reportClient =
+      widget.reportClient ?? ReportClient.fromEnvironment();
+  late final ReportLimiter _reportLimiter =
+      widget.reportLimiter ?? ReportLimiter();
 
   bool get _hasText => _controller.text.trim().isNotEmpty;
 
@@ -102,7 +122,10 @@ class _MessagesScreenState extends State<MessagesScreen> {
       final analysis = analyzeMessage(text, model.predict(text));
       // Le texte a changé entre-temps (nouveau partage) : résultat périmé.
       if (!mounted || _controller.text != text) return;
-      setState(() => _analysis = analysis);
+      setState(() {
+        _analysis = analysis;
+        _analyzedText = text;
+      });
     } catch (_) {
       // Modèle introuvable ou illisible.
       if (!mounted) return;
@@ -110,6 +133,24 @@ class _MessagesScreenState extends State<MessagesScreen> {
     } finally {
       if (mounted) setState(() => _analyzing = false);
     }
+  }
+
+  /// Ouvre l'écran de signalement ; merci affiché si l'envoi a réussi.
+  Future<void> _report(ReportClient client, MessageAnalysis analysis) async {
+    final l = context.l10n;
+    final sent = await Navigator.of(context).push<bool>(
+      MaterialPageRoute(
+        builder: (_) => ReportScreen(
+          text: _analyzedText,
+          analysis: analysis,
+          client: client,
+          limiter: _reportLimiter,
+        ),
+      ),
+    );
+    if (sent != true || !mounted) return;
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(l.reportThanks)));
   }
 
   /// Scan d'un QR code : explication avant la première demande de caméra,
@@ -238,6 +279,23 @@ class _MessagesScreenState extends State<MessagesScreen> {
                     reasons: analysis.reasons(l),
                     advice: analysis.advice(l),
                   ),
+                if (analysis != null && !_analyzing)
+                  if (_reportClient case final client?)
+                    Align(
+                      alignment: AlignmentDirectional.centerStart,
+                      child: Padding(
+                        padding: const EdgeInsets.only(top: 16),
+                        child: TextButton.icon(
+                          style: TextButton.styleFrom(
+                            foregroundColor: context.colors.bleu,
+                            padding: EdgeInsets.zero,
+                          ),
+                          onPressed: () => _report(client, analysis),
+                          icon: const Icon(Icons.flag_outlined),
+                          label: Text(l.reportButton),
+                        ),
+                      ),
+                    ),
               ],
             ),
           ),
@@ -245,7 +303,9 @@ class _MessagesScreenState extends State<MessagesScreen> {
           Padding(
             padding: const EdgeInsets.fromLTRB(28, 0, 28, 16),
             child: Text(
-              l.messagesLocalNote,
+              _reportClient == null
+                  ? l.messagesLocalNote
+                  : l.messagesLocalNoteReport,
               style: TextStyle(fontSize: 12, color: context.colors.discret),
             ),
           ),

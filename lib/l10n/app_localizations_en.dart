@@ -268,11 +268,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get onboarding2Line1 =>
-      'No account, no ads, no analytics. Your messages, your passwords and your list of apps never leave the phone.';
+      'No account, no ads, no analytics. Your messages, your passwords and your list of apps do not leave the phone, except a message you choose to report.';
 
   @override
   String get onboarding2Line2 =>
-      'There are only three network exchanges, all optional, and only if you turn them on:';
+      'There are only four network exchanges, all optional, and only if you turn them on:';
 
   @override
   String get onboarding2Line3 =>
@@ -285,6 +285,10 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get onboarding2Line5 =>
       '• Blocklist updates: a simple download from GitHub.';
+
+  @override
+  String get onboarding2Line6 =>
+      '• Report a message: the anonymized text, reviewed by you, sent only when you tap \"Send\".';
 
   @override
   String get onboarding3Title => 'Permissions, at the right time';
@@ -304,11 +308,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get privacyBrief1 =>
-      'Sentinel has no server, no account, no ads, no usage analytics and no crash reports. All analyses run on the phone.';
+      'Sentinel has no account, no ads, no usage analytics and no crash reports. All analyses run on the phone. A server only receives the messages you choose to report, one by one.';
 
   @override
   String get privacyBrief2 =>
-      'Sentinel only connects to the Internet for the three optional features below, and only after you agree.';
+      'Sentinel only connects to the Internet for the four optional features below, and only after you agree.';
 
   @override
   String get privacyNetworkTitle => 'The only network exchanges (optional)';
@@ -328,6 +332,10 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get privacyNetwork4 =>
       '\"Open the website\" links (advice, sources, audit report) open in your browser, only when you tap them.';
+
+  @override
+  String get privacyNetwork5 =>
+      '4. Reporting a message (Messages tab, when the service is available). Nothing is sent automatically: you tap \"Report this message\", read the text, already anonymized on the phone (numbers, emails, IBANs, cards, codes; links keep only their domain), can edit it, then tap \"Send\". What is sent: this text, your opinion, Sentinel\'s verdict and probability, the language and the app version; no number, no phone identifier. The server anonymizes the text again, keeps neither your IP address nor the time (only the day), and a person reviews each report before it is used to improve detection.';
 
   @override
   String get privacyLocalTitle => 'What stays on the phone';
@@ -352,11 +360,15 @@ class AppLocalizationsEn extends AppLocalizations {
       'Android backup is turned off: nothing goes to the cloud. A vault backup (encrypted .sentinel file) is only created if you ask for it, in the place you choose.';
 
   @override
+  String get privacyLocal6 =>
+      'The time of your reports from the last hour, for the limit of 5 per hour (never their content).';
+
+  @override
   String get privacyNeverTitle => 'What Sentinel never records';
 
   @override
   String get privacyNever1 =>
-      'The text of analyzed messages and QR codes (pasted, shared, scanned or read from notifications): it is analyzed in memory and then forgotten. The camera image is never saved.';
+      'The text of analyzed messages and QR codes (pasted, shared, scanned or read from notifications): it is analyzed in memory and then forgotten. The camera image is never saved. Only the messages you report yourself are sent (point 4), and no copy is kept on the phone.';
 
   @override
   String get privacyNever2 =>
@@ -398,7 +410,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get privacyErase1 =>
-      'Uninstalling Sentinel erases everything it saved on the phone. There is no copy anywhere else.';
+      'Uninstalling Sentinel erases everything it saved on the phone. Elsewhere, there are only the reports you sent, which are linked neither to you nor to your phone.';
 
   @override
   String get auditFrameTitle => 'Scope';
@@ -530,6 +542,90 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get messagesLocalNote =>
       'The analysis runs on your phone. The message is not sent anywhere.';
+
+  @override
+  String get messagesLocalNoteReport =>
+      'The analysis runs on your phone. The message is not sent anywhere, unless you choose to report it.';
+
+  @override
+  String get reportButton => 'Report this message';
+
+  @override
+  String get reportTitle => 'Report this message';
+
+  @override
+  String get reportIntro =>
+      'Help Sentinel recognize scams better: read this message again, then send it. Nothing is sent without your consent.';
+
+  @override
+  String get reportPreviewLabel => 'Text to send (already anonymized)';
+
+  @override
+  String get reportReminder =>
+      'Check that no name, address or personal information is left. You can edit the text.';
+
+  @override
+  String get reportQuestion => 'Your opinion';
+
+  @override
+  String get reportFeedbackScam => 'It\'s a scam';
+
+  @override
+  String get reportFeedbackNotScam => 'It\'s not a scam';
+
+  @override
+  String get reportFeedbackUnsure => 'I don\'t know';
+
+  @override
+  String get reportSentTitle => 'What is sent';
+
+  @override
+  String get reportSentText =>
+      'The text above, your opinion, Sentinel\'s verdict and its probability, the message language and the app version.';
+
+  @override
+  String get reportWhereTitle => 'Where and why';
+
+  @override
+  String reportWhereText(String host) {
+    return 'To the Sentinel server ($host), to improve scam detection. A person reviews each report before it is used to train the model.';
+  }
+
+  @override
+  String get reportNotSentTitle => 'What is not sent';
+
+  @override
+  String get reportNotSentText =>
+      'Not your number, not the sender\'s, no phone identifier, no location, no account. The server does not keep your IP address and only records the day it was sent.';
+
+  @override
+  String get reportSend => 'Send';
+
+  @override
+  String get reportSending => 'Sending…';
+
+  @override
+  String get reportThanks =>
+      'Thank you, your report will help improve detection.';
+
+  @override
+  String get reportErrorOffline =>
+      'Cannot reach the server. Check your Internet connection, then try again.';
+
+  @override
+  String get reportErrorTimeout =>
+      'The server is not responding. Try again later.';
+
+  @override
+  String get reportErrorTooMany =>
+      'Too many reports for now (at most 5 per hour). Try again later.';
+
+  @override
+  String get reportErrorRejected =>
+      'The server refused this report. Check the text, then try again.';
+
+  @override
+  String get reportErrorServer => 'Server error. Try again later.';
 
   @override
   String messagesProbability(String percent) {

@@ -275,11 +275,11 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get onboarding2Line1 =>
-      'Pas de compte, pas de publicité, pas de statistiques. Vos messages, vos mots de passe et la liste de vos applications ne quittent jamais le téléphone.';
+      'Pas de compte, pas de publicité, pas de statistiques. Vos messages, vos mots de passe et la liste de vos applications ne quittent pas le téléphone, sauf un message que vous choisissez de signaler.';
 
   @override
   String get onboarding2Line2 =>
-      'Seuls trois échanges réseau existent, tous facultatifs, et seulement si vous les activez :';
+      'Seuls quatre échanges réseau existent, tous facultatifs, et seulement si vous les activez :';
 
   @override
   String get onboarding2Line3 =>
@@ -292,6 +292,10 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get onboarding2Line5 =>
       '• Mise à jour des listes de blocage : un simple téléchargement depuis GitHub.';
+
+  @override
+  String get onboarding2Line6 =>
+      '• Signaler un message : le texte anonymisé, relu par vous, envoyé seulement quand vous touchez « Envoyer ».';
 
   @override
   String get onboarding3Title => 'Les autorisations, au bon moment';
@@ -311,11 +315,11 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get privacyBrief1 =>
-      'Sentinel n\'a ni serveur, ni compte, ni publicité, ni statistiques d\'utilisation, ni rapport de plantage. Toutes les analyses se font sur le téléphone.';
+      'Sentinel n\'a ni compte, ni publicité, ni statistiques d\'utilisation, ni rapport de plantage. Toutes les analyses se font sur le téléphone. Un serveur ne reçoit que les messages que vous choisissez de signaler, un par un.';
 
   @override
   String get privacyBrief2 =>
-      'Sentinel ne contacte Internet que pour les trois fonctions facultatives ci-dessous, et seulement après votre accord.';
+      'Sentinel ne contacte Internet que pour les quatre fonctions facultatives ci-dessous, et seulement après votre accord.';
 
   @override
   String get privacyNetworkTitle => 'Les seuls échanges réseau (facultatifs)';
@@ -335,6 +339,10 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get privacyNetwork4 =>
       'Les liens « Ouvrir le site » (conseils, sources, rapport d\'audit) s\'ouvrent dans votre navigateur, seulement quand vous les touchez.';
+
+  @override
+  String get privacyNetwork5 =>
+      '4. Signalement d\'un message (onglet Messages, quand le service est disponible). Rien ne part automatiquement : vous touchez « Signaler ce message », vous relisez le texte, déjà anonymisé sur le téléphone (numéros, e-mails, IBAN, cartes, codes ; les liens ne gardent que leur domaine), vous pouvez le modifier, puis vous touchez « Envoyer ». Sont envoyés : ce texte, votre avis, le verdict et la probabilité de Sentinel, la langue et la version de l\'app ; ni numéro, ni identifiant du téléphone. Le serveur anonymise à nouveau le texte, ne garde ni votre adresse IP ni l\'heure (seulement le jour), et une personne relit chaque signalement avant qu\'il serve à améliorer la détection.';
 
   @override
   String get privacyLocalTitle => 'Ce qui reste sur le téléphone';
@@ -359,11 +367,15 @@ class AppLocalizationsFr extends AppLocalizations {
       'La sauvegarde Android est désactivée : rien ne part dans le cloud. Une sauvegarde du coffre (fichier .sentinel chiffré) n\'est créée que si vous la demandez, à l\'endroit que vous choisissez.';
 
   @override
+  String get privacyLocal6 =>
+      'L\'heure de vos signalements de la dernière heure, pour la limite de 5 par heure (jamais leur contenu).';
+
+  @override
   String get privacyNeverTitle => 'Ce que Sentinel n\'enregistre jamais';
 
   @override
   String get privacyNever1 =>
-      'Le texte des messages et des QR codes analysés (collés, partagés, scannés ou lus dans les notifications) : il est analysé en mémoire puis oublié. L\'image de la caméra n\'est jamais enregistrée.';
+      'Le texte des messages et des QR codes analysés (collés, partagés, scannés ou lus dans les notifications) : il est analysé en mémoire puis oublié. L\'image de la caméra n\'est jamais enregistrée. Seuls les messages que vous signalez vous-même sont envoyés (point 4), sans copie gardée sur le téléphone.';
 
   @override
   String get privacyNever2 =>
@@ -405,7 +417,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get privacyErase1 =>
-      'Désinstaller Sentinel efface tout ce qu\'il a enregistré sur le téléphone. Il n\'existe aucune copie ailleurs.';
+      'Désinstaller Sentinel efface tout ce qu\'il a enregistré sur le téléphone. Ailleurs, il n\'existe que les signalements que vous avez envoyés, qui ne sont reliés ni à vous ni à votre téléphone.';
 
   @override
   String get auditFrameTitle => 'Le cadre';
@@ -538,6 +550,90 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get messagesLocalNote =>
       'L\'analyse se fait sur votre téléphone. Le message n\'est envoyé nulle part.';
+
+  @override
+  String get messagesLocalNoteReport =>
+      'L\'analyse se fait sur votre téléphone. Le message n\'est envoyé nulle part, sauf si vous choisissez de le signaler.';
+
+  @override
+  String get reportButton => 'Signaler ce message';
+
+  @override
+  String get reportTitle => 'Signaler ce message';
+
+  @override
+  String get reportIntro =>
+      'Aidez Sentinel à mieux reconnaître les arnaques : relisez ce message, puis envoyez-le. Rien ne part sans votre accord.';
+
+  @override
+  String get reportPreviewLabel => 'Texte envoyé (déjà anonymisé)';
+
+  @override
+  String get reportReminder =>
+      'Vérifiez qu\'il ne reste ni nom, ni adresse, ni information personnelle. Vous pouvez modifier le texte.';
+
+  @override
+  String get reportQuestion => 'Votre avis';
+
+  @override
+  String get reportFeedbackScam => 'C\'est une arnaque';
+
+  @override
+  String get reportFeedbackNotScam => 'Ce n\'est pas une arnaque';
+
+  @override
+  String get reportFeedbackUnsure => 'Je ne sais pas';
+
+  @override
+  String get reportSentTitle => 'Ce qui est envoyé';
+
+  @override
+  String get reportSentText =>
+      'Le texte ci-dessus, votre avis, le verdict de Sentinel et sa probabilité, la langue du message et la version de l\'app.';
+
+  @override
+  String get reportWhereTitle => 'Où et pour quoi faire';
+
+  @override
+  String reportWhereText(String host) {
+    return 'Au serveur de Sentinel ($host), pour améliorer la détection des arnaques. Une personne relit chaque signalement avant qu\'il serve à entraîner le modèle.';
+  }
+
+  @override
+  String get reportNotSentTitle => 'Ce qui n\'est pas envoyé';
+
+  @override
+  String get reportNotSentText =>
+      'Ni votre numéro, ni celui de l\'expéditeur, ni identifiant du téléphone, ni position, ni compte. Le serveur ne garde pas votre adresse IP et ne note que le jour de l\'envoi.';
+
+  @override
+  String get reportSend => 'Envoyer';
+
+  @override
+  String get reportSending => 'Envoi en cours…';
+
+  @override
+  String get reportThanks =>
+      'Merci, votre signalement aidera à améliorer la détection.';
+
+  @override
+  String get reportErrorOffline =>
+      'Impossible de joindre le serveur. Vérifiez votre connexion Internet, puis réessayez.';
+
+  @override
+  String get reportErrorTimeout =>
+      'Le serveur ne répond pas. Réessayez plus tard.';
+
+  @override
+  String get reportErrorTooMany =>
+      'Trop de signalements pour le moment (5 par heure au plus). Réessayez plus tard.';
+
+  @override
+  String get reportErrorRejected =>
+      'Le serveur a refusé ce signalement. Vérifiez le texte, puis réessayez.';
+
+  @override
+  String get reportErrorServer => 'Erreur du serveur. Réessayez plus tard.';
 
   @override
   String messagesProbability(String percent) {

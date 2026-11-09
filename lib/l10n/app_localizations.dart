@@ -577,13 +577,13 @@ abstract class AppLocalizations {
   /// No description provided for @onboarding2Line1.
   ///
   /// In fr, this message translates to:
-  /// **'Pas de compte, pas de publicité, pas de statistiques. Vos messages, vos mots de passe et la liste de vos applications ne quittent jamais le téléphone.'**
+  /// **'Pas de compte, pas de publicité, pas de statistiques. Vos messages, vos mots de passe et la liste de vos applications ne quittent pas le téléphone, sauf un message que vous choisissez de signaler.'**
   String get onboarding2Line1;
 
   /// No description provided for @onboarding2Line2.
   ///
   /// In fr, this message translates to:
-  /// **'Seuls trois échanges réseau existent, tous facultatifs, et seulement si vous les activez :'**
+  /// **'Seuls quatre échanges réseau existent, tous facultatifs, et seulement si vous les activez :'**
   String get onboarding2Line2;
 
   /// No description provided for @onboarding2Line3.
@@ -603,6 +603,12 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'• Mise à jour des listes de blocage : un simple téléchargement depuis GitHub.'**
   String get onboarding2Line5;
+
+  /// No description provided for @onboarding2Line6.
+  ///
+  /// In fr, this message translates to:
+  /// **'• Signaler un message : le texte anonymisé, relu par vous, envoyé seulement quand vous touchez « Envoyer ».'**
+  String get onboarding2Line6;
 
   /// No description provided for @onboarding3Title.
   ///
@@ -637,13 +643,13 @@ abstract class AppLocalizations {
   /// No description provided for @privacyBrief1.
   ///
   /// In fr, this message translates to:
-  /// **'Sentinel n\'a ni serveur, ni compte, ni publicité, ni statistiques d\'utilisation, ni rapport de plantage. Toutes les analyses se font sur le téléphone.'**
+  /// **'Sentinel n\'a ni compte, ni publicité, ni statistiques d\'utilisation, ni rapport de plantage. Toutes les analyses se font sur le téléphone. Un serveur ne reçoit que les messages que vous choisissez de signaler, un par un.'**
   String get privacyBrief1;
 
   /// No description provided for @privacyBrief2.
   ///
   /// In fr, this message translates to:
-  /// **'Sentinel ne contacte Internet que pour les trois fonctions facultatives ci-dessous, et seulement après votre accord.'**
+  /// **'Sentinel ne contacte Internet que pour les quatre fonctions facultatives ci-dessous, et seulement après votre accord.'**
   String get privacyBrief2;
 
   /// No description provided for @privacyNetworkTitle.
@@ -675,6 +681,12 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Les liens « Ouvrir le site » (conseils, sources, rapport d\'audit) s\'ouvrent dans votre navigateur, seulement quand vous les touchez.'**
   String get privacyNetwork4;
+
+  /// No description provided for @privacyNetwork5.
+  ///
+  /// In fr, this message translates to:
+  /// **'4. Signalement d\'un message (onglet Messages, quand le service est disponible). Rien ne part automatiquement : vous touchez « Signaler ce message », vous relisez le texte, déjà anonymisé sur le téléphone (numéros, e-mails, IBAN, cartes, codes ; les liens ne gardent que leur domaine), vous pouvez le modifier, puis vous touchez « Envoyer ». Sont envoyés : ce texte, votre avis, le verdict et la probabilité de Sentinel, la langue et la version de l\'app ; ni numéro, ni identifiant du téléphone. Le serveur anonymise à nouveau le texte, ne garde ni votre adresse IP ni l\'heure (seulement le jour), et une personne relit chaque signalement avant qu\'il serve à améliorer la détection.'**
+  String get privacyNetwork5;
 
   /// No description provided for @privacyLocalTitle.
   ///
@@ -712,6 +724,12 @@ abstract class AppLocalizations {
   /// **'La sauvegarde Android est désactivée : rien ne part dans le cloud. Une sauvegarde du coffre (fichier .sentinel chiffré) n\'est créée que si vous la demandez, à l\'endroit que vous choisissez.'**
   String get privacyLocal5;
 
+  /// No description provided for @privacyLocal6.
+  ///
+  /// In fr, this message translates to:
+  /// **'L\'heure de vos signalements de la dernière heure, pour la limite de 5 par heure (jamais leur contenu).'**
+  String get privacyLocal6;
+
   /// No description provided for @privacyNeverTitle.
   ///
   /// In fr, this message translates to:
@@ -721,7 +739,7 @@ abstract class AppLocalizations {
   /// No description provided for @privacyNever1.
   ///
   /// In fr, this message translates to:
-  /// **'Le texte des messages et des QR codes analysés (collés, partagés, scannés ou lus dans les notifications) : il est analysé en mémoire puis oublié. L\'image de la caméra n\'est jamais enregistrée.'**
+  /// **'Le texte des messages et des QR codes analysés (collés, partagés, scannés ou lus dans les notifications) : il est analysé en mémoire puis oublié. L\'image de la caméra n\'est jamais enregistrée. Seuls les messages que vous signalez vous-même sont envoyés (point 4), sans copie gardée sur le téléphone.'**
   String get privacyNever1;
 
   /// No description provided for @privacyNever2.
@@ -787,7 +805,7 @@ abstract class AppLocalizations {
   /// No description provided for @privacyErase1.
   ///
   /// In fr, this message translates to:
-  /// **'Désinstaller Sentinel efface tout ce qu\'il a enregistré sur le téléphone. Il n\'existe aucune copie ailleurs.'**
+  /// **'Désinstaller Sentinel efface tout ce qu\'il a enregistré sur le téléphone. Ailleurs, il n\'existe que les signalements que vous avez envoyés, qui ne sont reliés ni à vous ni à votre téléphone.'**
   String get privacyErase1;
 
   /// No description provided for @auditFrameTitle.
@@ -993,6 +1011,150 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'L\'analyse se fait sur votre téléphone. Le message n\'est envoyé nulle part.'**
   String get messagesLocalNote;
+
+  /// No description provided for @messagesLocalNoteReport.
+  ///
+  /// In fr, this message translates to:
+  /// **'L\'analyse se fait sur votre téléphone. Le message n\'est envoyé nulle part, sauf si vous choisissez de le signaler.'**
+  String get messagesLocalNoteReport;
+
+  /// No description provided for @reportButton.
+  ///
+  /// In fr, this message translates to:
+  /// **'Signaler ce message'**
+  String get reportButton;
+
+  /// No description provided for @reportTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Signaler ce message'**
+  String get reportTitle;
+
+  /// No description provided for @reportIntro.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aidez Sentinel à mieux reconnaître les arnaques : relisez ce message, puis envoyez-le. Rien ne part sans votre accord.'**
+  String get reportIntro;
+
+  /// No description provided for @reportPreviewLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Texte envoyé (déjà anonymisé)'**
+  String get reportPreviewLabel;
+
+  /// No description provided for @reportReminder.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vérifiez qu\'il ne reste ni nom, ni adresse, ni information personnelle. Vous pouvez modifier le texte.'**
+  String get reportReminder;
+
+  /// No description provided for @reportQuestion.
+  ///
+  /// In fr, this message translates to:
+  /// **'Votre avis'**
+  String get reportQuestion;
+
+  /// No description provided for @reportFeedbackScam.
+  ///
+  /// In fr, this message translates to:
+  /// **'C\'est une arnaque'**
+  String get reportFeedbackScam;
+
+  /// No description provided for @reportFeedbackNotScam.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce n\'est pas une arnaque'**
+  String get reportFeedbackNotScam;
+
+  /// No description provided for @reportFeedbackUnsure.
+  ///
+  /// In fr, this message translates to:
+  /// **'Je ne sais pas'**
+  String get reportFeedbackUnsure;
+
+  /// No description provided for @reportSentTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce qui est envoyé'**
+  String get reportSentTitle;
+
+  /// No description provided for @reportSentText.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le texte ci-dessus, votre avis, le verdict de Sentinel et sa probabilité, la langue du message et la version de l\'app.'**
+  String get reportSentText;
+
+  /// No description provided for @reportWhereTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Où et pour quoi faire'**
+  String get reportWhereTitle;
+
+  /// No description provided for @reportWhereText.
+  ///
+  /// In fr, this message translates to:
+  /// **'Au serveur de Sentinel ({host}), pour améliorer la détection des arnaques. Une personne relit chaque signalement avant qu\'il serve à entraîner le modèle.'**
+  String reportWhereText(String host);
+
+  /// No description provided for @reportNotSentTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce qui n\'est pas envoyé'**
+  String get reportNotSentTitle;
+
+  /// No description provided for @reportNotSentText.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ni votre numéro, ni celui de l\'expéditeur, ni identifiant du téléphone, ni position, ni compte. Le serveur ne garde pas votre adresse IP et ne note que le jour de l\'envoi.'**
+  String get reportNotSentText;
+
+  /// No description provided for @reportSend.
+  ///
+  /// In fr, this message translates to:
+  /// **'Envoyer'**
+  String get reportSend;
+
+  /// No description provided for @reportSending.
+  ///
+  /// In fr, this message translates to:
+  /// **'Envoi en cours…'**
+  String get reportSending;
+
+  /// No description provided for @reportThanks.
+  ///
+  /// In fr, this message translates to:
+  /// **'Merci, votre signalement aidera à améliorer la détection.'**
+  String get reportThanks;
+
+  /// No description provided for @reportErrorOffline.
+  ///
+  /// In fr, this message translates to:
+  /// **'Impossible de joindre le serveur. Vérifiez votre connexion Internet, puis réessayez.'**
+  String get reportErrorOffline;
+
+  /// No description provided for @reportErrorTimeout.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le serveur ne répond pas. Réessayez plus tard.'**
+  String get reportErrorTimeout;
+
+  /// No description provided for @reportErrorTooMany.
+  ///
+  /// In fr, this message translates to:
+  /// **'Trop de signalements pour le moment (5 par heure au plus). Réessayez plus tard.'**
+  String get reportErrorTooMany;
+
+  /// No description provided for @reportErrorRejected.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le serveur a refusé ce signalement. Vérifiez le texte, puis réessayez.'**
+  String get reportErrorRejected;
+
+  /// No description provided for @reportErrorServer.
+  ///
+  /// In fr, this message translates to:
+  /// **'Erreur du serveur. Réessayez plus tard.'**
+  String get reportErrorServer;
 
   /// No description provided for @messagesProbability.
   ///

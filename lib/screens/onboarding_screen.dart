@@ -34,6 +34,7 @@ List<OnboardingPage> onboardingPages(AppLocalizations l) => [
       l.onboarding2Line3,
       l.onboarding2Line4,
       l.onboarding2Line5,
+      l.onboarding2Line6,
     ],
   ),
   OnboardingPage(

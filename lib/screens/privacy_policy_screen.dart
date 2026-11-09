@@ -12,6 +12,7 @@ List<TextSection> privacySections(AppLocalizations l) => [
     l.privacyNetwork1,
     l.privacyNetwork2,
     l.privacyNetwork3,
+    l.privacyNetwork5,
     l.privacyNetwork4,
   ]),
   TextSection(l.privacyLocalTitle, [
@@ -20,6 +21,7 @@ List<TextSection> privacySections(AppLocalizations l) => [
     l.privacyLocal3,
     l.privacyLocal4,
     l.privacyLocal5,
+    l.privacyLocal6,
   ]),
   TextSection(l.privacyNeverTitle, [
     l.privacyNever1,

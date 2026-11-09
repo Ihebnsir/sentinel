@@ -266,11 +266,11 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get onboarding2Line1 =>
-      'لا حساب ولا إعلانات ولا إحصاءات. رسائلك وكلمات مرورك وقائمة تطبيقاتك لا تغادر الهاتف أبدًا.';
+      'لا حساب ولا إعلانات ولا إحصاءات. رسائلك وكلمات مرورك وقائمة تطبيقاتك لا تغادر الهاتف، إلا رسالة تختار الإبلاغ عنها.';
 
   @override
   String get onboarding2Line2 =>
-      'هناك ثلاثة اتصالات بالشبكة فقط، كلها اختيارية، ولا تحدث إلا إذا فعّلتها:';
+      'هناك أربعة اتصالات بالشبكة فقط، كلها اختيارية، ولا تحدث إلا إذا فعّلتها:';
 
   @override
   String get onboarding2Line3 =>
@@ -282,6 +282,10 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get onboarding2Line5 => '• تحديث قوائم الحظر: تنزيل بسيط من GitHub.';
+
+  @override
+  String get onboarding2Line6 =>
+      '• الإبلاغ عن رسالة: النص بعد إخفاء البيانات الشخصية، تراجعه بنفسك، ولا يُرسَل إلا عندما تلمس «إرسال».';
 
   @override
   String get onboarding3Title => 'الأذونات في الوقت المناسب';
@@ -301,11 +305,11 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get privacyBrief1 =>
-      'لا يملك Sentinel أي خادم ولا حساب ولا إعلانات ولا إحصاءات استخدام ولا تقارير أعطال. تتم جميع التحليلات على الهاتف.';
+      'لا يملك Sentinel أي حساب ولا إعلانات ولا إحصاءات استخدام ولا تقارير أعطال. تتم جميع التحليلات على الهاتف. لا يتلقى الخادم إلا الرسائل التي تختار الإبلاغ عنها، واحدة تلو الأخرى.';
 
   @override
   String get privacyBrief2 =>
-      'لا يتصل Sentinel بالإنترنت إلا من أجل الميزات الاختيارية الثلاث المذكورة أدناه، وبعد موافقتك فقط.';
+      'لا يتصل Sentinel بالإنترنت إلا من أجل الميزات الاختيارية الأربع المذكورة أدناه، وبعد موافقتك فقط.';
 
   @override
   String get privacyNetworkTitle => 'الاتصالات الوحيدة بالشبكة (اختيارية)';
@@ -325,6 +329,10 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get privacyNetwork4 =>
       'تُفتح روابط «فتح الموقع» (النصائح، المصادر، تقرير التدقيق) في متصفّحك، فقط عندما تلمسها.';
+
+  @override
+  String get privacyNetwork5 =>
+      '4. الإبلاغ عن رسالة (تبويب الرسائل، عندما تكون الخدمة متاحة). لا يُرسَل أي شيء تلقائيًا: تلمس «الإبلاغ عن هذه الرسالة»، وتراجع النص بعد إخفاء بياناته الشخصية على الهاتف (الأرقام، البريد الإلكتروني، IBAN، البطاقات، الرموز؛ ولا يُحتفظ من الروابط إلا بالنطاق)، ويمكنك تعديله، ثم تلمس «إرسال». يُرسَل: هذا النص، ورأيك، وحكم Sentinel واحتماله، واللغة، وإصدار التطبيق؛ لا رقم ولا معرّف للهاتف. يُخفي الخادم البيانات الشخصية مرة أخرى، ولا يحتفظ بعنوان IP ولا بالساعة (اليوم فقط)، ويراجع شخصٌ كل بلاغ قبل استخدامه لتحسين الكشف.';
 
   @override
   String get privacyLocalTitle => 'ما يبقى على الهاتف';
@@ -349,11 +357,15 @@ class AppLocalizationsAr extends AppLocalizations {
       'النسخ الاحتياطي في أندرويد معطَّل: لا يُرسَل أي شيء إلى السحابة. لا تُنشأ نسخة احتياطية من الخزنة (ملف ‎.sentinel مشفّر) إلا إذا طلبتها، وفي المكان الذي تختاره.';
 
   @override
+  String get privacyLocal6 =>
+      'أوقات بلاغاتك خلال الساعة الأخيرة، من أجل حدّ 5 بلاغات في الساعة (دون محتواها أبدًا).';
+
+  @override
   String get privacyNeverTitle => 'ما لا يسجّله Sentinel أبدًا';
 
   @override
   String get privacyNever1 =>
-      'نص الرسائل ورموز QR التي يتم تحليلها (الملصوقة أو المشارَكة أو الممسوحة أو المقروءة من الإشعارات): يُحلَّل في الذاكرة ثم يُنسى. لا تُحفظ صورة الكاميرا أبدًا.';
+      'نص الرسائل ورموز QR التي يتم تحليلها (الملصوقة أو المشارَكة أو الممسوحة أو المقروءة من الإشعارات): يُحلَّل في الذاكرة ثم يُنسى. لا تُحفظ صورة الكاميرا أبدًا. لا تُرسَل إلا الرسائل التي تبلّغ عنها بنفسك (البند 4)، دون الاحتفاظ بنسخة منها على الهاتف.';
 
   @override
   String get privacyNever2 =>
@@ -395,7 +407,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get privacyErase1 =>
-      'إلغاء تثبيت Sentinel يمحو كل ما سجّله على الهاتف. لا توجد أي نسخة في مكان آخر.';
+      'إلغاء تثبيت Sentinel يمحو كل ما سجّله على الهاتف. لا يوجد في مكان آخر إلا البلاغات التي أرسلتها، وهي غير مرتبطة بك ولا بهاتفك.';
 
   @override
   String get auditFrameTitle => 'إطار التدقيق';
@@ -527,6 +539,88 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get messagesLocalNote =>
       'يتم التحليل على هاتفك، ولا تُرسَل الرسالة إلى أي مكان.';
+
+  @override
+  String get messagesLocalNoteReport =>
+      'يتم التحليل على هاتفك، ولا تُرسَل الرسالة إلى أي مكان، إلا إذا اخترت الإبلاغ عنها.';
+
+  @override
+  String get reportButton => 'الإبلاغ عن هذه الرسالة';
+
+  @override
+  String get reportTitle => 'الإبلاغ عن هذه الرسالة';
+
+  @override
+  String get reportIntro =>
+      'ساعد Sentinel على التعرّف على الاحتيال بشكل أفضل: راجع هذه الرسالة، ثم أرسلها. لا يُرسَل أي شيء دون موافقتك.';
+
+  @override
+  String get reportPreviewLabel => 'النص المُرسَل (بعد إخفاء البيانات الشخصية)';
+
+  @override
+  String get reportReminder =>
+      'تأكّد من أنه لم يبقَ أي اسم أو عنوان أو معلومة شخصية. يمكنك تعديل النص.';
+
+  @override
+  String get reportQuestion => 'رأيك';
+
+  @override
+  String get reportFeedbackScam => 'إنها عملية احتيال';
+
+  @override
+  String get reportFeedbackNotScam => 'ليست عملية احتيال';
+
+  @override
+  String get reportFeedbackUnsure => 'لا أعرف';
+
+  @override
+  String get reportSentTitle => 'ما يُرسَل';
+
+  @override
+  String get reportSentText =>
+      'النص أعلاه، ورأيك، وحكم Sentinel واحتماله، ولغة الرسالة، وإصدار التطبيق.';
+
+  @override
+  String get reportWhereTitle => 'إلى أين ولماذا';
+
+  @override
+  String reportWhereText(String host) {
+    return 'إلى خادم Sentinel ($host)، لتحسين كشف الاحتيال. يراجع شخصٌ كل بلاغ قبل استخدامه في تدريب النموذج.';
+  }
+
+  @override
+  String get reportNotSentTitle => 'ما لا يُرسَل';
+
+  @override
+  String get reportNotSentText =>
+      'لا رقمك، ولا رقم المرسِل، ولا أي معرّف للهاتف، ولا موقعك، ولا أي حساب. لا يحتفظ الخادم بعنوان IP الخاص بك ولا يسجّل إلا يوم الإرسال.';
+
+  @override
+  String get reportSend => 'إرسال';
+
+  @override
+  String get reportSending => 'جارٍ الإرسال…';
+
+  @override
+  String get reportThanks => 'شكرًا، سيساعد بلاغك على تحسين الكشف.';
+
+  @override
+  String get reportErrorOffline =>
+      'تعذّر الاتصال بالخادم. تحقّق من اتصالك بالإنترنت، ثم أعد المحاولة.';
+
+  @override
+  String get reportErrorTimeout => 'الخادم لا يستجيب. أعد المحاولة لاحقًا.';
+
+  @override
+  String get reportErrorTooMany =>
+      'بلاغات كثيرة جدًا حاليًا (5 في الساعة على الأكثر). أعد المحاولة لاحقًا.';
+
+  @override
+  String get reportErrorRejected =>
+      'رفض الخادم هذا البلاغ. تحقّق من النص، ثم أعد المحاولة.';
+
+  @override
+  String get reportErrorServer => 'خطأ في الخادم. أعد المحاولة لاحقًا.';
 
   @override
   String messagesProbability(String percent) {
