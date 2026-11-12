@@ -102,9 +102,17 @@ Gardez-les sous les noms **mdp sentinel_app** et **mdp sentinel_revue**.
    ```
 2. En haut de la page du service, notez l'adresse `https://sentinel-api-xxxx.onrender.com`.
 3. Testez la santé (étape 8, premier test).
-4. Sur Neon, ouvrez **SQL Editor** (base `neondb`).
-5. Ouvrez [`backend/sql/roles.sql`](../backend/sql/roles.sql) **sur votre PC** et copiez tout son contenu dans l'éditeur. **Dans l'éditeur seulement** (jamais dans le fichier du dépôt), remplacez `REMPLACER_MOT_DE_PASSE_APP` et `REMPLACER_MOT_DE_PASSE_REVUE` par vos deux mots de passe. Cliquez sur **Run**.
-   *Écran attendu* : « Statement executed successfully » (ou une liste de commandes réussies).
+4. Sur Neon, ouvrez **SQL Editor**. En haut de l'éditeur, choisissez la branche `main`, la base **`neondb`** et le rôle **`neondb_owner`** (le propriétaire des tables : lui seul peut donner les droits).
+5. Le script est dans le dépôt : **`backend/sql/roles.sql`** (sur votre PC : `C:\dev\projets\sentinel\backend\sql\roles.sql` ; sur GitHub : dossier `backend/sql/`). Ouvrez-le dans VS Code et copiez **tout** son contenu dans l'éditeur de Neon. **Dans l'éditeur de Neon seulement** (jamais dans le fichier du dépôt), remplacez `REMPLACER_MOT_DE_PASSE_APP` et `REMPLACER_MOT_DE_PASSE_REVUE` par vos deux mots de passe de l'étape 5 (lettres et chiffres seulement : pas d'apostrophe). Cliquez sur **Run**.
+   *Écran attendu* : les commandes réussissent, sans ligne rouge. Le script peut être relancé sans erreur (par exemple pour remettre les droits à zéro), mais il **ne change pas** le mot de passe d'un rôle qui existe déjà : pour cela, `ALTER ROLE sentinel_app WITH PASSWORD '…';`.
+   Vérification, dans le même éditeur :
+   ```sql
+   SELECT grantee, privilege_type, column_name
+   FROM information_schema.column_privileges
+   WHERE table_name = 'reports' AND grantee LIKE 'sentinel_%'
+   ORDER BY grantee, privilege_type, column_name;
+   ```
+   *Attendu* : pour `sentinel_app`, `INSERT` sur toutes les colonnes, `SELECT` seulement sur `count`, `fingerprint`, `id`, `received_on` (jamais `text`), `UPDATE` seulement sur `count` ; pour `sentinel_revue`, `SELECT` sur toutes les colonnes, `UPDATE` seulement sur `exported_on` et `review_status`. (`DELETE` n'apparaît pas ici, il porte sur la table entière.)
 6. Construisez les deux URL limitées. Reprenez l'URL migrations et remplacez `neondb_owner:MOT_DE_PASSE` par le rôle et son mot de passe :
    - **URL app** : `postgresql://sentinel_app:MDP_APP@ep-xxxx-123456.eu-central-1.aws.neon.tech/neondb?sslmode=require` ;
    - **URL revue** : `postgresql://sentinel_revue:MDP_REVUE@ep-xxxx-123456.eu-central-1.aws.neon.tech/neondb?sslmode=require`.
