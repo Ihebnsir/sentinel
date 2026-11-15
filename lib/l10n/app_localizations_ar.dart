@@ -1,3 +1,5 @@
+// ignore_for_file: text_direction_code_point_in_literal, text_direction_code_point_in_comment
+
 // ignore: unused_import
 import 'package:intl/intl.dart' as intl;
 
@@ -134,7 +136,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String homeWifiAlert(String title) {
-    return '$title: تجنّب العمليات البنكية والشراء.';
+    return '⁨$title⁩: تجنّب العمليات البنكية والشراء.';
   }
 
   @override
@@ -145,7 +147,8 @@ class AppLocalizationsAr extends AppLocalizations {
       'رمز أو نمط يمنع الوصول إلى بياناتك إذا ضاع الهاتف';
 
   @override
-  String get scoreRootTitle => 'يبدو أن صلاحيات الجذر (root) مفعّلة على هاتفك';
+  String get scoreRootTitle =>
+      'يبدو أن صلاحيات الجذر (⁦root⁩) مفعّلة على هاتفك';
 
   @override
   String get scoreRootDesc =>
@@ -173,7 +176,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get scoreDevOptionsDesc => 'تتيح الوصول إلى إعدادات حساسة في النظام';
 
   @override
-  String get scoreUsbTitle => 'أوقف تصحيح أخطاء USB';
+  String get scoreUsbTitle => 'أوقف تصحيح أخطاء ⁦USB⁩';
 
   @override
   String get scoreUsbDesc => 'قد يصل حاسوب موصول بالهاتف إلى بياناتك';
@@ -189,7 +192,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String settingsAppVersion(String version) {
-    return 'Sentinel $version';
+    return '⁦Sentinel $version⁩';
   }
 
   @override
@@ -224,7 +227,7 @@ class AppLocalizationsAr extends AppLocalizations {
       'المكتبات، الخط، قوائم الحظر، برامج التجسس';
 
   @override
-  String get settingsLicenseLegalese => 'رخصة MIT';
+  String get settingsLicenseLegalese => 'رخصة ⁦MIT⁩';
 
   @override
   String get settingsAudit => 'تقرير التدقيق الأمني';
@@ -233,7 +236,8 @@ class AppLocalizationsAr extends AppLocalizations {
   String get settingsReportFlaw => 'الإبلاغ عن ثغرة';
 
   @override
-  String get settingsReportFlawDetail => 'بشكل خاص عبر GitHub (يفتح المتصفّح)';
+  String get settingsReportFlawDetail =>
+      'بشكل خاص عبر ⁦GitHub⁩ (يفتح المتصفّح)';
 
   @override
   String get onboardingNext => 'التالي';
@@ -242,7 +246,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get onboardingStart => 'ابدأ';
 
   @override
-  String get onboarding1Title => 'Sentinel يحرس هاتفك';
+  String get onboarding1Title => '⁦Sentinel⁩ يحرس هاتفك';
 
   @override
   String get onboarding1Line1 => 'درجة أمان والإعدادات التي يجب تصحيحها.';
@@ -274,14 +278,14 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get onboarding2Line3 =>
-      '• التحقق من تسريب كلمات المرور (Have I Been Pwned): تُرسَل 5 أحرف من بصمة، ولا تُرسَل كلمة المرور أبدًا.';
+      '• التحقق من تسريب كلمات المرور (⁦Have I Been Pwned⁩): تُرسَل 5 أحرف من بصمة، ولا تُرسَل كلمة المرور أبدًا.';
 
   @override
   String get onboarding2Line4 =>
-      '• جدار حماية DNS: تُرسَل أسماء المواقع المسموح بها مشفّرةً إلى خادم Quad9.';
+      '• جدار حماية ⁦DNS⁩: تُرسَل أسماء المواقع المسموح بها مشفّرةً إلى خادم ⁦Quad9⁩.';
 
   @override
-  String get onboarding2Line5 => '• تحديث قوائم الحظر: تنزيل بسيط من GitHub.';
+  String get onboarding2Line5 => '• تحديث قوائم الحظر: تنزيل بسيط من ⁦GitHub⁩.';
 
   @override
   String get onboarding2Line6 =>
@@ -291,11 +295,11 @@ class AppLocalizationsAr extends AppLocalizations {
   String get onboarding3Title => 'الأذونات في الوقت المناسب';
 
   @override
-  String get onboarding3Line1 => 'لا يطلب Sentinel أي شيء الآن.';
+  String get onboarding3Line1 => 'لا يطلب ⁦Sentinel⁩ أي شيء الآن.';
 
   @override
   String get onboarding3Line2 =>
-      'يُطلب كل إذن (الإشعارات، الوصول إلى الإشعارات، VPN، البصمة) فقط عندما تفعّل الميزة التي تحتاجه، مع شرح.';
+      'يُطلب كل إذن (الإشعارات، الوصول إلى الإشعارات، ⁦VPN⁩، البصمة) فقط عندما تفعّل الميزة التي تحتاجه، مع شرح.';
 
   @override
   String get onboarding3Line3 => 'يمكنك إيقاف كل شيء في أي وقت.';
@@ -305,26 +309,26 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get privacyBrief1 =>
-      'لا يملك Sentinel أي حساب ولا إعلانات ولا إحصاءات استخدام ولا تقارير أعطال. تتم جميع التحليلات على الهاتف. لا يتلقى الخادم إلا الرسائل التي تختار الإبلاغ عنها، واحدة تلو الأخرى.';
+      'لا يملك ⁦Sentinel⁩ أي حساب ولا إعلانات ولا إحصاءات استخدام ولا تقارير أعطال. تتم جميع التحليلات على الهاتف. لا يتلقى الخادم إلا الرسائل التي تختار الإبلاغ عنها، واحدة تلو الأخرى.';
 
   @override
   String get privacyBrief2 =>
-      'لا يتصل Sentinel بالإنترنت إلا من أجل الميزات الاختيارية الأربع المذكورة أدناه، وبعد موافقتك فقط.';
+      'لا يتصل ⁦Sentinel⁩ بالإنترنت إلا من أجل الميزات الاختيارية الأربع المذكورة أدناه، وبعد موافقتك فقط.';
 
   @override
   String get privacyNetworkTitle => 'الاتصالات الوحيدة بالشبكة (اختيارية)';
 
   @override
   String get privacyNetwork1 =>
-      '1. التحقق من تسريب كلمات المرور (الخزنة). بعد موافقتك، يحسب Sentinel بصمة SHA-1 لكل كلمة مرور ولا يرسل إلا أحرفها الخمسة الأولى إلى Have I Been Pwned (api.pwnedpasswords.com) عبر HTTPS. لا تغادر كلمة المرور ولا بصمتها الكاملة الهاتف أبدًا. ترى الخدمة عنوان IP الخاص بك. يمكنك سحب هذه الموافقة، وعندها تُمحى النتائج.';
+      '1. التحقق من تسريب كلمات المرور (الخزنة). بعد موافقتك، يحسب ⁦Sentinel⁩ بصمة ⁦SHA-1⁩ لكل كلمة مرور ولا يرسل إلا أحرفها الخمسة الأولى إلى ⁦Have I Been Pwned⁩ (⁦api.pwnedpasswords.com⁩) عبر ⁦HTTPS⁩. لا تغادر كلمة المرور ولا بصمتها الكاملة الهاتف أبدًا. ترى الخدمة عنوان ⁦IP⁩ الخاص بك. يمكنك سحب هذه الموافقة، وعندها تُمحى النتائج.';
 
   @override
   String get privacyNetwork2 =>
-      '2. جدار حماية DNS. عند تفعيله، تمرّ أسماء المواقع التي تطلبها تطبيقاتك عبر Sentinel. تتلقى المواقع المحظورة ردًّا على الهاتف نفسه، وتُرسَل الأسماء الأخرى مشفّرةً إلى خادم Quad9 (DNS عبر TLS أو عبر HTTPS). يرى Quad9 هذه الأسماء وعنوان IP الخاص بك، وفق سياسة الخصوصية الخاصة به. إذا حظرت شبكةٌ DNS المشفّر، فلا يُرسَل أي شيء دون تشفير إلا إذا سمحت بذلك لهذه الشبكة.';
+      '2. جدار حماية ⁦DNS⁩. عند تفعيله، تمرّ أسماء المواقع التي تطلبها تطبيقاتك عبر ⁦Sentinel⁩. تتلقى المواقع المحظورة ردًّا على الهاتف نفسه، وتُرسَل الأسماء الأخرى مشفّرةً إلى خادم ⁦Quad9⁩ (⁦DNS⁩ عبر ⁦TLS⁩ أو عبر ⁦HTTPS⁩). يرى ⁦Quad9⁩ هذه الأسماء وعنوان ⁦IP⁩ الخاص بك، وفق سياسة الخصوصية الخاصة به. إذا حظرت شبكةٌ ⁦DNS⁩ المشفّر، فلا يُرسَل أي شيء دون تشفير إلا إذا سمحت بذلك لهذه الشبكة.';
 
   @override
   String get privacyNetwork3 =>
-      '3. تحديث قوائم الحظر. غير مفعّل افتراضيًا. إذا شغّلته أو فعّلت التحديث التلقائي (مرة واحدة في اليوم على الأكثر)، ينزّل Sentinel القوائم من GitHub (raw.githubusercontent.com) دون ملفات تعريف ارتباط ودون أي معلومة عنك. يرى GitHub عنوان IP الخاص بك.';
+      '3. تحديث قوائم الحظر. غير مفعّل افتراضيًا. إذا شغّلته أو فعّلت التحديث التلقائي (مرة واحدة في اليوم على الأكثر)، ينزّل ⁦Sentinel⁩ القوائم من ⁦GitHub⁩ (⁦raw.githubusercontent.com⁩) دون ملفات تعريف ارتباط ودون أي معلومة عنك. يرى ⁦GitHub⁩ عنوان ⁦IP⁩ الخاص بك.';
 
   @override
   String get privacyNetwork4 =>
@@ -332,14 +336,14 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get privacyNetwork5 =>
-      '4. الإبلاغ عن رسالة (تبويب الرسائل، عندما تكون الخدمة متاحة). لا يُرسَل أي شيء تلقائيًا: تلمس «الإبلاغ عن هذه الرسالة»، وتراجع النص بعد إخفاء بياناته الشخصية على الهاتف (الأرقام، البريد الإلكتروني، IBAN، البطاقات، الرموز؛ ولا يُحتفظ من الروابط إلا بالنطاق)، ويمكنك تعديله، ثم تلمس «إرسال». يُرسَل: هذا النص، ورأيك، وحكم Sentinel واحتماله، واللغة، وإصدار التطبيق؛ لا رقم ولا معرّف للهاتف. يُخفي الخادم البيانات الشخصية مرة أخرى، ولا يحتفظ بعنوان IP ولا بالساعة (اليوم فقط)، ويراجع شخصٌ كل بلاغ قبل استخدامه لتحسين الكشف.';
+      '4. الإبلاغ عن رسالة (تبويب الرسائل، عندما تكون الخدمة متاحة). لا يُرسَل أي شيء تلقائيًا: تلمس «الإبلاغ عن هذه الرسالة»، وتراجع النص بعد إخفاء بياناته الشخصية على الهاتف (الأرقام، البريد الإلكتروني، ⁦IBAN⁩، البطاقات، الرموز؛ ولا يُحتفظ من الروابط إلا بالنطاق)، ويمكنك تعديله، ثم تلمس «إرسال». يُرسَل: هذا النص، ورأيك، وحكم ⁦Sentinel⁩ واحتماله، واللغة، وإصدار التطبيق؛ لا رقم ولا معرّف للهاتف. يُخفي الخادم البيانات الشخصية مرة أخرى، ولا يحتفظ بعنوان ⁦IP⁩ ولا بالساعة (اليوم فقط)، ويراجع شخصٌ كل بلاغ قبل استخدامه لتحسين الكشف.';
 
   @override
   String get privacyLocalTitle => 'ما يبقى على الهاتف';
 
   @override
   String get privacyLocal1 =>
-      'الخزنة (كلمات المرور والملاحظات): مشفّرة بكلمة مرورك الرئيسية (Argon2id، AES-256-GCM).';
+      'الخزنة (كلمات المرور والملاحظات): مشفّرة بكلمة مرورك الرئيسية (⁦Argon2id⁩، ⁦AES-256-GCM⁩).';
 
   @override
   String get privacyLocal2 =>
@@ -354,18 +358,18 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get privacyLocal5 =>
-      'النسخ الاحتياطي في أندرويد معطَّل: لا يُرسَل أي شيء إلى السحابة. لا تُنشأ نسخة احتياطية من الخزنة (ملف ‎.sentinel مشفّر) إلا إذا طلبتها، وفي المكان الذي تختاره.';
+      'النسخ الاحتياطي في أندرويد معطَّل: لا يُرسَل أي شيء إلى السحابة. لا تُنشأ نسخة احتياطية من الخزنة (ملف ⁦.sentinel⁩ مشفّر) إلا إذا طلبتها، وفي المكان الذي تختاره.';
 
   @override
   String get privacyLocal6 =>
       'أوقات بلاغاتك خلال الساعة الأخيرة، من أجل حدّ 5 بلاغات في الساعة (دون محتواها أبدًا).';
 
   @override
-  String get privacyNeverTitle => 'ما لا يسجّله Sentinel أبدًا';
+  String get privacyNeverTitle => 'ما لا يسجّله ⁦Sentinel⁩ أبدًا';
 
   @override
   String get privacyNever1 =>
-      'نص الرسائل ورموز QR التي يتم تحليلها (الملصوقة أو المشارَكة أو الممسوحة أو المقروءة من الإشعارات): يُحلَّل في الذاكرة ثم يُنسى. لا تُحفظ صورة الكاميرا أبدًا. لا تُرسَل إلا الرسائل التي تبلّغ عنها بنفسك (البند 4)، دون الاحتفاظ بنسخة منها على الهاتف.';
+      'نص الرسائل ورموز ⁦QR⁩ التي يتم تحليلها (الملصوقة أو المشارَكة أو الممسوحة أو المقروءة من الإشعارات): يُحلَّل في الذاكرة ثم يُنسى. لا تُحفظ صورة الكاميرا أبدًا. لا تُرسَل إلا الرسائل التي تبلّغ عنها بنفسك (البند 4)، دون الاحتفاظ بنسخة منها على الهاتف.';
 
   @override
   String get privacyNever2 =>
@@ -373,7 +377,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get privacyNever3 =>
-      'اسم شبكة Wi-Fi وموقعك: لا يطلب Sentinel إذن تحديد الموقع.';
+      'اسم شبكة ⁦Wi-Fi⁩ وموقعك: لا يطلب ⁦Sentinel⁩ إذن تحديد الموقع.';
 
   @override
   String get privacyPermissionsTitle => 'الأذونات';
@@ -388,11 +392,11 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get privacyPermissions3 =>
-      'الوصول إلى الإشعارات: إعداد في أندرويد تفتحه بنفسك من أجل الحماية التلقائية، ويقرأ Sentinel الرسائل الواردة للبحث فيها عن عمليات احتيال.';
+      'الوصول إلى الإشعارات: إعداد في أندرويد تفتحه بنفسك من أجل الحماية التلقائية، ويقرأ ⁦Sentinel⁩ الرسائل الواردة للبحث فيها عن عمليات احتيال.';
 
   @override
   String get privacyPermissions4 =>
-      'VPN: يُطلب عند تفعيل جدار الحماية. لا يلتقط إلا طلبات DNS، وليس بقية حركة البيانات.';
+      '⁦VPN⁩: يُطلب عند تفعيل جدار الحماية. لا يلتقط إلا طلبات ⁦DNS⁩، وليس بقية حركة البيانات.';
 
   @override
   String get privacyPermissions5 =>
@@ -400,21 +404,21 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get privacyPermissions6 =>
-      'الكاميرا: تُطلب عند الضغط على «مسح رمز QR»، فقط لقراءة الرمز، على الهاتف.';
+      'الكاميرا: تُطلب عند الضغط على «مسح رمز ⁦QR⁩»، فقط لقراءة الرمز، على الهاتف.';
 
   @override
   String get privacyEraseTitle => 'محو بياناتك';
 
   @override
   String get privacyErase1 =>
-      'إلغاء تثبيت Sentinel يمحو كل ما سجّله على الهاتف. لا يوجد في مكان آخر إلا البلاغات التي أرسلتها، وهي غير مرتبطة بك ولا بهاتفك.';
+      'إلغاء تثبيت ⁦Sentinel⁩ يمحو كل ما سجّله على الهاتف. لا يوجد في مكان آخر إلا البلاغات التي أرسلتها، وهي غير مرتبطة بك ولا بهاتفك.';
 
   @override
   String get auditFrameTitle => 'إطار التدقيق';
 
   @override
   String get auditFrame1 =>
-      'تدقيق أمني وفق معيار OWASP MASVS v2، من 21 إلى 24 أكتوبر 2026، على الإصدار 1.0.0 من Sentinel: تحليل الشيفرة وحركة الشبكة والتخزين ومكوّنات أندرويد.';
+      'تدقيق أمني وفق معيار ⁦OWASP MASVS v2⁩، من 21 إلى 24 أكتوبر 2026، على الإصدار 1.0.0 من ⁦Sentinel⁩: تحليل الشيفرة وحركة الشبكة والتخزين ومكوّنات أندرويد.';
 
   @override
   String get auditFrame2 =>
@@ -443,7 +447,7 @@ class AppLocalizationsAr extends AppLocalizations {
       'لا يوجد تطبيق آمن بنسبة 100٪. المخاطر الرئيسية المتبقية تتعلق بالهاتف: إصدار أندرويد قديم جدًا، أو برنامج تجسس مُنح إذن تسهيلات الاستخدام أو صلاحيات الجذر.';
 
   @override
-  String get auditReadFull => 'قراءة التقرير الكامل على GitHub';
+  String get auditReadFull => 'قراءة التقرير الكامل على ⁦GitHub⁩';
 
   @override
   String get verdictScam => 'احتيال محتمل';
@@ -456,7 +460,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get adviceScam =>
-      'لا تضغط على الرابط ولا تشارك أي رمز. لن يطلب منك البنك أو البريد أبدًا الدفع عبر رسالة SMS. احذف هذه الرسالة.';
+      'لا تضغط على الرابط ولا تشارك أي رمز. لن يطلب منك البنك أو البريد أبدًا الدفع عبر رسالة ⁦SMS⁩. احذف هذه الرسالة.';
 
   @override
   String get adviceSuspect =>
@@ -477,7 +481,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String reasonQuotedWord(String word) {
-    return '«$word»';
+    return '«⁨$word⁩»';
   }
 
   @override
@@ -485,44 +489,44 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String reasonLinkImpersonation(String host, String brand) {
-    return '«$host» ينتحل صفة $brand لكنه ليس موقعه الرسمي';
+    return '«⁨$host⁩» ينتحل صفة ⁨$brand⁩ لكنه ليس موقعه الرسمي';
   }
 
   @override
   String reasonLinkIp(String host) {
-    return 'يستخدم الرابط عنوان IP ($host) بدلًا من اسم موقع';
+    return 'يستخدم الرابط عنوان ⁦IP⁩ (⁨$host⁩) بدلًا من اسم موقع';
   }
 
   @override
   String reasonLinkPunycode(String host) {
-    return '«$host» يحتوي على أحرف متنكّرة (punycode) ليشبه موقعًا حقيقيًا';
+    return '«⁨$host⁩» يحتوي على أحرف متنكّرة (⁦punycode⁩) ليشبه موقعًا حقيقيًا';
   }
 
   @override
   String reasonLinkAt(String host) {
-    return 'يحتوي الرابط على «@»: الوجهة الحقيقية هي «$host»';
+    return 'يحتوي الرابط على «@»: الوجهة الحقيقية هي «⁨$host⁩»';
   }
 
   @override
   String reasonLinkShortener(String host) {
-    return 'رابط مختصر ($host): العنوان الحقيقي مخفي';
+    return 'رابط مختصر (⁨$host⁩): العنوان الحقيقي مخفي';
   }
 
   @override
   String reasonLinkTld(String tld) {
-    return 'الامتداد «.$tld» يُستخدم كثيرًا في عمليات الاحتيال';
+    return 'الامتداد «⁨.$tld⁩» يُستخدم كثيرًا في عمليات الاحتيال';
   }
 
   @override
   String reasonLinkSubdomains(String host) {
-    return '«$host» يحتوي على نطاقات فرعية كثيرة، وهي حيلة للخداع';
+    return '«⁨$host⁩» يحتوي على نطاقات فرعية كثيرة، وهي حيلة للخداع';
   }
 
   @override
-  String get reasonLinkHttp => 'الرابط غير آمن (http بدلًا من https)';
+  String get reasonLinkHttp => 'الرابط غير آمن (⁦http⁩ بدلًا من ⁦https⁩)';
 
   @override
-  String get messagesHint => 'الصق رسالة SMS أو رسالة واتساب أو رابطًا';
+  String get messagesHint => 'الصق رسالة ⁦SMS⁩ أو رسالة واتساب أو رابطًا';
 
   @override
   String get messagesPaste => 'لصق';
@@ -552,7 +556,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get reportIntro =>
-      'ساعد Sentinel على التعرّف على الاحتيال بشكل أفضل: راجع هذه الرسالة، ثم أرسلها. لا يُرسَل أي شيء دون موافقتك.';
+      'ساعد ⁦Sentinel⁩ على التعرّف على الاحتيال بشكل أفضل: راجع هذه الرسالة، ثم أرسلها. لا يُرسَل أي شيء دون موافقتك.';
 
   @override
   String get reportPreviewLabel => 'النص المُرسَل (بعد إخفاء البيانات الشخصية)';
@@ -578,14 +582,14 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get reportSentText =>
-      'النص أعلاه، ورأيك، وحكم Sentinel واحتماله، ولغة الرسالة، وإصدار التطبيق.';
+      'النص أعلاه، ورأيك، وحكم ⁦Sentinel⁩ واحتماله، ولغة الرسالة، وإصدار التطبيق.';
 
   @override
   String get reportWhereTitle => 'إلى أين ولماذا';
 
   @override
   String reportWhereText(String host) {
-    return 'إلى خادم Sentinel ($host)، لتحسين كشف الاحتيال. يراجع شخصٌ كل بلاغ قبل استخدامه في تدريب النموذج.';
+    return 'إلى خادم ⁦Sentinel⁩ (⁨$host⁩)، لتحسين كشف الاحتيال. يراجع شخصٌ كل بلاغ قبل استخدامه في تدريب النموذج.';
   }
 
   @override
@@ -593,13 +597,20 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get reportNotSentText =>
-      'لا رقمك، ولا رقم المرسِل، ولا أي معرّف للهاتف، ولا موقعك، ولا أي حساب. لا يحتفظ الخادم بعنوان IP الخاص بك ولا يسجّل إلا يوم الإرسال.';
+      'لا رقمك، ولا رقم المرسِل، ولا أي معرّف للهاتف، ولا موقعك، ولا أي حساب. لا يحتفظ الخادم بعنوان ⁦IP⁩ الخاص بك ولا يسجّل إلا يوم الإرسال.';
 
   @override
   String get reportSend => 'إرسال';
 
   @override
   String get reportSending => 'جارٍ الإرسال…';
+
+  @override
+  String get reportWakingServer =>
+      'جارٍ إيقاظ الخادم، يُرجى الانتظار… (حتى دقيقة واحدة)';
+
+  @override
+  String get reportRetry => 'إعادة المحاولة';
 
   @override
   String get reportThanks => 'شكرًا، سيساعد بلاغك على تحسين الكشف.';
@@ -609,7 +620,8 @@ class AppLocalizationsAr extends AppLocalizations {
       'تعذّر الاتصال بالخادم. تحقّق من اتصالك بالإنترنت، ثم أعد المحاولة.';
 
   @override
-  String get reportErrorTimeout => 'الخادم لا يستجيب. أعد المحاولة لاحقًا.';
+  String get reportErrorTimeout =>
+      'لم يستجب الخادم حتى بعد دقيقة. أعد المحاولة بعد قليل.';
 
   @override
   String get reportErrorTooMany =>
@@ -632,14 +644,14 @@ class AppLocalizationsAr extends AppLocalizations {
       'تشبه هذه الرسالة عمليات الاحتيال المعروفة. لا تضغط على أي رابط.';
 
   @override
-  String get alertTitleSms => 'احتيال محتمل في رسالة SMS';
+  String get alertTitleSms => 'احتيال محتمل في رسالة ⁦SMS⁩';
 
   @override
   String get alertTitleMessage => 'احتيال محتمل في رسالة';
 
   @override
   String alertTitleApp(String app) {
-    return 'احتيال محتمل على $app';
+    return 'احتيال محتمل على ⁨$app⁩';
   }
 
   @override
@@ -651,17 +663,17 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get autoProtectionNotificationsBlocked =>
-      'إشعارات Sentinel محظورة: لن يتم تنبيهك في حال وجود احتيال.';
+      'إشعارات ⁦Sentinel⁩ محظورة: لن يتم تنبيهك في حال وجود احتيال.';
 
   @override
-  String get autoProtectionAllowNotifications => 'السماح بإشعارات Sentinel';
+  String get autoProtectionAllowNotifications => 'السماح بإشعارات ⁦Sentinel⁩';
 
   @override
   String get autoProtectionRemoveAccess =>
       'إزالة الوصول أيضًا من إعدادات أندرويد';
 
   @override
-  String get autoProtectionDoesTitle => 'ما يفعله Sentinel';
+  String get autoProtectionDoesTitle => 'ما يفعله ⁦Sentinel⁩';
 
   @override
   String get autoProtectionDoes1 => 'يقرأ نص إشعارات تطبيقات المراسلة لديك.';
@@ -673,7 +685,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get autoProtectionDoes3 => 'ينبّهك إذا كان احتيالًا.';
 
   @override
-  String get autoProtectionNeverTitle => 'ما لا يفعله Sentinel أبدًا';
+  String get autoProtectionNeverTitle => 'ما لا يفعله ⁦Sentinel⁩ أبدًا';
 
   @override
   String get autoProtectionNever1 => 'إرسال رسائلك عبر الإنترنت.';
@@ -706,10 +718,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get wifiSecurityOpen => 'لا توجد (شبكة مفتوحة)';
 
   @override
-  String get wifiSecurityWpa2 => 'WPA2 أو WPA';
+  String get wifiSecurityWpa2 => '⁦WPA2⁩ أو ⁦WPA⁩';
 
   @override
-  String get wifiSecurityEnterprise => 'مؤسسات (WPA2 / WPA3)';
+  String get wifiSecurityEnterprise => 'مؤسسات (⁦WPA2 / WPA3⁩)';
 
   @override
   String get wifiAdviceNoBanking =>
@@ -720,24 +732,24 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get wifiAdviceUpgradeBox =>
-      'إذا كان هذا جهاز الراوتر الخاص بك، فاختر WPA2 أو WPA3 في إعداداته';
+      'إذا كان هذا جهاز الراوتر الخاص بك، فاختر ⁦WPA2⁩ أو ⁦WPA3⁩ في إعداداته';
 
   @override
   String get wifiAdvicePublicUnknown =>
-      'على شبكة Wi-Fi عامة، تجنّب العمليات البنكية والشراء';
+      'على شبكة ⁦Wi-Fi⁩ عامة، تجنّب العمليات البنكية والشراء';
 
   @override
-  String get wifiNoneTitle => 'لا توجد شبكة Wi-Fi';
+  String get wifiNoneTitle => 'لا توجد شبكة ⁦Wi-Fi⁩';
 
   @override
-  String get wifiNoneSummary => 'أنت غير متصل بأي شبكة Wi-Fi.';
+  String get wifiNoneSummary => 'أنت غير متصل بأي شبكة ⁦Wi-Fi⁩.';
 
   @override
   String get wifiNoneExplanation =>
-      'أنت غير متصل بأي شبكة Wi-Fi: لا شيء للتحقق منه حاليًا.';
+      'أنت غير متصل بأي شبكة ⁦Wi-Fi⁩: لا شيء للتحقق منه حاليًا.';
 
   @override
-  String get wifiPublicTitle => 'شبكة Wi-Fi عامة';
+  String get wifiPublicTitle => 'شبكة ⁦Wi-Fi⁩ عامة';
 
   @override
   String get wifiPublicSummary => 'شبكة مشتركة بصفحة تسجيل دخول.';
@@ -752,13 +764,14 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get wifiDnsOffExplanation =>
-      'خاصية DNS الخاص غير مفعّلة: يمكن للشبكة رؤية أسماء المواقع التي تزورها.';
+      'خاصية ⁦DNS⁩ الخاص غير مفعّلة: يمكن للشبكة رؤية أسماء المواقع التي تزورها.';
 
   @override
-  String get wifiDnsOffAdvice => 'فعّل DNS الخاص (الوضع التلقائي) من الإعدادات';
+  String get wifiDnsOffAdvice =>
+      'فعّل ⁦DNS⁩ الخاص (الوضع التلقائي) من الإعدادات';
 
   @override
-  String get wifiOpenTitle => 'شبكة Wi-Fi مفتوحة';
+  String get wifiOpenTitle => 'شبكة ⁦Wi-Fi⁩ مفتوحة';
 
   @override
   String get wifiOpenSummary => 'هذه الشبكة غير محمية.';
@@ -768,64 +781,64 @@ class AppLocalizationsAr extends AppLocalizations {
       'هذه الشبكة غير محمية. يمكن للأشخاص المتصلين بالشبكة نفسها رؤية ما ترسله.';
 
   @override
-  String get wifiWepTitle => 'حماية WEP قديمة';
+  String get wifiWepTitle => 'حماية ⁦WEP⁩ قديمة';
 
   @override
   String get wifiWepSummary => 'يمكن كسر حمايتها في دقائق.';
 
   @override
   String get wifiWepExplanation =>
-      'تستخدم هذه الشبكة WEP، وهي حماية تعود إلى عام 1999 ويمكن كسرها في دقائق. إنها تقريبًا مثل شبكة مفتوحة.';
+      'تستخدم هذه الشبكة ⁦WEP⁩، وهي حماية تعود إلى عام 1999 ويمكن كسرها في دقائق. إنها تقريبًا مثل شبكة مفتوحة.';
 
   @override
-  String get wifiWpaTitle => 'حماية WPA قديمة';
+  String get wifiWpaTitle => 'حماية ⁦WPA⁩ قديمة';
 
   @override
   String get wifiWpaSummary => 'حماية قديمة وضعيفة.';
 
   @override
   String get wifiWpaExplanation =>
-      'تستخدم هذه الشبكة WPA، وهي حماية قديمة بها ثغرات معروفة.';
+      'تستخدم هذه الشبكة ⁦WPA⁩، وهي حماية قديمة بها ثغرات معروفة.';
 
   @override
-  String get wifiOweTitle => 'شبكة Wi-Fi عامة مشفّرة';
+  String get wifiOweTitle => 'شبكة ⁦Wi-Fi⁩ عامة مشفّرة';
 
   @override
   String get wifiOweSummary => 'مشفّرة، لكنها مفتوحة للجميع.';
 
   @override
   String get wifiOweExplanation =>
-      'تشفّر هذه الشبكة العامة اتصالاتك (Enhanced Open)، فلا يستطيع الآخرون قراءتها. لكن يمكن لأي شخص الاتصال بها، ويمكن لشبكة مزيّفة أن تنتحل صفة الشبكة الحقيقية.';
+      'تشفّر هذه الشبكة العامة اتصالاتك (⁦Enhanced Open⁩)، فلا يستطيع الآخرون قراءتها. لكن يمكن لأي شخص الاتصال بها، ويمكن لشبكة مزيّفة أن تنتحل صفة الشبكة الحقيقية.';
 
   @override
-  String get wifiWpa2Title => 'شبكة Wi-Fi محمية (WPA2)';
+  String get wifiWpa2Title => 'شبكة ⁦Wi-Fi⁩ محمية (⁦WPA2⁩)';
 
   @override
   String get wifiWpa2Summary => 'محمية بكلمة مرور.';
 
   @override
   String get wifiWpa2Explanation =>
-      'هذه الشبكة محمية بكلمة مرور (WPA2). لا يستطيع من لا يعرفها قراءة ما ترسله.';
+      'هذه الشبكة محمية بكلمة مرور (⁦WPA2⁩). لا يستطيع من لا يعرفها قراءة ما ترسله.';
 
   @override
-  String get wifiWpa3Title => 'شبكة Wi-Fi محمية جدًا (WPA3)';
+  String get wifiWpa3Title => 'شبكة ⁦Wi-Fi⁩ محمية جدًا (⁦WPA3⁩)';
 
   @override
-  String get wifiWpa3Summary => 'أفضل حماية Wi-Fi متوفرة حاليًا.';
+  String get wifiWpa3Summary => 'أفضل حماية ⁦Wi-Fi⁩ متوفرة حاليًا.';
 
   @override
   String get wifiWpa3Explanation =>
-      'تستخدم هذه الشبكة WPA3، وهي أحدث حماية. حتى من يعرف كلمة المرور لا يستطيع قراءة اتصالاتك.';
+      'تستخدم هذه الشبكة ⁦WPA3⁩، وهي أحدث حماية. حتى من يعرف كلمة المرور لا يستطيع قراءة اتصالاتك.';
 
   @override
-  String get wifiEnterpriseTitle => 'شبكة Wi-Fi للمؤسسات';
+  String get wifiEnterpriseTitle => 'شبكة ⁦Wi-Fi⁩ للمؤسسات';
 
   @override
   String get wifiEnterpriseSummary => 'يتصل كل شخص باسم مستخدم خاص به.';
 
   @override
   String get wifiEnterpriseExplanation =>
-      'تمنح شبكة المؤسسات هذه (WPA2 / WPA3-Enterprise) كل شخص اسم مستخدم ومفتاحًا خاصين به.';
+      'تمنح شبكة المؤسسات هذه (⁦WPA2 / WPA3-Enterprise⁩) كل شخص اسم مستخدم ومفتاحًا خاصين به.';
 
   @override
   String get wifiUnknownTitle => 'أمان غير معروف';
@@ -835,21 +848,21 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get wifiUnknownOldAndroid =>
-      'في أندرويد 11 والإصدارات الأقدم، تتطلب معرفة حماية شبكة Wi-Fi إذن تحديد الموقع، وهو إذن لا يطلبه Sentinel.';
+      'في أندرويد 11 والإصدارات الأقدم، تتطلب معرفة حماية شبكة ⁦Wi-Fi⁩ إذن تحديد الموقع، وهو إذن لا يطلبه ⁦Sentinel⁩.';
 
   @override
   String get wifiUnknownExplanation =>
       'لم يُشر أندرويد إلى نوع حماية هذه الشبكة.';
 
   @override
-  String get wifiSectionTitle => 'شبكة Wi-Fi';
+  String get wifiSectionTitle => 'شبكة ⁦Wi-Fi⁩';
 
   @override
   String get wifiUnavailableTitle => 'المعلومة غير متوفرة';
 
   @override
   String get wifiUnavailableSummary =>
-      'تعذّر على أندرويد قراءة حالة شبكة Wi-Fi.';
+      'تعذّر على أندرويد قراءة حالة شبكة ⁦Wi-Fi⁩.';
 
   @override
   String get wifiDetailProtection => 'الحماية';
@@ -858,17 +871,17 @@ class AppLocalizationsAr extends AppLocalizations {
   String get wifiDetailCaptive => 'صفحة تسجيل الدخول';
 
   @override
-  String get wifiDetailPrivateDns => 'DNS الخاص';
+  String get wifiDetailPrivateDns => '⁦DNS⁩ الخاص';
 
   @override
   String get wifiOurAdvice => 'نصائحنا';
 
   @override
-  String get wifiEnablePrivateDns => 'تفعيل DNS الخاص';
+  String get wifiEnablePrivateDns => 'تفعيل ⁦DNS⁩ الخاص';
 
   @override
   String get wifiPrivateDnsHelp =>
-      'يفتح «الشبكة والإنترنت». قد تجد DNS الخاص أحيانًا ضمن «إعدادات متقدمة» أو «المزيد من إعدادات الاتصال».';
+      'يفتح «الشبكة والإنترنت». قد تجد ⁦DNS⁩ الخاص أحيانًا ضمن «إعدادات متقدمة» أو «المزيد من إعدادات الاتصال».';
 
   @override
   String get riskLevelSystem => 'النظام';
@@ -883,21 +896,21 @@ class AppLocalizationsAr extends AppLocalizations {
   String get riskLevelHigh => 'مرتفع';
 
   @override
-  String get riskStalkerware => 'برنامج تجسس معروف (stalkerware)';
+  String get riskStalkerware => 'برنامج تجسس معروف (⁦stalkerware⁩)';
 
   @override
   String riskModifiedCopy(String brand) {
-    return 'نسخة معدّلة من $brand (توقيعها مختلف عن توقيع الناشر الرسمي)';
+    return 'نسخة معدّلة من ⁨$brand⁩ (توقيعها مختلف عن توقيع الناشر الرسمي)';
   }
 
   @override
   String riskImpersonation(String brand) {
-    return 'ينتحل صفة $brand، لكنه ليس التطبيق الرسمي';
+    return 'ينتحل صفة ⁨$brand⁩، لكنه ليس التطبيق الرسمي';
   }
 
   @override
   String riskKnownMod(String brand) {
-    return 'نسخة معدّلة غير رسمية من $brand: يمكنها قراءة رسائلك';
+    return 'نسخة معدّلة غير رسمية من ⁨$brand⁩: يمكنها قراءة رسائلك';
   }
 
   @override
@@ -913,7 +926,7 @@ class AppLocalizationsAr extends AppLocalizations {
       'يمكنه قراءة كل ما يظهر على الشاشة والتصرّف نيابةً عنك';
 
   @override
-  String get riskUnknownSource => 'مثبّت من خارج متجر Play';
+  String get riskUnknownSource => 'مثبّت من خارج متجر ⁦Play⁩';
 
   @override
   String get riskDeviceAdmin =>
@@ -923,7 +936,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get riskDebugCert => 'موقّع بشهادة اختبار';
 
   @override
-  String get riskSms => 'يمكنه قراءة رسائل SMS، بما فيها رموز التحقق البنكية';
+  String get riskSms => 'يمكنه قراءة رسائل ⁦SMS⁩، بما فيها رموز التحقق البنكية';
 
   @override
   String get riskNotifications => 'يمكنه قراءة جميع إشعاراتك، بما فيها رسائلك';
@@ -945,7 +958,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get riskOtherStore =>
-      'مثبّت من متجر غير متجر Play (بإجراءات فحص مختلفة)';
+      'مثبّت من متجر غير متجر ⁦Play⁩ (بإجراءات فحص مختلفة)';
 
   @override
   String get riskContacts => 'يمكنه قراءة جهات اتصالك';
@@ -983,7 +996,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get appsEmptyMessage =>
-      'يتحقق Sentinel من أذونات كل تطبيق مثبّت وينبّهك إلى التطبيقات التي تطلب أكثر من اللازم.';
+      'يتحقق ⁦Sentinel⁩ من أذونات كل تطبيق مثبّت وينبّهك إلى التطبيقات التي تطلب أكثر من اللازم.';
 
   @override
   String get appsStartScan => 'بدء التحليل';
@@ -1020,39 +1033,39 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String detailKnownSpyware(String name) {
-    return 'برنامج تجسس معروف: $name';
+    return 'برنامج تجسس معروف: ⁨$name⁩';
   }
 
   @override
   String detailSignatureVerified(String brand) {
-    return 'تم التحقق من توقيع $brand';
+    return 'تم التحقق من توقيع ⁨$brand⁩';
   }
 
   @override
   String detailSignatureDifferent(String brand) {
-    return 'توقيع مختلف عن توقيع الناشر الرسمي لـ$brand';
+    return 'توقيع مختلف عن توقيع الناشر الرسمي لـ⁨$brand⁩';
   }
 
   @override
   String detailNotOfficial(String brand) {
-    return 'هذا ليس التطبيق الرسمي لـ$brand';
+    return 'هذا ليس التطبيق الرسمي لـ⁨$brand⁩';
   }
 
   @override
   String detailKnownMod(String brand) {
-    return 'نسخة معدّلة غير رسمية من $brand';
+    return 'نسخة معدّلة غير رسمية من ⁨$brand⁩';
   }
 
   @override
   String detailUnchecked(String brand) {
-    return 'البصمة الرسمية لـ$brand غير مسجّلة بعد في Sentinel';
+    return 'البصمة الرسمية لـ⁨$brand⁩ غير مسجّلة بعد في ⁦Sentinel⁩';
   }
 
   @override
   String get detailSignatureUnreadable => 'توقيع غير مقروء';
 
   @override
-  String get detailSha256 => 'بصمة SHA-256';
+  String get detailSha256 => 'بصمة ⁦SHA-256⁩';
 
   @override
   String get detailCertificate => 'الشهادة';
@@ -1138,14 +1151,14 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get spywareParagraph3 =>
-      'لا ينبّه Sentinel أي أحد ولا يرسل أي إشعار بهذا الشأن.';
+      'لا ينبّه ⁦Sentinel⁩ أي أحد ولا يرسل أي إشعار بهذا الشأن.';
 
   @override
   String get spywareGetHelp => 'الحصول على مساعدة';
 
   @override
   String get spywareCoalition =>
-      'Coalition Against Stalkerware: نصائح للأشخاص الخاضعين للمراقبة وجهات اتصال لجمعيات المساعدة.';
+      '⁦Coalition Against Stalkerware⁩: نصائح للأشخاص الخاضعين للمراقبة وجهات اتصال لجمعيات المساعدة.';
 
   @override
   String get spywareBrowserNote =>
@@ -1162,19 +1175,19 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get spywareIocCredit =>
-      'قائمة برامج التجسس: مشروع Stalkerware Indicators (Echap)، برخصة CC BY 4.0.';
+      'قائمة برامج التجسس: مشروع ⁦Stalkerware Indicators⁩ (⁦Echap⁩)، برخصة ⁦CC BY 4.0⁩.';
 
   @override
-  String get permReadSms => 'قراءة رسائل SMS';
+  String get permReadSms => 'قراءة رسائل ⁦SMS⁩';
 
   @override
-  String get permReceiveSms => 'استقبال رسائل SMS';
+  String get permReceiveSms => 'استقبال رسائل ⁦SMS⁩';
 
   @override
-  String get permSendSms => 'إرسال رسائل SMS (قد تكون مدفوعة)';
+  String get permSendSms => 'إرسال رسائل ⁦SMS⁩ (قد تكون مدفوعة)';
 
   @override
-  String get permReceiveMms => 'استقبال رسائل MMS';
+  String get permReceiveMms => 'استقبال رسائل ⁦MMS⁩';
 
   @override
   String get permReadCallLog => 'الاطلاع على سجلّ المكالمات';
@@ -1268,10 +1281,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get permBluetoothScan => 'البحث عن أجهزة البلوتوث';
 
   @override
-  String get permNearbyWifiDevices => 'العثور على أجهزة Wi-Fi القريبة';
+  String get permNearbyWifiDevices => 'العثور على أجهزة ⁦Wi-Fi⁩ القريبة';
 
   @override
-  String get permNfc => 'استخدام NFC (الدفع اللاتلامسي…)';
+  String get permNfc => 'استخدام ⁦NFC⁩ (الدفع اللاتلامسي…)';
 
   @override
   String get permInternet => 'الوصول إلى الإنترنت';
@@ -1280,10 +1293,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get permAccessNetworkState => 'معرفة حالة الاتصال';
 
   @override
-  String get permAccessWifiState => 'رؤية شبكات Wi-Fi';
+  String get permAccessWifiState => 'رؤية شبكات ⁦Wi-Fi⁩';
 
   @override
-  String get permChangeWifiState => 'تشغيل Wi-Fi أو إيقافه';
+  String get permChangeWifiState => 'تشغيل ⁦Wi-Fi⁩ أو إيقافه';
 
   @override
   String get permSystemAlertWindow => 'الظهور فوق التطبيقات الأخرى';
@@ -1328,7 +1341,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get permUseFullScreenIntent => 'عرض تنبيهات بملء الشاشة';
 
   @override
-  String get firewallTitle => 'جدار حماية DNS';
+  String get firewallTitle => 'جدار حماية ⁦DNS⁩';
 
   @override
   String firewallOnBlocked(int count, String n) {
@@ -1402,7 +1415,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get firewallLastAttemptFailed => 'فشلت المحاولة الأخيرة';
 
   @override
-  String get analysisErrorFirewallOff => 'فعّل جدار حماية DNS أولًا.';
+  String get analysisErrorFirewallOff => 'فعّل جدار حماية ⁦DNS⁩ أولًا.';
 
   @override
   String get analysisErrorRunning => 'هناك تحليل جارٍ بالفعل.';
@@ -1468,12 +1481,12 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String reportNoDomain(String app) {
-    return 'لم يتصل $app بأي نطاق أثناء التحليل.';
+    return 'لم يتصل ⁨$app⁩ بأي نطاق أثناء التحليل.';
   }
 
   @override
   String reportContacted(String app, String domains) {
-    return 'اتصل $app بـ$domains';
+    return 'اتصل ⁨$app⁩ بـ$domains';
   }
 
   @override
@@ -1572,7 +1585,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String analysisRunning(String app) {
-    return 'جارٍ تحليل $app';
+    return 'جارٍ تحليل ⁨$app⁩';
   }
 
   @override
@@ -1597,7 +1610,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get analysisScreenIntro =>
-      'اختر التطبيق المراد مراقبته. سيسجّل Sentinel لبضع دقائق المواقع (النطاقات) التي يتصل بها.';
+      'اختر التطبيق المراد مراقبته. سيسجّل ⁦Sentinel⁩ لبضع دقائق المواقع (النطاقات) التي يتصل بها.';
 
   @override
   String get analysisListFailed => 'تعذّر عرض قائمة التطبيقات.';
@@ -1607,12 +1620,12 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String analysisSheetTitle(String app) {
-    return 'تحليل $app';
+    return 'تحليل ⁨$app⁩';
   }
 
   @override
   String analysisSheetLine1(String duration, String app) {
-    return 'خلال $duration، لا تمرّ عبر جدار الحماية إلا طلبات $app: كل نطاق يُرصد يعود إليه.';
+    return 'خلال $duration، لا تمرّ عبر جدار الحماية إلا طلبات ⁨$app⁩: كل نطاق يُرصد يعود إليه.';
   }
 
   @override
@@ -1621,7 +1634,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get analysisSheetLine3 =>
-      'في النهاية، يعود جدار الحماية العادي تلقائيًا. يمكنك الإيقاف قبل ذلك من Sentinel أو من الإشعار.';
+      'في النهاية، يعود جدار الحماية العادي تلقائيًا. يمكنك الإيقاف قبل ذلك من ⁦Sentinel⁩ أو من الإشعار.';
 
   @override
   String get analysisSheetLine4 =>
@@ -1629,7 +1642,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String analysisSheetLine5(String app) {
-    return 'سيُفتح $app: استخدمه كالمعتاد.';
+    return 'سيُفتح ⁨$app⁩: استخدمه كالمعتاد.';
   }
 
   @override
@@ -1679,7 +1692,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String reportImitates(String brand) {
-    return 'ينتحل صفة $brand';
+    return 'ينتحل صفة ⁨$brand⁩';
   }
 
   @override
@@ -1703,7 +1716,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get firewallOneVpn =>
-      'يسمح أندرويد بشبكة VPN واحدة فقط في كل مرة: إذا فعّلت شبكة أخرى، يتوقف جدار الحماية.';
+      'يسمح أندرويد بشبكة ⁦VPN⁩ واحدة فقط في كل مرة: إذا فعّلت شبكة أخرى، يتوقف جدار الحماية.';
 
   @override
   String get firewallUpdated => 'تم تحديث القوائم.';
@@ -1713,7 +1726,7 @@ class AppLocalizationsAr extends AppLocalizations {
       'تعذّر التحديث: تم الاحتفاظ بالقوائم الحالية.';
 
   @override
-  String get firewallInvalidDomain => 'نطاق غير صالح، مثال: example.com';
+  String get firewallInvalidDomain => 'نطاق غير صالح، مثال: ⁦example.com⁩';
 
   @override
   String get firewallDomainRefused =>
@@ -1721,15 +1734,15 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get firewallExplain1 =>
-      'سيطلب منك أندرويد السماح بـ«اتصال VPN»: هكذا يرى Sentinel أسماء المواقع المطلوبة.';
+      'سيطلب منك أندرويد السماح بـ«اتصال ⁦VPN⁩»: هكذا يرى ⁦Sentinel⁩ أسماء المواقع المطلوبة.';
 
   @override
   String get firewallExplain2 =>
-      'لا تمرّ عبر Sentinel إلا طلبات أسماء المواقع (DNS)، ولا تتغير بقية حركة بياناتك.';
+      'لا تمرّ عبر ⁦Sentinel⁩ إلا طلبات أسماء المواقع (⁦DNS⁩)، ولا تتغير بقية حركة بياناتك.';
 
   @override
   String get firewallExplain3 =>
-      'تُطلب المواقع المسموح بها من Quad9 (خادم سويسري) بشكل مشفّر: لم تعد شبكتك ترى أسماء المواقع.';
+      'تُطلب المواقع المسموح بها من ⁦Quad9⁩ (خادم سويسري) بشكل مشفّر: لم تعد شبكتك ترى أسماء المواقع.';
 
   @override
   String get firewallExplain4 =>
@@ -1744,11 +1757,11 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get firewallConsent1 =>
-      'ينزّل Sentinel قوائم الحظر من GitHub (raw.githubusercontent.com) عبر HTTPS، مرة واحدة يوميًا على الأكثر.';
+      'ينزّل ⁦Sentinel⁩ قوائم الحظر من ⁦GitHub⁩ (⁦raw.githubusercontent.com⁩) عبر ⁦HTTPS⁩، مرة واحدة يوميًا على الأكثر.';
 
   @override
   String get firewallConsent2 =>
-      'لا تُرسَل أي معلومة عنك: لا المواقع التي تزورها ولا أي مُعرِّف. وكما في أي اتصال، يرى GitHub عنوان IP لهاتفك.';
+      'لا تُرسَل أي معلومة عنك: لا المواقع التي تزورها ولا أي مُعرِّف. وكما في أي اتصال، يرى ⁦GitHub⁩ عنوان ⁦IP⁩ لهاتفك.';
 
   @override
   String get firewallConsent3 =>
@@ -1756,7 +1769,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get blocklistCacheNote =>
-      'قد تستغرق التغييرات بضع دقائق لتُطبَّق (ذاكرة DNS المؤقتة في المتصفّح).';
+      'قد تستغرق التغييرات بضع دقائق لتُطبَّق (ذاكرة ⁦DNS⁩ المؤقتة في المتصفّح).';
 
   @override
   String get blocklistListsTitle => 'قوائم الحظر';
@@ -1776,7 +1789,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get blocklistUpdateNote =>
-      'تُنزَّل القوائم عبر HTTPS من GitHub، مرة واحدة يوميًا على الأكثر. لا تُرسَل أي معلومة عنك.';
+      'تُنزَّل القوائم عبر ⁦HTTPS⁩ من ⁦GitHub⁩، مرة واحدة يوميًا على الأكثر. لا تُرسَل أي معلومة عنك.';
 
   @override
   String get blocklistUpdating => 'جارٍ التحديث…';
@@ -1802,7 +1815,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String allowlistRemove(String domain) {
-    return 'إزالة $domain';
+    return 'إزالة ⁨$domain⁩';
   }
 
   @override
@@ -1815,37 +1828,37 @@ class AppLocalizationsAr extends AppLocalizations {
   String get upstreamIdle => 'في انتظار الطلب الأول';
 
   @override
-  String get upstreamDot => 'مشفّر (DNS-over-TLS)';
+  String get upstreamDot => 'مشفّر (⁦DNS-over-TLS⁩)';
 
   @override
-  String get upstreamDoh => 'مشفّر (DNS-over-HTTPS)';
+  String get upstreamDoh => 'مشفّر (⁦DNS-over-HTTPS⁩)';
 
   @override
   String get upstreamPlain => 'غير مشفّر: مسموح به على هذه الشبكة';
 
   @override
-  String get upstreamFailing => 'تعذّر الوصول إلى Quad9 بشكل مشفّر';
+  String get upstreamFailing => 'تعذّر الوصول إلى ⁦Quad9⁩ بشكل مشفّر';
 
   @override
   String get upstreamFailingHelp =>
-      'تحظر هذه الشبكة DNS المشفّر، لذلك لن تُفتح المواقع. لا يرسل Sentinel طلباتك دون تشفير أبدًا من دون موافقتك. إذا كنت تثق بهذه الشبكة، يمكنك السماح بذلك أدناه: ستصبح عندها أسماء المواقع التي تزورها مرئية على الشبكة.';
+      'تحظر هذه الشبكة ⁦DNS⁩ المشفّر، لذلك لن تُفتح المواقع. لا يرسل ⁦Sentinel⁩ طلباتك دون تشفير أبدًا من دون موافقتك. إذا كنت تثق بهذه الشبكة، يمكنك السماح بذلك أدناه: ستصبح عندها أسماء المواقع التي تزورها مرئية على الشبكة.';
 
   @override
-  String get upstreamLabel => 'الطلبات إلى Quad9';
+  String get upstreamLabel => 'الطلبات إلى ⁦Quad9⁩';
 
   @override
-  String get upstreamAllowPlain => 'السماح بـDNS غير المشفّر على هذه الشبكة';
+  String get upstreamAllowPlain => 'السماح بـ⁦DNS⁩ غير المشفّر على هذه الشبكة';
 
   @override
-  String get dnsStrictTitle => 'DNS خاص غير متوافق';
+  String get dnsStrictTitle => '⁦DNS⁩ خاص غير متوافق';
 
   @override
   String dnsStrictMessage(String server) {
-    return 'تم ضبط DNS الخاص لديك على «$server» (الوضع الصارم). مع جدار الحماية، لن يُفتح أي موقع. اختر «تلقائي» في الإعدادات: Sentinel يشفّر طلبات DNS الخاصة بك أصلًا.';
+    return 'تم ضبط ⁦DNS⁩ الخاص لديك على «⁨$server⁩» (الوضع الصارم). مع جدار الحماية، لن يُفتح أي موقع. اختر «تلقائي» في الإعدادات: ⁦Sentinel⁩ يشفّر طلبات ⁦DNS⁩ الخاصة بك أصلًا.';
   }
 
   @override
-  String get dnsStrictOpenSettings => 'فتح إعدادات DNS الخاص';
+  String get dnsStrictOpenSettings => 'فتح إعدادات ⁦DNS⁩ الخاص';
 
   @override
   String get networkProtectionTitle => 'حماية الشبكة';
@@ -1871,7 +1884,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get vaultUnreadableMessage =>
-      'يبدو أن ملف الخزنة تالف أو معدَّل. لا يستطيع Sentinel فتحه.';
+      'يبدو أن ملف الخزنة تالف أو معدَّل. لا يستطيع ⁦Sentinel⁩ فتحه.';
 
   @override
   String get vaultCreateFailed => 'فشل إنشاء الخزنة.';
@@ -1882,7 +1895,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get vaultCreateWarning =>
-      'لا أحد، ولا حتى Sentinel، يستطيع استرجاع كلمة المرور هذه. ستحصل بعد ذلك على مفتاح استرداد: دوّنه، فهو الطريقة الوحيدة لفتح الخزنة إذا نسيتها.';
+      'لا أحد، ولا حتى ⁦Sentinel⁩، يستطيع استرجاع كلمة المرور هذه. ستحصل بعد ذلك على مفتاح استرداد: دوّنه، فهو الطريقة الوحيدة لفتح الخزنة إذا نسيتها.';
 
   @override
   String get vaultMasterPassword => 'كلمة المرور الرئيسية';
@@ -2029,15 +2042,15 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get backupUnreadable =>
-      'هذا الملف ليس نسخة احتياطية من Sentinel، أو أنه تالف.';
+      'هذا الملف ليس نسخة احتياطية من ⁦Sentinel⁩، أو أنه تالف.';
 
   @override
   String get backupNewerVersion =>
-      'هذه النسخة الاحتياطية من إصدار أحدث من Sentinel. حدّث التطبيق ثم أعد المحاولة.';
+      'هذه النسخة الاحتياطية من إصدار أحدث من ⁦Sentinel⁩. حدّث التطبيق ثم أعد المحاولة.';
 
   @override
   String get backupTooBig =>
-      'هذا الملف أكبر من أن يكون نسخة احتياطية من Sentinel.';
+      'هذا الملف أكبر من أن يكون نسخة احتياطية من ⁦Sentinel⁩.';
 
   @override
   String get backupCannotReadFile => 'تعذّرت قراءة هذا الملف.';
@@ -2054,7 +2067,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get backupIntroFile =>
-      'اختر ملف .sentinel الذي أنشأته عبر «تصدير نسخة احتياطية مشفّرة» على هاتفك القديم.';
+      'اختر ملف ⁦.sentinel⁩ الذي أنشأته عبر «تصدير نسخة احتياطية مشفّرة» على هاتفك القديم.';
 
   @override
   String get backupIntroPassword =>
@@ -2129,7 +2142,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String vaultDeleteItemTitle(String title) {
-    return 'حذف «$title»؟';
+    return 'حذف «⁨$title⁩»؟';
   }
 
   @override
@@ -2178,7 +2191,7 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
-  String get generatorUppercase => 'أحرف كبيرة (A-Z)';
+  String get generatorUppercase => 'أحرف كبيرة (⁦A-Z⁩)';
 
   @override
   String get generatorDigits => 'أرقام (0-9)';
@@ -2222,7 +2235,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get healthCheckIntro =>
-      'تحقّق مما إذا كانت كلمات مرورك تظهر في تسريبات معروفة (Have I Been Pwned).';
+      'تحقّق مما إذا كانت كلمات مرورك تظهر في تسريبات معروفة (⁦Have I Been Pwned⁩).';
 
   @override
   String get healthCheckButton => 'التحقق من التسريبات';
@@ -2266,7 +2279,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get breachConsentText =>
-      'يرسل Sentinel فقط أول 5 أحرف من بصمة (hash) كل كلمة مرور إلى Have I Been Pwned. لا تغادر كلمة مرورك الهاتف أبدًا.';
+      'يرسل ⁦Sentinel⁩ فقط أول 5 أحرف من بصمة (⁦hash⁩) كل كلمة مرور إلى ⁦Have I Been Pwned⁩. لا تغادر كلمة مرورك الهاتف أبدًا.';
 
   @override
   String get breachConsentDetail =>
@@ -2280,14 +2293,14 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get breachErrorOffline =>
-      'لا يوجد اتصال بالإنترنت. تحقّق من Wi-Fi أو بيانات الهاتف المحمول.';
+      'لا يوجد اتصال بالإنترنت. تحقّق من ⁦Wi-Fi⁩ أو بيانات الهاتف المحمول.';
 
   @override
   String get breachErrorTooMany => 'طلبات كثيرة جدًا. أعد المحاولة بعد قليل.';
 
   @override
   String breachErrorUnavailable(String code) {
-    return 'خدمة Have I Been Pwned غير متاحة (خطأ $code).';
+    return 'خدمة ⁦Have I Been Pwned⁩ غير متاحة (خطأ ⁨$code⁩).';
   }
 
   @override
@@ -2354,7 +2367,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get vaultBreachSettingDetail =>
-      'Have I Been Pwned. لا يُرسَل إلا جزء من بداية البصمة، وليس كلمة المرور أبدًا.';
+      '⁦Have I Been Pwned⁩. لا يُرسَل إلا جزء من بداية البصمة، وليس كلمة المرور أبدًا.';
 
   @override
   String get vaultChangeMaster => 'تغيير كلمة المرور الرئيسية';
@@ -2373,7 +2386,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String vaultDeleteVaultText(String word) {
-    return 'ستُمحى جميع كلمات المرور والملاحظات نهائيًا. اكتب $word للتأكيد.';
+    return 'ستُمحى جميع كلمات المرور والملاحظات نهائيًا. اكتب ⁨$word⁩ للتأكيد.';
   }
 
   @override
@@ -2406,11 +2419,11 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get exportIntro =>
-      'للانتقال إلى هاتف جديد: ملف .sentinel مشفّر بكلمة المرور التي تختارها هنا. من دون كلمة المرور هذه، لا يستطيع أحد قراءته، ولا حتى Sentinel.';
+      'للانتقال إلى هاتف جديد: ملف ⁦.sentinel⁩ مشفّر بكلمة المرور التي تختارها هنا. من دون كلمة المرور هذه، لا يستطيع أحد قراءته، ولا حتى ⁦Sentinel⁩.';
 
   @override
   String get exportStore =>
-      'احفظ الملف أينما شئت (Drive، مفتاح USB، حاسوب)، ولا تُضِعه ولا تُضِع كلمة مروره.';
+      'احفظ الملف أينما شئت (⁦Drive⁩، مفتاح ⁦USB⁩، حاسوب)، ولا تُضِعه ولا تُضِع كلمة مروره.';
 
   @override
   String get exportPasswordLabel => 'كلمة مرور التصدير';
@@ -2422,21 +2435,22 @@ class AppLocalizationsAr extends AppLocalizations {
   String get exportButton => 'تصدير';
 
   @override
-  String get qrScanButton => 'مسح رمز QR';
+  String get qrScanButton => 'مسح رمز ⁦QR⁩';
 
   @override
   String get qrScanSubtitle =>
-      'تحقّق من رمز QR (ملصق، عدّاد وقوف، طرد) قبل فتحه';
+      'تحقّق من رمز ⁦QR⁩ (ملصق، عدّاد وقوف، طرد) قبل فتحه';
 
   @override
-  String get qrScanPrompt => 'ضع رمز QR داخل الإطار. لا يُفتح أي شيء تلقائيًا.';
+  String get qrScanPrompt =>
+      'ضع رمز ⁦QR⁩ داخل الإطار. لا يُفتح أي شيء تلقائيًا.';
 
   @override
   String get qrCameraTitle => 'السماح باستخدام الكاميرا؟';
 
   @override
   String get qrCameraText =>
-      'يستخدم Sentinel الكاميرا أثناء المسح فقط، لقراءة رمز QR. لا تُحفظ الصورة ولا تُرسل: كل شيء يبقى على الهاتف.';
+      'يستخدم ⁦Sentinel⁩ الكاميرا أثناء المسح فقط، لقراءة رمز ⁦QR⁩. لا تُحفظ الصورة ولا تُرسل: كل شيء يبقى على الهاتف.';
 
   @override
   String get qrOpenSettings => 'الإعدادات';
@@ -2446,23 +2460,23 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get qrErrorPermissionDenied =>
-      'بدون الكاميرا، لا يستطيع Sentinel قراءة رمز QR.';
+      'بدون الكاميرا، لا يستطيع ⁦Sentinel⁩ قراءة رمز ⁦QR⁩.';
 
   @override
   String get qrErrorPermissionBlocked =>
-      'الكاميرا مرفوضة لـ Sentinel. اسمح بها من إعدادات أندرويد.';
+      'الكاميرا مرفوضة لـ ⁦Sentinel⁩. اسمح بها من إعدادات أندرويد.';
 
   @override
   String get qrErrorFailed => 'فشل المسح. أعد المحاولة.';
 
   @override
-  String get qrResultTitle => 'رمز QR الممسوح';
+  String get qrResultTitle => 'رمز ⁦QR⁩ الممسوح';
 
   @override
   String get qrRawContent => 'المحتوى الخام';
 
   @override
-  String get qrEmpty => '(رمز QR فارغ)';
+  String get qrEmpty => '(رمز ⁦QR⁩ فارغ)';
 
   @override
   String get qrKindLink => 'رابط';
@@ -2471,13 +2485,13 @@ class AppLocalizationsAr extends AppLocalizations {
   String get qrKindUnsafeLink => 'رابط من نوع خطير';
 
   @override
-  String get qrKindWifi => 'شبكة Wi-Fi';
+  String get qrKindWifi => 'شبكة ⁦Wi-Fi⁩';
 
   @override
   String get qrKindPhone => 'رقم هاتف';
 
   @override
-  String get qrKindSms => 'رسالة SMS للإرسال';
+  String get qrKindSms => 'رسالة ⁦SMS⁩ للإرسال';
 
   @override
   String get qrKindPayment => 'طلب دفع';
@@ -2495,7 +2509,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get qrWifiPassword => 'كلمة المرور';
 
   @override
-  String get qrWifiPasswordYes => 'موجودة في رمز QR';
+  String get qrWifiPasswordYes => 'موجودة في رمز ⁦QR⁩';
 
   @override
   String get qrWifiPasswordNo => 'لا توجد';
@@ -2520,7 +2534,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get qrWarningUnsafeLink =>
-      'يحتوي رمز QR هذا على رابط قد يشغّل برمجية أو يفتح ملفًا، وليس صفحة ويب. لن يفتحه Sentinel.';
+      'يحتوي رمز ⁦QR⁩ هذا على رابط قد يشغّل برمجية أو يفتح ملفًا، وليس صفحة ويب. لن يفتحه ⁦Sentinel⁩.';
 
   @override
   String get qrWarningUssd =>
@@ -2539,7 +2553,7 @@ class AppLocalizationsAr extends AppLocalizations {
       'شبكة مفتوحة: بدون كلمة مرور، يمكن للآخرين قراءة كل ما يُرسل دون تشفير.';
 
   @override
-  String get qrWarningWifiWep => 'حماية WEP: يمكن كسرها في دقائق.';
+  String get qrWarningWifiWep => 'حماية ⁦WEP⁩: يمكن كسرها في دقائق.';
 
   @override
   String get qrActionOpenLink => 'فتح الرابط';
@@ -2557,7 +2571,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get qrActionPayment => 'الفتح في تطبيق دفع';
 
   @override
-  String get qrActionBlocked => 'حظره Sentinel: احتيال محتمل.';
+  String get qrActionBlocked => 'حظره ⁦Sentinel⁩: احتيال محتمل.';
 
   @override
   String get qrActionFailed =>
@@ -2565,21 +2579,21 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String qrConfirmLink(String url) {
-    return 'لا تُدخل أي رمز أو كلمة مرور إذا طلبتها الصفحة. الرابط الذي سيُفتح في المتصفح: $url';
+    return 'لا تُدخل أي رمز أو كلمة مرور إذا طلبتها الصفحة. الرابط الذي سيُفتح في المتصفح: ⁨$url⁩';
   }
 
   @override
   String qrConfirmCall(String number) {
-    return 'يفتح الهاتف شاشة الاتصال بالرقم $number. لا تبدأ المكالمة إلا إذا ضغطت على اتصال.';
+    return 'يفتح الهاتف شاشة الاتصال بالرقم ⁨$number⁩. لا تبدأ المكالمة إلا إذا ضغطت على اتصال.';
   }
 
   @override
   String qrConfirmSms(String number) {
-    return 'يُفتح تطبيق الرسائل برسالة إلى $number. لا يُرسل شيء حتى تضغط على إرسال.';
+    return 'يُفتح تطبيق الرسائل برسالة إلى ⁨$number⁩. لا يُرسل شيء حتى تضغط على إرسال.';
   }
 
   @override
   String qrConfirmPayment(String recipient) {
-    return 'سيُفتح تطبيق دفع لـ: $recipient. تحقّق من المستفيد والمبلغ قبل التأكيد.';
+    return 'سيُفتح تطبيق دفع لـ: ⁨$recipient⁩. تحقّق من المستفيد والمبلغ قبل التأكيد.';
   }
 }

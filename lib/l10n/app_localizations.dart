@@ -1,3 +1,4 @@
+// ignore_for_file: text_direction_code_point_in_literal, text_direction_code_point_in_comment
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
@@ -1120,6 +1121,18 @@ abstract class AppLocalizations {
   /// **'Envoi en cours…'**
   String get reportSending;
 
+  /// Envoi qui tarde : le serveur gratuit (Render) se réveille, jusqu'à ~60 s.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réveil du serveur, patientez… (jusqu\'à une minute)'**
+  String get reportWakingServer;
+
+  /// Bouton d'envoi après une erreur réseau, de délai ou du serveur.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réessayer'**
+  String get reportRetry;
+
   /// No description provided for @reportThanks.
   ///
   /// In fr, this message translates to:
@@ -1135,7 +1148,7 @@ abstract class AppLocalizations {
   /// No description provided for @reportErrorTimeout.
   ///
   /// In fr, this message translates to:
-  /// **'Le serveur ne répond pas. Réessayez plus tard.'**
+  /// **'Le serveur ne répond pas, même après une minute. Réessayez dans un moment.'**
   String get reportErrorTimeout;
 
   /// No description provided for @reportErrorTooMany.

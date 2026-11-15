@@ -35,6 +35,8 @@ class _ReportScreenState extends State<ReportScreen> {
   );
   UserFeedback? _feedback;
   bool _sending = false;
+  bool _slow = false; // réponse lente : serveur sans doute endormi
+  bool _canRetry = false; // dernière erreur : réessayer a un sens
   String? _error;
 
   bool get _canSend =>
@@ -53,7 +55,9 @@ class _ReportScreenState extends State<ReportScreen> {
     FocusScope.of(context).unfocus();
     setState(() {
       _sending = true;
+      _slow = false;
       _error = null;
+      _canRetry = false;
     });
     try {
       if (!await widget.limiter.canSend()) {
@@ -66,14 +70,28 @@ class _ReportScreenState extends State<ReportScreen> {
           probability: widget.analysis.probability,
           feedback: feedback,
         ),
+        onSlow: () {
+          if (mounted) setState(() => _slow = true);
+        },
       );
       await widget.limiter.recordSent();
       if (mounted) Navigator.of(context).pop(true);
     } on ReportException catch (e) {
-      // Pas de nouvel essai automatique : l'utilisateur réessaie s'il veut.
-      if (mounted) setState(() => _error = e.message(l));
+      // Pas de nouvel essai automatique : l'utilisateur réessaie s'il veut
+      // (le serveur ignore de toute façon un doublon).
+      if (mounted) {
+        setState(() {
+          _error = e.message(l);
+          _canRetry = e.canRetry;
+        });
+      }
     } finally {
-      if (mounted) setState(() => _sending = false);
+      if (mounted) {
+        setState(() {
+          _sending = false;
+          _slow = false;
+        });
+      }
     }
   }
 
@@ -154,7 +172,20 @@ class _ReportScreenState extends State<ReportScreen> {
             if (_sending)
               Padding(
                 padding: const EdgeInsets.only(top: 8),
-                child: LoadingBar(label: l.reportSending),
+                child: LoadingBar(
+                  label: _slow ? l.reportWakingServer : l.reportSending,
+                ),
+              ),
+            if (_sending && _slow)
+              Padding(
+                padding: const EdgeInsets.only(top: 8),
+                child: Semantics(
+                  liveRegion: true,
+                  child: Text(
+                    l.reportWakingServer,
+                    style: TextStyle(fontSize: 15, color: muted),
+                  ),
+                ),
               ),
             if (error != null)
               Padding(
@@ -185,7 +216,10 @@ class _ReportScreenState extends State<ReportScreen> {
                   ),
                   // null = désactivé : pas d'avis choisi ou texte vide.
                   onPressed: _canSend ? _send : null,
-                  child: Text(l.reportSend),
+                  // Après un échec réseau, le même bouton devient « Réessayer ».
+                  child: Text(
+                    error != null && _canRetry ? l.reportRetry : l.reportSend,
+                  ),
                 ),
               ],
             ),

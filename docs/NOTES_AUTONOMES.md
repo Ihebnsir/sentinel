@@ -195,3 +195,30 @@ Choix faits sans demander :
 - **Petite correction en passant** : `ShareService.start()` s'arrête si l'écran est fermé pendant l'attente (sinon la deuxième question à Android touchait un objet fermé).
 
 Non vérifié : la tuile n'a pas été essayée sur un téléphone (règle : pas de `flutter run`). À tester à la main : ajout de la tuile dans le panneau, appui écran verrouillé, démarrage depuis la tuile sur Android 12, 13, 14 et 15 (repli vers l'app si Android refuse), mise à jour quand on coupe depuis la notification.
+
+## Arabe : mots latins isolés, et réveil du serveur de signalement (2026-11-15)
+
+Choix faits sans demander :
+
+**1. Mots latins dans les phrases arabes**
+
+- **Isolement Unicode dans `app_ar.arb`** : chaque morceau latin écrit en dur (Sentinel, DNS, Wi-Fi, `.sentinel`, `raw.githubusercontent.com`, `http`/`https`…) est entouré de LRI…PDI (toujours de gauche à droite). Chaque valeur insérée qui peut être latine (`{host}`, `{brand}`, `{word}`, `{app}`, `{domain}`, `{url}`, `{number}`, `{title}`…) est entourée de FSI…PDI (le sens suit sa première lettre : un nom d'app en arabe reste correct). `.{tld}` est isolé avec son point : « .xyz » ne devient plus « xyz. ». 170 textes changés par un petit script, pas à la main. Le fichier écrit les caractères en `\u2066`/`\u2068`/`\u2069`, jamais tels quels.
+- **Pourquoi les guillemets se mélangeaient** : entre deux mots latins, « », « » et la virgule arabe « ، » sont neutres et prenaient le sens latin. Isoler le mot *dans* ses guillemets suffit.
+- **Français et anglais inchangés** : pas de problème d'ordre en gauche-à-droite pour des mots latins ; moins de risque de casser les tests et les recherches de texte.
+- **Pluriels (`plural`) non touchés** : aucun ne contient de mot latin.
+- **Écrans** : nouveau `lib/utils/bidi.dart` (`bidiIsolate`, `ltrIsolate`, `directionOf`, `pageStart`). Liste de titres du coffre (« Utilisé aussi pour : ») : chaque titre isolé avant d'être joint par « ، ». Domaines seuls (rapport d'analyse, liste blanche, sources) : `textDirection: ltr` mais alignés au début de la page (à droite en arabe). Contenu brut du QR et valeurs (numéro « +216… ») : sens selon la première lettre, sans caractère caché (la copie du texte reste fidèle).
+- **Contrôles de sens venus d'ailleurs** retirés par `bidiIsolate` (un PDI glissé dans un nom fermerait l'isolement trop tôt).
+- **Notifications Android** (`values-ar/strings.xml`) : `%1$s` / `%2$s` (domaine bloqué, marque, app analysée) isolés aussi.
+- **Fichiers générés** : `l10n.yaml` ajoute un `header` qui permet ces caractères dans `app_localizations_*.dart` (lint `text_direction_code_point_in_literal`) ; le lint reste actif partout ailleurs (SEN-12).
+- **Tests** : `test/arabic_bidi_test.dart` mesure la position de chaque caractère à l'écran (« .xyz », « payez », « code », « appelez », « poste-tn-livraison.xyz », « (http بدلًا من https) », titres latins, « +216 »), plus un garde-fou : aucun mot latin hors isolement dans `app_ar.arb`. Vérifié que les anciens textes échouaient pour « .xyz » et les mots entre guillemets. Pour « (http…) » et le domaine seul, le moteur de test affichait déjà l'ancien texte dans le bon ordre (largeurs 250 à 700 dp) : je n'ai pas reproduit le défaut vu sur le téléphone, l'isolement le prévient quand même.
+
+**2. Serveur endormi (Render gratuit)**
+
+- **Délai d'envoi : 60 s** (au lieu de 10 s), constante `ReportClient.defaultTimeout`.
+- **Message après 4 s** (`defaultSlowAfter`) : « Réveil du serveur, patientez… (jusqu'à une minute) », visible sous la barre et annoncé par TalkBack. 4 s : une réponse normale arrive en moins d'une seconde, un réveil prend 30 à 60 s.
+- **« Réessayer »** : le bouton « Envoyer » change de nom après une erreur de réseau, de délai ou du serveur (`ReportException.canRetry`). Pas de deuxième bouton qui ferait la même chose. Après « trop de signalements » ou « refusé », il garde son nom : réessayer tel quel ne servirait à rien.
+- **Pas de renvoi automatique** : une requête par appui ; le bouton est désactivé pendant l'envoi (pas de double appui). Si un envoi a abouti côté serveur après le délai, le serveur ignore le doublon. Le compteur local (5 par heure) ne compte que les succès.
+- **Message de délai** réécrit : « Le serveur ne répond pas, même après une minute. Réessayez dans un moment. »
+- **Tests** : client (60 s par défaut, une seule requête après un délai dépassé, `onSlow` appelé une fois si lent, jamais si la réponse ou l'échec est rapide, `canRetry`) et écran (message après quelques secondes puis succès à 40 s, erreur à 60 s puis « Réessayer » qui renvoie, aucun renvoi pendant 3 min, textes en arabe et en anglais).
+
+Non vérifié : pas essayé sur un téléphone (règle : pas de `flutter run`). À regarder : rendu des phrases arabes avec Readex Pro sur l'appareil, notifications en arabe, premier signalement après une longue pause du serveur.

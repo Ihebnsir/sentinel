@@ -3,6 +3,7 @@ import 'package:sentinel/background/background_analyzer.dart';
 import 'package:sentinel/l10n/l10n.dart';
 import 'package:sentinel/services/phishing/message_analyzer.dart';
 import 'package:sentinel/services/phishing/url_analyzer.dart';
+import 'package:sentinel/utils/bidi.dart';
 
 import 'support/l10n.dart';
 
@@ -106,7 +107,8 @@ void main() {
       );
       expect(
         backgroundResponseFor(analysis, ar)['mainReason'],
-        '«poste-tn[.]xyz» ينتحل صفة La Poste Tunisienne لكنه ليس موقعه الرسمي',
+        '«${fsi}poste-tn[.]xyz$pdi» ينتحل صفة ${fsi}La Poste Tunisienne$pdi '
+        'لكنه ليس موقعه الرسمي',
       );
       expect(
         backgroundResponseFor(analysis, en)['mainReason'],
@@ -195,7 +197,7 @@ void main() {
     });
 
     test('en arabe et en anglais', () {
-      expect(alertTitleFor(ar, 'com.whatsapp'), 'احتيال محتمل على WhatsApp');
+      expect(alertTitleFor(ar, 'com.whatsapp'), 'احتيال محتمل على ${fsi}WhatsApp$pdi');
       expect(alertTitleFor(en, 'x', isSms: true), 'Likely scam in an SMS');
     });
 

@@ -8,3 +8,6 @@ output-class: AppLocalizations
 output-dir: lib/l10n
 # AppLocalizations.of(context) ne renvoie jamais null.
 nullable-getter: false
+# L'arabe isole les mots latins (FSI/LRI…PDI, voir lib/utils/bidi.dart) :
+# ces caractères voulus sont permis dans les fichiers générés.
+header: "// ignore_for_file: text_direction_code_point_in_literal, text_direction_code_point_in_comment"

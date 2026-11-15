@@ -6,6 +6,7 @@ import 'package:sentinel/screens/home_screen.dart';
 import 'package:sentinel/screens/messages_screen.dart';
 import 'package:sentinel/services/phishing/known_brands.dart';
 import 'package:sentinel/services/phishing/phishing_model.dart';
+import 'package:sentinel/utils/bidi.dart';
 
 import 'support/l10n.dart';
 
@@ -114,7 +115,7 @@ void main() {
       expect(find.textContaining('احتمال الاحتيال'), findsOneWidget);
       // Raison produite par la règle sur les liens.
       expect(
-        find.textContaining('«poste-tn-livraison.xyz» ينتحل صفة'),
+        find.textContaining('«${fsi}poste-tn-livraison.xyz$pdi» ينتحل صفة'),
         findsOneWidget,
       );
       expect(find.text(ar.reasonLinkTld('xyz')), findsOneWidget);

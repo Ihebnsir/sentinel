@@ -4,6 +4,7 @@ import '../l10n/l10n.dart';
 import '../services/apps_scanner_service.dart';
 import '../services/firewall_service.dart';
 import '../theme/app_colors.dart';
+import '../utils/bidi.dart';
 
 // Couleur : celle du thème (dividerTheme, ligne fine).
 const _divider = Divider(height: 1, thickness: 1);
@@ -276,6 +277,8 @@ class AllowlistSection extends StatelessWidget {
               Expanded(
                 child: Text(
                   domain,
+                  textDirection: TextDirection.ltr,
+                  textAlign: pageStart(context),
                   style: TextStyle(fontSize: 15, color: context.colors.encre),
                 ),
               ),
@@ -313,6 +316,8 @@ class BlocklistSourcesSection extends StatelessWidget {
             padding: const EdgeInsets.only(top: 12),
             child: Text(
               '${source.name} · ${source.license}',
+              textDirection: TextDirection.ltr,
+              textAlign: pageStart(context),
               style: TextStyle(
                 fontSize: 15,
                 fontWeight: FontWeight.w500,

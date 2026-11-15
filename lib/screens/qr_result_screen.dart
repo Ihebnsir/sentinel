@@ -12,6 +12,7 @@ import '../theme/app_colors.dart';
 import '../widgets/loading_bar.dart';
 import '../widgets/verdict_section.dart';
 import '../widgets/wifi_section.dart';
+import '../utils/bidi.dart';
 
 /// Charge l'IA anti-arnaque et renvoie sa fonction de prédiction.
 typedef PredictorLoader =
@@ -294,8 +295,12 @@ class _RawContent extends StatelessWidget {
         border: Border.all(color: context.colors.ligne),
         borderRadius: BorderRadius.circular(8),
       ),
+      // Sens du contenu (un lien reste de gauche à droite en arabe),
+      // sans caractère caché : la copie reste fidèle.
       child: SelectableText(
         empty ? context.l10n.qrEmpty : raw,
+        textDirection: empty ? null : directionOf(raw),
+        textAlign: pageStart(context),
         style: TextStyle(
           fontSize: 14,
           color: empty ? context.colors.discret : context.colors.encre,
@@ -336,6 +341,9 @@ class _InfoRow extends StatelessWidget {
                 flex: 2,
                 child: Text(
                   value,
+                  // Sens du contenu : « +216… » garde son « + » à gauche.
+                  textDirection: directionOf(value),
+                  textAlign: pageStart(context),
                   style: TextStyle(fontSize: 15, color: context.colors.encre),
                 ),
               ),

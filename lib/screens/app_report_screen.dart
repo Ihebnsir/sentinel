@@ -13,6 +13,7 @@ import '../theme/app_colors.dart';
 import '../widgets/app_icon.dart';
 import '../widgets/blocklist_sections.dart';
 import 'app_detail_screen.dart';
+import '../utils/bidi.dart';
 
 // Couleur : celle du thème (dividerTheme, ligne fine).
 const _divider = Divider(height: 1, thickness: 1);
@@ -280,6 +281,8 @@ class _DomainRow extends StatelessWidget {
               children: [
                 Text(
                   domain.name,
+                  textDirection: TextDirection.ltr,
+                  textAlign: pageStart(context),
                   style: TextStyle(fontSize: 15, color: context.colors.encre),
                 ),
                 if (brand != null)

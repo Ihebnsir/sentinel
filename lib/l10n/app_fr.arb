@@ -318,9 +318,17 @@
   "reportNotSentText": "Ni votre numéro, ni celui de l'expéditeur, ni identifiant du téléphone, ni position, ni compte. Le serveur ne garde pas votre adresse IP et ne note que le jour de l'envoi.",
   "reportSend": "Envoyer",
   "reportSending": "Envoi en cours…",
+  "reportWakingServer": "Réveil du serveur, patientez… (jusqu'à une minute)",
+  "@reportWakingServer": {
+    "description": "Envoi qui tarde : le serveur gratuit (Render) se réveille, jusqu'à ~60 s."
+  },
+  "reportRetry": "Réessayer",
+  "@reportRetry": {
+    "description": "Bouton d'envoi après une erreur réseau, de délai ou du serveur."
+  },
   "reportThanks": "Merci, votre signalement aidera à améliorer la détection.",
   "reportErrorOffline": "Impossible de joindre le serveur. Vérifiez votre connexion Internet, puis réessayez.",
-  "reportErrorTimeout": "Le serveur ne répond pas. Réessayez plus tard.",
+  "reportErrorTimeout": "Le serveur ne répond pas, même après une minute. Réessayez dans un moment.",
   "reportErrorTooMany": "Trop de signalements pour le moment (5 par heure au plus). Réessayez plus tard.",
   "reportErrorRejected": "Le serveur a refusé ce signalement. Vérifiez le texte, puis réessayez.",
   "reportErrorServer": "Erreur du serveur. Réessayez plus tard.",

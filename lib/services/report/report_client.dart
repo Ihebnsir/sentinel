@@ -49,6 +49,14 @@ class ReportException implements Exception {
 
   final ReportProblem problem;
 
+  /// Vaut la peine de réessayer tel quel (réseau, délai, serveur).
+  /// Sinon : attendre (trop d'envois) ou corriger le texte (refusé).
+  bool get canRetry => switch (problem) {
+    ReportProblem.offline || ReportProblem.timeout || ReportProblem.server =>
+      true,
+    ReportProblem.tooMany || ReportProblem.rejected => false,
+  };
+
   String message(AppLocalizations l) => switch (problem) {
     ReportProblem.offline => l.reportErrorOffline,
     ReportProblem.timeout => l.reportErrorTimeout,
@@ -105,6 +113,7 @@ class ReportClient {
     this.server, {
     http.Client? client,
     this.timeout = defaultTimeout,
+    this.slowAfter = defaultSlowAfter,
     bool debug = kDebugMode,
   }) : _client = client ?? http.Client() {
     // Double sécurité : une adresse refusée ne crée jamais de client.
@@ -120,10 +129,16 @@ class ReportClient {
     return server == null ? null : ReportClient(server);
   }
 
-  static const defaultTimeout = Duration(seconds: 10);
+  /// Offre gratuite de Render : le serveur endormi met jusqu'à ~60 s
+  /// à se réveiller. On attend donc une minute avant d'abandonner.
+  static const defaultTimeout = Duration(seconds: 60);
+
+  /// Au-delà, le serveur dort sans doute : on prévient l'utilisateur.
+  static const defaultSlowAfter = Duration(seconds: 4);
 
   final Uri server;
   final Duration timeout;
+  final Duration slowAfter;
   final http.Client _client;
 
   /// Nom affiché à l'utilisateur (« où part le signalement »).
@@ -137,7 +152,9 @@ class ReportClient {
   }
 
   /// Lève [ReportException] si le signalement n'est pas enregistré.
-  Future<void> send(Report report) async {
+  /// [onSlow] est appelé une fois si la réponse tarde ([slowAfter]).
+  Future<void> send(Report report, {VoidCallback? onSlow}) async {
+    final slow = onSlow == null ? null : Timer(slowAfter, onSlow);
     final http.Response response;
     try {
       response = await _client
@@ -156,6 +173,8 @@ class ReportClient {
       throw const ReportException(ReportProblem.offline);
     } on http.ClientException {
       throw const ReportException(ReportProblem.offline);
+    } finally {
+      slow?.cancel();
     }
     switch (response.statusCode) {
       case 201:

@@ -1,4 +1,6 @@
+import 'dart:async';
 import 'dart:convert';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
@@ -26,17 +28,22 @@ const _analysis = MessageAnalysis(
   links: [],
 );
 
-/// Faux serveur : garde les corps reçus, répond [status].
+/// Faux serveur : garde les corps reçus, répond [status] après [delay]
+/// (temps simulé du test). [asleep] : ne répond jamais.
 class _FakeServer {
   _FakeServer([this.status = 201]);
 
   int status;
+  Duration delay = Duration.zero;
+  bool asleep = false;
   final bodies = <Map<String, dynamic>>[];
 
   ReportClient client() => ReportClient(
     Uri.parse('https://api.example.org'),
     client: MockClient((request) async {
       bodies.add(jsonDecode(request.body) as Map<String, dynamic>);
+      if (asleep) return Completer<http.Response>().future;
+      await Future<void>.delayed(delay);
       return http.Response('{}', status);
     }),
   );
@@ -176,6 +183,98 @@ void main() {
     await tapSend(tester, fr.reportSend);
     expect(server.bodies, hasLength(2));
     expect(find.byType(ReportScreen), findsNothing);
+  });
+
+  group('serveur endormi (Render gratuit)', () {
+    Future<void> tapAndWait(WidgetTester tester, String label) async {
+      await tester.ensureVisible(find.text(label));
+      await tester.tap(find.text(label));
+      await tester.pump();
+    }
+
+    testWidgets('réveil lent : message après quelques secondes, puis succès', (
+      tester,
+    ) async {
+      final server = _FakeServer()..delay = const Duration(seconds: 40);
+      await pumpScreen(tester, server);
+      await tester.tap(find.text(fr.reportFeedbackScam));
+      await tester.pump();
+      await tapAndWait(tester, fr.reportSend);
+
+      // Au début : envoi normal, pas encore de message de réveil.
+      await tester.pump(const Duration(seconds: 1));
+      expect(find.text(fr.reportWakingServer), findsNothing);
+      // Après quelques secondes : on explique l'attente.
+      await tester.pump(ReportClient.defaultSlowAfter);
+      expect(find.text(fr.reportWakingServer), findsOneWidget);
+      // 40 s plus tard (moins d'une minute) : enregistré, écran fermé.
+      await tester.pump(const Duration(seconds: 40));
+      await tester.pumpAndSettle();
+      expect(server.bodies, hasLength(1));
+      expect(find.byType(ReportScreen), findsNothing);
+    });
+
+    testWidgets('pas de réponse en 60 s : erreur et « Réessayer »', (
+      tester,
+    ) async {
+      final server = _FakeServer()..asleep = true;
+      await pumpScreen(tester, server);
+      await tester.tap(find.text(fr.reportFeedbackScam));
+      await tester.pump();
+      await tapAndWait(tester, fr.reportSend);
+
+      // Toujours en attente juste avant la minute.
+      await tester.pump(const Duration(seconds: 59));
+      expect(find.text(fr.reportWakingServer), findsOneWidget);
+      expect(find.text(fr.reportErrorTimeout), findsNothing);
+      await tester.pump(const Duration(seconds: 2));
+      await tester.pumpAndSettle();
+      expect(find.text(fr.reportErrorTimeout), findsOneWidget);
+      expect(find.text(fr.reportWakingServer), findsNothing);
+      expect(find.widgetWithText(FilledButton, fr.reportRetry), findsOneWidget);
+
+      // Aucun renvoi automatique, même longtemps après.
+      await tester.pump(const Duration(minutes: 3));
+      expect(server.bodies, hasLength(1));
+
+      // L'utilisateur réessaie : le serveur, réveillé, répond.
+      server.asleep = false;
+      await tapSend(tester, fr.reportRetry);
+      expect(server.bodies, hasLength(2));
+      expect(limiter.sent, 1);
+      expect(find.byType(ReportScreen), findsNothing);
+    });
+
+    testWidgets('trop d\'envois : pas de « Réessayer » (attendre)', (
+      tester,
+    ) async {
+      await pumpScreen(tester, _FakeServer(429));
+      await tester.tap(find.text(fr.reportFeedbackScam));
+      await tester.pump();
+      await tapSend(tester, fr.reportSend);
+      expect(find.text(fr.reportErrorTooMany), findsOneWidget);
+      expect(find.text(fr.reportRetry), findsNothing);
+    });
+
+    testWidgets('textes traduits (arabe, anglais)', (tester) async {
+      for (final (locale, l) in [
+        (const Locale('ar'), ar),
+        (const Locale('en'), en),
+      ]) {
+        final server = _FakeServer()..asleep = true;
+        await tester.pumpWidget(const SizedBox()); // écran neuf
+        await pumpScreen(tester, server, locale: locale);
+        await tester.tap(find.text(l.reportFeedbackScam));
+        await tester.pump();
+        await tapAndWait(tester, l.reportSend);
+        await tester.pump(ReportClient.defaultSlowAfter);
+        expect(find.text(l.reportWakingServer), findsOneWidget);
+        await tester.pump(ReportClient.defaultTimeout);
+        await tester.pumpAndSettle();
+        expect(find.text(l.reportErrorTimeout), findsOneWidget);
+        expect(find.text(l.reportRetry), findsOneWidget);
+      }
+    });
   });
 
   testWidgets('limite de l\'app : 6e signalement de l\'heure bloqué', (

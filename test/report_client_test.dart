@@ -23,7 +23,13 @@ const _report = Report(
 ReportClient _client(
   Future<http.Response> Function(http.Request) handler, {
   Duration timeout = ReportClient.defaultTimeout,
-}) => ReportClient(_server, client: MockClient(handler), timeout: timeout);
+  Duration slowAfter = ReportClient.defaultSlowAfter,
+}) => ReportClient(
+  _server,
+  client: MockClient(handler),
+  timeout: timeout,
+  slowAfter: slowAfter,
+);
 
 Future<ReportProblem> _problemOf(Future<void> future) async {
   try {
@@ -176,14 +182,77 @@ void main() {
       expect(await _problemOf(closed.send(_report)), ReportProblem.offline);
     });
 
-    test('délai dépassé (10 s par défaut)', () async {
-      expect(ReportClient.defaultTimeout, const Duration(seconds: 10));
+    test('délai dépassé (60 s par défaut : réveil du serveur)', () async {
+      // Render gratuit : jusqu'à ~60 s pour sortir du sommeil.
+      expect(ReportClient.defaultTimeout, const Duration(seconds: 60));
       final never = Completer<http.Response>();
       final client = _client(
         (_) => never.future,
         timeout: const Duration(milliseconds: 20),
       );
       expect(await _problemOf(client.send(_report)), ReportProblem.timeout);
+    });
+
+    test('délai dépassé : une seule requête, pas de renvoi automatique',
+        () async {
+      var calls = 0;
+      final client = _client((_) {
+        calls++;
+        return Completer<http.Response>().future;
+      }, timeout: const Duration(milliseconds: 20));
+      expect(await _problemOf(client.send(_report)), ReportProblem.timeout);
+      // Laisse passer du temps : aucun nouvel essai en arrière-plan.
+      await Future<void>.delayed(const Duration(milliseconds: 60));
+      expect(calls, 1);
+    });
+
+    test('réponse lente : onSlow appelé une fois, puis envoi réussi', () async {
+      expect(ReportClient.defaultSlowAfter, lessThan(const Duration(seconds: 10)));
+      var slow = 0;
+      final client = _client(
+        (_) async {
+          await Future<void>.delayed(const Duration(milliseconds: 80));
+          return http.Response('{}', 201);
+        },
+        slowAfter: const Duration(milliseconds: 10),
+      );
+      await client.send(_report, onSlow: () => slow++);
+      expect(slow, 1);
+    });
+
+    test('réponse rapide : onSlow jamais appelé (même après coup)', () async {
+      var slow = 0;
+      final client = _client(
+        (_) async => http.Response('{}', 201),
+        slowAfter: const Duration(milliseconds: 20),
+      );
+      await client.send(_report, onSlow: () => slow++);
+      await Future<void>.delayed(const Duration(milliseconds: 60));
+      expect(slow, 0);
+    });
+
+    test('échec rapide : onSlow annulé aussi', () async {
+      var slow = 0;
+      final client = _client(
+        (_) async => http.Response('{}', 500),
+        slowAfter: const Duration(milliseconds: 20),
+      );
+      expect(
+        await _problemOf(client.send(_report, onSlow: () => slow++)),
+        ReportProblem.server,
+      );
+      await Future<void>.delayed(const Duration(milliseconds: 60));
+      expect(slow, 0);
+    });
+
+    test('réessayer : seulement si ça peut marcher tel quel', () {
+      bool retry(ReportProblem p) => ReportException(p).canRetry;
+      expect(retry(ReportProblem.offline), isTrue);
+      expect(retry(ReportProblem.timeout), isTrue);
+      expect(retry(ReportProblem.server), isTrue);
+      // Trop d'envois : attendre. Refusé : corriger le texte.
+      expect(retry(ReportProblem.tooMany), isFalse);
+      expect(retry(ReportProblem.rejected), isFalse);
     });
 
     test('messages clairs dans les 3 langues', () {

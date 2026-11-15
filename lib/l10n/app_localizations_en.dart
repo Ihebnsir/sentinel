@@ -1,3 +1,5 @@
+// ignore_for_file: text_direction_code_point_in_literal, text_direction_code_point_in_comment
+
 // ignore: unused_import
 import 'package:intl/intl.dart' as intl;
 
@@ -605,6 +607,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get reportSending => 'Sending…';
 
   @override
+  String get reportWakingServer =>
+      'Waking up the server, please wait… (up to a minute)';
+
+  @override
+  String get reportRetry => 'Try again';
+
+  @override
   String get reportThanks =>
       'Thank you, your report will help improve detection.';
 
@@ -614,7 +623,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get reportErrorTimeout =>
-      'The server is not responding. Try again later.';
+      'The server did not respond, even after a minute. Try again in a moment.';
 
   @override
   String get reportErrorTooMany =>

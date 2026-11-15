@@ -9,6 +9,7 @@ import '../../services/vault/vault_session.dart';
 import '../../theme/app_colors.dart';
 import '../../widgets/breach_consent_sheet.dart';
 import 'vault_item_screen.dart';
+import '../../utils/bidi.dart';
 
 // Couleur : celle du thème (dividerTheme, ligne fine).
 const _divider = Divider(height: 1, thickness: 1);
@@ -148,7 +149,8 @@ class _PasswordHealthScreenState extends State<PasswordHealthScreen> {
           emptyText: l.healthAllUnique,
           items: report.reused,
           subtitle: (item) => l.healthAlsoUsedFor(
-            report.reusedWith[item.id]!.join(l.listSeparator),
+            // Chaque titre isolé : l'ordre tient en arabe.
+            report.reusedWith[item.id]!.map(bidiIsolate).join(l.listSeparator),
           ),
           color: context.colors.ocre,
           onTap: _open,

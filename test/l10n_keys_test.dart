@@ -138,8 +138,10 @@ void main() {
       for (final lang in ['fr', 'en', 'ar']) {
         for (final e in _texts(_arb(lang)).entries) {
           for (final rune in e.value.runes) {
-            // Marques de direction (U+200E, U+200F…) : invisibles.
+            // Marques de direction (U+200E, U+200F…) et isolements
+            // (U+2066 à U+2069) : invisibles, sans dessin dans la police.
             if (rune >= 0x200B && rune <= 0x200F) continue;
+            if (rune >= 0x2066 && rune <= 0x2069) continue;
             expect(
               codePoints,
               contains(rune),
