@@ -52,6 +52,7 @@ SQLite reste possible (voir l'en-tête de `docker-compose.yml`).
 | `SENTINEL_ALLOW_SQLITE` | SQLite autorisé en prod (défaut : non) |
 | `SENTINEL_FINGERPRINT_KEY` | Clé secrète des empreintes de doublons (32 caractères min. en prod) |
 | `SENTINEL_TRUST_PROXY`, `SENTINEL_CLIENT_IP_HEADER`, `SENTINEL_PROXY_HOPS` | IP du client derrière le proxy de l'hébergeur (voir plus bas) |
+| `SENTINEL_IP_DIAGNOSTIC` | Diagnostic **temporaire** de l'IP client (empreintes dans le journal, jamais l'IP). Défaut : `false` |
 | `SENTINEL_RATE_LIMIT_PER_WINDOW`, `SENTINEL_GLOBAL_DAILY_LIMIT` | 10 par heure et par adresse ; 500 nouveaux signalements par jour au total |
 
 Liste complète : `.env.example`. **En production, le serveur refuse de démarrer** si PostgreSQL n'exige pas TLS, si la clé d'empreinte manque, ou si la base est SQLite sans choix explicite. Le message d'erreur ne recopie jamais l'URL (elle contient le mot de passe).
@@ -122,6 +123,8 @@ Le reste n'est **pas modifié** (mots d'arnaque, domaines, montants, dates) : c'
 ## Derrière le proxy de l'hébergeur
 
 Chez Render, le serveur voit l'adresse du proxy, pas celle du téléphone. Avec `SENTINEL_TRUST_PROXY=true`, l'IP du client est lue dans `X-Forwarded-For`, **à la fin** (`SENTINEL_PROXY_HOPS`-ième entrée en partant de la droite). Le client peut écrire n'importe quoi au début de cet en-tête ; le proxy ajoute la vraie adresse à la fin. Sans cette variable (défaut), l'en-tête est ignoré. uvicorn ne réécrit plus l'adresse (`proxy_headers=False`). Cette IP sert **seulement** à la limite de débit, en mémoire, sous forme d'empreinte salée.
+
+Render passe par Cloudflare : la dernière entrée de `X-Forwarded-For` peut être un proxy qui change à chaque requête, et alors la limite ne marche pas. `SENTINEL_CLIENT_IP_HEADER=cf-connecting-ip` (en-tête réécrit par Cloudflare) ou `SENTINEL_PROXY_HOPS=2` corrigent cela. Pour choisir, `SENTINEL_IP_DIAGNOSTIC=true` journalise une empreinte courte (HMAC, clé aléatoire tirée au démarrage, jamais écrite) de chaque source possible, puis `tools/smoke_test.ps1 -Diagnostic` envoie des requêtes normales et truquées. La marche à suivre est dans [docs/DEPLOIEMENT.md](../docs/DEPLOIEMENT.md), étape 8.
 
 HTTPS : Render redirige HTTP vers HTTPS. Si le proxy signale malgré tout une requête en HTTP (`X-Forwarded-Proto: http`), le serveur répond `400` (pas de redirection : un POST redirigé renverrait le texte en clair). HSTS : 2 ans.
 

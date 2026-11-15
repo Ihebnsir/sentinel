@@ -16,6 +16,13 @@
 
 .EXAMPLE
     .\tools\smoke_test.ps1 -Api https://sentinel-api-xxxx.onrender.com
+
+.EXAMPLE
+    .\tools\smoke_test.ps1 -Api https://sentinel-api-xxxx.onrender.com -Diagnostic
+    Diagnostic de l'IP client (avec SENTINEL_IP_DIAGNOSTIC=true sur Render) :
+    5 signalements normaux, puis 3 avec de faux en-têtes X-Forwarded-For,
+    True-Client-IP et CF-Connecting-IP (1.2.3.4). Puis lire les lignes
+    « diagnostic ip » dans les logs Render (elles ne contiennent aucune IP).
 #>
 param(
     [Parameter(Mandatory = $true)]
@@ -23,7 +30,9 @@ param(
     # Réveil de Render (offre gratuite) : environ 1 minute.
     [int]$WakeTimeoutSeconds = 90,
     # Au-delà, le test de limite est déclaré en échec (pas de 429 reçu).
-    [int]$MaxAttempts = 15
+    [int]$MaxAttempts = 15,
+    # Diagnostic de l'IP client seulement (voir l'exemple ci-dessus).
+    [switch]$Diagnostic
 )
 
 $ErrorActionPreference = 'Stop'
@@ -115,6 +124,40 @@ if ($health -and $health.Status -eq 200 -and $health.Body -match '"status"\s*:\s
     $results | Format-Table -AutoSize -Wrap
     Write-Host 'Serveur injoignable : arrêt.' -ForegroundColor Red
     exit 1
+}
+
+# --- Mode diagnostic de l'IP client ----------------------------------------
+if ($Diagnostic) {
+    $fake = '1.2.3.4'
+    $begin = Get-Date -Format 'HH:mm'
+    Write-Host ''
+    Write-Host "Diagnostic IP : 5 envois normaux, puis 3 avec de faux en-têtes ($fake)." -ForegroundColor Cyan
+    for ($i = 1; $i -le 5; $i++) {
+        $r = Send-Request -Method POST -Url "$Api/v1/reports" -Json (New-Report "diagnostic $runId normal n°$i")
+        Write-Host "  envoi normal $i : statut $($r.Status)"
+    }
+    $fakeHeaders = @{ 'X-Forwarded-For' = $fake; 'True-Client-IP' = $fake; 'CF-Connecting-IP' = $fake }
+    for ($i = 1; $i -le 3; $i++) {
+        $r = Send-Request -Method POST -Url "$Api/v1/reports" -Json (New-Report "diagnostic $runId faux n°$i") `
+            -Headers $fakeHeaders
+        Write-Host "  envoi FAUX   $i : statut $($r.Status)"
+    }
+    $end = Get-Date -Format 'HH:mm'
+    $http.Dispose()
+    Write-Host ''
+    Write-Host 'Quoi regarder maintenant :' -ForegroundColor Cyan
+    Write-Host "1. Render > sentinel-api > Logs. Tapez « diagnostic ip » dans la recherche (entre $begin et $end)."
+    Write-Host '2. Vous devez voir UNE ligne « diagnostic ip ACTIF ... = XXXXXXXX » (la référence = la fausse'
+    Write-Host '   adresse 1.2.3.4), puis 8 lignes « diagnostic ip: n_xff=... xff_d1=... cf_connecting_ip=... ».'
+    Write-Host '   Elles ne contiennent aucune adresse IP : vous pouvez les copier telles quelles.'
+    Write-Host '3. La bonne source est celle qui a la MÊME valeur sur les 8 lignes, jamais « absent »,'
+    Write-Host '   et jamais égale à la référence. En priorité : cf_connecting_ip, puis true_client_ip,'
+    Write-Host '   puis xff_d2, xff_d3... (xff_d1 change sans doute à chaque ligne : c''est le bug actuel).'
+    Write-Host '4. Les 8 lignes doivent suivre la même ligne « ACTIF » (sinon le serveur a redémarré : relancez).'
+    Write-Host "5. Remettez ensuite SENTINEL_IP_DIAGNOSTIC=false. Textes « $prefix » à rejeter dans la revue."
+    Write-Host '   Un statut 429 ici est normal (limite globale ou par adresse) : la ligne est quand même écrite.'
+    Write-Host '   Un statut 403 sur les envois FAUX veut dire que Cloudflare refuse ces en-têtes (pas de ligne).'
+    exit 0
 }
 
 # --- 2. HTTP -> HTTPS -----------------------------------------------------

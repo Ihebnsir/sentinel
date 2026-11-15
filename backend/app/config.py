@@ -82,6 +82,9 @@ class Settings(BaseSettings):
     # Nombre de proxys de confiance qui ajoutent une entrée (on lit la
     # n-ième en partant de la droite : celles de gauche viennent du client).
     proxy_hops: int = Field(1, ge=1, le=5)
+    # Diagnostic TEMPORAIRE : empreintes des sources d'IP possibles dans le
+    # journal (app.ip_diagnostic). Jamais l'IP elle-même. À remettre à false.
+    ip_diagnostic: bool = False
 
     # Clé HMAC de l'empreinte des textes (doublons). Secret en production.
     fingerprint_key: SecretStr | None = None

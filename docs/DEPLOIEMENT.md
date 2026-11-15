@@ -158,7 +158,24 @@ Invoke-RestMethod -Method Post -Uri "$api/v1/reports" -ContentType "application/
    ```
    *Attendu* : 1 à 10 donnent `201`, et le 11e donne `429`.
 2. **Usurpation.** Renvoyez un signalement en ajoutant `-Headers @{ "X-Forwarded-For" = "1.2.3.4" }`. *Attendu* : toujours `429`. Si vous obtenez `201`, n'importe qui peut contourner la limite : remettez `SENTINEL_TRUST_PROXY=false` sur Render et ouvrez une issue.
-3. **Autre appareil.** Depuis le téléphone, en données mobiles (pas le même Wi-Fi), envoyez un signalement. *Attendu* : `201`. Si vous obtenez `429`, tout le monde partage la même adresse, celle d'un proxy interne. Essayez `SENTINEL_PROXY_HOPS=2`, ou `SENTINEL_CLIENT_IP_HEADER=true-client-ip`, puis refaites les tests 1 à 3.
+3. **Autre appareil.** Depuis le téléphone, en données mobiles (pas le même Wi-Fi), envoyez un signalement. *Attendu* : `201`. Si vous obtenez `429`, tout le monde partage la même adresse, celle d'un proxy interne. Faites le diagnostic ci-dessous.
+
+**Si aucun 429 n'arrive (la limite ne marche pas) : diagnostic de l'IP client.** Render passe par Cloudflare (protection DDoS, [render.com/docs/ddos-protection](https://render.com/docs/ddos-protection)), mais sa documentation ne dit pas quel en-tête porte l'IP du client. Cloudflare [documente](https://developers.cloudflare.com/fundamentals/reference/http-headers/) trois choses : `CF-Connecting-IP` est l'adresse du client qu'il voit ; il **ajoute** à `X-Forwarded-For` (ce que le client a écrit reste au début) ; `True-Client-IP` n'existe que sur l'offre Enterprise et **peut être falsifié** s'il n'est pas réécrit. La dernière entrée de `X-Forwarded-For` peut donc être un proxy qui change à chaque requête. On mesure, sans jamais journaliser d'IP :
+
+1. Render > `sentinel-api` > **Environment** : ajoutez `SENTINEL_IP_DIAGNOSTIC` = `true`, puis **Save Changes**. Attendez le redémarrage.
+2. Sur votre PC : `.\tools\smoke_test.ps1 -Api https://sentinel-api-xxxx.onrender.com -Diagnostic`. Il envoie 5 signalements normaux, puis 3 avec de faux `X-Forwarded-For`, `True-Client-IP` et `CF-Connecting-IP` (`1.2.3.4`).
+3. Render > **Logs**, recherche `diagnostic ip`. Une ligne `ACTIF … = XXXXXXXX` donne l'empreinte de la fausse adresse (la *référence*). Suivent 8 lignes avec une empreinte de 8 caractères par source : `xff_d1` (dernière entrée de `X-Forwarded-For`), `xff_d2` (avant-dernière)…, `true_client_ip`, `cf_connecting_ip`, `connexion`, et `retenue` (celle utilisée aujourd'hui). Une empreinte est un HMAC avec une clé aléatoire tirée au démarrage et jamais écrite : on ne peut pas en retrouver l'IP.
+4. Choisissez la **première** source de ce tableau qui a la **même** empreinte sur les 8 lignes, jamais `absent` et jamais égale à la référence :
+
+   | Source stable et non falsifiée | `SENTINEL_CLIENT_IP_HEADER` | `SENTINEL_PROXY_HOPS` |
+   |---|---|---|
+   | `cf_connecting_ip` | `cf-connecting-ip` | `1` |
+   | `true_client_ip` | `true-client-ip` | `1` |
+   | `xff_d2` | `x-forwarded-for` | `2` |
+   | `xff_d3` | `x-forwarded-for` | `3` |
+
+   Une source égale à la référence sur les 3 dernières lignes est **falsifiable** : ne la choisissez jamais. Si aucune ne convient, laissez `SENTINEL_TRUST_PROXY=false` : la limite par adresse ne marchera pas, mais la limite globale de 500 par jour protège quand même.
+5. Mettez ces deux valeurs dans **Environment**, remettez `SENTINEL_IP_DIAGNOSTIC` à `false`, puis **Save Changes**. Relancez `.\tools\smoke_test.ps1 -Api …` (sans `-Diagnostic`) : le test 7 doit donner `429` et le test 8 aussi. Reportez les deux valeurs dans `render.yaml`, sinon une synchronisation du Blueprint remettrait les anciennes.
 
 Ensuite, passez ces signalements de test en « rejeté » avec l'outil de revue (étape 10).
 

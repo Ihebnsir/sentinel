@@ -20,6 +20,7 @@ from .config import Settings, get_settings
 from .db import get_session, make_sessionmaker
 from .db_errors import describe
 from .fingerprint import fingerprint
+from .ip_diagnostic import IpDiagnostic
 from .middleware import SecurityMiddleware
 from .models import Report, ReviewStatus
 from .rate_limit import RateLimiter
@@ -48,7 +49,11 @@ def create_report(
     settings: Settings = request.app.state.settings
     limiter: RateLimiter = request.app.state.rate_limiter
     # L'adresse ne sert qu'ici, en mémoire, sous forme d'empreinte salée.
-    decision = limiter.hit(client_ip(request, settings))
+    ip = client_ip(request, settings)
+    diagnostic: IpDiagnostic | None = request.app.state.ip_diagnostic
+    if diagnostic is not None:
+        diagnostic.log_request(request, ip)
+    decision = limiter.hit(ip)
     if not decision.allowed:
         return _too_many(decision.retry_after)
 
@@ -147,6 +152,10 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     )
     app.state.settings = settings
     app.state.sessionmaker = make_sessionmaker(settings.database_url)
+    # Clé aléatoire propre à ce démarrage (jamais journalisée).
+    app.state.ip_diagnostic = IpDiagnostic() if settings.ip_diagnostic else None
+    if app.state.ip_diagnostic is not None:
+        app.state.ip_diagnostic.log_start()
     app.state.rate_limiter = RateLimiter(
         limit=settings.rate_limit_per_window,
         window_seconds=settings.rate_limit_window_seconds,
