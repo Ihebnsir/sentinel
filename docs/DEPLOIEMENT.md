@@ -146,7 +146,7 @@ Invoke-RestMethod -Method Post -Uri "$api/v1/reports" -ContentType "application/
 
 **Documentation fermée** : `"$api/docs"` doit répondre `404`.
 
-**Vérifier que la limite par adresse lit la bonne IP.** La doc de Render ne précise pas son en-tête d'IP client. Ce test le vérifie. Sentinel lit la **dernière** entrée de `X-Forwarded-For`, celle que le proxy ajoute ; le client ne peut écrire qu'au début.
+**Vérifier que la limite par adresse lit la bonne IP.** La doc de Render ne précise pas son en-tête d'IP client. Le diagnostic plus bas (fait le 15/11/2026) a désigné `CF-Connecting-IP`, réécrit par Cloudflare : `render.yaml` met donc `SENTINEL_CLIENT_IP_HEADER=cf-connecting-ip` et `SENTINEL_PROXY_HOPS=1`. Ce test vérifie que cela marche toujours.
 
 1. Depuis votre PC, envoyez 11 signalements de textes différents :
    ```powershell

@@ -28,14 +28,20 @@ services:
       # Port écouté par le conteneur (Dockerfile : SENTINEL_PORT=8000).
       - key: PORT
         value: "8000"
-      # Le proxy de Render ajoute l'IP du client à la fin de X-Forwarded-For.
-      # Vérification au déploiement : docs/DEPLOIEMENT.md, étape 8.
+      # IP du client : CF-Connecting-IP, réécrit par Cloudflare (devant Render).
+      # Choisi par le diagnostic du 15/11/2026 (SENTINEL_IP_DIAGNOSTIC) : seule
+      # source stable entre les requêtes et jamais égale à la fausse adresse
+      # envoyée par le client. La dernière entrée de X-Forwarded-For change à
+      # chaque requête (proxy de Cloudflare). Voir docs/DEPLOIEMENT.md, étape 8.
       - key: SENTINEL_TRUST_PROXY
         value: "true"
       - key: SENTINEL_CLIENT_IP_HEADER
-        value: x-forwarded-for
+        value: cf-connecting-ip
       - key: SENTINEL_PROXY_HOPS
         value: "1"
+      # Diagnostic temporaire de l'IP client : désactivé.
+      - key: SENTINEL_IP_DIAGNOSTIC
+        value: "false"
       - key: SENTINEL_GLOBAL_DAILY_LIMIT
         value: "500"
       - key: SENTINEL_LOG_LEVEL

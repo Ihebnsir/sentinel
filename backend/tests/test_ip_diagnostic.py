@@ -4,6 +4,7 @@ configurations finales possibles derrière Render + Cloudflare."""
 import logging
 import re
 from collections.abc import Callable
+from pathlib import Path
 
 import pytest
 from fastapi.testclient import TestClient
@@ -151,3 +152,50 @@ def test_derniere_entree_ne_limite_pas_derriere_un_bord_changeant(
     client = make_client(trust_proxy=True, rate_limit_per_window=2)
     for n, edge in enumerate(EDGES):
         assert _post(client, {"X-Forwarded-For": f"{CLIENT}, {edge}"}, f"x{n}") == 201
+
+
+# --- Configuration de production (render.yaml) -----------------------------
+
+RENDER_YAML = Path(__file__).resolve().parents[2] / "render.yaml"
+
+
+def _render_settings() -> dict[str, str]:
+    import yaml
+
+    service = yaml.safe_load(RENDER_YAML.read_text(encoding="utf-8"))["services"][0]
+    return {v["key"]: v["value"] for v in service["envVars"] if "value" in v}
+
+
+def test_render_yaml_lit_cf_connecting_ip() -> None:
+    env = _render_settings()
+    assert env["SENTINEL_TRUST_PROXY"] == "true"
+    assert env["SENTINEL_CLIENT_IP_HEADER"] == "cf-connecting-ip"
+    assert env["SENTINEL_PROXY_HOPS"] == "1"
+    assert env["SENTINEL_IP_DIAGNOSTIC"] == "false"
+
+
+def test_render_yaml_limite_par_client_et_non_falsifiable(
+    make_client: Callable[..., TestClient],
+) -> None:
+    env = _render_settings()
+    client = make_client(
+        trust_proxy=True,
+        client_ip_header=env["SENTINEL_CLIENT_IP_HEADER"],
+        proxy_hops=int(env["SENTINEL_PROXY_HOPS"]),
+        rate_limit_per_window=2,
+    )
+
+    def via_cloudflare(ip: str, edge: str, fake: dict[str, str] | None = None) -> dict[str, str]:
+        # Cloudflare ajoute à X-Forwarded-For et RÉÉCRIT CF-Connecting-IP.
+        headers = dict(fake or {})
+        forwarded = headers.pop("X-Forwarded-For", None)
+        headers["X-Forwarded-For"] = ", ".join(x for x in (forwarded, ip, edge) if x)
+        headers["CF-Connecting-IP"] = ip
+        return headers
+
+    fake = {"X-Forwarded-For": SMOKE_FAKE_IP, "True-Client-IP": SMOKE_FAKE_IP}
+    assert _post(client, via_cloudflare(CLIENT, EDGES[0]), "a") == 201
+    assert _post(client, via_cloudflare(CLIENT, EDGES[1]), "b") == 201
+    assert _post(client, via_cloudflare(CLIENT, EDGES[2]), "c") == 429
+    assert _post(client, via_cloudflare(CLIENT, EDGES[0], fake), "d") == 429
+    assert _post(client, via_cloudflare(OTHER, EDGES[1]), "e") == 201
