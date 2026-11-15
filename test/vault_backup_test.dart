@@ -57,7 +57,7 @@ void main() {
   });
 
   test('aller-retour : tous les champs sont retrouvés', () async {
-    final items = await importBackup(backup, exportPassword);
+    final items = (await importBackup(backup, exportPassword)).items;
     expect(
       items.map((i) => i.toJson()).toList(),
       sample.map((i) => i.toJson()).toList(),
@@ -179,8 +179,8 @@ void main() {
         await session.load();
         expect(session.status, VaultStatus.absent);
 
-        final items = await session.readBackup(backup, exportPassword);
-        await session.restore(items, masterPassword);
+        final contents = await session.readBackup(backup, exportPassword);
+        await session.restore(contents.items, masterPassword);
         expect(session.status, VaultStatus.ouvert);
         expect(session.pendingRecoveryKey, isNotNull);
         expect(session.items.map((i) => i.id), containsAll(['a1', 'b2']));
@@ -198,7 +198,7 @@ void main() {
 
         // Et l'export du coffre restauré se relit.
         final reexport = await again.createBackup(exportPassword);
-        expect((await importBackup(reexport, exportPassword)).length, 2);
+        expect((await importBackup(reexport, exportPassword)).items.length, 2);
         again.dispose();
         session.dispose();
       },

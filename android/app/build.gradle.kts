@@ -119,6 +119,9 @@ dependencies {
         implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:2.4.0")
     }
 
+    // FileProvider (photo d'un document du coffre) ; version fixée plus haut.
+    implementation("androidx.core:core:1.18.0")
+
     // Lecture des QR codes (Messages > Scanner un QR code). Apache 2.0.
     // Décodage ZXing sur le téléphone : ni réseau, ni modèle téléchargé.
     // ZXing core 3.5.3 (dernière version) au lieu du 3.4.1 tiré par défaut.

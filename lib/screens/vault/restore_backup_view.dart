@@ -4,7 +4,6 @@ import 'package:material_ui/material_ui.dart';
 import '../../services/vault/password_strength.dart';
 import '../../services/vault/vault_backup.dart';
 import '../../services/vault/vault_crypto.dart';
-import '../../services/vault/vault_item.dart';
 import '../../services/vault/vault_platform.dart';
 import '../../l10n/l10n.dart';
 import '../../services/vault/vault_session.dart';
@@ -49,7 +48,7 @@ class _RestoreBackupViewState extends State<RestoreBackupView> {
   bool _busy = false;
   String? _error;
   Uint8List? _bytes; // fichier chiffré choisi
-  List<VaultItem>? _items; // déchiffrés, en attente du nouveau mot de passe
+  BackupContents? _contents; // déchiffré, en attente du nouveau mot de passe
 
   bool get _matches => _password.text == _confirmation.text;
 
@@ -62,7 +61,8 @@ class _RestoreBackupViewState extends State<RestoreBackupView> {
     _password.dispose();
     _confirmation.dispose();
     _bytes = null;
-    _items = null;
+    _contents?.wipeDocuments(); // documents en clair : effacés
+    _contents = null;
     super.dispose();
   }
 
@@ -108,7 +108,7 @@ class _RestoreBackupViewState extends State<RestoreBackupView> {
     String? error;
     try {
       // Argon2 dans un isolate : l'écran reste fluide.
-      _items = await widget.session.readBackup(bytes, _backupPassword.text);
+      _contents = await widget.session.readBackup(bytes, _backupPassword.text);
       _backupPassword.clear();
       _step = _Step.nouveauMotDePasse;
     } on WrongPasswordException {
@@ -127,13 +127,17 @@ class _RestoreBackupViewState extends State<RestoreBackupView> {
   }
 
   Future<void> _restore() async {
-    final items = _items;
-    if (items == null) return;
+    final contents = _contents;
+    if (contents == null) return;
     FocusScope.of(context).unfocus();
     setState(() => _busy = true);
     try {
       // Réussi : le coffre s'ouvre et la nouvelle clé s'affiche.
-      await widget.session.restore(items, _password.text);
+      await widget.session.restore(
+        contents.items,
+        _password.text,
+        documents: contents.documents,
+      );
     } catch (_) {
       if (!mounted) return;
       setState(() => _busy = false);
@@ -144,7 +148,7 @@ class _RestoreBackupViewState extends State<RestoreBackupView> {
   }
 
   String _intro(AppLocalizations l) {
-    final count = _items?.length ?? 0;
+    final count = _contents?.items.length ?? 0;
     return switch (_step) {
       _Step.fichier => l.backupIntroFile,
       _Step.motDePasse => l.backupIntroPassword,

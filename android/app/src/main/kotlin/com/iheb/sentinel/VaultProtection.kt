@@ -32,6 +32,9 @@ class VaultProtection(private val activity: Activity, messenger: BinaryMessenger
     // Sauvegarde chiffrée : sélecteur de fichiers d'Android.
     private val documents = VaultDocuments(activity)
 
+    // Documents du coffre : photo, image ou PDF, aperçu, partage.
+    private val media = VaultMedia(activity)
+
     // ACTION_SCREEN_OFF ne peut être reçue que par un récepteur
     // enregistré dans le code (pas dans le manifeste).
     private val screenOffReceiver = object : BroadcastReceiver() {
@@ -55,6 +58,7 @@ class VaultProtection(private val activity: Activity, messenger: BinaryMessenger
     fun dispose() {
         biometric.dispose()
         documents.dispose()
+        media.dispose()
         activity.unregisterReceiver(screenOffReceiver)
         channel.setMethodCallHandler(null)
     }
@@ -104,6 +108,30 @@ class VaultProtection(private val activity: Activity, messenger: BinaryMessenger
                 }
             }
             "openDocument" -> documents.open(call.argument<Int>("maxBytes") ?: 0, result)
+            "capturePhoto" -> media.capture(call.argument<Int>("maxBytes") ?: 0, result)
+            "pickVaultDocument" -> media.pick(call.argument<Int>("maxBytes") ?: 0, result)
+            "pdfOpen" -> {
+                val data = call.argument<ByteArray>("data")
+                if (data == null) result.error("ECHEC", null, null) else media.pdfOpen(data, result)
+            }
+            "pdfPage" -> media.pdfPage(
+                call.argument<Int>("index") ?: 0,
+                call.argument<Int>("width") ?: 0,
+                result,
+            )
+            "pdfClose" -> {
+                media.pdfClose()
+                result.success(null)
+            }
+            "shareDocument" -> {
+                val data = call.argument<ByteArray>("data")
+                val mime = call.argument<String>("mime")
+                if (data == null || mime == null) result.error("ECHEC", null, null) else media.share(data, mime, result)
+            }
+            "clearSharedDocument" -> {
+                media.clearShared()
+                result.success(null)
+            }
             "biometricDeleteKey" -> {
                 biometric.deleteKey()
                 result.success(null)
@@ -114,7 +142,12 @@ class VaultProtection(private val activity: Activity, messenger: BinaryMessenger
 
     /** Réponse du sélecteur de fichiers ; true si elle était pour le coffre. */
     fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?): Boolean =
-        documents.onActivityResult(requestCode, resultCode, data)
+        documents.onActivityResult(requestCode, resultCode, data) ||
+            media.onActivityResult(requestCode, resultCode, data)
+
+    /** Réponse à la demande de caméra (photo d'un document). */
+    fun onRequestPermissionsResult(requestCode: Int, grantResults: IntArray): Boolean =
+        media.onRequestPermissionsResult(requestCode, grantResults)
 
     // FLAG_SECURE : écran noir sur les captures et dans les apps récentes.
     private fun setSecure(secure: Boolean) {

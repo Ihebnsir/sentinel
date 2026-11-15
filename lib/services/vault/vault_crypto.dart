@@ -439,15 +439,75 @@ Future<List<VaultItem>> openItems(Uint8List dek, VaultFile file) async {
 }
 
 // ---------------------------------------------------------------------
+// Documents (photos, PDF) : un fichier chiffré par document
+// ---------------------------------------------------------------------
+
+/// Chiffre un document avec la DEK. AAD = id du document : un fichier
+/// renommé (échangé avec un autre) ne se déchiffre plus.
+/// Dans un isolate : un gros fichier ne fige pas l'écran.
+Future<EncryptedBlob> encryptDocument(
+  Uint8List clear,
+  Uint8List dek,
+  String id,
+) {
+  final aad = utf8.encode(id);
+  return Isolate.run(() => _encrypt(clear, dek, aad));
+}
+
+/// Déchiffre un document. Lève [VaultCorruptedException] si le fichier
+/// a été modifié ou n'appartient pas à cet id.
+Future<Uint8List> decryptDocument(
+  EncryptedBlob blob,
+  Uint8List dek,
+  String id,
+) async {
+  final aad = utf8.encode(id);
+  final clear = await Isolate.run(() => _decryptOrNull(blob, dek, aad));
+  if (clear == null) throw const VaultCorruptedException();
+  return clear;
+}
+
+// Dans un isolate : null plutôt qu'une exception à faire traverser.
+Future<Uint8List?> _decryptOrNull(
+  EncryptedBlob blob,
+  Uint8List key,
+  Uint8List aad,
+) async {
+  try {
+    return await _decrypt(blob, key, aad);
+  } on SecretBoxAuthenticationError {
+    return null;
+  }
+}
+
+// ---------------------------------------------------------------------
 // Sauvegarde chiffrée (fichier .sentinel)
 // ---------------------------------------------------------------------
 
+/// Contenu déchiffré d'une sauvegarde : les éléments et, depuis la
+/// version 2, le contenu des documents (id → octets en clair).
+class BackupContents {
+  const BackupContents(this.items, [this.documents = const {}]);
+
+  final List<VaultItem> items;
+  final Map<String, Uint8List> documents;
+
+  /// Efface les documents en clair de la mémoire.
+  void wipeDocuments() => documents.values.forEach(wipe);
+}
+
+// AAD d'un document dans une sauvegarde : en-tête + id.
+Uint8List _backupDocumentAad(Uint8List header, String id) =>
+    Uint8List.fromList([...header, 0, ...utf8.encode(id)]);
+
 /// Chiffre les éléments pour une sauvegarde : clé = Argon2id(mot de
 /// passe d'export, sel neuf), en-tête de la sauvegarde en AAD.
+/// [documents] : contenu en clair des documents (id → octets).
 Future<Uint8List> exportBackup(
   List<VaultItem> items,
   String password, {
   KdfParams? kdf,
+  Map<String, Uint8List> documents = const {},
 }) async {
   final empty = VaultBackup(
     kdf: kdf ?? newKdfParams(),
@@ -456,7 +516,20 @@ Future<Uint8List> exportBackup(
   final key = await deriveKek(password, empty.kdf);
   final clear = _encodeItems(items);
   try {
-    return empty.withData(await _encrypt(clear, key, empty.header)).encode();
+    final header = empty.header;
+    final docs = <String, EncryptedBlob>{};
+    for (final item in items) {
+      if (item.type != VaultItemType.document) continue;
+      final content = documents[item.id];
+      if (content == null) throw StateError('Document manquant');
+      final aad = _backupDocumentAad(header, item.id);
+      docs[item.id] = await Isolate.run(() => _encrypt(content, key, aad));
+    }
+    return VaultBackup(
+      kdf: empty.kdf,
+      data: await _encrypt(clear, key, header),
+      documents: docs,
+    ).encode();
   } finally {
     wipe(clear);
     wipe(key);
@@ -466,23 +539,43 @@ Future<Uint8List> exportBackup(
 /// Déchiffre une sauvegarde. Lève [BackupFormatException] si le fichier
 /// n'en est pas une, [WrongPasswordException] si le mot de passe est faux
 /// ou le fichier modifié (GCM ne permet pas de distinguer les deux).
-Future<List<VaultItem>> importBackup(Uint8List bytes, String password) async {
+Future<BackupContents> importBackup(Uint8List bytes, String password) async {
   final backup = VaultBackup.decode(bytes);
   final key = await deriveKek(password, backup.kdf);
-  final Uint8List clear;
   try {
-    clear = await _decrypt(backup.data, key, backup.header);
-  } on SecretBoxAuthenticationError {
-    throw const WrongPasswordException();
+    final Uint8List clear;
+    try {
+      clear = await _decrypt(backup.data, key, backup.header);
+    } on SecretBoxAuthenticationError {
+      throw const WrongPasswordException();
+    }
+    final List<VaultItem> items;
+    try {
+      items = _decodeItems(clear);
+    } on VaultCorruptedException {
+      throw const BackupFormatException(BackupProblem.illisible);
+    } finally {
+      wipe(clear);
+    }
+    // Chaque document de la liste doit avoir son contenu, intact.
+    final documents = <String, Uint8List>{};
+    final header = backup.header;
+    for (final item in items) {
+      if (item.type != VaultItemType.document) continue;
+      final blob = backup.documents[item.id];
+      final aad = _backupDocumentAad(header, item.id);
+      final content = blob == null
+          ? null
+          : await Isolate.run(() => _decryptOrNull(blob, key, aad));
+      if (content == null) {
+        documents.values.forEach(wipe);
+        throw const BackupFormatException(BackupProblem.illisible);
+      }
+      documents[item.id] = content;
+    }
+    return BackupContents(items, documents);
   } finally {
     wipe(key);
-  }
-  try {
-    return _decodeItems(clear);
-  } on VaultCorruptedException {
-    throw const BackupFormatException(BackupProblem.illisible);
-  } finally {
-    wipe(clear);
   }
 }
 

@@ -41,8 +41,9 @@
     <!-- Permission « normale » : après un redémarrage, reprogrammer la
          suppression des rapports d'analyse à 24 h (BootReceiver). -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
-    <!-- Caméra : seulement pour « Scanner un QR code » (onglet Messages),
-         demandée au moment du scan. L'image n'est ni enregistrée ni envoyée.
+    <!-- Caméra : pour « Scanner un QR code » (onglet Messages) et la photo
+         d'un document du coffre, demandée au moment de l'utiliser. L'image
+         du QR n'est ni enregistrée ni envoyée ; la photo est chiffrée.
          Déjà ajoutée par zxing-android-embedded ; écrite ici pour être vue.
          Pas exigée : l'app s'installe aussi sans caméra. -->
     <uses-permission android:name="android.permission.CAMERA" />
@@ -171,6 +172,26 @@
                 <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
             </intent-filter>
         </receiver>
+        <!-- Photo d'un document du coffre : l'appareil photo d'Android écrit
+             dans cache/vault_capture (lue puis effacée aussitôt).
+             Non exporté : accès accordé à la seule app photo lancée. -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.vaultcapture"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/vault_capture_paths" />
+        </provider>
+        <!-- Partage d'un document du coffre, choisi par l'utilisateur :
+             octets servis depuis la mémoire, jamais de fichier en clair.
+             Non exporté : seule l'app choisie reçoit l'accès. -->
+        <provider
+            android:name=".VaultShareProvider"
+            android:authorities="${applicationId}.vaultshare"
+            android:exported="false"
+            android:grantUriPermissions="true" />
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
         <meta-data

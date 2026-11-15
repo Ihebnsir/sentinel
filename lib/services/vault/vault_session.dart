@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import '../../utils/debug_log.dart';
 import 'vault_biometrics.dart';
 import 'vault_crypto.dart';
+import 'vault_documents.dart';
 import 'vault_file.dart';
 import 'vault_item.dart';
 import 'vault_storage.dart';
@@ -46,6 +47,9 @@ class VaultSession extends ChangeNotifier {
        _clock = clock ?? DateTime.now;
 
   final VaultStorage _storage;
+
+  // Documents chiffrés, dans le même dossier que le coffre.
+  late final _documents = VaultDocumentStore(directory: _storage.directory);
   final VaultBiometrics _biometrics;
   final DateTime Function() _clock;
 
@@ -134,6 +138,7 @@ class VaultSession extends ChangeNotifier {
       kdf: kdfForNewVault?.call(),
       now: _clock(),
     );
+    await _documents.deleteAll(); // restes d'un ancien coffre
     await _storage.write(created.file);
     _file = created.file;
     _dek = created.dek;
@@ -145,7 +150,12 @@ class VaultSession extends ChangeNotifier {
 
   /// Restaure une sauvegarde lue par [readBackup] : coffre neuf (nouvelle
   /// DEK, nouveau mot de passe maître, nouvelle clé de récupération).
-  Future<void> restore(List<VaultItem> items, String newPassword) async {
+  /// Les documents sont rechiffrés avec la nouvelle DEK.
+  Future<void> restore(
+    List<VaultItem> items,
+    String newPassword, {
+    Map<String, Uint8List> documents = const {},
+  }) async {
     if (_status != VaultStatus.absent) throw StateError('Coffre existant');
     final created = await createVault(
       newPassword,
@@ -153,6 +163,20 @@ class VaultSession extends ChangeNotifier {
       kdf: kdfForNewVault?.call(),
       now: _clock(),
     );
+    await _documents.deleteAll();
+    try {
+      // Documents d'abord : le coffre ne référence jamais un fichier absent.
+      for (final item in items) {
+        if (item.type != VaultItemType.document) continue;
+        final content = documents[item.id];
+        if (content == null) throw StateError('Document manquant');
+        await _documents.write(item.id, created.dek, content);
+      }
+    } catch (_) {
+      wipe(created.dek);
+      await _documents.deleteAll();
+      rethrow;
+    }
     await _storage.write(created.file);
     _file = created.file;
     _biometricBroken = false;
@@ -162,13 +186,30 @@ class VaultSession extends ChangeNotifier {
 
   /// Déchiffre une sauvegarde (Argon2, dans un isolate). Lève
   /// [BackupFormatException] ou [WrongPasswordException].
-  Future<List<VaultItem>> readBackup(Uint8List bytes, String password) =>
+  Future<BackupContents> readBackup(Uint8List bytes, String password) =>
       importBackup(bytes, password);
 
-  /// Le contenu du coffre ouvert, chiffré par [password] (fichier .sentinel).
+  /// Le contenu du coffre ouvert, documents compris, chiffré par
+  /// [password] (fichier .sentinel).
   Future<Uint8List> createBackup(String password) async {
     if (_status != VaultStatus.ouvert) throw StateError('Coffre verrouillé');
-    return exportBackup(_items, password, kdf: kdfForNewVault?.call());
+    final items = _items;
+    final documents = <String, Uint8List>{};
+    try {
+      for (final item in items) {
+        if (item.type == VaultItemType.document) {
+          documents[item.id] = await readDocument(item.id);
+        }
+      }
+      return await exportBackup(
+        items,
+        password,
+        kdf: kdfForNewVault?.call(),
+        documents: documents,
+      );
+    } finally {
+      documents.values.forEach(wipe);
+    }
   }
 
   /// Essaie d'ouvrir le coffre. Après un échec, impose un délai croissant.
@@ -195,6 +236,7 @@ class VaultSession extends ChangeNotifier {
       if (opening.migrated && opening.file.recoverySlot == null) {
         _offerRecoveryKey = true;
       }
+      await _cleanDocuments(opening.items);
       _opened(opening.dek, opening.items);
       return UnlockResult.ouvert;
     } on WrongPasswordException {
@@ -243,7 +285,9 @@ class VaultSession extends ChangeNotifier {
       return BiometricUnlockResult.annule;
     }
     try {
-      _opened(dek, await openItems(dek, file));
+      final items = await openItems(dek, file);
+      await _cleanDocuments(items);
+      _opened(dek, items);
       return BiometricUnlockResult.ouvert;
     } on VaultCorruptedException {
       wipe(dek);
@@ -281,6 +325,7 @@ class VaultSession extends ChangeNotifier {
       _file = reset.file;
       _pendingRecoveryKey = reset.recoveryKey;
       _offerRecoveryKey = false;
+      await _cleanDocuments(reset.items);
       _opened(reset.dek, reset.items);
       return true;
     } on WrongRecoveryKeyException {
@@ -362,10 +407,11 @@ class VaultSession extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Supprime le coffre et la clé Keystore. Irréversible.
+  /// Supprime le coffre, ses documents et la clé Keystore. Irréversible.
   Future<void> deleteVault() async {
     lock();
     await _storage.delete();
+    await _documents.deleteAll();
     await _biometrics.deleteKey();
     _file = null;
     _biometricBroken = false;
@@ -395,11 +441,65 @@ class VaultSession extends ChangeNotifier {
     await _persist(updated);
   }
 
+  /// Supprime un élément ; pour un document, efface aussi son fichier
+  /// chiffré (après l'avoir retiré de la liste).
   Future<void> delete(String id) async {
+    final isDocument = _items.any(
+      (item) => item.id == id && item.type == VaultItemType.document,
+    );
     await _persist([
       for (final item in _items)
         if (item.id != id) item,
     ]);
+    if (isDocument) await _documents.delete(id);
+  }
+
+  /// Ajoute un document : le fichier chiffré d'abord, puis l'élément.
+  /// Lève [DocumentTooLargeException] ou [UnsupportedDocumentException].
+  Future<void> addDocument(VaultItem item, Uint8List content) async {
+    if (item.type != VaultItemType.document) throw ArgumentError('type');
+    if (content.length > maxDocumentBytes) {
+      throw const DocumentTooLargeException();
+    }
+    if (detectDocumentMime(content) == null) {
+      throw const UnsupportedDocumentException();
+    }
+    await _withKey((dek) => _documents.write(item.id, dek, content));
+    try {
+      await save(item);
+    } catch (_) {
+      await _documents.delete(item.id); // pas de fichier orphelin
+      rethrow;
+    }
+  }
+
+  /// Contenu en clair d'un document, en mémoire seulement (coffre
+  /// ouvert). Lève [VaultCorruptedException] si le fichier est abîmé.
+  Future<Uint8List> readDocument(String id) =>
+      _withKey((dek) => _documents.read(id, dek));
+
+  // Copie de la DEK le temps d'une opération (voir _update).
+  Future<T> _withKey<T>(Future<T> Function(Uint8List dek) action) async {
+    final dek = _dek;
+    if (dek == null) throw StateError('Coffre verrouillé');
+    final key = Uint8List.fromList(dek);
+    try {
+      return await action(key);
+    } finally {
+      wipe(key);
+    }
+  }
+
+  // Fichiers de documents qu'aucun élément ne référence : effacés.
+  Future<void> _cleanDocuments(List<VaultItem> items) async {
+    try {
+      await _documents.removeOrphans({
+        for (final item in items)
+          if (item.type == VaultItemType.document) item.id,
+      });
+    } on FileSystemException {
+      debugLog(() => 'Coffre : nettoyage des documents reporté');
+    }
   }
 
   Future<void> _persist(List<VaultItem> items) async {

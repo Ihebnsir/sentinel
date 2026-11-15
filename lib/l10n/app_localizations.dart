@@ -3737,6 +3737,144 @@ abstract class AppLocalizations {
   /// **'Note secrète'**
   String get vaultTypeNote;
 
+  /// No description provided for @vaultTypeDocument.
+  ///
+  /// In fr, this message translates to:
+  /// **'Document'**
+  String get vaultTypeDocument;
+
+  /// No description provided for @vaultNewDocument.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouveau : document'**
+  String get vaultNewDocument;
+
+  /// No description provided for @vaultDocTakePhoto.
+  ///
+  /// In fr, this message translates to:
+  /// **'Prendre une photo'**
+  String get vaultDocTakePhoto;
+
+  /// No description provided for @vaultDocChooseFile.
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisir une image ou un PDF'**
+  String get vaultDocChooseFile;
+
+  /// No description provided for @vaultDocSourceHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Chiffré sur le téléphone, jamais enregistré en clair. 10 Mo maximum.'**
+  String get vaultDocSourceHint;
+
+  /// No description provided for @vaultDocTooLarge.
+  ///
+  /// In fr, this message translates to:
+  /// **'Fichier trop volumineux : 10 Mo maximum.'**
+  String get vaultDocTooLarge;
+
+  /// No description provided for @vaultDocUnsupported.
+  ///
+  /// In fr, this message translates to:
+  /// **'Seules les images et les PDF sont acceptés.'**
+  String get vaultDocUnsupported;
+
+  /// No description provided for @vaultDocCameraDenied.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sans la caméra, Sentinel ne peut pas prendre la photo.'**
+  String get vaultDocCameraDenied;
+
+  /// No description provided for @vaultDocPickFailed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Impossible de lire ce fichier. Réessayez.'**
+  String get vaultDocPickFailed;
+
+  /// No description provided for @vaultDocUnreadable.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce document est endommagé : il ne peut pas être ouvert.'**
+  String get vaultDocUnreadable;
+
+  /// No description provided for @vaultDocNoPreview.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aperçu impossible pour ce PDF sur ce téléphone.'**
+  String get vaultDocNoPreview;
+
+  /// No description provided for @vaultDocDecrypting.
+  ///
+  /// In fr, this message translates to:
+  /// **'Déchiffrement…'**
+  String get vaultDocDecrypting;
+
+  /// No description provided for @vaultDocShare.
+  ///
+  /// In fr, this message translates to:
+  /// **'Partager'**
+  String get vaultDocShare;
+
+  /// No description provided for @vaultDocShareTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Partager ce document ?'**
+  String get vaultDocShareTitle;
+
+  /// No description provided for @vaultDocShareWarning.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le document sortira du coffre sans chiffrement : l\'app choisie pourra le garder, le copier ou l\'envoyer en ligne. Ne le partagez qu\'avec une personne ou une app de confiance.'**
+  String get vaultDocShareWarning;
+
+  /// No description provided for @vaultDocShareAnyway.
+  ///
+  /// In fr, this message translates to:
+  /// **'Partager quand même'**
+  String get vaultDocShareAnyway;
+
+  /// No description provided for @vaultDocShareFailed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune app ne peut recevoir ce document.'**
+  String get vaultDocShareFailed;
+
+  /// No description provided for @vaultDocKindImage.
+  ///
+  /// In fr, this message translates to:
+  /// **'Image'**
+  String get vaultDocKindImage;
+
+  /// No description provided for @vaultDocKindPdf.
+  ///
+  /// In fr, this message translates to:
+  /// **'PDF'**
+  String get vaultDocKindPdf;
+
+  /// No description provided for @vaultDocPhotoTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Photo du {date}'**
+  String vaultDocPhotoTitle(String date);
+
+  /// No description provided for @vaultDocPage.
+  ///
+  /// In fr, this message translates to:
+  /// **'Page {page}'**
+  String vaultDocPage(String page);
+
+  /// No description provided for @vaultDocSizeKb.
+  ///
+  /// In fr, this message translates to:
+  /// **'{size} Ko'**
+  String vaultDocSizeKb(String size);
+
+  /// No description provided for @vaultDocSizeMb.
+  ///
+  /// In fr, this message translates to:
+  /// **'{size} Mo'**
+  String vaultDocSizeMb(String size);
+
   /// No description provided for @vaultPasswordCopied.
   ///
   /// In fr, this message translates to:

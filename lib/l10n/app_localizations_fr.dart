@@ -2251,6 +2251,89 @@ class AppLocalizationsFr extends AppLocalizations {
   String get vaultTypeNote => 'Note secrète';
 
   @override
+  String get vaultTypeDocument => 'Document';
+
+  @override
+  String get vaultNewDocument => 'Nouveau : document';
+
+  @override
+  String get vaultDocTakePhoto => 'Prendre une photo';
+
+  @override
+  String get vaultDocChooseFile => 'Choisir une image ou un PDF';
+
+  @override
+  String get vaultDocSourceHint =>
+      'Chiffré sur le téléphone, jamais enregistré en clair. 10 Mo maximum.';
+
+  @override
+  String get vaultDocTooLarge => 'Fichier trop volumineux : 10 Mo maximum.';
+
+  @override
+  String get vaultDocUnsupported =>
+      'Seules les images et les PDF sont acceptés.';
+
+  @override
+  String get vaultDocCameraDenied =>
+      'Sans la caméra, Sentinel ne peut pas prendre la photo.';
+
+  @override
+  String get vaultDocPickFailed => 'Impossible de lire ce fichier. Réessayez.';
+
+  @override
+  String get vaultDocUnreadable =>
+      'Ce document est endommagé : il ne peut pas être ouvert.';
+
+  @override
+  String get vaultDocNoPreview =>
+      'Aperçu impossible pour ce PDF sur ce téléphone.';
+
+  @override
+  String get vaultDocDecrypting => 'Déchiffrement…';
+
+  @override
+  String get vaultDocShare => 'Partager';
+
+  @override
+  String get vaultDocShareTitle => 'Partager ce document ?';
+
+  @override
+  String get vaultDocShareWarning =>
+      'Le document sortira du coffre sans chiffrement : l\'app choisie pourra le garder, le copier ou l\'envoyer en ligne. Ne le partagez qu\'avec une personne ou une app de confiance.';
+
+  @override
+  String get vaultDocShareAnyway => 'Partager quand même';
+
+  @override
+  String get vaultDocShareFailed => 'Aucune app ne peut recevoir ce document.';
+
+  @override
+  String get vaultDocKindImage => 'Image';
+
+  @override
+  String get vaultDocKindPdf => 'PDF';
+
+  @override
+  String vaultDocPhotoTitle(String date) {
+    return 'Photo du $date';
+  }
+
+  @override
+  String vaultDocPage(String page) {
+    return 'Page $page';
+  }
+
+  @override
+  String vaultDocSizeKb(String size) {
+    return '$size Ko';
+  }
+
+  @override
+  String vaultDocSizeMb(String size) {
+    return '$size Mo';
+  }
+
+  @override
   String vaultPasswordCopied(String seconds) {
     return 'Mot de passe copié. Il sera effacé du presse-papiers dans $seconds s.';
   }

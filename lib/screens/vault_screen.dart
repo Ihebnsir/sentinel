@@ -4,6 +4,7 @@ import 'package:material_ui/material_ui.dart';
 
 import '../l10n/l10n.dart';
 import '../services/breach/breach_checker.dart';
+import '../services/vault/vault_document_platform.dart';
 import '../services/vault/vault_platform.dart';
 import '../services/vault/vault_session.dart';
 import '../theme/app_colors.dart';
@@ -85,7 +86,10 @@ class _VaultScreenState extends State<VaultScreen> {
       _restoring = false;
     }
     if (_session.status != VaultStatus.verrouille) _recovering = false;
-    if (_session.status != VaultStatus.ouvert) _breaches.clear();
+    if (_session.status != VaultStatus.ouvert) {
+      _breaches.clear();
+      VaultDocumentPlatform.clearShared(); // document partagé : oublié
+    }
     setState(() {});
   }
 

@@ -2221,6 +2221,87 @@ class AppLocalizationsEn extends AppLocalizations {
   String get vaultTypeNote => 'Secret note';
 
   @override
+  String get vaultTypeDocument => 'Document';
+
+  @override
+  String get vaultNewDocument => 'New document';
+
+  @override
+  String get vaultDocTakePhoto => 'Take a photo';
+
+  @override
+  String get vaultDocChooseFile => 'Choose an image or a PDF';
+
+  @override
+  String get vaultDocSourceHint =>
+      'Encrypted on the phone, never stored unencrypted. 10 MB maximum.';
+
+  @override
+  String get vaultDocTooLarge => 'File too large: 10 MB maximum.';
+
+  @override
+  String get vaultDocUnsupported => 'Only images and PDFs are accepted.';
+
+  @override
+  String get vaultDocCameraDenied =>
+      'Without the camera, Sentinel cannot take the photo.';
+
+  @override
+  String get vaultDocPickFailed => 'This file could not be read. Try again.';
+
+  @override
+  String get vaultDocUnreadable =>
+      'This document is damaged and cannot be opened.';
+
+  @override
+  String get vaultDocNoPreview => 'This PDF cannot be previewed on this phone.';
+
+  @override
+  String get vaultDocDecrypting => 'Decrypting…';
+
+  @override
+  String get vaultDocShare => 'Share';
+
+  @override
+  String get vaultDocShareTitle => 'Share this document?';
+
+  @override
+  String get vaultDocShareWarning =>
+      'The document will leave the vault unencrypted: the chosen app can keep it, copy it or upload it. Only share it with a person or app you trust.';
+
+  @override
+  String get vaultDocShareAnyway => 'Share anyway';
+
+  @override
+  String get vaultDocShareFailed => 'No app can receive this document.';
+
+  @override
+  String get vaultDocKindImage => 'Image';
+
+  @override
+  String get vaultDocKindPdf => 'PDF';
+
+  @override
+  String vaultDocPhotoTitle(String date) {
+    return 'Photo of $date';
+  }
+
+  @override
+  String vaultDocPage(String page) {
+    return 'Page $page';
+  }
+
+  @override
+  String vaultDocSizeKb(String size) {
+    return '$size KB';
+  }
+
+  @override
+  String vaultDocSizeMb(String size) {
+    return '$size MB';
+  }
+
+  @override
   String vaultPasswordCopied(String seconds) {
     return 'Password copied. It will be cleared from the clipboard in $seconds s.';
   }

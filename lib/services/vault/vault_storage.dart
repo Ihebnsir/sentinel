@@ -13,6 +13,9 @@ class VaultStorage {
 
   final Future<Directory> Function() _directory;
 
+  /// Le dossier privé (partagé avec les documents chiffrés).
+  Future<Directory> Function() get directory => _directory;
+
   Future<File> _file() async {
     final dir = await _directory();
     return File('${dir.path}${Platform.pathSeparator}$fileName');

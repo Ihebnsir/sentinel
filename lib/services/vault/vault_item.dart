@@ -1,14 +1,16 @@
 import '../../l10n/l10n.dart';
 
-/// Les deux sortes d'éléments rangés dans le coffre.
+/// Les sortes d'éléments rangés dans le coffre.
 enum VaultItemType {
   motDePasse,
-  note;
+  note,
+  document; // photo ou PDF, contenu dans un fichier chiffré à part
 
   /// Nom affiché à l'utilisateur.
   String label(AppLocalizations l) => switch (this) {
     motDePasse => l.vaultTypePassword,
     note => l.vaultTypeNote,
+    document => l.vaultTypeDocument,
   };
 }
 
@@ -24,6 +26,8 @@ class VaultItem {
     this.motDePasse = '',
     this.siteWeb = '',
     this.note = '',
+    this.mime = '',
+    this.taille = 0,
     required this.creeLe,
     required this.modifieLe,
   });
@@ -35,6 +39,12 @@ class VaultItem {
   final String motDePasse;
   final String siteWeb;
   final String note;
+
+  /// Document : type du fichier (image/jpeg, application/pdf…) et taille
+  /// en octets. Vides pour les autres types.
+  final String mime;
+  final int taille;
+
   final DateTime creeLe;
   final DateTime modifieLe;
 
@@ -54,6 +64,8 @@ class VaultItem {
       motDePasse: motDePasse ?? this.motDePasse,
       siteWeb: siteWeb ?? this.siteWeb,
       note: note ?? this.note,
+      mime: mime,
+      taille: taille,
       creeLe: creeLe,
       modifieLe: modifieLe ?? this.modifieLe,
     );
@@ -67,6 +79,7 @@ class VaultItem {
     'motDePasse': motDePasse,
     'siteWeb': siteWeb,
     'note': note,
+    if (type == VaultItemType.document) ...{'mime': mime, 'taille': taille},
     'creeLe': creeLe.toUtc().toIso8601String(),
     'modifieLe': modifieLe.toUtc().toIso8601String(),
   };
@@ -80,6 +93,8 @@ class VaultItem {
       motDePasse: json['motDePasse'] as String? ?? '',
       siteWeb: json['siteWeb'] as String? ?? '',
       note: json['note'] as String? ?? '',
+      mime: json['mime'] as String? ?? '',
+      taille: json['taille'] as int? ?? 0,
       creeLe: DateTime.parse(json['creeLe'] as String),
       modifieLe: DateTime.parse(json['modifieLe'] as String),
     );

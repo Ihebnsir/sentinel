@@ -24,30 +24,41 @@ class BackupFormatException implements Exception {
 /// Une sauvegarde chiffrée du coffre (fichier .sentinel), en JSON :
 ///
 /// ```json
-/// { "format": "sentinel-sauvegarde", "version": 1,
-///   "kdf": { Argon2id, sel neuf }, "data": { nonce, chiffré } }
+/// { "format": "sentinel-sauvegarde", "version": 2,
+///   "kdf": { Argon2id, sel neuf }, "data": { nonce, chiffré },
+///   "documents": [ { "id", nonce, chiffré } ] }
 /// ```
 ///
 /// La clé vient d'Argon2id(mot de passe d'export) : aucun lien avec le
-/// mot de passe maître ni la DEK du coffre. Tout sauf « data » forme
-/// l'en-tête, utilisé comme AAD : le modifier fait échouer GCM.
+/// mot de passe maître ni la DEK du coffre. format + version + kdf
+/// forment l'en-tête, utilisé comme AAD : le modifier fait échouer GCM.
+/// Chaque document a pour AAD l'en-tête suivi de son id.
+/// Version 1 : sans « documents » (toujours lue).
 class VaultBackup {
   const VaultBackup({
     required this.kdf,
     required this.data,
+    this.documents = const {},
     this.version = currentVersion,
   });
 
   static const formatName = 'sentinel-sauvegarde';
-  static const currentVersion = 1;
+  static const currentVersion = 2;
   static const extension = 'sentinel';
 
+  /// Versions lues (1 : avant les documents).
+  static const readableVersions = {1, 2};
+
   /// Au-delà, le fichier est refusé avant même d'être décodé.
-  static const maxBytes = 16 * 1024 * 1024;
+  /// Assez pour une dizaine de documents de 10 Mo (base64 : +33 %).
+  static const maxBytes = 128 * 1024 * 1024;
 
   final int version;
   final KdfParams kdf;
   final EncryptedBlob data; // les éléments chiffrés
+
+  /// Contenu chiffré des documents, par id (version 2).
+  final Map<String, EncryptedBlob> documents;
 
   Map<String, Object> _headerJson() => {
     'format': formatName,
@@ -59,11 +70,18 @@ class VaultBackup {
   Uint8List get header => utf8.encode(jsonEncode(_headerJson()));
 
   VaultBackup withData(EncryptedBlob data) =>
-      VaultBackup(version: version, kdf: kdf, data: data);
+      VaultBackup(version: version, kdf: kdf, data: data, documents: documents);
 
   Uint8List encode() => utf8.encode(
-    const JsonEncoder.withIndent('  ')
-        .convert({..._headerJson(), 'data': data.toJson()}),
+    const JsonEncoder.withIndent('  ').convert({
+      ..._headerJson(),
+      'data': data.toJson(),
+      if (version >= 2)
+        'documents': [
+          for (final entry in documents.entries)
+            {'id': entry.key, ...entry.value.toJson()},
+        ],
+    }),
   );
 
   /// Lit les octets du fichier ; lève [BackupFormatException] sinon.
@@ -77,7 +95,8 @@ class VaultBackup {
       if (json is! Map<String, Object?> || json['format'] != formatName) {
         throw const BackupFormatException(BackupProblem.illisible);
       }
-      if (json['version'] != currentVersion) {
+      final version = json['version'];
+      if (version is! int || !readableVersions.contains(version)) {
         throw const BackupFormatException(BackupProblem.versionInconnue);
       }
       final kdf = json['kdf'];
@@ -85,8 +104,10 @@ class VaultBackup {
         throw const BackupFormatException(BackupProblem.illisible);
       }
       return VaultBackup(
+        version: version,
         kdf: KdfParams.fromJson(kdf), // bornes de bon sens incluses
         data: EncryptedBlob.fromJson(json['data']),
+        documents: version >= 2 ? _decodeDocuments(json['documents']) : {},
       );
     } on BackupFormatException {
       rethrow;
@@ -98,4 +119,28 @@ class VaultBackup {
       throw const BackupFormatException(BackupProblem.illisible);
     }
   }
+
+  // Liste [{id, nonce, chiffre}] ; id sûr (devient un nom de fichier) et
+  // unique.
+  static Map<String, EncryptedBlob> _decodeDocuments(Object? json) {
+    if (json is! List<Object?>) {
+      throw const BackupFormatException(BackupProblem.illisible);
+    }
+    final documents = <String, EncryptedBlob>{};
+    for (final entry in json) {
+      if (entry is! Map<String, Object?>) {
+        throw const BackupFormatException(BackupProblem.illisible);
+      }
+      final id = entry['id'];
+      if (id is! String || !isSafeDocumentId(id) || documents.containsKey(id)) {
+        throw const BackupFormatException(BackupProblem.illisible);
+      }
+      documents[id] = EncryptedBlob.fromJson(entry);
+    }
+    return documents;
+  }
 }
+
+/// Un id utilisable comme nom de fichier : ni « / », ni « .. ».
+bool isSafeDocumentId(String id) =>
+    RegExp(r'^[A-Za-z0-9_-]{1,64}$').hasMatch(id);

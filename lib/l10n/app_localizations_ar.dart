@@ -2275,6 +2275,87 @@ class AppLocalizationsAr extends AppLocalizations {
   String get vaultTypeNote => 'ملاحظة سرية';
 
   @override
+  String get vaultTypeDocument => 'مستند';
+
+  @override
+  String get vaultNewDocument => 'مستند جديد';
+
+  @override
+  String get vaultDocTakePhoto => 'التقاط صورة';
+
+  @override
+  String get vaultDocChooseFile => 'اختيار صورة أو ملف ⁦PDF⁩';
+
+  @override
+  String get vaultDocSourceHint =>
+      'يُشفَّر على الهاتف ولا يُحفظ أبدًا دون تشفير. الحد الأقصى 10 ميغابايت.';
+
+  @override
+  String get vaultDocTooLarge => 'الملف كبير جدًا: الحد الأقصى 10 ميغابايت.';
+
+  @override
+  String get vaultDocUnsupported => 'تُقبل الصور وملفات ⁦PDF⁩ فقط.';
+
+  @override
+  String get vaultDocCameraDenied =>
+      'بدون الكاميرا، لا يستطيع ⁦Sentinel⁩ التقاط الصورة.';
+
+  @override
+  String get vaultDocPickFailed => 'تعذّرت قراءة هذا الملف. أعد المحاولة.';
+
+  @override
+  String get vaultDocUnreadable => 'هذا المستند تالف ولا يمكن فتحه.';
+
+  @override
+  String get vaultDocNoPreview =>
+      'لا يمكن معاينة ملف ⁦PDF⁩ هذا على هذا الهاتف.';
+
+  @override
+  String get vaultDocDecrypting => 'جارٍ فك التشفير…';
+
+  @override
+  String get vaultDocShare => 'مشاركة';
+
+  @override
+  String get vaultDocShareTitle => 'مشاركة هذا المستند؟';
+
+  @override
+  String get vaultDocShareWarning =>
+      'سيخرج المستند من الخزنة دون تشفير: يمكن للتطبيق المختار الاحتفاظ به أو نسخه أو إرساله عبر الإنترنت. لا تشاركه إلا مع شخص أو تطبيق تثق به.';
+
+  @override
+  String get vaultDocShareAnyway => 'المشاركة على أي حال';
+
+  @override
+  String get vaultDocShareFailed => 'لا يوجد تطبيق يمكنه استقبال هذا المستند.';
+
+  @override
+  String get vaultDocKindImage => 'صورة';
+
+  @override
+  String get vaultDocKindPdf => '⁦PDF⁩';
+
+  @override
+  String vaultDocPhotoTitle(String date) {
+    return 'صورة بتاريخ $date';
+  }
+
+  @override
+  String vaultDocPage(String page) {
+    return 'الصفحة $page';
+  }
+
+  @override
+  String vaultDocSizeKb(String size) {
+    return '$size كيلوبايت';
+  }
+
+  @override
+  String vaultDocSizeMb(String size) {
+    return '$size ميغابايت';
+  }
+
+  @override
   String vaultPasswordCopied(String seconds) {
     return 'تم نسخ كلمة المرور. ستُمحى من الحافظة بعد $seconds ث.';
   }

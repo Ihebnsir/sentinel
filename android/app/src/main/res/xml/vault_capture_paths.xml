@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Seul dossier accessible par FileProvider : la photo d'un document
+     du coffre, effacée dès qu'elle est lue (VaultMedia.kt). -->
+<paths>
+    <cache-path name="vault_capture" path="vault_capture/" />
+</paths>

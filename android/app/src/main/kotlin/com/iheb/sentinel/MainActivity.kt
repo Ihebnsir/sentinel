@@ -278,6 +278,7 @@ class MainActivity : FlutterActivity() {
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (qrScanner?.onRequestPermissionsResult(requestCode, grantResults) == true) return
+        if (vaultProtection?.onRequestPermissionsResult(requestCode, grantResults) == true) return
         if (requestCode != REQUEST_NOTIFICATIONS) return
         pendingPermissionResult?.success(ProtectionSettings.notificationsAllowed(this))
         pendingPermissionResult = null

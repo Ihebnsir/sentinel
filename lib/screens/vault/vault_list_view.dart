@@ -3,11 +3,14 @@ import 'package:material_ui/material_ui.dart';
 import '../../l10n/l10n.dart';
 import '../../services/breach/breach_checker.dart';
 import '../../services/vault/password_health.dart';
+import '../../services/vault/vault_crypto.dart';
+import '../../services/vault/vault_document_platform.dart';
 import '../../services/vault/vault_item.dart';
 import '../../services/vault/vault_platform.dart';
 import '../../services/vault/vault_session.dart';
 import '../../theme/app_colors.dart';
 import 'password_health_screen.dart';
+import 'vault_document_screen.dart';
 import 'vault_item_screen.dart';
 
 /// Coffre ouvert : recherche, bouton « Ajouter », liste triée par titre.
@@ -57,10 +60,54 @@ class _VaultListViewState extends State<VaultListView> {
       builder: (_) => const _TypeChooser(),
     );
     if (type == null || !mounted) return;
+    if (type == VaultItemType.document) return _addDocument();
     _open(type: type);
   }
 
+  // Photo ou fichier, puis l'écran du document (pas encore enregistré).
+  Future<void> _addDocument() async {
+    final camera = await showModalBottomSheet<bool>(
+      context: context,
+      showDragHandle: true,
+      backgroundColor: context.colors.chaux,
+      builder: (_) => const _DocumentSourceChooser(),
+    );
+    if (camera == null || !mounted) return;
+    final PickedDocument? picked;
+    try {
+      picked = camera
+          ? await VaultDocumentPlatform.capturePhoto()
+          : await VaultDocumentPlatform.pickFile();
+    } on DocumentPickException catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(e.error.message(context.l10n))));
+      return;
+    }
+    if (picked == null) return;
+    // Verrouillé pendant la photo (plus de 30 s dehors) : on oublie tout.
+    if (!mounted || widget.session.status != VaultStatus.ouvert) {
+      wipe(picked.bytes);
+      return;
+    }
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) =>
+            VaultDocumentScreen(session: widget.session, picked: picked),
+      ),
+    );
+  }
+
   void _open({VaultItem? item, VaultItemType? type}) {
+    if (item != null && item.type == VaultItemType.document) {
+      Navigator.of(context).push(
+        MaterialPageRoute<void>(
+          builder: (_) =>
+              VaultDocumentScreen(session: widget.session, item: item),
+        ),
+      );
+      return;
+    }
     Navigator.of(context).push(
       MaterialPageRoute<void>(
         builder: (_) => VaultItemScreen(
@@ -249,16 +296,27 @@ class _ItemRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final subtitle = item.type == VaultItemType.note
-        ? item.type.label(context.l10n)
-        : item.identifiant;
+    final l = context.l10n;
+    final subtitle = switch (item.type) {
+      VaultItemType.note => item.type.label(l),
+      VaultItemType.document =>
+        '${documentKindLabel(l, item.mime)} · '
+            '${documentSizeLabel(l, item.taille)}',
+      VaultItemType.motDePasse => item.identifiant,
+    };
     return InkWell(
       onTap: onTap,
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 14),
         child: Row(
           children: [
-            Icon(iconFor(item.type), color: context.colors.bleu),
+            Icon(
+              item.type == VaultItemType.document &&
+                      item.mime.startsWith('image/')
+                  ? Icons.image_outlined
+                  : iconFor(item.type),
+              color: context.colors.bleu,
+            ),
             const SizedBox(width: 16),
             Expanded(
               child: Column(
@@ -299,6 +357,7 @@ class _ItemRow extends StatelessWidget {
 IconData iconFor(VaultItemType type) => switch (type) {
   VaultItemType.motDePasse => Icons.key_outlined,
   VaultItemType.note => Icons.sticky_note_2_outlined,
+  VaultItemType.document => Icons.description_outlined,
 };
 
 /// Feuille du bas : quel type d'élément ajouter ?
@@ -323,29 +382,91 @@ class _TypeChooser extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 12),
-            for (final type in VaultItemType.values) ...[
-              Divider(height: 1, thickness: 1, color: context.colors.ligne),
-              InkWell(
-                onTap: () => Navigator.of(context).pop(type),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  child: Row(
-                    children: [
-                      Icon(iconFor(type), color: context.colors.bleu),
-                      const SizedBox(width: 16),
-                      Text(
-                        type.label(context.l10n),
-                        style: TextStyle(
-                          fontSize: 15,
-                          color: context.colors.encre,
+            for (final type in VaultItemType.values)
+              // Documents : sélecteur et appareil photo d'Android.
+              if (type != VaultItemType.document ||
+                  VaultDocumentPlatform.isSupported) ...[
+                Divider(height: 1, thickness: 1, color: context.colors.ligne),
+                InkWell(
+                  onTap: () => Navigator.of(context).pop(type),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    child: Row(
+                      children: [
+                        Icon(iconFor(type), color: context.colors.bleu),
+                        const SizedBox(width: 16),
+                        Text(
+                          type.label(context.l10n),
+                          style: TextStyle(
+                            fontSize: 15,
+                            color: context.colors.encre,
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
             Divider(height: 1, thickness: 1, color: context.colors.ligne),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Feuille du bas : photo (true) ou fichier (false) ?
+class _DocumentSourceChooser extends StatelessWidget {
+  const _DocumentSourceChooser();
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    Widget row(IconData icon, String label, bool camera) => InkWell(
+      onTap: () => Navigator.of(context).pop(camera),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 16),
+        child: Row(
+          children: [
+            Icon(icon, color: context.colors.bleu),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Text(
+                label,
+                style: TextStyle(fontSize: 15, color: context.colors.encre),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+    final line = Divider(height: 1, thickness: 1, color: context.colors.ligne);
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(28, 0, 28, 16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              l.vaultNewDocument,
+              style: TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.w600,
+                color: context.colors.encre,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              l.vaultDocSourceHint,
+              style: TextStyle(fontSize: 13, color: context.colors.secondaire),
+            ),
+            const SizedBox(height: 12),
+            line,
+            row(Icons.photo_camera_outlined, l.vaultDocTakePhoto, true),
+            line,
+            row(Icons.upload_file_outlined, l.vaultDocChooseFile, false),
+            line,
           ],
         ),
       ),
