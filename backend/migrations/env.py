@@ -10,6 +10,7 @@ from alembic import context
 from sqlalchemy import create_engine, pool
 
 from app.config import get_settings, normalize_db_url
+from app.db import postgres_connect_args
 from app.models import Base
 
 config = context.config
@@ -34,7 +35,9 @@ def run_migrations_offline() -> None:
 
 
 def run_migrations_online() -> None:
-    connectable = create_engine(url, poolclass=pool.NullPool)
+    # Mêmes options TLS et de connexion que le serveur (app.db).
+    connect_args = {} if url.startswith("sqlite") else postgres_connect_args(url)
+    connectable = create_engine(url, poolclass=pool.NullPool, connect_args=connect_args)
     with connectable.connect() as connection:
         # render_as_batch : SQLite ne sait pas modifier une colonne en place.
         context.configure(

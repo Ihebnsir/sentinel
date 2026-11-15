@@ -18,6 +18,7 @@ from .anonymize import ANONYMIZER_VERSION, anonymize
 from .client_ip import client_ip
 from .config import Settings, get_settings
 from .db import get_session, make_sessionmaker
+from .db_errors import describe
 from .fingerprint import fingerprint
 from .middleware import SecurityMiddleware
 from .models import Report, ReviewStatus
@@ -97,8 +98,12 @@ def create_report(
         session.commit()
     except SQLAlchemyError as exc:
         session.rollback()
-        # Seulement le type : le message SQL contiendrait le texte.
-        log.error("enregistrement impossible: %s", type(exc).__name__)
+        # Type, SQLSTATE, piste et message NETTOYÉ (app.db_errors) : ni URL,
+        # ni mot de passe, ni hôte, ni IP, ni texte du signalement.
+        log.error(
+            "enregistrement impossible: %s",
+            describe(exc, forbidden=(report.text, text, settings.database_url)),
+        )
         return JSONResponse(
             {"detail": "erreur interne"}, status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
         )

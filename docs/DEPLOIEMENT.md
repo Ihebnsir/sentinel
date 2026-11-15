@@ -235,7 +235,9 @@ Pour automatiser, deux options :
 | `SQLite refusé en production` | `SENTINEL_DATABASE_URL` vide | Renseigner l'URL Neon |
 | `SENTINEL_FINGERPRINT_KEY manquante` | Variable supprimée | La recréer : 32 caractères aléatoires ou plus |
 | `permission denied for table reports` | `roles.sql` pas lancé, ou URL app utilisée pour les migrations | Refaire l'étape 7, vérifier `SENTINEL_MIGRATION_DATABASE_URL` |
-| `password authentication failed` | Mot de passe mal recopié | Recopier, ou `ALTER ROLE sentinel_app WITH PASSWORD '…';` dans le SQL Editor |
+| `password authentication failed` ou `piste=mot de passe refusé` | Mot de passe mal recopié | `python -m tools.db_doctor`, option 2 (nouveau mot de passe, URL copiée pour Render) |
+| `enregistrement impossible: type=OperationalError …` | Le serveur n'arrive pas à se connecter en `sentinel_app` | Lire `sqlstate=` et `piste=` dans la ligne, puis `python -m tools.db_doctor` (option 1, puis 2) |
+| Un mot de passe a fuité | Collé par erreur quelque part | `python -m tools.db_doctor`, option 2 (ou 3), puis option 4 pour nettoyer l'historique |
 | Premier appel très lent | Réveil du service | Normal sur l'offre gratuite (environ 1 min) |
 
 ## 13. Et l'app ?

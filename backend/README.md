@@ -133,6 +133,22 @@ HTTPS : Render redirige HTTP vers HTTPS. Si le proxy signale malgré tout une re
   - `sentinel_revue` (vos outils) : lire, changer le statut, marquer l'export, supprimer. Il ne peut pas ajouter de signalement ni changer le schéma.
 - Les tests `tests/test_postgres_roles.py` vérifient ces droits sur un vrai PostgreSQL.
 
+## Docteur de la base (Neon)
+
+Un outil interactif pour vérifier la base et **changer le mot de passe** d'un rôle, sans jamais afficher de secret. Depuis `backend/` :
+
+```powershell
+.\.venv\Scripts\python.exe -m tools.db_doctor
+```
+
+- Il demande l'URL du **propriétaire** Neon (`neondb_owner`) en saisie masquée : rien ne s'affiche, rien n'est écrit sur le disque ni dans l'historique.
+- **1** : diagnostic (connexion, table `reports`, rôles `sentinel_app` et `sentinel_revue` et leurs droits, comme `sql/roles.sql`).
+- **2** / **3** : nouveau mot de passe aléatoire (32 lettres et chiffres) pour `sentinel_app` / `sentinel_revue`, appliqué par `ALTER ROLE`, puis test réel (connexion + insertion dans une transaction **annulée**). L'URL est **copiée** dans le presse-papiers (exclue de l'historique Win+V), jamais affichée, puis effacée quand vous appuyez sur Entrée.
+- **4** : retire de l'historique PowerShell les lignes contenant `npg_` ou `postgresql://` (après confirmation).
+- **5** : réapplique `sql/roles.sql` (crée les rôles manquants, remet les droits).
+
+Attention : dès l'option 2, l'ancien mot de passe de `sentinel_app` ne marche plus. Collez tout de suite la nouvelle URL dans Render (`SENTINEL_DATABASE_URL`).
+
 ## Outils (sur votre PC)
 
 Depuis `backend/`, avec l'URL du rôle revue dans `DATABASE_URL` (TLS obligatoire) :
@@ -149,7 +165,7 @@ Pas de page web d'administration : une page de plus, en ligne, serait une cible 
 ## Sécurité et journaux
 
 - **Aucune IP stockée** : ni en base, ni dans les journaux. La limite de débit (10 signalements par heure et par adresse) garde en mémoire une **empreinte HMAC-SHA256** de l'IP, avec un sel aléatoire changé à chaque heure. En IPv6, c'est le /64 qui compte.
-- **Journaux sans IP ni texte** : le journal d'accès d'uvicorn est désactivé (`access_log=False`) et remplacé par une ligne « méthode chemin statut durée ». Un filtre efface aussi toute IP qui apparaîtrait dans un message. En cas d'erreur, seul le *type* d'erreur est journalisé, car le message pourrait contenir le texte.
+- **Journaux sans IP ni texte** : le journal d'accès d'uvicorn est désactivé (`access_log=False`) et remplacé par une ligne « méthode chemin statut durée ». Un filtre efface aussi toute IP qui apparaîtrait dans un message. En cas d'erreur de base, le journal donne le type, le code SQLSTATE, une piste en français et un message **nettoyé** (`app/db_errors.py`) : ni URL, ni mot de passe, ni hôte, ni IP, ni texte du signalement. Exemple : `enregistrement impossible: type=OperationalError sqlstate=28P01 piste=mot de passe refusé …`.
 - **Erreurs de validation** : la réponse 422 ne renvoie jamais le texte reçu.
 - Requêtes limitées à 16 Kio (413). En-têtes de sécurité (CSP, nosniff, no-referrer…), pas d'en-tête `server`.
 - **CORS fermé** : aucun site web ne peut appeler l'API depuis un navigateur. L'app mobile n'est pas concernée.
