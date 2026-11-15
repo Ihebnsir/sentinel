@@ -9,6 +9,13 @@
     <uses-permission
         android:name="android.permission.QUERY_ALL_PACKAGES"
         tools:ignore="QueryAllPackagesPermission" />
+    <!-- « Accès sensibles » : autorisation spéciale « Accès aux données
+         d'utilisation » (pas une permission dangereuse). L'utilisateur
+         l'active lui-même dans les réglages, après explication ; on lit
+         seulement quand les apps étaient ouvertes ou actives (7 jours). -->
+    <uses-permission
+        android:name="android.permission.PACKAGE_USAGE_STATS"
+        tools:ignore="ProtectedPermissions" />
     <!-- Permission « normale » : ouvrir l'écran de désinstallation d'une app.
          C'est toujours l'utilisateur qui confirme. -->
     <uses-permission android:name="android.permission.REQUEST_DELETE_PACKAGES" />

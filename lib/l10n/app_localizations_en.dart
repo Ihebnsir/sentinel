@@ -1029,6 +1029,145 @@ class AppLocalizationsEn extends AppLocalizations {
   String get appsNoWorry => 'No worrying signs';
 
   @override
+  String get accessEntryTitle => 'Sensitive access';
+
+  @override
+  String get accessEntrySubtitle =>
+      'Which apps could use the camera, microphone or location, and when';
+
+  @override
+  String get accessAndroidOnly => 'Sensitive access is available on Android.';
+
+  @override
+  String get accessIntroTitle =>
+      'Who could use the camera, microphone or location?';
+
+  @override
+  String get accessIntroWhat =>
+      'Sentinel combines two pieces of Android information: the apps allowed to use the camera, microphone or location, and the moments when they were open or active in the background, over the last 7 days.';
+
+  @override
+  String get accessIntroPermission =>
+      'To read these moments, Android requires a special permission: “Usage access”. On the page that opens, choose Sentinel and turn on the switch. You can remove it at any time.';
+
+  @override
+  String get accessIntroPrivacy =>
+      'Everything stays on your phone: Sentinel sends nothing and keeps nothing.';
+
+  @override
+  String get accessLimit =>
+      'Android keeps the exact camera, microphone and location history for the system only. Sentinel shows the moments when an app could use them, not proof that it did.';
+
+  @override
+  String get accessOpenSettings => 'Open settings';
+
+  @override
+  String get accessNotYetGranted =>
+      'The permission is not on yet. Find Sentinel in the list and turn on the switch.';
+
+  @override
+  String get accessLoading => 'Reading app activity…';
+
+  @override
+  String get accessNothing =>
+      'No app allowed to use the camera, microphone or location was active in the last 7 days.';
+
+  @override
+  String get accessToReview => 'Worth a look';
+
+  @override
+  String get accessOtherApps => 'Other apps';
+
+  @override
+  String get accessCamera => 'Camera';
+
+  @override
+  String get accessMicrophone => 'Microphone';
+
+  @override
+  String get accessLocation => 'Location';
+
+  @override
+  String accessLastActivity(String date) {
+    return 'Last activity: $date';
+  }
+
+  @override
+  String get accessNoRecentActivity => 'No activity in the last 7 days';
+
+  @override
+  String accessTimes(int count, String n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$n times',
+      one: '$n time',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String accessCounts(String day, String week) {
+    return '$day in 24 h · $week in 7 days';
+  }
+
+  @override
+  String get accessNight => 'At night (midnight – 6 AM)';
+
+  @override
+  String get accessBackground => 'In the background';
+
+  @override
+  String get accessLocationAlways => 'Location allowed all the time';
+
+  @override
+  String get accessReasonNight => 'Active at night, between midnight and 6 AM.';
+
+  @override
+  String get accessReasonBackground =>
+      'Active in the background while the camera or microphone is allowed.';
+
+  @override
+  String get accessRetention =>
+      'Depending on the phone, Android keeps this history for only a few days.';
+
+  @override
+  String get accessPrivacyDashboard => 'Exact history in Android settings';
+
+  @override
+  String get accessPrivacyDashboardHint =>
+      'Privacy dashboard, Android 12 and later';
+
+  @override
+  String get accessRevoke => 'Remove usage access';
+
+  @override
+  String get accessDetailAllowed => 'Permissions granted';
+
+  @override
+  String get accessDetailLast24h => 'Last 24 hours';
+
+  @override
+  String get accessDetailLast7d => 'Last 7 days';
+
+  @override
+  String get accessDetailMoments => 'Activity moments';
+
+  @override
+  String get accessMomentForeground => 'Open on screen';
+
+  @override
+  String get accessMomentBackground => 'Active in the background';
+
+  @override
+  String accessMomentRange(String start, String end) {
+    return '$start – $end';
+  }
+
+  @override
+  String get accessSeeAnalysis => 'See the app analysis';
+
+  @override
   String get detailPreinstalled => 'Preinstalled';
 
   @override

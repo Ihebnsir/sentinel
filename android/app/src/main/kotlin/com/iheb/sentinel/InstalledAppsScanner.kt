@@ -9,12 +9,9 @@ import android.content.pm.ApplicationInfo
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.content.pm.Signature
-import android.graphics.Bitmap
-import android.graphics.Canvas
 import android.os.Build
 import android.provider.Settings
 import java.io.ByteArrayInputStream
-import java.io.ByteArrayOutputStream
 import java.security.MessageDigest
 import java.security.cert.CertificateFactory
 import java.security.cert.X509Certificate
@@ -25,9 +22,7 @@ import javax.security.auth.x500.X500Principal
 class InstalledAppsScanner(private val context: Context) {
 
     private val pm: PackageManager = context.packageManager
-
-    // Taille des icônes envoyées à Dart, en pixels.
-    private val iconSize = 96
+    private val icons = AppIcons(pm)
 
     // Une Map par application, sauf Sentinel elle-même.
     fun scan(): List<Map<String, Any?>> {
@@ -49,14 +44,40 @@ class InstalledAppsScanner(private val context: Context) {
             }
     }
 
-    // Toutes les apps, avec leurs permissions et leurs certificats de signature.
-    private fun installedPackages(): List<PackageInfo> {
-        val flags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+    // Une seule app (lien depuis « Accès sensibles »), null si absente.
+    fun scanOne(packageName: String): Map<String, Any?>? {
+        if (packageName == context.packageName) return null
+        val info = try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                pm.getPackageInfo(packageName, PackageManager.PackageInfoFlags.of(packageFlags().toLong()))
+            } else {
+                @Suppress("DEPRECATION")
+                pm.getPackageInfo(packageName, packageFlags())
+            }
+        } catch (e: PackageManager.NameNotFoundException) {
+            return null
+        }
+        return describe(
+            info,
+            enabledPackages(Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES),
+            enabledPackages("enabled_notification_listeners"),
+            activeAdminPackages(),
+            packagesWithLauncherIcon(),
+        )
+    }
+
+    // Permissions et certificats de signature.
+    private fun packageFlags(): Int =
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             PackageManager.GET_PERMISSIONS or PackageManager.GET_SIGNING_CERTIFICATES
         } else {
             @Suppress("DEPRECATION")
             PackageManager.GET_PERMISSIONS or PackageManager.GET_SIGNATURES
         }
+
+    // Toutes les apps, avec leurs permissions et leurs certificats de signature.
+    private fun installedPackages(): List<PackageInfo> {
+        val flags = packageFlags()
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             pm.getInstalledPackages(PackageManager.PackageInfoFlags.of(flags.toLong()))
         } else {
@@ -80,7 +101,7 @@ class InstalledAppsScanner(private val context: Context) {
         return mapOf(
             "packageName" to packageName,
             "label" to pm.getApplicationLabel(app).toString(),
-            "icon" to iconPng(app),
+            "icon" to icons.png(app),
             "isSystemApp" to isSystemApp(app),
             "installerPackage" to installerOf(packageName),
             "versionName" to info.versionName,
@@ -266,21 +287,6 @@ class InstalledAppsScanner(private val context: Context) {
             }
             .map { it.packageName }
             .toSet()
-    }
-
-    // Dessine l'icône dans une image 96x96 puis la compresse en PNG.
-    private fun iconPng(app: ApplicationInfo): ByteArray? = try {
-        val bitmap = Bitmap.createBitmap(iconSize, iconSize, Bitmap.Config.ARGB_8888)
-        // mutate() : on modifie une copie, pas l'icône partagée par le système.
-        val drawable = pm.getApplicationIcon(app).mutate()
-        drawable.setBounds(0, 0, iconSize, iconSize)
-        drawable.draw(Canvas(bitmap))
-        val out = ByteArrayOutputStream()
-        bitmap.compress(Bitmap.CompressFormat.PNG, 100, out)
-        bitmap.recycle()
-        out.toByteArray()
-    } catch (e: Exception) {
-        null
     }
 
     // Les réglages listent des composants « package/classe » séparés par « : ».

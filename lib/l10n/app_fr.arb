@@ -508,6 +508,85 @@
   "appsScanning": "Analyse de vos applications…",
   "appsSystemApp": "Application du système Android",
   "appsNoWorry": "Aucun signal inquiétant",
+  "accessEntryTitle": "Accès sensibles",
+  "accessEntrySubtitle": "Quelles apps ont pu utiliser la caméra, le micro ou la localisation, et quand",
+  "accessAndroidOnly": "Les accès sensibles sont disponibles sur Android.",
+  "accessIntroTitle": "Qui a pu utiliser la caméra, le micro ou la localisation ?",
+  "accessIntroWhat": "Sentinel croise deux informations d'Android : les applications autorisées à utiliser la caméra, le micro ou la localisation, et les moments où elles étaient ouvertes ou actives en arrière-plan, sur les 7 derniers jours.",
+  "accessIntroPermission": "Pour lire ces moments, Android demande une autorisation spéciale : « Accès aux données d'utilisation ». Dans la page qui s'ouvre, choisissez Sentinel puis activez l'interrupteur. Vous pourrez la retirer à tout moment.",
+  "accessIntroPrivacy": "Tout reste sur votre téléphone : Sentinel n'envoie rien et ne garde rien.",
+  "accessLimit": "Android réserve l'historique exact de la caméra, du micro et de la localisation au système. Sentinel montre les moments où une app pouvait s'en servir, pas la preuve qu'elle l'a fait.",
+  "accessOpenSettings": "Ouvrir les réglages",
+  "accessNotYetGranted": "L'autorisation n'est pas encore activée. Cherchez Sentinel dans la liste et activez l'interrupteur.",
+  "accessLoading": "Lecture de l'activité des applications…",
+  "accessNothing": "Aucune application autorisée à utiliser la caméra, le micro ou la localisation n'a été active ces 7 derniers jours.",
+  "accessToReview": "À regarder",
+  "accessOtherApps": "Autres applications",
+  "accessCamera": "Caméra",
+  "accessMicrophone": "Micro",
+  "accessLocation": "Localisation",
+  "accessLastActivity": "Dernière activité : {date}",
+  "@accessLastActivity": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    },
+    "description": "date = date et heure déjà formatées"
+  },
+  "accessNoRecentActivity": "Aucune activité ces 7 derniers jours",
+  "accessTimes": "{count, plural, one{{n} fois} other{{n} fois}}",
+  "@accessTimes": {
+    "description": "n = le même nombre, déjà formaté",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "accessCounts": "{day} en 24 h · {week} en 7 jours",
+  "@accessCounts": {
+    "placeholders": {
+      "day": {
+        "type": "String"
+      },
+      "week": {
+        "type": "String"
+      }
+    },
+    "description": "day / week = « 3 fois » (accessTimes)"
+  },
+  "accessNight": "La nuit (0 h – 6 h)",
+  "accessBackground": "En arrière-plan",
+  "accessLocationAlways": "Localisation autorisée en permanence",
+  "accessReasonNight": "Active la nuit, entre 0 h et 6 h.",
+  "accessReasonBackground": "Active en arrière-plan alors que la caméra ou le micro est autorisé.",
+  "accessRetention": "Selon le téléphone, Android ne garde cet historique que quelques jours.",
+  "accessPrivacyDashboard": "Historique exact dans les réglages d'Android",
+  "accessPrivacyDashboardHint": "Tableau de bord de confidentialité, Android 12 et plus",
+  "accessRevoke": "Retirer l'accès aux données d'utilisation",
+  "accessDetailAllowed": "Autorisations accordées",
+  "accessDetailLast24h": "Dernières 24 h",
+  "accessDetailLast7d": "7 derniers jours",
+  "accessDetailMoments": "Moments d'activité",
+  "accessMomentForeground": "Ouverte à l'écran",
+  "accessMomentBackground": "Active en arrière-plan",
+  "accessMomentRange": "{start} – {end}",
+  "@accessMomentRange": {
+    "placeholders": {
+      "start": {
+        "type": "String"
+      },
+      "end": {
+        "type": "String"
+      }
+    },
+    "description": "Heures de début et de fin, déjà formatées"
+  },
+  "accessSeeAnalysis": "Voir l'analyse de l'app",
   "detailPreinstalled": "Préinstallée",
   "detailUnknownSource": "Source inconnue",
   "detailKnownSpyware": "Logiciel espion connu : {name}",

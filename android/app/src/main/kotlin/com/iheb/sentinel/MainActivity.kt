@@ -173,7 +173,29 @@ class MainActivity : FlutterActivity() {
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, appsChannelName)
             .setMethodCallHandler { call, result ->
                 when (call.method) {
-                    "scanApps" -> scanAppsInBackground(result)
+                    "scanApps" -> inBackground(result, "SCAN_FAILED") {
+                        InstalledAppsScanner(applicationContext).scan()
+                    }
+                    "scanApp" -> {
+                        val pkg = call.argument<String>("packageName").orEmpty()
+                        inBackground(result, "SCAN_FAILED") {
+                            InstalledAppsScanner(applicationContext).scanOne(pkg)
+                        }
+                    }
+                    // Accès sensibles (lib/services/sensitive_access_service.dart).
+                    "hasUsageAccess" ->
+                        result.success(SensitiveAccessReader(this).hasUsageAccess())
+                    "readSensitiveAccess" -> inBackground(result, "READ_FAILED") {
+                        SensitiveAccessReader(applicationContext).read()
+                    }
+                    "openUsageAccessSettings" -> {
+                        openUsageAccessSettings()
+                        result.success(null)
+                    }
+                    "openPrivacyDashboard" -> {
+                        openPrivacyDashboard()
+                        result.success(null)
+                    }
                     "openAppSettings" -> openForPackage(call, result) { uri ->
                         Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, uri)
                     }
@@ -280,17 +302,49 @@ class MainActivity : FlutterActivity() {
         openOrFallback(Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS))
     }
 
-    // Le scan tourne sur un autre thread pour ne pas figer l'écran ;
+    // Le travail tourne sur un autre thread pour ne pas figer l'écran ;
     // la réponse est renvoyée sur le thread principal, comme l'exige Flutter.
-    private fun scanAppsInBackground(result: MethodChannel.Result) {
+    private fun inBackground(result: MethodChannel.Result, errorCode: String, work: () -> Any?) {
         appsExecutor.execute {
             try {
-                val apps = InstalledAppsScanner(applicationContext).scan()
-                mainHandler.post { result.success(apps) }
+                val value = work()
+                mainHandler.post { result.success(value) }
             } catch (e: Exception) {
-                mainHandler.post { result.error("SCAN_FAILED", e.message, null) }
+                mainHandler.post { result.error(errorCode, e.message, null) }
             }
         }
+    }
+
+    // « Accès aux données d'utilisation » : directement sur Sentinel si le
+    // téléphone le permet, sinon la liste des apps.
+    private fun openUsageAccessSettings() {
+        try {
+            startActivity(
+                Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS)
+                    .setData(Uri.parse("package:$packageName")),
+            )
+        } catch (e: ActivityNotFoundException) {
+            openOrFallback(Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS))
+        } catch (e: SecurityException) {
+            openOrFallback(Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS))
+        }
+    }
+
+    // Android 12+ : tableau de bord de confidentialité (historique exact,
+    // lu par le système seul). Action non garantie selon le fabricant :
+    // sinon, les réglages de confidentialité.
+    private fun openPrivacyDashboard() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            try {
+                startActivity(Intent("android.intent.action.REVIEW_PERMISSION_USAGE"))
+                return
+            } catch (e: ActivityNotFoundException) {
+                // On essaie les réglages ci-dessous.
+            } catch (e: SecurityException) {
+                // Idem.
+            }
+        }
+        openOrFallback(Intent(Settings.ACTION_PRIVACY_SETTINGS))
     }
 
     // Lit l'argument « packageName » et ouvre l'écran Android correspondant.

@@ -30,6 +30,20 @@ class AppsScannerService {
     }
   }
 
+  /// Une seule application (lien depuis « Accès sensibles »).
+  /// Retourne null si elle n'est plus installée ou hors Android.
+  Future<InstalledApp?> scanApp(String packageName) async {
+    if (!_isAndroid) return null;
+    try {
+      final map = await _channel.invokeMapMethod<Object?, Object?>('scanApp', {
+        'packageName': packageName,
+      });
+      return map == null ? null : InstalledApp.fromMap(map);
+    } on MissingPluginException {
+      return null;
+    }
+  }
+
   /// Ouvre la page « Infos sur l'application » d'Android.
   Future<void> openAppSettings(String packageName) =>
       _invoke('openAppSettings', packageName);

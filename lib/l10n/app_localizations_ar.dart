@@ -1026,6 +1026,148 @@ class AppLocalizationsAr extends AppLocalizations {
   String get appsNoWorry => 'لا توجد مؤشرات مقلقة';
 
   @override
+  String get accessEntryTitle => 'الوصول الحساس';
+
+  @override
+  String get accessEntrySubtitle =>
+      'أي التطبيقات استطاعت استخدام الكاميرا أو الميكروفون أو الموقع، ومتى';
+
+  @override
+  String get accessAndroidOnly => 'الوصول الحساس متاح على أندرويد.';
+
+  @override
+  String get accessIntroTitle =>
+      'من استطاع استخدام الكاميرا أو الميكروفون أو الموقع؟';
+
+  @override
+  String get accessIntroWhat =>
+      'يجمع ⁦Sentinel⁩ بين معلومتين من أندرويد: التطبيقات المسموح لها باستخدام الكاميرا أو الميكروفون أو الموقع، والأوقات التي كانت فيها مفتوحة أو نشطة في الخلفية، خلال الأيام السبعة الأخيرة.';
+
+  @override
+  String get accessIntroPermission =>
+      'لقراءة هذه الأوقات، يطلب أندرويد إذنًا خاصًا: «الوصول إلى بيانات الاستخدام». في الصفحة التي ستُفتح، اختر ⁦Sentinel⁩ ثم فعّل الزر. يمكنك سحب هذا الإذن في أي وقت.';
+
+  @override
+  String get accessIntroPrivacy =>
+      'يبقى كل شيء على هاتفك: لا يرسل ⁦Sentinel⁩ أي شيء ولا يحتفظ بأي شيء.';
+
+  @override
+  String get accessLimit =>
+      'يحتفظ أندرويد بالسجل الدقيق للكاميرا والميكروفون والموقع للنظام وحده. يعرض ⁦Sentinel⁩ الأوقات التي كان بإمكان التطبيق استخدامها فيها، وليس دليلًا على أنه فعل ذلك.';
+
+  @override
+  String get accessOpenSettings => 'فتح الإعدادات';
+
+  @override
+  String get accessNotYetGranted =>
+      'الإذن غير مفعّل بعد. ابحث عن ⁦Sentinel⁩ في القائمة وفعّل الزر.';
+
+  @override
+  String get accessLoading => 'جارٍ قراءة نشاط التطبيقات…';
+
+  @override
+  String get accessNothing =>
+      'لم يكن أي تطبيق مسموح له باستخدام الكاميرا أو الميكروفون أو الموقع نشطًا خلال الأيام السبعة الأخيرة.';
+
+  @override
+  String get accessToReview => 'تستحق المراجعة';
+
+  @override
+  String get accessOtherApps => 'تطبيقات أخرى';
+
+  @override
+  String get accessCamera => 'الكاميرا';
+
+  @override
+  String get accessMicrophone => 'الميكروفون';
+
+  @override
+  String get accessLocation => 'الموقع';
+
+  @override
+  String accessLastActivity(String date) {
+    return 'آخر نشاط: $date';
+  }
+
+  @override
+  String get accessNoRecentActivity => 'لا نشاط خلال الأيام السبعة الأخيرة';
+
+  @override
+  String accessTimes(int count, String n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$n مرة',
+      many: '$n مرة',
+      few: '$n مرات',
+      two: 'مرتان',
+      one: 'مرة واحدة',
+      zero: '$n مرة',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String accessCounts(String day, String week) {
+    return '$day خلال 24 ساعة · $week خلال 7 أيام';
+  }
+
+  @override
+  String get accessNight => 'ليلًا (من منتصف الليل إلى 6 صباحًا)';
+
+  @override
+  String get accessBackground => 'في الخلفية';
+
+  @override
+  String get accessLocationAlways => 'الموقع مسموح به دائمًا';
+
+  @override
+  String get accessReasonNight => 'نشط ليلًا، بين منتصف الليل و6 صباحًا.';
+
+  @override
+  String get accessReasonBackground =>
+      'نشط في الخلفية مع أن الكاميرا أو الميكروفون مسموح به.';
+
+  @override
+  String get accessRetention =>
+      'حسب الهاتف، لا يحتفظ أندرويد بهذا السجل إلا لبضعة أيام.';
+
+  @override
+  String get accessPrivacyDashboard => 'السجل الدقيق في إعدادات أندرويد';
+
+  @override
+  String get accessPrivacyDashboardHint => 'لوحة الخصوصية، أندرويد 12 وما بعده';
+
+  @override
+  String get accessRevoke => 'سحب الوصول إلى بيانات الاستخدام';
+
+  @override
+  String get accessDetailAllowed => 'الأذونات الممنوحة';
+
+  @override
+  String get accessDetailLast24h => 'آخر 24 ساعة';
+
+  @override
+  String get accessDetailLast7d => 'آخر 7 أيام';
+
+  @override
+  String get accessDetailMoments => 'أوقات النشاط';
+
+  @override
+  String get accessMomentForeground => 'مفتوح على الشاشة';
+
+  @override
+  String get accessMomentBackground => 'نشط في الخلفية';
+
+  @override
+  String accessMomentRange(String start, String end) {
+    return '$start – $end';
+  }
+
+  @override
+  String get accessSeeAnalysis => 'عرض تحليل التطبيق';
+
+  @override
   String get detailPreinstalled => 'مثبّت مسبقًا';
 
   @override

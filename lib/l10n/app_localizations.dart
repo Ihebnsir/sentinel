@@ -1841,6 +1841,234 @@ abstract class AppLocalizations {
   /// **'Aucun signal inquiétant'**
   String get appsNoWorry;
 
+  /// No description provided for @accessEntryTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Accès sensibles'**
+  String get accessEntryTitle;
+
+  /// No description provided for @accessEntrySubtitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Quelles apps ont pu utiliser la caméra, le micro ou la localisation, et quand'**
+  String get accessEntrySubtitle;
+
+  /// No description provided for @accessAndroidOnly.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les accès sensibles sont disponibles sur Android.'**
+  String get accessAndroidOnly;
+
+  /// No description provided for @accessIntroTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Qui a pu utiliser la caméra, le micro ou la localisation ?'**
+  String get accessIntroTitle;
+
+  /// No description provided for @accessIntroWhat.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sentinel croise deux informations d\'Android : les applications autorisées à utiliser la caméra, le micro ou la localisation, et les moments où elles étaient ouvertes ou actives en arrière-plan, sur les 7 derniers jours.'**
+  String get accessIntroWhat;
+
+  /// No description provided for @accessIntroPermission.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pour lire ces moments, Android demande une autorisation spéciale : « Accès aux données d\'utilisation ». Dans la page qui s\'ouvre, choisissez Sentinel puis activez l\'interrupteur. Vous pourrez la retirer à tout moment.'**
+  String get accessIntroPermission;
+
+  /// No description provided for @accessIntroPrivacy.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tout reste sur votre téléphone : Sentinel n\'envoie rien et ne garde rien.'**
+  String get accessIntroPrivacy;
+
+  /// No description provided for @accessLimit.
+  ///
+  /// In fr, this message translates to:
+  /// **'Android réserve l\'historique exact de la caméra, du micro et de la localisation au système. Sentinel montre les moments où une app pouvait s\'en servir, pas la preuve qu\'elle l\'a fait.'**
+  String get accessLimit;
+
+  /// No description provided for @accessOpenSettings.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ouvrir les réglages'**
+  String get accessOpenSettings;
+
+  /// No description provided for @accessNotYetGranted.
+  ///
+  /// In fr, this message translates to:
+  /// **'L\'autorisation n\'est pas encore activée. Cherchez Sentinel dans la liste et activez l\'interrupteur.'**
+  String get accessNotYetGranted;
+
+  /// No description provided for @accessLoading.
+  ///
+  /// In fr, this message translates to:
+  /// **'Lecture de l\'activité des applications…'**
+  String get accessLoading;
+
+  /// No description provided for @accessNothing.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune application autorisée à utiliser la caméra, le micro ou la localisation n\'a été active ces 7 derniers jours.'**
+  String get accessNothing;
+
+  /// No description provided for @accessToReview.
+  ///
+  /// In fr, this message translates to:
+  /// **'À regarder'**
+  String get accessToReview;
+
+  /// No description provided for @accessOtherApps.
+  ///
+  /// In fr, this message translates to:
+  /// **'Autres applications'**
+  String get accessOtherApps;
+
+  /// No description provided for @accessCamera.
+  ///
+  /// In fr, this message translates to:
+  /// **'Caméra'**
+  String get accessCamera;
+
+  /// No description provided for @accessMicrophone.
+  ///
+  /// In fr, this message translates to:
+  /// **'Micro'**
+  String get accessMicrophone;
+
+  /// No description provided for @accessLocation.
+  ///
+  /// In fr, this message translates to:
+  /// **'Localisation'**
+  String get accessLocation;
+
+  /// date = date et heure déjà formatées
+  ///
+  /// In fr, this message translates to:
+  /// **'Dernière activité : {date}'**
+  String accessLastActivity(String date);
+
+  /// No description provided for @accessNoRecentActivity.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune activité ces 7 derniers jours'**
+  String get accessNoRecentActivity;
+
+  /// n = le même nombre, déjà formaté
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, one{{n} fois} other{{n} fois}}'**
+  String accessTimes(int count, String n);
+
+  /// day / week = « 3 fois » (accessTimes)
+  ///
+  /// In fr, this message translates to:
+  /// **'{day} en 24 h · {week} en 7 jours'**
+  String accessCounts(String day, String week);
+
+  /// No description provided for @accessNight.
+  ///
+  /// In fr, this message translates to:
+  /// **'La nuit (0 h – 6 h)'**
+  String get accessNight;
+
+  /// No description provided for @accessBackground.
+  ///
+  /// In fr, this message translates to:
+  /// **'En arrière-plan'**
+  String get accessBackground;
+
+  /// No description provided for @accessLocationAlways.
+  ///
+  /// In fr, this message translates to:
+  /// **'Localisation autorisée en permanence'**
+  String get accessLocationAlways;
+
+  /// No description provided for @accessReasonNight.
+  ///
+  /// In fr, this message translates to:
+  /// **'Active la nuit, entre 0 h et 6 h.'**
+  String get accessReasonNight;
+
+  /// No description provided for @accessReasonBackground.
+  ///
+  /// In fr, this message translates to:
+  /// **'Active en arrière-plan alors que la caméra ou le micro est autorisé.'**
+  String get accessReasonBackground;
+
+  /// No description provided for @accessRetention.
+  ///
+  /// In fr, this message translates to:
+  /// **'Selon le téléphone, Android ne garde cet historique que quelques jours.'**
+  String get accessRetention;
+
+  /// No description provided for @accessPrivacyDashboard.
+  ///
+  /// In fr, this message translates to:
+  /// **'Historique exact dans les réglages d\'Android'**
+  String get accessPrivacyDashboard;
+
+  /// No description provided for @accessPrivacyDashboardHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tableau de bord de confidentialité, Android 12 et plus'**
+  String get accessPrivacyDashboardHint;
+
+  /// No description provided for @accessRevoke.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retirer l\'accès aux données d\'utilisation'**
+  String get accessRevoke;
+
+  /// No description provided for @accessDetailAllowed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Autorisations accordées'**
+  String get accessDetailAllowed;
+
+  /// No description provided for @accessDetailLast24h.
+  ///
+  /// In fr, this message translates to:
+  /// **'Dernières 24 h'**
+  String get accessDetailLast24h;
+
+  /// No description provided for @accessDetailLast7d.
+  ///
+  /// In fr, this message translates to:
+  /// **'7 derniers jours'**
+  String get accessDetailLast7d;
+
+  /// No description provided for @accessDetailMoments.
+  ///
+  /// In fr, this message translates to:
+  /// **'Moments d\'activité'**
+  String get accessDetailMoments;
+
+  /// No description provided for @accessMomentForeground.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ouverte à l\'écran'**
+  String get accessMomentForeground;
+
+  /// No description provided for @accessMomentBackground.
+  ///
+  /// In fr, this message translates to:
+  /// **'Active en arrière-plan'**
+  String get accessMomentBackground;
+
+  /// Heures de début et de fin, déjà formatées
+  ///
+  /// In fr, this message translates to:
+  /// **'{start} – {end}'**
+  String accessMomentRange(String start, String end);
+
+  /// No description provided for @accessSeeAnalysis.
+  ///
+  /// In fr, this message translates to:
+  /// **'Voir l\'analyse de l\'app'**
+  String get accessSeeAnalysis;
+
   /// No description provided for @detailPreinstalled.
   ///
   /// In fr, this message translates to:

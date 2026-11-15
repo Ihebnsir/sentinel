@@ -12,6 +12,7 @@ import '../widgets/empty_state.dart';
 import '../widgets/loading_bar.dart';
 import '../widgets/risk_level_text.dart';
 import 'app_detail_screen.dart';
+import 'sensitive_access_screen.dart';
 import 'spyware_advice_screen.dart';
 
 /// Onglet « Applications » : analyse des applications installées.
@@ -163,6 +164,7 @@ class _AppsScreenState extends State<AppsScreen> with WidgetsBindingObserver {
           padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 24),
           children: [
             const _PageTitle(),
+            const _SensitiveAccessEntry(),
             ..._results(),
           ],
         ),
@@ -177,7 +179,11 @@ class _AppsScreenState extends State<AppsScreen> with WidgetsBindingObserver {
         padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 24),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: [const _PageTitle(), ...children],
+          children: [
+            const _PageTitle(),
+            const _SensitiveAccessEntry(),
+            ...children,
+          ],
         ),
       ),
     );
@@ -262,6 +268,60 @@ class _PageTitle extends StatelessWidget {
         fontWeight: FontWeight.w600,
         color: context.colors.encre,
       ),
+    );
+  }
+}
+
+/// Lien vers « Accès sensibles », toujours visible sous le titre.
+/// L'autorisation n'est demandée qu'une fois l'écran ouvert.
+class _SensitiveAccessEntry extends StatelessWidget {
+  const _SensitiveAccessEntry();
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    final c = context.colors;
+    return Column(
+      children: [
+        const SizedBox(height: 12),
+        InkWell(
+          onTap: () => Navigator.of(context).push(
+            MaterialPageRoute<void>(
+              builder: (_) => const SensitiveAccessScreen(),
+            ),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 12),
+            child: Row(
+              children: [
+                Icon(Icons.visibility_outlined, color: c.bleu),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        l.accessEntryTitle,
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                          color: c.encre,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        l.accessEntrySubtitle,
+                        style: TextStyle(fontSize: 13, color: c.secondaire),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        Divider(height: 1, thickness: 1, color: c.ligne),
+      ],
     );
   }
 }

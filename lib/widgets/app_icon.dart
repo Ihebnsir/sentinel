@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../models/installed_app.dart';
@@ -5,14 +6,19 @@ import '../theme/app_colors.dart';
 
 /// L'icône d'une app, aux coins légèrement arrondis.
 class AppIcon extends StatelessWidget {
-  const AppIcon({super.key, required this.app, required this.size});
+  const AppIcon({super.key, required InstalledApp this.app, required this.size})
+    : bytes = null;
 
-  final InstalledApp app;
+  /// Icône PNG brute (écran « Accès sensibles »).
+  const AppIcon.bytes(this.bytes, {super.key, required this.size}) : app = null;
+
+  final InstalledApp? app;
+  final Uint8List? bytes;
   final double size;
 
   @override
   Widget build(BuildContext context) {
-    final icon = app.icon;
+    final icon = app?.icon ?? bytes;
     return ClipRRect(
       borderRadius: BorderRadius.circular(size * 0.2),
       child: icon == null

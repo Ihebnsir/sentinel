@@ -1044,6 +1044,147 @@ class AppLocalizationsFr extends AppLocalizations {
   String get appsNoWorry => 'Aucun signal inquiétant';
 
   @override
+  String get accessEntryTitle => 'Accès sensibles';
+
+  @override
+  String get accessEntrySubtitle =>
+      'Quelles apps ont pu utiliser la caméra, le micro ou la localisation, et quand';
+
+  @override
+  String get accessAndroidOnly =>
+      'Les accès sensibles sont disponibles sur Android.';
+
+  @override
+  String get accessIntroTitle =>
+      'Qui a pu utiliser la caméra, le micro ou la localisation ?';
+
+  @override
+  String get accessIntroWhat =>
+      'Sentinel croise deux informations d\'Android : les applications autorisées à utiliser la caméra, le micro ou la localisation, et les moments où elles étaient ouvertes ou actives en arrière-plan, sur les 7 derniers jours.';
+
+  @override
+  String get accessIntroPermission =>
+      'Pour lire ces moments, Android demande une autorisation spéciale : « Accès aux données d\'utilisation ». Dans la page qui s\'ouvre, choisissez Sentinel puis activez l\'interrupteur. Vous pourrez la retirer à tout moment.';
+
+  @override
+  String get accessIntroPrivacy =>
+      'Tout reste sur votre téléphone : Sentinel n\'envoie rien et ne garde rien.';
+
+  @override
+  String get accessLimit =>
+      'Android réserve l\'historique exact de la caméra, du micro et de la localisation au système. Sentinel montre les moments où une app pouvait s\'en servir, pas la preuve qu\'elle l\'a fait.';
+
+  @override
+  String get accessOpenSettings => 'Ouvrir les réglages';
+
+  @override
+  String get accessNotYetGranted =>
+      'L\'autorisation n\'est pas encore activée. Cherchez Sentinel dans la liste et activez l\'interrupteur.';
+
+  @override
+  String get accessLoading => 'Lecture de l\'activité des applications…';
+
+  @override
+  String get accessNothing =>
+      'Aucune application autorisée à utiliser la caméra, le micro ou la localisation n\'a été active ces 7 derniers jours.';
+
+  @override
+  String get accessToReview => 'À regarder';
+
+  @override
+  String get accessOtherApps => 'Autres applications';
+
+  @override
+  String get accessCamera => 'Caméra';
+
+  @override
+  String get accessMicrophone => 'Micro';
+
+  @override
+  String get accessLocation => 'Localisation';
+
+  @override
+  String accessLastActivity(String date) {
+    return 'Dernière activité : $date';
+  }
+
+  @override
+  String get accessNoRecentActivity => 'Aucune activité ces 7 derniers jours';
+
+  @override
+  String accessTimes(int count, String n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$n fois',
+      one: '$n fois',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String accessCounts(String day, String week) {
+    return '$day en 24 h · $week en 7 jours';
+  }
+
+  @override
+  String get accessNight => 'La nuit (0 h – 6 h)';
+
+  @override
+  String get accessBackground => 'En arrière-plan';
+
+  @override
+  String get accessLocationAlways => 'Localisation autorisée en permanence';
+
+  @override
+  String get accessReasonNight => 'Active la nuit, entre 0 h et 6 h.';
+
+  @override
+  String get accessReasonBackground =>
+      'Active en arrière-plan alors que la caméra ou le micro est autorisé.';
+
+  @override
+  String get accessRetention =>
+      'Selon le téléphone, Android ne garde cet historique que quelques jours.';
+
+  @override
+  String get accessPrivacyDashboard =>
+      'Historique exact dans les réglages d\'Android';
+
+  @override
+  String get accessPrivacyDashboardHint =>
+      'Tableau de bord de confidentialité, Android 12 et plus';
+
+  @override
+  String get accessRevoke => 'Retirer l\'accès aux données d\'utilisation';
+
+  @override
+  String get accessDetailAllowed => 'Autorisations accordées';
+
+  @override
+  String get accessDetailLast24h => 'Dernières 24 h';
+
+  @override
+  String get accessDetailLast7d => '7 derniers jours';
+
+  @override
+  String get accessDetailMoments => 'Moments d\'activité';
+
+  @override
+  String get accessMomentForeground => 'Ouverte à l\'écran';
+
+  @override
+  String get accessMomentBackground => 'Active en arrière-plan';
+
+  @override
+  String accessMomentRange(String start, String end) {
+    return '$start – $end';
+  }
+
+  @override
+  String get accessSeeAnalysis => 'Voir l\'analyse de l\'app';
+
+  @override
   String get detailPreinstalled => 'Préinstallée';
 
   @override

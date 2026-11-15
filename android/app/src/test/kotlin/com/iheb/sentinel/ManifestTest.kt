@@ -67,4 +67,19 @@ class ManifestTest {
             assertTrue("$name exporté sans permission", c.attr("permission").isNotEmpty())
         }
     }
+
+    @Test
+    fun `aucune permission dangereuse en dehors de la camera et des notifications`() {
+        val factory = DocumentBuilderFactory.newInstance().apply { isNamespaceAware = true }
+        val doc = factory.newDocumentBuilder().parse(File("src/main/AndroidManifest.xml"))
+        val nodes = doc.getElementsByTagName("uses-permission")
+        val names = (0 until nodes.length).map { (nodes.item(it) as Element).attr("name") }
+        // Accès sensibles : autorisation spéciale, jamais micro ni localisation.
+        assertTrue("android.permission.PACKAGE_USAGE_STATS" in names)
+        val dangerous = listOf(
+            "RECORD_AUDIO", "ACCESS_FINE_LOCATION", "ACCESS_COARSE_LOCATION",
+            "ACCESS_BACKGROUND_LOCATION", "READ_PHONE_STATE", "READ_CONTACTS",
+        ).map { "android.permission.$it" }
+        assertTrue(names.none { it in dangerous })
+    }
 }
