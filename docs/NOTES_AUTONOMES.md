@@ -299,3 +299,24 @@ Non vérifié : l'interface n'a pas été lancée sur un téléphone (règle : p
 - Dart (`test/weekly_report_test.dart`) : lecture des données, clés envoyées au canal, écran (fr/ar, arche vide, hors Android), réglage (activation, refus, ligne masquée).
 
 Non vérifié : pas essayé sur un téléphone (règle : pas de `flutter run`). À regarder : déclenchement réel de la tâche quotidienne (Doze, fabricants agressifs type Xiaomi), notification du lundi, compteurs du pare-feu après une longue session VPN. La politique de confidentialité in-app ne mentionne pas encore ce bilan local : à ajouter si souhaité.
+
+## Réentraînement sûr de l'IA anti-arnaque (2026-11-16)
+
+### Choix faits sans demander
+
+- **`ml/retrain.py` réutilise `train.py`** : même recette (TF-IDF char_wb 2-5 + régression logistique, C par validation croisée). `train.py` a seulement été découpé en fonctions (`build_export`, `write_model`, `write_parity`) ; vérifié : modèle et fixtures identiques octet pour octet hors `version`/`date`.
+- **Test réel figé** = `ml/data/test_reel_fige.csv`, 30 % des messages réels (stratifié par label, `random_state=42`, une seule copie par forme « canonique »). Créé seulement à partir de 20 messages réels dont 4 de chaque label ; avant, la porte de qualité se rabat sur le test synthétique (dit dans le rapport). Jamais réécrit ensuite ; on le supprime à la main pour le refaire. Il est écrit même en mode `--essai` (il ne touche pas au modèle).
+- **Pas de fuite** : sont exclus de l'entraînement les messages du test figé, leurs copies « canoniques » (nettoyage SEN-12, minuscules, chiffres → 0, espaces réduits) et leurs quasi-copies (similarité cosinus ≥ 0,9 sur n-grammes 3-5). Le test synthétique = même découpage 80/20 que `train.py` sur le seed seul, donc identique à celui du modèle livré tant que `messages_perso.csv` est vide.
+- **Modèle livré** évalué depuis son JSON avec `reference_predict()` (le calcul exact de l'app), avec son propre seuil.
+- **Porte de qualité** (comparaison en nombres, pas en pourcentages) : arnaques détectées ≥ modèle livré ; fausses alertes sur normaux ≤ modèle livré (test réel figé, sinon synthétique, critère par critère) ; garde-fou ajouté : F1 synthétique sans baisse de plus de 0,05. Pas de modèle livré → le candidat est accepté.
+- **Après export** : si l'écart de la spécification Python dépasse 1e-12 ou si `flutter test test/phishing_parity_test.dart` échoue (ou flutter introuvable), les anciens fichiers sont remis et le rapport le dit.
+- **Empoisonnement** (sur réels + test figé) : quasi-doublons à labels opposés → signalés et **écartés de l'entraînement** (pas seulement signalés : plus sûr) ; groupes de quasi-copies ≥ 3 et ≥ 10 % ; domaines dans ≥ 3 messages et ≥ 15 % ; sources > 50 % (seulement s'il y a au moins 2 valeurs de `source` : aujourd'hui `review.py` écrit toujours « reel »).
+- **Rapport** `ml/reports/AAAA-MM-JJ.md` (suffixe `-2`, `-3` si plusieurs le même jour), CRLF, avec lexique. Il cite des extraits de messages réels (déjà anonymisés dans le CSV versionné) pour les contradictions.
+- `pytest==9.2.0` dans `ml/requirements-dev.txt` (installé dans `ml/.venv`).
+
+### Vérifié
+
+- 16 tests pytest (`ml/tests/`, données factices aléatoires à graine fixe, aucune base) : jeu figé créé une fois, jamais dans l'entraînement, contradictions / domaines / sources, porte de qualité, pipeline complet (premier export puis données empoisonnées refusées sans rien toucher), mode `--essai`, échec flutter → restauration.
+- Lancement complet réel sur les CSV locaux (perso vide) : candidat accepté, export, `flutter test` parité OK (52 tests) ; puis modèle et fixtures **remis** à la version livrée (le candidat était identique hors version). Le rapport commité est celui du mode `--essai`.
+
+Limite : un candidat identique au modèle livré est quand même réexporté (nouvelle `version`). Aucune connexion à Neon : les données réelles arrivent toujours par `backend/tools/review.py export`.

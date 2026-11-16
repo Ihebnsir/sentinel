@@ -376,10 +376,39 @@ def main() -> None:
         print(f"  [{kind}] p={proba[i]:.3f} ({row.langue}) {row.text}")
 
     title("6. Export")
+    metrics_test = {
+        "n_train": len(train_df),
+        "n_test": len(test_df),
+        "precision": precision,
+        "recall": recall,
+        "f1": f1,
+        "accuracy": accuracy,
+        "confusion_matrix": cm.tolist(),
+        "par_langue": per_lang,
+        "attention": "donnees majoritairement synthetiques : metriques optimistes",
+    }
+    export = build_export(model, best_c, metrics_test)
+    write_model(export)
+    print(f"  Modèle  : {MODEL_OUT.relative_to(ROOT)} ({MODEL_OUT.stat().st_size / 1024:.0f} Ko)")
+    max_gap, n_cases = write_parity(model, export)
+    print(f"  Parité  : {PARITY_OUT.relative_to(ROOT)} ({n_cases} cas)")
+
+    title("7. Vérification de la spécification du README")
+    print(f"  Écart max. implémentation de référence (sans sklearn) vs sklearn : {max_gap:.2e}")
+    if max_gap > 1e-12:
+        sys.exit("  ERREUR : la spécification ne reproduit pas scikit-learn !")
+    print("  OK : la spécification reproduit scikit-learn.")
+
+
+# --- Export (réutilisé par retrain.py) ------------------------------------------------
+def build_export(model: Pipeline, best_c: float, metrics_test: dict) -> dict:
+    """Le dictionnaire de phishing_model.json pour un modèle entraîné."""
+    vec: TfidfVectorizer = model.named_steps["tfidf"]
+    clf: LogisticRegression = model.named_steps["clf"]
     whitespace = python_whitespace()
     now = datetime.now()
     vocab = {g: int(j) for g, j in sorted(vec.vocabulary_.items(), key=lambda kv: kv[1])}
-    export = {
+    return {
         "format_version": 2,  # 2 : étape 0 (SEN-12)
         "version": now.strftime("%Y%m%d-%H%M%S"),
         "date": now.isoformat(timespec="seconds"),
@@ -411,28 +440,23 @@ def main() -> None:
         "intercept": float(clf.intercept_[0]),
         "vocabulary": vocab,
         "idf": [float(x) for x in vec.idf_],
-        "coef": [float(x) for x in coefs],
-        "metrics_test": {
-            "n_train": len(train_df),
-            "n_test": len(test_df),
-            "precision": precision,
-            "recall": recall,
-            "f1": f1,
-            "accuracy": accuracy,
-            "confusion_matrix": cm.tolist(),
-            "par_langue": per_lang,
-            "attention": "donnees majoritairement synthetiques : metriques optimistes",
-        },
+        "coef": [float(x) for x in clf.coef_[0]],
+        "metrics_test": metrics_test,
     }
-    MODEL_OUT.parent.mkdir(parents=True, exist_ok=True)
+
+
+def write_model(export: dict, path: Path = MODEL_OUT) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
     # JSON compact sur une ligne ; les flottants sont écrits avec assez de
     # chiffres pour être relus à l'identique (aller-retour exact en Dart).
-    with open(MODEL_OUT, "w", encoding="utf-8", newline="") as f:
+    with open(path, "w", encoding="utf-8", newline="") as f:
         f.write(json.dumps(export, ensure_ascii=False, separators=(",", ":")))
         f.write("\r\n")
-    print(f"  Modèle  : {MODEL_OUT.relative_to(ROOT)} ({MODEL_OUT.stat().st_size / 1024:.0f} Ko)")
 
-    # Fixtures de parité.
+
+def write_parity(model: Pipeline, export: dict, path: Path = PARITY_OUT) -> tuple[float, int]:
+    """Écrit les fixtures de parité. Renvoie (écart max. référence/sklearn, nb de cas)."""
+    vec: TfidfVectorizer = model.named_steps["tfidf"]
     texts = [t for _, t in PARITY_TEXTS]
     p_parity = model.predict_proba(texts)[:, 1]
     z_parity = model.decision_function(texts)
@@ -450,17 +474,11 @@ def main() -> None:
                        "donner les mêmes à la tolérance près.",
         "cases": cases,
     }
-    PARITY_OUT.parent.mkdir(parents=True, exist_ok=True)
-    with open(PARITY_OUT, "w", encoding="utf-8", newline="\r\n") as f:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with open(path, "w", encoding="utf-8", newline="\r\n") as f:
         f.write(json.dumps(parity, ensure_ascii=False, indent=2))
         f.write("\n")
-    print(f"  Parité  : {PARITY_OUT.relative_to(ROOT)} ({len(cases)} cas)")
-
-    title("7. Vérification de la spécification du README")
-    print(f"  Écart max. implémentation de référence (sans sklearn) vs sklearn : {max_gap:.2e}")
-    if max_gap > 1e-12:
-        sys.exit("  ERREUR : la spécification ne reproduit pas scikit-learn !")
-    print("  OK : la spécification reproduit scikit-learn.")
+    return max_gap, len(cases)
 
 
 if __name__ == "__main__":

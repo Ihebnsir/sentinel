@@ -42,6 +42,35 @@ Le script fusionne les deux CSV, retire les doublons, sépare 80 % / 20 % (strat
 réécrit le modèle et les fixtures. **Après chaque réentraînement, il faut committer
 les deux fichiers JSON ensemble** (la fixture est liée à une version du modèle).
 
+### Réentraînement sûr (recommandé) : `retrain.py`
+
+```powershell
+ml\.venv\Scripts\python.exe ml\retrain.py              # complet
+ml\.venv\Scripts\python.exe ml\retrain.py --essai      # rapport seul, rien n'est exporté
+ml\.venv\Scripts\python.exe ml\retrain.py --sans-flutter
+```
+
+1. **Test réel figé** : dès qu'il y a au moins 20 messages réels (dont 4 arnaques et
+   4 normaux), 30 % sont mis de côté dans `data/test_reel_fige.csv`, **une seule fois**.
+   Ce fichier n'est plus jamais réécrit ; ses messages (et leurs quasi-copies) ne servent
+   jamais à l'entraînement. Pour le refaire, il faut le supprimer à la main (les
+   comparaisons avec les anciens rapports ne sont alors plus valables).
+2. **Empoisonnement** : signale les messages réels presque identiques avec des labels
+   opposés (écartés de l'entraînement), les messages recopiés en masse, les domaines et
+   les sources sur-représentés.
+3. **Candidat** : même recette que `train.py`, comparé au modèle livré sur le test réel
+   figé et sur le test synthétique.
+4. **Porte de qualité** : export seulement si le candidat détecte au moins autant
+   d'arnaques réelles, ne fait pas plus de fausses alertes sur les messages normaux
+   réels (test synthétique tant que le test réel n'existe pas) et si son F1 synthétique
+   ne baisse pas de plus de 0,05. Sinon : rien n'est touché.
+5. **Export** : modèle + fixtures de parité, puis `flutter test test/phishing_parity_test.dart`.
+   Si la parité échoue, les anciens fichiers sont remis.
+6. **Rapport** : `reports/AAAA-MM-JJ.md`, à lire même quand tout va bien.
+
+Tests : `ml\.venv\Scripts\python.exe -m pip install -r ml\requirements-dev.txt` puis
+`ml\.venv\Scripts\python.exe -m pytest ml\tests` (petites données factices).
+
 La dernière étape (« Vérification de la spécification ») recalcule les probabilités
 avec une implémentation **sans scikit-learn** qui suit exactement la spécification
 ci-dessous. Si elle échoue, la spécification n'est plus valable.

@@ -1,0 +1,2 @@
+# Outils de test (en plus de requirements.txt)
+pytest==9.2.0
