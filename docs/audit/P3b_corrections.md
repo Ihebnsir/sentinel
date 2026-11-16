@@ -4,14 +4,14 @@
 |---|---|
 | Base | P3a (`docs/audit/P3a_corrections.md`) |
 | Constats traités | SEN-01, SEN-04, SEN-08, SEN-10, SEN-11 |
-| Retest émulateur | `Sentinel_Audit_Root` (Android 17, root), APK **profile** obfusqué : même compilation AOT que la release ; signé avec la clé de debug, jamais distribué. La release attend la clé de publication. |
+| Retest émulateur | `Sentinel_Audit_Root` (Android 17, root), APK **profile** obfusqué : même compilation AOT que la release ; signé avec la clé de debug, jamais distribué. La release est signée par la clé de publication (vérifiée le 16/11/2026, SEN-01). |
 | Contrôles | `flutter analyze` sans problème ; `flutter test` **436 réussis** ; `./gradlew testDebugUnitTest` **125 tests, 0 échec** (1 ignoré : benchmark, ignoré exprès) ; `flutter build apk --debug` réussi |
 
 ## Résumé
 
 | ID | Statut | Changement | Tests | Retest |
 |---|---|---|---|---|
-| SEN-01 | **Corrigé**, vérification `apksigner` en attente de la clé | Signature release lue dans `android/key.properties`, keystore hors du dépôt, build release bloqué sinon | build sans clé → échec ; keystore dans le dépôt → échec | `apksigner` dès que la clé existe (docs/RELEASE.md, §4) |
+| SEN-01 | **Corrigé** | Signature release lue dans `android/key.properties`, keystore hors du dépôt, build release bloqué sinon | build sans clé → échec ; keystore dans le dépôt → échec | `apksigner` : vérifié, schéma v2, clé de publication RSA 4096 (16/11/2026) |
 | SEN-04 | **Corrigé** | `tools/release/build_release.ps1` : `--obfuscate --split-debug-info=build/symbols`, symboles archivés hors du dépôt | script sans clé → refus | binaire : 1 chemin `package:sentinel/` (P1 : 71) |
 | SEN-08 | **Corrigé** | AndroidX et coroutines relevés par contraintes Gradle | build + 125 JUnit + 436 Dart | OSV : 67 composants, 0 vulnérabilité |
 | SEN-10 | **Corrigé** | DNS-over-TLS, repli DNS-over-HTTPS/2, jamais de clair sans accord, SERVFAIL et état visible | 24 JUnit (framing, choix, HTTP/2, vrai TLS) + 4 Dart | capture : 0 UDP 53 vers Quad9 |
@@ -98,4 +98,9 @@ En P2, chaque nom visité partait en clair (`www.wikipedia.org`, `audit-visite-p
 - Avec un `key.properties` temporaire pointant vers un faux fichier dans le dépôt : `… le keystore doit être HORS du dépôt …` → **BUILD FAILED** (fichiers temporaires supprimés).
 - `tools\release\build_release.ps1` sans clé : refus avant toute demande de mot de passe.
 - `flutter build apk --debug` : réussi (le debug n'est pas concerné).
-- **Reste à faire par le propriétaire** : créer la clé (docs/RELEASE.md, §1), construire, puis vérifier avec `apksigner` (§4).
+- **Vérification finale (16/11/2026)** : APK construit par le propriétaire avec `tools\release\build_release.ps1` et sa clé de publication. `apksigner verify --print-certs build/app/outputs/flutter-apk/app-release.apk` :
+  - `Verifies`, schéma de signature **v2 : true** ;
+  - certificat `CN=Iheb Nsir, OU=Sentinel, O=Sentinel, L=tunis, ST=Unknown, C=TN` (plus `CN=Android Debug`), clé de **4096** bits ;
+  - empreinte SHA-256 du certificat : `ec541b88160d995808bb24a61a8968d7c3c0311b02d955cc88b92fc7d08a1030` ;
+  - SHA-256 de l'APK vérifié : `a2f348f0cf8dbfb7aa55c4bf763b34125958efdc1861f8e98d5818d9ab465568`.
+- `git ls-files` : aucun keystore (`.jks`, `.keystore`, `.p12`) ni `key.properties` suivi ; `android/key.properties` est ignoré (`git check-ignore`). Aucun mot de passe n'apparaît dans ce rapport.

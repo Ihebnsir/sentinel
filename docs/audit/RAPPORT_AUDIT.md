@@ -75,7 +75,7 @@ Sévérité selon l'impact pour l'utilisateur et la facilité d'exploitation (d�
 
 | ID | Constat | MASVS | Sévérité | Statut final | Preuve |
 |---|---|---|---|---|---|
-| SEN-01 | APK release signé avec la clé de debug | RESILIENCE-2 | **Élevée** | **Corrigé**, vérification `apksigner` à faire avec la clé | [P3b](P3b_corrections.md#sen-01--signature), [RELEASE](../RELEASE.md) |
+| SEN-01 | APK release signé avec la clé de debug | RESILIENCE-2 | **Élevée** | **Corrigé** (`apksigner` : clé de publication, certificat SHA-256 `ec541b88…d7c3c0311b02d955cc88b92fc7d08a1030`) | [P3b](P3b_corrections.md#sen-01--signature), [RELEASE](../RELEASE.md) |
 | SEN-02 | Police téléchargée chez Google au lancement, sans accord | PRIVACY-1/3 | Moyenne | **Corrigé** | [P3a](P3a_corrections.md#sen-02--police-téléchargée-chez-google--corrigé) |
 | SEN-03 | Presse-papiers lisible par toutes les apps (Android ≤ 9) | CODE-1 | Moyenne | **Corrigé** | [P3a](P3a_corrections.md#sen-03--presse-papiers-lisible-par-toutes-les-apps-android--9--corrigé) |
 | SEN-04 | Code Dart non obfusqué | RESILIENCE-3 | Faible | **Corrigé** | [P3b](P3b_corrections.md#sen-04--obfuscation) |
@@ -94,7 +94,7 @@ Sévérité selon l'impact pour l'utilisateur et la facilité d'exploitation (d�
 | SEN-17 | Bandeau Wi-Fi qui cache des boutons | hors MASVS | Info | **Corrigé** | [P3a](P3a_corrections.md#sen-17--bandeau-wi-fi-qui-cache-des-boutons--corrigé) |
 | SEN-18 | Pare-feu actif : sécurité du Wi-Fi « inconnue » | hors MASVS | Moyenne | **Corrigé** | [P3c](P3c_corrections.md#sen-18--wi-fi--inconnu--quand-le-pare-feu-est-actif) |
 
-Bilan : **14 corrigés et vérifiés, 1 corrigé en attente de la vérification finale (SEN-01), 3 acceptés, 0 restant** (18 constats). Pendant les corrections, 10 faux positifs de MobSF ont été écartés (P1, §5), et 20 faux positifs de Gitleaks issus du rapport MobSF ont été documentés (P3a, §3).
+Bilan : **15 corrigés et vérifiés, 3 acceptés, 0 restant** (18 constats). SEN-01 vérifié le 16/11/2026 sur l'APK release signé par le propriétaire (`apksigner` : schéma v2, RSA 4096, APK SHA-256 `a2f348f0cf8dbfb7aa55c4bf763b34125958efdc1861f8e98d5818d9ab465568`). Pendant les corrections, 10 faux positifs de MobSF ont été écartés (P1, §5), et 20 faux positifs de Gitleaks issus du rapport MobSF ont été documentés (P3a, §3).
 
 **Indicateurs finaux** : `flutter analyze` sans problème ; **436** tests Flutter et **125** tests JUnit réussis à la fin de l'audit (**703** et **144** après SEN-18, le 07/11/2026) ; **0** vulnérabilité connue dans les 70 paquets Pub et les 67 composants Android (OSV.dev, 24/10/2026) ; **0** requête DNS en clair vers Quad9 sans accord de l'utilisateur (capture réseau).
 

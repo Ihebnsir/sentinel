@@ -161,6 +161,22 @@ Merci de signaler les vulnérabilités en privé. Voir [SECURITY.md](SECURITY.md
 
 L'application a été auditée selon l'OWASP MASVS v2 (analyse statique et dynamique, 17 constats et leurs corrections) : voir le [rapport d'audit](docs/audit/RAPPORT_AUDIT.md). La publication d'une version est décrite dans [docs/RELEASE.md](docs/RELEASE.md).
 
+### Vérifier un APK
+
+Les APK officiels de Sentinel sont signés avec une seule clé de publication. Avant d'installer un APK, vérifiez son certificat :
+
+```
+apksigner verify --print-certs app-release.apk
+```
+
+La sortie doit indiquer `Verifies` et cette empreinte SHA-256 du certificat :
+
+```
+ec541b88160d995808bb24a61a8968d7c3c0311b02d955cc88b92fc7d08a1030
+```
+
+Toute autre empreinte (par exemple `CN=Android Debug`) signifie que l'APK n'est pas officiel : ne l'installez pas.
+
 ## Données tierces
 
 Les QR codes sont décodés par [zxing-android-embedded](https://github.com/journeyapps/zxing-android-embedded) 4.3.0 et [ZXing](https://github.com/zxing/zxing) core 3.5.3, sous licence [Apache 2.0](https://www.apache.org/licenses/LICENSE-2.0).
