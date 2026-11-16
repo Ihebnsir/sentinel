@@ -268,3 +268,34 @@ Choix faits sans demander :
 - **Tests ajoutés** : `test/vault_documents_test.dart` (type détecté, aller-retour, nonces neufs, octet / tag / nonce / en-tête modifiés, fichier tronqué ou échangé, mauvaise clé, id dangereux, lecture refusée coffre verrouillé, trop gros / mauvais type, suppression, renommage, orphelins, suppression du coffre, export v2 / import, sauvegarde altérée ou incomplète, ancien export v1, restauration sur un « autre téléphone », aucun fichier en clair ni temporaire restant) ; `VaultMediaPolicyTest.kt` (règles de recompression, PDF, nom de partage, fournisseurs non exportés, aucune permission de stockage).
 
 Non vérifié : l'interface n'a pas été lancée sur un téléphone (règle : pas de `flutter run`). À essayer à la main : photo avec plusieurs apps d'appareil photo (Samsung, Xiaomi, Pixel), rotation des photos, aperçu des PDF (multi-pages, Android 10 et 11+), partage vers WhatsApp / Gmail / Drive (certaines apps veulent un fichier « seekable » et pourraient refuser un tube), et une sauvegarde lourde sur un téléphone d'entrée de gamme.
+
+## Bilan de la semaine (2026-11-16)
+
+### Ce que dit la doc Android (vérifié sur developer.android.com)
+
+- WorkManager est recommandé pour le travail persistant ; dernière version stable 2.12.0 (23/09/2026), minSdk 24, compileSdk 33+. Il s'appuie sur JobScheduler (API 23+).
+- `JobInfo.Builder.setPersisted(true)` garde la tâche après un redémarrage et exige `RECEIVE_BOOT_COMPLETED` (déjà déclarée). Période minimale 15 min ; garder un `jobId` fixe entre les mises à jour.
+
+### Choix faits sans demander
+
+- **JobScheduler directement, pas WorkManager** : c'est ce que WorkManager utilise en dessous sur notre minSdk (24). Aucune nouvelle dépendance (WorkManager tire Room/SQLite, initialiseur au démarrage…), cohérent avec la politique « peu de dépendances » de l'app. Tâche **quotidienne** (`setPeriodic(1 jour, flex 6 h)`, persistée), pas hebdomadaire : plus robuste au mode Doze ; elle décide seule si c'est le moment.
+- **La tâche n'existe que si elle a du travail** : notification activée, ou des semaines enregistrées à effacer. Sinon elle s'annule. Pas de service permanent.
+- **Stockage côté Kotlin** (`weekly/WeeklyStatsStore.kt`, SharedPreferences privées, déjà exclues des sauvegardes) : le pare-feu et la protection automatique comptent sans moteur Flutter. Dart envoie ses compteurs par le canal `com.iheb.sentinel/weekly`.
+- **Liste fermée de clés** (`WeeklyLedger.COUNTERS` / `GAUGES`) : toute autre clé est refusée, côté canal comme à la lecture du fichier. Impossible d'y glisser un domaine, un texte ou un nom de Wi-Fi.
+- **Ce qui est compté** :
+  - requêtes bloquées par catégorie (malware, imitations, traqueurs, pubs) : catégorie seulement, écritures groupées toutes les 30 s (et à l'arrêt du VPN) ; on peut perdre jusqu'à 30 s de compteurs si Android tue l'app ;
+  - messages analysés : analyse manuelle (onglet Messages) + protection automatique ; le scan de QR code n'est pas compté ;
+  - alertes d'arnaque : verdict « Arnaque probable » (manuel ou automatique), même si Android bloque l'affichage de la notification ;
+  - score : premier et dernier score calculés dans la semaine (à chaque audit de l'accueil) ;
+  - apps à risque : dernière valeur vue (apps « modéré » ou « élevé » au dernier scan de l'onglet Applications) ;
+  - mots de passe : dernières valeurs vues (faibles, réutilisés, trouvés dans des fuites) quand le coffre est ouvert. « – » si pas mesuré cette semaine.
+- **Semaine** = du lundi au dimanche, heure locale. **Effacement** : on garde la semaine en cours + les 7 précédentes (8 semaines) ; les semaines plus anciennes, vides ou « du futur » (horloge changée) sont supprimées à chaque lecture/écriture et par la tâche quotidienne.
+- **Notification** désactivée par défaut, réglage « Notification du bilan » dans Réglages (demande l'autorisation Android 13+ au moment d'activer ; refus → reste désactivée). Envoyée le lundi à partir de 9 h, une fois par semaine, seulement si la semaine passée a des données ; pas d'envoi immédiat pour la semaine en cours au moment d'activer. Texte neutre, sans aucun chiffre (« Votre bilan de la semaine est prêt »), même version sur l'écran verrouillé ; canal à importance basse (sans son). Le tap ouvre simplement Sentinel (accueil), pas directement l'écran Bilan : plus simple, rien à transmettre.
+- **Écran** : entrée « Bilan de la semaine » en bas de l'accueil (Android seulement), arche du score de fin de semaine, évolution du score, tableau sobre à deux colonnes (cette semaine / semaine d'avant) avec traits fins, note de confidentialité.
+
+### Tests
+
+- Kotlin (`WeeklyLedgerTest`, 10 tests) : début de semaine (fuseau, avant 1970), addition des compteurs, refus des clés inconnues, score début/fin, jauges, effacement après 8 semaines, JSON, décision de notification.
+- Dart (`test/weekly_report_test.dart`) : lecture des données, clés envoyées au canal, écran (fr/ar, arche vide, hors Android), réglage (activation, refus, ligne masquée).
+
+Non vérifié : pas essayé sur un téléphone (règle : pas de `flutter run`). À regarder : déclenchement réel de la tâche quotidienne (Doze, fabricants agressifs type Xiaomi), notification du lundi, compteurs du pare-feu après une longue session VPN. La politique de confidentialité in-app ne mentionne pas encore ce bilan local : à ajouter si souhaité.

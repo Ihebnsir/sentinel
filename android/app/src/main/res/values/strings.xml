@@ -41,4 +41,9 @@
     <string name="tile_off">Inactif</string>
     <string name="tile_needs_permission">Autorisation à donner</string>
     <string name="tile_strict_dns">DNS privé strict</string>
+    <!-- Bilan de la semaine (notification facultative, texte neutre). -->
+    <string name="weekly_channel_name">Bilan de la semaine</string>
+    <string name="weekly_channel_description">Un rappel par semaine, si vous l’avez activé dans les Réglages.</string>
+    <string name="weekly_notification_title">Bilan de la semaine</string>
+    <string name="weekly_notification_text">Votre bilan de la semaine est prêt.</string>
 </resources>

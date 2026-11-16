@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:material_ui/material_ui.dart';
 
 import '../l10n/l10n.dart';
@@ -6,6 +8,7 @@ import '../models/security_action.dart';
 import '../models/wifi_status.dart';
 import '../services/device_security_service.dart';
 import '../services/firewall_service.dart';
+import '../services/weekly_report_service.dart';
 import '../services/security_score_calculator.dart';
 import '../services/wifi_risk.dart';
 import '../services/wifi_service.dart';
@@ -16,6 +19,7 @@ import '../widgets/score_arch.dart';
 import '../widgets/wifi_alert.dart';
 import '../widgets/wifi_section.dart';
 import 'settings_screen.dart';
+import 'weekly_report_screen.dart';
 
 /// L'écran d'accueil : salutation, score et actions conseillées.
 /// StatefulWidget car il garde le résultat de l'audit en mémoire.
@@ -132,8 +136,18 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       final status = await _service.getSecurityStatus();
       // L'écran a pu être fermé pendant l'attente.
       if (!mounted) return;
+      if (status != null) {
+        // Bilan de la semaine : score de début et de fin de semaine.
+        final score = calculateSecurityScore(
+          context.l10n,
+          status,
+          DateTime.now(),
+        ).score;
+        unawaited(const WeeklyReportService().recordScore(score));
+      }
       setState(() {
         _status = status;
+
         _failed = false;
         _loading = false;
       });
@@ -233,6 +247,17 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                   const SizedBox(height: 32),
                   const NetworkProtectionSection(),
                 ],
+                if (WeeklyReportService.isSupported && !_loading) ...[
+                  const SizedBox(height: 24),
+                  Divider(height: 1, thickness: 1, color: context.colors.ligne),
+                  _WeeklyEntry(
+                    onTap: () => Navigator.of(context).push(
+                      MaterialPageRoute<void>(
+                        builder: (_) => const WeeklyReportScreen(),
+                      ),
+                    ),
+                  ),
+                ],
               ],
             ),
           ),
@@ -304,7 +329,35 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   }
 }
 
+/// Entrée discrète vers le « Bilan de la semaine ».
+class _WeeklyEntry extends StatelessWidget {
+  const _WeeklyEntry({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    return ListTile(
+      contentPadding: EdgeInsets.zero,
+      leading: Icon(Icons.insights_outlined, color: context.colors.secondaire),
+      title: Text(
+        l.weeklyTitle,
+        style: TextStyle(fontSize: 15, color: context.colors.encre),
+      ),
+      subtitle: Text(
+        l.weeklyHomeEntryDetail,
+        style: TextStyle(fontSize: 13, color: context.colors.discret),
+      ),
+      trailing: Icon(Icons.chevron_right, color: context.colors.discret),
+
+      onTap: onTap,
+    );
+  }
+}
+
 /// Message centré affiché à la place de l'arche.
+
 class _InfoMessage extends StatelessWidget {
   const _InfoMessage(this.text);
 

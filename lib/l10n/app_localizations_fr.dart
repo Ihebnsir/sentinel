@@ -2794,4 +2794,90 @@ class AppLocalizationsFr extends AppLocalizations {
   String qrConfirmPayment(String recipient) {
     return 'Une app de paiement va s\'ouvrir pour : $recipient. Vérifiez le bénéficiaire et le montant avant de valider.';
   }
+
+  @override
+  String get weeklyTitle => 'Bilan de la semaine';
+
+  @override
+  String get weeklyHomeEntryDetail =>
+      'Ce que Sentinel a fait pour vous ces derniers jours';
+
+  @override
+  String weeklyPeriod(String start, String end) {
+    return 'Du $start au $end';
+  }
+
+  @override
+  String get weeklyThisWeek => 'Cette semaine';
+
+  @override
+  String get weeklyLastWeek => 'Semaine d\'avant';
+
+  @override
+  String get weeklyNoScore => 'Pas encore de score';
+
+  @override
+  String weeklyScoreChange(String start, String end) {
+    return 'Score : $start en début de semaine, $end aujourd\'hui';
+  }
+
+  @override
+  String weeklyLastWeekScore(String score) {
+    return 'Score à la fin de la semaine d\'avant : $score';
+  }
+
+  @override
+  String get weeklyFirewall => 'Pare-feu : requêtes bloquées';
+
+  @override
+  String get weeklyBlockedTotal => 'Total';
+
+  @override
+  String get weeklyMessages => 'Messages';
+
+  @override
+  String get weeklyMessagesAnalyzed => 'Messages analysés';
+
+  @override
+  String get weeklyScamAlerts => 'Alertes d\'arnaque';
+
+  @override
+  String get weeklyApps => 'Applications';
+
+  @override
+  String get weeklyRiskyApps => 'Apps à vérifier';
+
+  @override
+  String get weeklyPasswords => 'Mots de passe du coffre';
+
+  @override
+  String get weeklyPasswordsWeak => 'Faibles';
+
+  @override
+  String get weeklyPasswordsReused => 'Réutilisés';
+
+  @override
+  String get weeklyPasswordsBreached => 'Trouvés dans des fuites';
+
+  @override
+  String get weeklyNotMeasured => 'Pas mesuré';
+
+  @override
+  String get weeklyPrivacyNote =>
+      'Seulement des compteurs, gardés sur ce téléphone pendant 8 semaines puis effacés. Aucun site, aucun message ni aucun nom de Wi-Fi n\'est enregistré.';
+
+  @override
+  String get weeklyAndroidOnly =>
+      'Le bilan de la semaine est disponible sur Android.';
+
+  @override
+  String get settingsWeeklyNotification => 'Notification du bilan';
+
+  @override
+  String get settingsWeeklyNotificationDetail =>
+      'Un rappel neutre le lundi matin';
+
+  @override
+  String get settingsWeeklyNotificationDenied =>
+      'Notifications refusées : autorisez-les dans les réglages d\'Android.';
 }

@@ -2819,4 +2819,88 @@ class AppLocalizationsAr extends AppLocalizations {
   String qrConfirmPayment(String recipient) {
     return 'سيُفتح تطبيق دفع لـ: ⁨$recipient⁩. تحقّق من المستفيد والمبلغ قبل التأكيد.';
   }
+
+  @override
+  String get weeklyTitle => 'حصيلة الأسبوع';
+
+  @override
+  String get weeklyHomeEntryDetail =>
+      'ما قام به ⁦Sentinel⁩ لحمايتك في الأيام الأخيرة';
+
+  @override
+  String weeklyPeriod(String start, String end) {
+    return 'من $start إلى $end';
+  }
+
+  @override
+  String get weeklyThisWeek => 'هذا الأسبوع';
+
+  @override
+  String get weeklyLastWeek => 'الأسبوع الماضي';
+
+  @override
+  String get weeklyNoScore => 'لا توجد نتيجة بعد';
+
+  @override
+  String weeklyScoreChange(String start, String end) {
+    return 'النتيجة: $start في بداية الأسبوع، و$end اليوم';
+  }
+
+  @override
+  String weeklyLastWeekScore(String score) {
+    return 'النتيجة في نهاية الأسبوع الماضي: $score';
+  }
+
+  @override
+  String get weeklyFirewall => 'جدار الحماية: الطلبات المحجوبة';
+
+  @override
+  String get weeklyBlockedTotal => 'المجموع';
+
+  @override
+  String get weeklyMessages => 'الرسائل';
+
+  @override
+  String get weeklyMessagesAnalyzed => 'رسائل تم فحصها';
+
+  @override
+  String get weeklyScamAlerts => 'تنبيهات احتيال';
+
+  @override
+  String get weeklyApps => 'التطبيقات';
+
+  @override
+  String get weeklyRiskyApps => 'تطبيقات للتحقق منها';
+
+  @override
+  String get weeklyPasswords => 'كلمات سر الخزنة';
+
+  @override
+  String get weeklyPasswordsWeak => 'ضعيفة';
+
+  @override
+  String get weeklyPasswordsReused => 'مكرّرة';
+
+  @override
+  String get weeklyPasswordsBreached => 'موجودة في تسريبات';
+
+  @override
+  String get weeklyNotMeasured => 'لم يُقَس';
+
+  @override
+  String get weeklyPrivacyNote =>
+      'عدّادات فقط، تُحفظ على هذا الهاتف لمدة 8 أسابيع ثم تُحذف. لا يُحفظ أي موقع ولا رسالة ولا اسم شبكة ⁦Wi-Fi⁩.';
+
+  @override
+  String get weeklyAndroidOnly => 'حصيلة الأسبوع متاحة على أندرويد.';
+
+  @override
+  String get settingsWeeklyNotification => 'إشعار الحصيلة';
+
+  @override
+  String get settingsWeeklyNotificationDetail => 'تذكير محايد صباح يوم الاثنين';
+
+  @override
+  String get settingsWeeklyNotificationDenied =>
+      'الإشعارات مرفوضة: فعّلها من إعدادات أندرويد.';
 }

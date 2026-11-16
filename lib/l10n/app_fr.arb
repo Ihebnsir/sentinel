@@ -1688,5 +1688,131 @@
         "description": "Nom, IBAN ou adresse du bénéficiaire"
       }
     }
+  },
+  "weeklyTitle": "Bilan de la semaine",
+  "@weeklyTitle": {
+    "description": "Titre de l'écran Bilan et de son entrée sur l'accueil"
+  },
+  "weeklyHomeEntryDetail": "Ce que Sentinel a fait pour vous ces derniers jours",
+  "@weeklyHomeEntryDetail": {
+    "description": "Sous-titre de l'entrée Bilan sur l'accueil"
+  },
+  "weeklyPeriod": "Du {start} au {end}",
+  "@weeklyPeriod": {
+    "description": "Dates de la semaine en cours (lundi et dimanche)",
+    "placeholders": {
+      "start": {
+        "type": "String",
+        "description": "Date du lundi"
+      },
+      "end": {
+        "type": "String",
+        "description": "Date du dimanche"
+      }
+    }
+  },
+  "weeklyThisWeek": "Cette semaine",
+  "@weeklyThisWeek": {
+    "description": "En-tête de colonne : semaine en cours"
+  },
+  "weeklyLastWeek": "Semaine d'avant",
+  "@weeklyLastWeek": {
+    "description": "En-tête de colonne : semaine précédente"
+  },
+  "weeklyNoScore": "Pas encore de score",
+  "@weeklyNoScore": {
+    "description": "Dans l'arche, quand aucun score n'a été calculé cette semaine"
+  },
+  "weeklyScoreChange": "Score : {start} en début de semaine, {end} aujourd'hui",
+  "@weeklyScoreChange": {
+    "description": "Évolution du score dans la semaine",
+    "placeholders": {
+      "start": {
+        "type": "String",
+        "description": "Premier score de la semaine"
+      },
+      "end": {
+        "type": "String",
+        "description": "Dernier score"
+      }
+    }
+  },
+  "weeklyLastWeekScore": "Score à la fin de la semaine d'avant : {score}",
+  "@weeklyLastWeekScore": {
+    "description": "Dernier score de la semaine précédente",
+    "placeholders": {
+      "score": {
+        "type": "String",
+        "description": "Score sur 100"
+      }
+    }
+  },
+  "weeklyFirewall": "Pare-feu : requêtes bloquées",
+  "@weeklyFirewall": {
+    "description": "Titre de section du bilan"
+  },
+  "weeklyBlockedTotal": "Total",
+  "@weeklyBlockedTotal": {
+    "description": "Ligne total des requêtes bloquées"
+  },
+  "weeklyMessages": "Messages",
+  "@weeklyMessages": {
+    "description": "Titre de section du bilan"
+  },
+  "weeklyMessagesAnalyzed": "Messages analysés",
+  "@weeklyMessagesAnalyzed": {
+    "description": "Nombre de messages analysés (à la main ou automatiquement)"
+  },
+  "weeklyScamAlerts": "Alertes d'arnaque",
+  "@weeklyScamAlerts": {
+    "description": "Nombre de messages jugés « Arnaque probable »"
+  },
+  "weeklyApps": "Applications",
+  "@weeklyApps": {
+    "description": "Titre de section du bilan"
+  },
+  "weeklyRiskyApps": "Apps à vérifier",
+  "@weeklyRiskyApps": {
+    "description": "Apps de risque modéré ou élevé lors de la dernière analyse"
+  },
+  "weeklyPasswords": "Mots de passe du coffre",
+  "@weeklyPasswords": {
+    "description": "Titre de section du bilan"
+  },
+  "weeklyPasswordsWeak": "Faibles",
+  "@weeklyPasswordsWeak": {
+    "description": "Mots de passe faibles"
+  },
+  "weeklyPasswordsReused": "Réutilisés",
+  "@weeklyPasswordsReused": {
+    "description": "Mots de passe réutilisés"
+  },
+  "weeklyPasswordsBreached": "Trouvés dans des fuites",
+  "@weeklyPasswordsBreached": {
+    "description": "Mots de passe trouvés dans des fuites"
+  },
+  "weeklyNotMeasured": "Pas mesuré",
+  "@weeklyNotMeasured": {
+    "description": "Lecture TalkBack du tiret : valeur pas mesurée cette semaine"
+  },
+  "weeklyPrivacyNote": "Seulement des compteurs, gardés sur ce téléphone pendant 8 semaines puis effacés. Aucun site, aucun message ni aucun nom de Wi-Fi n'est enregistré.",
+  "@weeklyPrivacyNote": {
+    "description": "Note de confidentialité en bas du bilan"
+  },
+  "weeklyAndroidOnly": "Le bilan de la semaine est disponible sur Android.",
+  "@weeklyAndroidOnly": {
+    "description": "Bilan indisponible (Windows, web)"
+  },
+  "settingsWeeklyNotification": "Notification du bilan",
+  "@settingsWeeklyNotification": {
+    "description": "Réglage : notification hebdomadaire"
+  },
+  "settingsWeeklyNotificationDetail": "Un rappel neutre le lundi matin",
+  "@settingsWeeklyNotificationDetail": {
+    "description": "Détail du réglage de notification hebdomadaire"
+  },
+  "settingsWeeklyNotificationDenied": "Notifications refusées : autorisez-les dans les réglages d'Android.",
+  "@settingsWeeklyNotificationDenied": {
+    "description": "Message quand l'autorisation des notifications est refusée"
   }
 }

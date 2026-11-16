@@ -4,7 +4,9 @@ import '../app_info.dart';
 import '../l10n/l10n.dart';
 import '../services/apps_scanner_service.dart';
 import '../services/language_store.dart';
+import '../services/protection_service.dart';
 import '../services/theme_store.dart';
+import '../services/weekly_report_service.dart';
 import '../theme/app_colors.dart';
 import '../widgets/arch_icon.dart';
 import 'audit_summary_screen.dart';
@@ -13,10 +15,18 @@ import 'privacy_policy_screen.dart';
 
 /// Réglages / À propos, ouvert par l'icône discrète de l'accueil.
 /// [openUrl] : remplaçable dans les tests (par défaut, le navigateur).
+/// [weekly] et [requestNotifications] : idem (bilan de la semaine).
 class SettingsScreen extends StatelessWidget {
-  const SettingsScreen({super.key, this.openUrl});
+  const SettingsScreen({
+    super.key,
+    this.openUrl,
+    this.weekly = const WeeklyReportService(),
+    this.requestNotifications,
+  });
 
   final void Function(String url)? openUrl;
+  final WeeklyReportService weekly;
+  final Future<bool> Function()? requestNotifications;
 
   void _open(String url) =>
       (openUrl ?? AppsScannerService().openWebPage).call(url);
@@ -198,6 +208,13 @@ class SettingsScreen extends StatelessWidget {
               Divider(height: 1, thickness: 1, color: context.colors.ligne),
               row,
             ],
+            // Masquée hors Android (rien n'écoute le canal).
+            _WeeklyNotificationRow(
+              service: weekly,
+              requestNotifications:
+                  requestNotifications ??
+                  ProtectionService().requestNotificationPermission,
+            ),
           ],
         ),
       ),
@@ -224,7 +241,79 @@ class _LanguageChoice {
   final String? code;
 }
 
+/// Notification hebdomadaire du bilan (désactivée par défaut).
+class _WeeklyNotificationRow extends StatefulWidget {
+  const _WeeklyNotificationRow({
+    required this.service,
+    required this.requestNotifications,
+  });
+
+  final WeeklyReportService service;
+  final Future<bool> Function() requestNotifications;
+
+  @override
+  State<_WeeklyNotificationRow> createState() => _WeeklyNotificationRowState();
+}
+
+class _WeeklyNotificationRowState extends State<_WeeklyNotificationRow> {
+  bool? _enabled; // null : option indisponible, ligne masquée
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  Future<void> _load() async {
+    final enabled = await widget.service.notificationsEnabled();
+    if (mounted) setState(() => _enabled = enabled);
+  }
+
+  Future<void> _toggle(bool value) async {
+    final messenger = ScaffoldMessenger.of(context);
+    final denied = context.l10n.settingsWeeklyNotificationDenied;
+    // Android 13+ : l'autorisation est demandée au moment d'activer.
+    if (value && !await widget.requestNotifications()) {
+      messenger.showSnackBar(SnackBar(content: Text(denied)));
+      return;
+    }
+    await widget.service.setNotificationsEnabled(value);
+    if (mounted) setState(() => _enabled = value);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final enabled = _enabled;
+    if (enabled == null) return const SizedBox.shrink();
+    final l = context.l10n;
+    return Column(
+      children: [
+        Divider(height: 1, thickness: 1, color: context.colors.ligne),
+        SwitchListTile(
+          contentPadding: EdgeInsets.zero,
+          secondary: Icon(
+            Icons.notifications_none,
+            color: context.colors.secondaire,
+          ),
+
+          title: Text(
+            l.settingsWeeklyNotification,
+            style: TextStyle(fontSize: 15, color: context.colors.encre),
+          ),
+          subtitle: Text(
+            l.settingsWeeklyNotificationDetail,
+            style: TextStyle(fontSize: 13, color: context.colors.discret),
+          ),
+          value: enabled,
+          onChanged: _toggle,
+        ),
+      ],
+    );
+  }
+}
+
 /// Une ligne de réglage : icône, titre, détail facultatif.
+
 class _Row extends StatelessWidget {
   const _Row({
     required this.icon,

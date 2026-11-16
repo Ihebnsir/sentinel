@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.provider.Telephony
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
+import com.iheb.sentinel.weekly.WeeklyStatsStore
 
 /**
  * Reçoit les notifications du téléphone (si l'utilisateur l'a autorisé)
@@ -56,6 +57,9 @@ class SentinelNotificationListener : NotificationListenerService() {
             "isSms" to isSms,
         )
         BackgroundAnalyzer.analyze(this, arguments) { result ->
+            // Bilan de la semaine : des compteurs, jamais le texte.
+            if (result != null) WeeklyStatsStore.count(applicationContext, "messages")
+            if (result?.verdict == "arnaque") WeeklyStatsStore.count(applicationContext, "scam_alerts")
             // Pas d'alerte pour « Suspect » : on évite la fatigue des alertes.
             if (result?.verdict == "arnaque") {
                 ScamAlertNotifier.show(

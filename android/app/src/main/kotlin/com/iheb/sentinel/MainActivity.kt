@@ -12,6 +12,7 @@ import android.os.Handler
 import android.os.Looper
 import android.provider.Settings
 import com.iheb.sentinel.firewall.FirewallChannel
+import com.iheb.sentinel.weekly.WeeklyChannel
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodCall
@@ -91,6 +92,8 @@ class MainActivity : FlutterActivity() {
         wifiChecker = WifiSecurityChecker(this, flutterEngine.dartExecutor.binaryMessenger)
         firewall = FirewallChannel(this, flutterEngine.dartExecutor.binaryMessenger)
         qrScanner = QrScanner(this, flutterEngine.dartExecutor.binaryMessenger)
+        // Bilan de la semaine : compteurs seulement.
+        WeeklyChannel(this, flutterEngine.dartExecutor.binaryMessenger)
 
         shareChannel = MethodChannel(flutterEngine.dartExecutor.binaryMessenger, shareChannelName)
             .apply {

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:material_ui/material_ui.dart';
 
 import '../l10n/l10n.dart';
@@ -5,6 +7,7 @@ import '../models/installed_app.dart';
 import '../services/app_risk_calculator.dart';
 import '../services/apps/stalkerware_ioc.dart';
 import '../services/apps_scanner_service.dart';
+import '../services/weekly_report_service.dart';
 import '../theme/app_colors.dart';
 import '../utils/debug_log.dart';
 import '../widgets/app_icon.dart';
@@ -79,8 +82,17 @@ class _AppsScreenState extends State<AppsScreen> with WidgetsBindingObserver {
       final ioc = apps == null ? null : await _loadIoc();
       // L'écran a pu être fermé pendant l'attente.
       if (!mounted) return;
+      final sorted = apps == null ? null : _sortedByRisk(apps, ioc);
+      // Bilan de la semaine : seulement le nombre d'apps à vérifier.
+      if (sorted != null) {
+        final risky = sorted.where((s) => s.report.needsReview).length;
+        unawaited(
+          const WeeklyReportService().setGauge(WeeklyGauge.riskyApps, risky),
+        );
+      }
       setState(() {
-        _apps = apps == null ? null : _sortedByRisk(apps, ioc);
+        _apps = sorted;
+
         _failed = false;
         _loading = false;
       });

@@ -4642,6 +4642,156 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Une app de paiement va s\'ouvrir pour : {recipient}. Vérifiez le bénéficiaire et le montant avant de valider.'**
   String qrConfirmPayment(String recipient);
+
+  /// Titre de l'écran Bilan et de son entrée sur l'accueil
+  ///
+  /// In fr, this message translates to:
+  /// **'Bilan de la semaine'**
+  String get weeklyTitle;
+
+  /// Sous-titre de l'entrée Bilan sur l'accueil
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce que Sentinel a fait pour vous ces derniers jours'**
+  String get weeklyHomeEntryDetail;
+
+  /// Dates de la semaine en cours (lundi et dimanche)
+  ///
+  /// In fr, this message translates to:
+  /// **'Du {start} au {end}'**
+  String weeklyPeriod(String start, String end);
+
+  /// En-tête de colonne : semaine en cours
+  ///
+  /// In fr, this message translates to:
+  /// **'Cette semaine'**
+  String get weeklyThisWeek;
+
+  /// En-tête de colonne : semaine précédente
+  ///
+  /// In fr, this message translates to:
+  /// **'Semaine d\'avant'**
+  String get weeklyLastWeek;
+
+  /// Dans l'arche, quand aucun score n'a été calculé cette semaine
+  ///
+  /// In fr, this message translates to:
+  /// **'Pas encore de score'**
+  String get weeklyNoScore;
+
+  /// Évolution du score dans la semaine
+  ///
+  /// In fr, this message translates to:
+  /// **'Score : {start} en début de semaine, {end} aujourd\'hui'**
+  String weeklyScoreChange(String start, String end);
+
+  /// Dernier score de la semaine précédente
+  ///
+  /// In fr, this message translates to:
+  /// **'Score à la fin de la semaine d\'avant : {score}'**
+  String weeklyLastWeekScore(String score);
+
+  /// Titre de section du bilan
+  ///
+  /// In fr, this message translates to:
+  /// **'Pare-feu : requêtes bloquées'**
+  String get weeklyFirewall;
+
+  /// Ligne total des requêtes bloquées
+  ///
+  /// In fr, this message translates to:
+  /// **'Total'**
+  String get weeklyBlockedTotal;
+
+  /// Titre de section du bilan
+  ///
+  /// In fr, this message translates to:
+  /// **'Messages'**
+  String get weeklyMessages;
+
+  /// Nombre de messages analysés (à la main ou automatiquement)
+  ///
+  /// In fr, this message translates to:
+  /// **'Messages analysés'**
+  String get weeklyMessagesAnalyzed;
+
+  /// Nombre de messages jugés « Arnaque probable »
+  ///
+  /// In fr, this message translates to:
+  /// **'Alertes d\'arnaque'**
+  String get weeklyScamAlerts;
+
+  /// Titre de section du bilan
+  ///
+  /// In fr, this message translates to:
+  /// **'Applications'**
+  String get weeklyApps;
+
+  /// Apps de risque modéré ou élevé lors de la dernière analyse
+  ///
+  /// In fr, this message translates to:
+  /// **'Apps à vérifier'**
+  String get weeklyRiskyApps;
+
+  /// Titre de section du bilan
+  ///
+  /// In fr, this message translates to:
+  /// **'Mots de passe du coffre'**
+  String get weeklyPasswords;
+
+  /// Mots de passe faibles
+  ///
+  /// In fr, this message translates to:
+  /// **'Faibles'**
+  String get weeklyPasswordsWeak;
+
+  /// Mots de passe réutilisés
+  ///
+  /// In fr, this message translates to:
+  /// **'Réutilisés'**
+  String get weeklyPasswordsReused;
+
+  /// Mots de passe trouvés dans des fuites
+  ///
+  /// In fr, this message translates to:
+  /// **'Trouvés dans des fuites'**
+  String get weeklyPasswordsBreached;
+
+  /// Lecture TalkBack du tiret : valeur pas mesurée cette semaine
+  ///
+  /// In fr, this message translates to:
+  /// **'Pas mesuré'**
+  String get weeklyNotMeasured;
+
+  /// Note de confidentialité en bas du bilan
+  ///
+  /// In fr, this message translates to:
+  /// **'Seulement des compteurs, gardés sur ce téléphone pendant 8 semaines puis effacés. Aucun site, aucun message ni aucun nom de Wi-Fi n\'est enregistré.'**
+  String get weeklyPrivacyNote;
+
+  /// Bilan indisponible (Windows, web)
+  ///
+  /// In fr, this message translates to:
+  /// **'Le bilan de la semaine est disponible sur Android.'**
+  String get weeklyAndroidOnly;
+
+  /// Réglage : notification hebdomadaire
+  ///
+  /// In fr, this message translates to:
+  /// **'Notification du bilan'**
+  String get settingsWeeklyNotification;
+
+  /// Détail du réglage de notification hebdomadaire
+  ///
+  /// In fr, this message translates to:
+  /// **'Un rappel neutre le lundi matin'**
+  String get settingsWeeklyNotificationDetail;
+
+  /// Message quand l'autorisation des notifications est refusée
+  ///
+  /// In fr, this message translates to:
+  /// **'Notifications refusées : autorisez-les dans les réglages d\'Android.'**
+  String get settingsWeeklyNotificationDenied;
 }
 
 class _AppLocalizationsDelegate

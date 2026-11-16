@@ -30,4 +30,9 @@
     <string name="tile_off">غير مفعّل</string>
     <string name="tile_needs_permission">يلزم منح الإذن</string>
     <string name="tile_strict_dns">DNS خاص صارم</string>
+    <!-- Bilan de la semaine (notification facultative, texte neutre). -->
+    <string name="weekly_channel_name">حصيلة الأسبوع</string>
+    <string name="weekly_channel_description">تذكير واحد في الأسبوع، إذا فعّلته في الإعدادات.</string>
+    <string name="weekly_notification_title">حصيلة الأسبوع</string>
+    <string name="weekly_notification_text">حصيلة أسبوعك جاهزة.</string>
 </resources>

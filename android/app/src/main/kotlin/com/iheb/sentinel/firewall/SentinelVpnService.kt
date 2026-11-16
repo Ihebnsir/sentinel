@@ -22,6 +22,7 @@ import android.system.StructPollfd
 import com.iheb.sentinel.AppLanguage
 import com.iheb.sentinel.MainActivity
 import com.iheb.sentinel.R
+import com.iheb.sentinel.weekly.WeeklyStatsStore
 import java.io.FileDescriptor
 import java.io.FileInputStream
 import java.io.FileOutputStream
@@ -443,6 +444,8 @@ class SentinelVpnService : VpnService() {
                 totalQueries.incrementAndGet()
                 blockedQueries.incrementAndGet()
                 FirewallEngine.blockedByCategory[decision.category]?.incrementAndGet()
+                // Bilan de la semaine : la catégorie seulement, jamais le domaine.
+                WeeklyStatsStore.count(this, "blocked_" + decision.category.id)
                 writeToTun(session, decision.packet)
                 maybeAlert(decision)
                 record(session, decision.name, decision.category, blocked = true)
@@ -547,6 +550,7 @@ class SentinelVpnService : VpnService() {
         if (wasRunning) {
             FirewallEngine.onVpnStopped()
             FirewallTileService.refresh(this)
+            WeeklyStatsStore.flush(this) // compteurs en attente écrits tout de suite
         }
         forwarders?.shutdownNow()
         forwarders = null

@@ -1,3 +1,7 @@
+import 'dart:async';
+
+import 'package:flutter/foundation.dart' show listEquals;
+
 import 'package:material_ui/material_ui.dart';
 
 import '../../l10n/l10n.dart';
@@ -8,6 +12,7 @@ import '../../services/vault/vault_document_platform.dart';
 import '../../services/vault/vault_item.dart';
 import '../../services/vault/vault_platform.dart';
 import '../../services/vault/vault_session.dart';
+import '../../services/weekly_report_service.dart';
 import '../../theme/app_colors.dart';
 import 'password_health_screen.dart';
 import 'vault_document_screen.dart';
@@ -32,12 +37,46 @@ class VaultListView extends StatefulWidget {
 
 class _VaultListViewState extends State<VaultListView> {
   final _search = TextEditingController();
+  late final Listenable _healthSources;
+  List<int>? _lastHealth; // évite de renvoyer les mêmes chiffres
+
+  @override
+  void initState() {
+    super.initState();
+    _healthSources = Listenable.merge([widget.session, widget.breaches]);
+    _healthSources.addListener(_recordHealth);
+    _recordHealth();
+  }
 
   @override
   void dispose() {
+    _healthSources.removeListener(_recordHealth);
     _search.dispose();
     super.dispose();
   }
+
+  /// Bilan de la semaine : seulement trois nombres (faibles, réutilisés,
+  /// trouvés dans des fuites), jamais un titre ni un mot de passe.
+  void _recordHealth() {
+    final items = widget.session.items;
+    if (!items.any((i) => i.type == VaultItemType.motDePasse)) return;
+    final report = analyzePasswordHealth(
+      items,
+      breachCount: widget.breaches.countFor,
+    );
+    final health = [
+      report.weak.length,
+      report.reused.length,
+      report.breached.length,
+    ];
+    if (listEquals(health, _lastHealth)) return;
+    _lastHealth = health;
+    const weekly = WeeklyReportService();
+    unawaited(weekly.setGauge(WeeklyGauge.passwordsWeak, health[0]));
+    unawaited(weekly.setGauge(WeeklyGauge.passwordsReused, health[1]));
+    unawaited(weekly.setGauge(WeeklyGauge.passwordsBreached, health[2]));
+  }
+
 
   // La recherche porte sur le titre, l'identifiant et le site.
   List<VaultItem> get _visibleItems {

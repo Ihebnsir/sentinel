@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
@@ -11,6 +13,7 @@ import '../services/qr/qr_scanner_service.dart';
 import '../services/report/report_client.dart';
 import '../services/report/report_limiter.dart';
 import '../services/share_service.dart';
+import '../services/weekly_report_service.dart';
 import '../theme/app_colors.dart';
 import '../widgets/actions_row.dart';
 import '../widgets/auto_protection_section.dart';
@@ -120,6 +123,13 @@ class _MessagesScreenState extends State<MessagesScreen> {
       final model = await loadPhishingModel();
       await loadKnownBrands();
       final analysis = analyzeMessage(text, model.predict(text));
+      // Bilan de la semaine : des compteurs, jamais le texte.
+      const weekly = WeeklyReportService();
+      unawaited(weekly.count(WeeklyCounter.messages));
+      if (analysis.verdict == Verdict.arnaque) {
+        unawaited(weekly.count(WeeklyCounter.scamAlerts));
+      }
+
       // Le texte a changé entre-temps (nouveau partage) : résultat périmé.
       if (!mounted || _controller.text != text) return;
       setState(() {

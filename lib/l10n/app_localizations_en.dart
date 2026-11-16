@@ -2761,4 +2761,89 @@ class AppLocalizationsEn extends AppLocalizations {
   String qrConfirmPayment(String recipient) {
     return 'A payment app will open for: $recipient. Check the payee and the amount before confirming.';
   }
+
+  @override
+  String get weeklyTitle => 'Weekly summary';
+
+  @override
+  String get weeklyHomeEntryDetail =>
+      'What Sentinel did for you in the last few days';
+
+  @override
+  String weeklyPeriod(String start, String end) {
+    return 'From $start to $end';
+  }
+
+  @override
+  String get weeklyThisWeek => 'This week';
+
+  @override
+  String get weeklyLastWeek => 'Last week';
+
+  @override
+  String get weeklyNoScore => 'No score yet';
+
+  @override
+  String weeklyScoreChange(String start, String end) {
+    return 'Score: $start at the start of the week, $end today';
+  }
+
+  @override
+  String weeklyLastWeekScore(String score) {
+    return 'Score at the end of last week: $score';
+  }
+
+  @override
+  String get weeklyFirewall => 'Firewall: blocked requests';
+
+  @override
+  String get weeklyBlockedTotal => 'Total';
+
+  @override
+  String get weeklyMessages => 'Messages';
+
+  @override
+  String get weeklyMessagesAnalyzed => 'Messages checked';
+
+  @override
+  String get weeklyScamAlerts => 'Scam alerts';
+
+  @override
+  String get weeklyApps => 'Apps';
+
+  @override
+  String get weeklyRiskyApps => 'Apps to check';
+
+  @override
+  String get weeklyPasswords => 'Vault passwords';
+
+  @override
+  String get weeklyPasswordsWeak => 'Weak';
+
+  @override
+  String get weeklyPasswordsReused => 'Reused';
+
+  @override
+  String get weeklyPasswordsBreached => 'Found in breaches';
+
+  @override
+  String get weeklyNotMeasured => 'Not measured';
+
+  @override
+  String get weeklyPrivacyNote =>
+      'Only counters, kept on this phone for 8 weeks and then deleted. No website, message or Wi-Fi name is ever saved.';
+
+  @override
+  String get weeklyAndroidOnly => 'The weekly summary is available on Android.';
+
+  @override
+  String get settingsWeeklyNotification => 'Summary notification';
+
+  @override
+  String get settingsWeeklyNotificationDetail =>
+      'A neutral reminder on Monday morning';
+
+  @override
+  String get settingsWeeklyNotificationDenied =>
+      'Notifications are blocked: allow them in Android settings.';
 }

@@ -30,4 +30,9 @@
     <string name="tile_off">Off</string>
     <string name="tile_needs_permission">Permission needed</string>
     <string name="tile_strict_dns">Strict private DNS</string>
+    <!-- Bilan de la semaine (notification facultative, texte neutre). -->
+    <string name="weekly_channel_name">Weekly summary</string>
+    <string name="weekly_channel_description">One reminder a week, if you turned it on in Settings.</string>
+    <string name="weekly_notification_title">Weekly summary</string>
+    <string name="weekly_notification_text">Your weekly summary is ready.</string>
 </resources>

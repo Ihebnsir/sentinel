@@ -39,7 +39,8 @@
          sur Android 12-13 ; Android 14+ : réveil inexact si refusée. -->
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
     <!-- Permission « normale » : après un redémarrage, reprogrammer la
-         suppression des rapports d'analyse à 24 h (BootReceiver). -->
+         suppression des rapports d'analyse à 24 h (BootReceiver), et garder
+         la tâche quotidienne du bilan de la semaine (setPersisted). -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <!-- Caméra : pour « Scanner un QR code » (onglet Messages) et la photo
          d'un document du coffre, demandée au moment de l'utiliser. L'image
@@ -172,6 +173,14 @@
                 <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
             </intent-filter>
         </receiver>
+        <!-- Bilan de la semaine : tâche quotidienne d'Android (JobScheduler),
+             lancée seulement par le système (BIND_JOB_SERVICE). Pas de service
+             permanent : elle efface les vieilles semaines et, si l'option est
+             activée, prévient le lundi que le bilan est prêt. -->
+        <service
+            android:name=".weekly.WeeklyReportJobService"
+            android:exported="false"
+            android:permission="android.permission.BIND_JOB_SERVICE" />
         <!-- Photo d'un document du coffre : l'appareil photo d'Android écrit
              dans cache/vault_capture (lue puis effacée aussitôt).
              Non exporté : accès accordé à la seule app photo lancée. -->
