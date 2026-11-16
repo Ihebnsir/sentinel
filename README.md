@@ -49,7 +49,7 @@ The app's interface is in French. Everything runs on the phone. Nothing goes ove
 
 - **Privacy by design.** No account, no analytics. The only server is the optional report backend (`backend/`), which receives a message only when the user reports it. Message text is never logged or stored on the phone. Kotlin keeps only `hashCode()` values to skip duplicates.
 - **Opt-in network calls only.** No network call at startup (the font is bundled). The breach check needs explicit consent. It uses the Pwned Passwords range API (k-anonymity): only the first 5 hex characters of the SHA-1 hash leave the device, and `Add-Padding: true` hides the response size. Results stay in memory and are cleared when the vault locks.
-- **Scam reports (opt-in, one by one).** "Report this message" appears under a Messages result only when the build sets `--dart-define=SENTINEL_API_URL` (empty today in release, so the button is hidden). The text is anonymized on the phone with the same rules as the server (`anonymizer.dart`, parity test on the 96 shared cases of `backend/tests/fixtures/anonymize_cases.json`), shown to the user, who can edit it, then sent with the user's opinion, the verdict, the probability, the language and the app version. No phone number, no device ID. HTTPS only; plain HTTP is allowed only in debug builds, only to `10.0.2.2` (the emulator's host), through `android/app/src/debug/res/xml/network_security_config.xml`. 10 s timeout, no queue, no automatic retry, 5 reports per hour on the phone (the server also limits).
+- **Scam reports (opt-in, one by one).** "Report this message" appears under a Messages result only when the build sets `--dart-define=SENTINEL_API_URL` (the release script sets it to the deployed server, `https://sentinel-api-b2gs.onrender.com`; without it the button does not exist). The text is anonymized on the phone with the same rules as the server (`anonymizer.dart`, parity test on the 96 shared cases of `backend/tests/fixtures/anonymize_cases.json`), shown to the user, who can edit it, then sent with the user's opinion, the verdict, the probability, the language and the app version. No phone number, no device ID. HTTPS only; plain HTTP is allowed only in debug builds, only to `10.0.2.2` (the emulator's host), through `android/app/src/debug/res/xml/network_security_config.xml`. 60 s timeout (the free server can take about a minute to wake up; a notice appears after 4 s), no queue, no automatic retry, 5 reports per hour on the phone (the server also limits).
 - **Vault cryptography.** A random 256-bit data key (DEK) encrypts the items with AES-256-GCM, using a fresh 12-byte nonce on every write. The DEK is wrapped by one key-encryption key (KEK) per *key slot*:
   - password: Argon2id, 46 MiB, 2 iterations, parallelism 1, 16-byte random salt, run in a separate isolate;
   - recovery key: 28 characters from a 32-symbol alphabet (140 bits), HKDF-SHA256;
@@ -148,7 +148,7 @@ These items come from the known limitations in the code and docs. **TODO:** revi
 
 - [ ] Collect real (anonymized) messages and retrain to get credible metrics.
 - [ ] Manually verify the official domains in `lib/services/phishing/known_brands.dart` (TODO in the code).
-- [ ] Release signing configuration (currently debug keys).
+- [x] Release signing with a dedicated release key (SEN-01, see "Verify an APK").
 - [ ] Persist the failed-unlock counter across app restarts.
 - [x] Encrypted vault export/import, to move the vault to a new phone (Android backup is disabled on purpose).
 - [ ] Add screenshots.

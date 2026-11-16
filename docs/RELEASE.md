@@ -43,11 +43,27 @@ powershell -ExecutionPolicy Bypass -File tools\release\build_release.ps1
 ```
 
 Le script :
-1. vérifie que `android\key.properties` existe ;
-2. demande le mot de passe (saisie masquée, jamais écrite sur le disque) ;
-3. lance `flutter build apk --release --obfuscate --split-debug-info=build/symbols` ;
-4. copie les symboles dans `%LOCALAPPDATA%\Sentinel\symbols\<version>-<commit>` (hors du dépôt : `flutter clean` efface `build\`) ;
-5. affiche le SHA-256 de l'APK.
+1. vérifie l'adresse du serveur de signalement (`-ApiUrl`, voir ci-dessous) ;
+2. vérifie que `android\key.properties` existe ;
+3. demande le mot de passe (saisie masquée, jamais écrite sur le disque) ;
+4. lance `flutter build apk --release --obfuscate --split-debug-info=build/symbols --dart-define=SENTINEL_API_URL=<ApiUrl>` ;
+5. copie les symboles dans `%LOCALAPPDATA%\Sentinel\symbols\<version>-<commit>` (hors du dépôt : `flutter clean` efface `build\`) ;
+6. affiche le SHA-256 de l'APK et l'adresse du serveur intégrée.
+
+### Serveur de signalement (`-ApiUrl`)
+
+Le bouton « Signaler ce message » n'existe dans l'APK que si l'adresse du serveur est fixée au moment du build (`--dart-define=SENTINEL_API_URL`). Le script la passe toujours :
+
+- par défaut : `https://sentinel-api-b2gs.onrender.com` (le serveur déployé, voir [DEPLOIEMENT.md](DEPLOIEMENT.md)) ;
+- pour un autre serveur :
+
+```powershell
+powershell -ExecutionPolicy Bypass -File tools\release\build_release.ps1 -ApiUrl https://mon-serveur.example
+```
+
+Le script **refuse** l'adresse, avant toute question, si elle ne commence pas par `https://` (HTTP en clair interdit), n'a pas de nom d'hôte, ou contient des identifiants (`user:motdepasse@`), des paramètres (`?…`) ou un fragment (`#…`). Ce sont les règles de l'app (`parseServerUrl` dans `lib/services/report/report_client.dart`) : une adresse qu'elle refuserait masquerait le bouton sans prévenir.
+
+L'adresse est écrite dans l'APK et donc publique : n'y mettez jamais de secret.
 
 ## 4. Vérifier la signature
 

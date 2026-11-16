@@ -259,10 +259,10 @@ Pour automatiser, deux options :
 
 ## 13. Et l'app ?
 
-Quand le serveur répond, construisez l'app avec son adresse :
+Quand le serveur répond, construisez l'app avec son adresse grâce au script de release (signature et obfuscation comprises, voir [RELEASE.md](RELEASE.md)) :
 
 ```powershell
-flutter build apk --release --dart-define=SENTINEL_API_URL=https://sentinel-api-xxxx.onrender.com
+powershell -ExecutionPolicy Bypass -File tools\release\build_release.ps1 -ApiUrl https://sentinel-api-xxxx.onrender.com
 ```
 
-Le bouton « Signaler ce message » apparaît alors. HTTPS est obligatoire en release.
+Sans `-ApiUrl`, le script utilise `https://sentinel-api-b2gs.onrender.com`. Le bouton « Signaler ce message » apparaît alors. HTTPS est obligatoire : le script refuse `http://`.

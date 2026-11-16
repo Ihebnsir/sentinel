@@ -205,9 +205,9 @@ A new network call, made only when the user taps "Report this message", reviews 
 | The report identifies the phone | Fixed list of fields: text, user opinion, verdict, probability, language, app version, `source: inconnue`. No phone number, no device ID, no account, no location | `Report.toJson`, `test/report_client_test.dart` |
 | Sending by mistake | Separate screen; "Send" stays disabled until an opinion is chosen; "Cancel" sends nothing | `report_screen.dart` |
 | Network observer | HTTPS required (`parseServerUrl`). Plain HTTP only in **debug** builds, only to `10.0.2.2` (the emulator's host, for the local backend), allowed by a network security config that exists only in `android/app/src/debug/`. Release builds have no exception: Android's default for API 28+ refuses cleartext, and the Dart client refuses `http://` too | `report_client.dart`, `android/app/src/debug/res/xml/network_security_config.xml` |
-| Server not deployed yet | `SENTINEL_API_URL` comes from `--dart-define`; empty (current release) means the button is hidden and no call is possible | `ReportClient.fromEnvironment` |
+| Wrong or missing server address | `SENTINEL_API_URL` comes from `--dart-define`. The release script passes `-ApiUrl` (default: the deployed Render server) and refuses anything but a clean `https://` URL before building. Empty or refused means the button is hidden and no call is possible | `ReportClient.fromEnvironment`, `tools/release/build_release.ps1` |
 | Flooding the server from the app | 5 reports per sliding hour on the phone; only send times are stored (never the content). The server enforces its own limit (429) | `report_limiter.dart` |
-| Hanging request | 10 s timeout; clear messages for offline, timeout, 429, rejected (413/422) and server errors | `report_client.dart` |
+| Hanging request | 60 s timeout (the free Render server takes up to about a minute to wake up), a "server is waking up" notice after 4 s; clear messages for offline, timeout, 429, rejected (413/422) and server errors | `report_client.dart` |
 
 ## 4. Known limitations
 
