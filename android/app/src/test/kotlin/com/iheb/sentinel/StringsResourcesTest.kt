@@ -45,7 +45,8 @@ class StringsResourcesTest {
 
     @Test
     fun `le manifeste ne contient plus de texte francais en dur`() {
-        val manifest = File("src/main/AndroidManifest.xml").readText()
+        val manifest = listOf("main", "complete")
+            .joinToString("\n") { File("src/$it/AndroidManifest.xml").readText() }
         val labels = Regex("""android:label="([^"]*)"""").findAll(manifest).map { it.groupValues[1] }
         // Seul le nom de l'app reste écrit tel quel.
         for (label in labels) {

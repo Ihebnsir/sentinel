@@ -21,6 +21,21 @@
 
 The app's interface is in French. Everything runs on the phone. Nothing goes over the network without your consent: the only network calls are four opt-in features, the breach check against Have I Been Pwned (5 hex characters of a SHA-1 hash, k-anonymity), the DNS firewall (forwards DNS queries to Quad9, encrypted with DNS over TLS or HTTPS), the blocklist updates (downloads from GitHub) and scam reports (one message at a time, anonymized on the phone, sent only when you tap "Send").
 
+## Install: which version?
+
+Sentinel comes in two Android variants, built from the same code and signed with the same key:
+
+| Variant | Where | Automatic protection | File |
+|---|---|---|---|
+| **Standard** | [GitHub Releases](https://github.com/Ihebnsir/sentinel/releases) | No | `sentinel-<version>-standard.apk` |
+| **Complete** | Google Play (coming later) | Yes | Play Store |
+
+**Install the standard APK from the Releases page.** Since version 1.0.1 it is the only APK published on GitHub.
+
+Why: Google Play Protect's enhanced fraud protection blocks, with no "install anyway" button, apps installed from a browser or a file manager that declare a notification listener, SMS or accessibility access. Version 1.0.0 had a notification listener (automatic protection) and was blocked this way. The standard variant does not declare any of these accesses: in the Messages tab, automatic protection is replaced by a short note, and you can still check a message by sharing it to Sentinel, selecting its text ("Check with Sentinel") or pasting it. Everything else is the same.
+
+The standard variant has its own package name (`com.iheb.sentinel.standard`), so it can sit next to the future Google Play version without conflict. If you installed 1.0.0, export a vault backup if you used the vault, then uninstall 1.0.0.
+
 ## Screenshots
 
 > **TODO:** add screenshots to `docs/screenshots/` (see [docs/screenshots/README.md](docs/screenshots/README.md)), then uncomment the table below.
@@ -115,10 +130,11 @@ cd sentinel
 flutter pub get
 flutter analyze
 flutter test
-flutter build apk --debug
+flutter build apk --debug --flavor standard   # or --flavor complete
+(cd android && ./gradlew testDebugUnitTest)   # Kotlin tests, both variants
 ```
 
-Release builds still use the debug signing config. A release signing setup is a TODO (see Roadmap).
+`--flavor` is required: `standard` (GitHub, no notification listener) or `complete` (Google Play). The standard build fails if its merged manifest declares an access blocked by Play Protect. Release builds are signed with the release key: see [docs/RELEASE.md](docs/RELEASE.md) (in French).
 
 ## Machine learning
 
@@ -166,7 +182,7 @@ The app was audited against OWASP MASVS v2 (static and dynamic analysis, 17 find
 Official Sentinel APKs are signed with a single release key. Before installing an APK, check its certificate:
 
 ```
-apksigner verify --print-certs app-release.apk
+apksigner verify --print-certs sentinel-1.0.1-standard.apk
 ```
 
 The output must say `Verifies` and show this certificate SHA-256 digest:

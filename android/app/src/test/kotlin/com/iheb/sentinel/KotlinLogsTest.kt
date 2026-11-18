@@ -22,7 +22,9 @@ class KotlinLogsTest {
     @Test
     fun `seuls les logs relus existent`() {
         val logCall = Regex("""\b(Log\.[a-z]+\(|println\(|printStackTrace\()""")
-        val found = File("src/main/kotlin").walkTopDown()
+        // Toutes les variantes : main, standard, complete.
+        val found = listOf("main", "standard", "complete")
+            .flatMap { File("src/$it/kotlin").walkTopDown() }
             .filter { it.isFile && it.extension == "kt" }
             .flatMap { file ->
                 file.readLines()

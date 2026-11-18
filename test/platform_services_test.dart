@@ -55,6 +55,19 @@ void main() {
       expect((await service.getStatus())!.isActive, isTrue);
     });
 
+    test('variante standard (available: false) : pas de protection', () async {
+      android(
+        canal,
+        (call) => {
+          'available': false,
+          'enabled': false,
+          'listenerAccess': false,
+          'notificationsAllowed': true,
+        },
+      );
+      expect(await service.getStatus(), isNull);
+    });
+
     test('commandes : nom et arguments transmis', () async {
       android(canal, (call) => true);
       await service.setEnabled(true);

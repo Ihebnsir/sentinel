@@ -10,16 +10,23 @@ import android.service.notification.NotificationListenerService
 /**
  * L'option « Protection automatique » et l'état réel des autorisations.
  * Seul un oui/non est enregistré : jamais le contenu d'un message.
+ *
+ * Variante standard (APK GitHub) : pas de lecteur de notifications
+ * (src/complete seulement), donc l'option reste toujours coupée.
  */
 object ProtectionSettings {
+    /** false dans la variante standard (build.gradle.kts). */
+    val isAvailable: Boolean = BuildConfig.AUTO_PROTECTION
+
     private const val PREFS = "sentinel_protection"
     private const val KEY_ENABLED = "auto_protection_enabled"
 
     fun isEnabled(context: Context): Boolean =
-        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+        isAvailable && context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
             .getBoolean(KEY_ENABLED, false)
 
-    fun setEnabled(context: Context, enabled: Boolean) {
+    fun setEnabled(context: Context, requested: Boolean) {
+        val enabled = requested && isAvailable
         context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
             .edit()
             .putBoolean(KEY_ENABLED, enabled)
@@ -38,11 +45,13 @@ object ProtectionSettings {
         }
     }
 
+    // Nom écrit en toutes lettres : la classe n'existe que dans src/complete.
     fun listenerComponent(context: Context) =
-        ComponentName(context, SentinelNotificationListener::class.java)
+        ComponentName(context.packageName, "com.iheb.sentinel.SentinelNotificationListener")
 
     /** L'utilisateur a-t-il accordé l'accès aux notifications à Sentinel ? */
     fun hasListenerAccess(context: Context): Boolean {
+        if (!isAvailable) return false
         val component = listenerComponent(context)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
             val manager = context.getSystemService(NotificationManager::class.java)
@@ -62,6 +71,7 @@ object ProtectionSettings {
 
     /** L'état envoyé à Dart (lib/services/protection_service.dart). */
     fun status(context: Context): Map<String, Boolean> = mapOf(
+        "available" to isAvailable,
         "listenerAccess" to hasListenerAccess(context),
         "notificationsAllowed" to notificationsAllowed(context),
         "enabled" to isEnabled(context),

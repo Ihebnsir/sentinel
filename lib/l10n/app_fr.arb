@@ -357,6 +357,10 @@
   "autoProtectionNotificationsBlocked": "Notifications de Sentinel bloquées : vous ne serez pas prévenu en cas d'arnaque.",
   "autoProtectionAllowNotifications": "Autoriser les notifications de Sentinel",
   "autoProtectionRemoveAccess": "Retirer aussi l'accès dans les réglages Android",
+  "autoProtectionPlayOnly": "Disponible dans la version Google Play de Sentinel. Ici, analysez un message en le partageant vers Sentinel ou en le collant ci-dessous.",
+  "@autoProtectionPlayOnly": {
+    "description": "APK GitHub (variante standard) : remplace l'interrupteur de la protection automatique."
+  },
   "autoProtectionDoesTitle": "Ce que fait Sentinel",
   "autoProtectionDoes1": "Lit le texte des notifications de vos applications de messagerie.",
   "autoProtectionDoes2": "L'analyse sur votre téléphone.",

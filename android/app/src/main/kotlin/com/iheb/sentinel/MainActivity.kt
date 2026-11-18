@@ -290,6 +290,7 @@ class MainActivity : FlutterActivity() {
     // Android 11+ : ouvre directement l'interrupteur de Sentinel ;
     // sinon (ou si le fabricant ne le gère pas) la liste des apps.
     private fun openListenerSettings() {
+        if (!ProtectionSettings.isAvailable) return // variante standard
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             try {
                 startActivity(

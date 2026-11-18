@@ -676,6 +676,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'Also remove access in Android settings';
 
   @override
+  String get autoProtectionPlayOnly =>
+      'Available in the Google Play version of Sentinel. Here, check a message by sharing it to Sentinel or pasting it below.';
+
+  @override
   String get autoProtectionDoesTitle => 'What Sentinel does';
 
   @override

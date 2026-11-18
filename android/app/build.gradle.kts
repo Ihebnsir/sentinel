@@ -1,4 +1,7 @@
+import com.android.build.api.artifact.SingleArtifact
 import java.util.Properties
+import javax.xml.parsers.DocumentBuilderFactory
+import org.w3c.dom.Element
 
 plugins {
     id("com.android.application")
@@ -62,6 +65,29 @@ android {
         versionName = flutter.versionName
     }
 
+    buildFeatures {
+        buildConfig = true
+    }
+
+    // Deux variantes, même code et même clé de signature (docs/RELEASE.md) :
+    // - standard : APK GitHub. Sans la protection automatique (lecteur de
+    //   notifications), que Google Play Protect bloque hors du Play Store.
+    //   applicationId distinct : s'installe à côté de la version Google Play,
+    //   sans conflit de signature (Play App Signing) ni désinstallation.
+    // - complete : future version Google Play, avec la protection automatique.
+    flavorDimensions += "distribution"
+    productFlavors {
+        create("standard") {
+            dimension = "distribution"
+            applicationIdSuffix = ".standard"
+            buildConfigField("boolean", "AUTO_PROTECTION", "false")
+        }
+        create("complete") {
+            dimension = "distribution"
+            buildConfigField("boolean", "AUTO_PROTECTION", "true")
+        }
+    }
+
     signingConfigs {
         create("release") {
             keyProperties.getProperty("storeFile")?.let { storeFile = file(it) }
@@ -92,6 +118,80 @@ flutter {
 // Vérifié au début de chaque build release (APK ou bundle), pas en debug.
 tasks.matching { it.name == "preReleaseBuild" }.configureEach {
     doFirst { checkReleaseSigning() }
+}
+
+// Play Protect (« protection renforcée contre la fraude ») bloque les APK
+// installés hors Play Store qui déclarent ces accès. Le manifeste FUSIONNÉ
+// (bibliothèques comprises) de la variante standard ne doit en contenir
+// aucun : sinon assembleStandardDebug / assembleStandardRelease échouent.
+abstract class CheckStandardManifest : DefaultTask() {
+    @get:InputFile
+    @get:PathSensitive(PathSensitivity.NONE)
+    abstract val mergedManifest: RegularFileProperty
+
+    @get:OutputFile
+    abstract val report: RegularFileProperty
+
+    @TaskAction
+    fun check() {
+        val ns = "http://schemas.android.com/apk/res/android"
+        val forbidden = setOf(
+            "android.permission.BIND_NOTIFICATION_LISTENER_SERVICE",
+            "android.service.notification.NotificationListenerService",
+            "android.permission.BIND_ACCESSIBILITY_SERVICE",
+            "android.accessibilityservice.AccessibilityService",
+            "android.permission.RECEIVE_SMS",
+            "android.permission.READ_SMS",
+            "android.permission.SEND_SMS",
+            "android.permission.WRITE_SMS",
+            "android.permission.RECEIVE_MMS",
+            "android.permission.RECEIVE_WAP_PUSH",
+            "android.permission.READ_CELL_BROADCASTS",
+        )
+        val doc = DocumentBuilderFactory.newInstance()
+            .apply { isNamespaceAware = true }
+            .newDocumentBuilder()
+            .parse(mergedManifest.get().asFile)
+        val all = doc.getElementsByTagName("*")
+        val found = (0 until all.length)
+            .map { all.item(it) as Element }
+            .flatMap { e ->
+                listOf("name", "permission").map { e.getAttributeNS(ns, it) }
+                    .filter { it in forbidden }
+                    .map { "<${e.tagName}> $it" }
+            }
+            .distinct()
+        if (found.isNotEmpty()) {
+            throw GradleException(
+                "Variante standard : accès bloqués par Play Protect dans le manifeste fusionné :\n" +
+                    found.joinToString("\n") { "  - $it" },
+            )
+        }
+        report.get().asFile.writeText("OK : aucun accès à risque pour Play Protect.\n")
+    }
+}
+
+androidComponents {
+    onVariants(selector().withFlavor("distribution" to "standard")) { variant ->
+        val suffix = variant.name.replaceFirstChar { it.uppercase() }
+        val checkTask = tasks.register<CheckStandardManifest>("checkPlayProtect${suffix}") {
+            group = "verification"
+            description = "Vérifie que le manifeste fusionné de ${variant.name} passe Play Protect."
+            mergedManifest.set(variant.artifacts.get(SingleArtifact.MERGED_MANIFEST))
+            report.set(layout.buildDirectory.file("reports/playProtect/${variant.name}.txt"))
+        }
+        tasks.matching { it.name == "assemble$suffix" || it.name == "bundle$suffix" }
+            .configureEach { dependsOn(checkTask) }
+        tasks.matching { it.name == "check" }.configureEach { dependsOn(checkTask) }
+    }
+}
+
+// Avec les variantes, AGP ne crée plus testDebugUnitTest pour :app : ce
+// raccourci (CI, docs) lance les tests JVM des deux variantes.
+tasks.register("testDebugUnitTest") {
+    group = "verification"
+    description = "Tests unitaires JVM des variantes standard et complete (debug)."
+    dependsOn("testStandardDebugUnitTest", "testCompleteDebugUnitTest")
 }
 
 dependencies {

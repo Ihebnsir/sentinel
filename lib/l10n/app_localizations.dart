@@ -1229,6 +1229,12 @@ abstract class AppLocalizations {
   /// **'Retirer aussi l\'accès dans les réglages Android'**
   String get autoProtectionRemoveAccess;
 
+  /// APK GitHub (variante standard) : remplace l'interrupteur de la protection automatique.
+  ///
+  /// In fr, this message translates to:
+  /// **'Disponible dans la version Google Play de Sentinel. Ici, analysez un message en le partageant vers Sentinel ou en le collant ci-dessous.'**
+  String get autoProtectionPlayOnly;
+
   /// No description provided for @autoProtectionDoesTitle.
   ///
   /// In fr, this message translates to:

@@ -1,5 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 
+import '../app_info.dart';
 import '../l10n/l10n.dart';
 import '../models/installed_app.dart';
 import '../services/app_analysis.dart';
@@ -11,8 +12,6 @@ import '../widgets/app_icon.dart';
 
 // Couleur : celle du thème (dividerTheme, ligne fine).
 const _divider = Divider(height: 1, thickness: 1);
-
-const _ownPackage = 'com.iheb.sentinel';
 
 /// Choix de l'application à analyser, puis de la durée.
 /// Renvoie true (Navigator.pop) si une analyse a été lancée.
@@ -45,7 +44,7 @@ class _AppAnalysisScreenState extends State<AppAnalysisScreen> {
         _apps =
             [
               for (final app in apps ?? const <InstalledApp>[])
-                if (app.hasLauncherIcon && app.packageName != _ownPackage) app,
+                if (app.hasLauncherIcon && app.packageName != ownPackageName) app,
             ]..sort(
               (a, b) => a.label.toLowerCase().compareTo(b.label.toLowerCase()),
             );

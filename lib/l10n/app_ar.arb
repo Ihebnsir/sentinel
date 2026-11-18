@@ -189,6 +189,7 @@
   "autoProtectionNotificationsBlocked": "إشعارات \u2066Sentinel\u2069 محظورة: لن يتم تنبيهك في حال وجود احتيال.",
   "autoProtectionAllowNotifications": "السماح بإشعارات \u2066Sentinel\u2069",
   "autoProtectionRemoveAccess": "إزالة الوصول أيضًا من إعدادات أندرويد",
+  "autoProtectionPlayOnly": "متوفرة في نسخة ⁦Sentinel⁩ على ⁦Google Play⁩. هنا، افحص الرسالة بمشاركتها مع ⁦Sentinel⁩ أو بلصقها في الأسفل.",
   "autoProtectionDoesTitle": "ما يفعله \u2066Sentinel\u2069",
   "autoProtectionDoes1": "يقرأ نص إشعارات تطبيقات المراسلة لديك.",
   "autoProtectionDoes2": "يحلّله على هاتفك.",

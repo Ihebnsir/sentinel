@@ -673,6 +673,10 @@ class AppLocalizationsAr extends AppLocalizations {
       'إزالة الوصول أيضًا من إعدادات أندرويد';
 
   @override
+  String get autoProtectionPlayOnly =>
+      'متوفرة في نسخة ⁦Sentinel⁩ على ⁦Google Play⁩. هنا، افحص الرسالة بمشاركتها مع ⁦Sentinel⁩ أو بلصقها في الأسفل.';
+
+  @override
   String get autoProtectionDoesTitle => 'ما يفعله ⁦Sentinel⁩';
 
   @override

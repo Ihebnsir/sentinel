@@ -6,6 +6,22 @@ Le format suit [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/) et le pr
 
 ## [Non publié]
 
+## [1.0.1] - 2026-11-18
+
+L'APK 1.0.0 téléchargé depuis GitHub était bloqué par Google Play Protect (« Appli bloquée pour protéger votre appareil », sans bouton pour passer outre). La 1.0.1 corrige ce blocage.
+
+### Modifié
+- Deux variantes Android, même code et même clé de signature : **standard** (APK GitHub, `com.iheb.sentinel.standard`) et **complete** (future version Google Play, `com.iheb.sentinel`). Voir [docs/RELEASE.md](docs/RELEASE.md).
+- Variante standard : sans le lecteur de notifications de la protection automatique, ni permission SMS ou d'accessibilité, que la protection renforcée contre la fraude de Play Protect bloque hors du Play Store. Dans l'onglet Messages, une courte explication (fr/ar/en) remplace l'interrupteur ; l'analyse par partage, sélection de texte ou copier-coller ne change pas.
+- APK publié sous le nom `sentinel-<version>-<variante>.apk` ; `tools/release/build_release.ps1` prend `-Flavor` (standard par défaut).
+- Build release : `--extra-gen-snapshot-options=--strip`. `libapp.so` ne contient plus d'informations DWARF avec les noms Dart en clair (avertissement « unobfuscated DWARF ») ; les symboles restent dans `build/symbols`.
+
+### Ajouté
+- Vérification Gradle `checkPlayProtectStandard*` : le build standard échoue si son manifeste fusionné déclare un lecteur de notifications, un service d'accessibilité ou une permission SMS.
+
+### Note
+- La 1.0.1 standard ne remplace pas la 1.0.0 (autre nom de paquet) : exporter une sauvegarde du coffre si besoin, puis désinstaller la 1.0.0.
+
 ## [1.0.0] - 2026-11-16
 
 Première version publique. L'app tourne entièrement sur le téléphone, sans compte ni statistiques d'usage.
@@ -56,5 +72,6 @@ Première version publique. L'app tourne entièrement sur le téléphone, sans c
 - Sauvegarde Android désactivée pour les données de l'app.
 - CI : tests, couverture minimale de 85 %, Gitleaks, Dependabot, et pour le serveur : pytest, ruff, bandit, pip-audit et image Docker non-root.
 
-[Non publié]: https://github.com/Ihebnsir/sentinel/compare/v1.0.0...HEAD
+[Non publié]: https://github.com/Ihebnsir/sentinel/compare/v1.0.1...HEAD
+[1.0.1]: https://github.com/Ihebnsir/sentinel/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/Ihebnsir/sentinel/releases/tag/v1.0.0

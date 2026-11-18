@@ -189,6 +189,7 @@
   "autoProtectionNotificationsBlocked": "Sentinel's notifications are blocked: you won't be warned about scams.",
   "autoProtectionAllowNotifications": "Allow Sentinel's notifications",
   "autoProtectionRemoveAccess": "Also remove access in Android settings",
+  "autoProtectionPlayOnly": "Available in the Google Play version of Sentinel. Here, check a message by sharing it to Sentinel or pasting it below.",
   "autoProtectionDoesTitle": "What Sentinel does",
   "autoProtectionDoes1": "Reads the text of notifications from your messaging apps.",
   "autoProtectionDoes2": "Analyzes it on your phone.",

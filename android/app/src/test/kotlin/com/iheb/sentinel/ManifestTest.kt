@@ -12,14 +12,22 @@ class ManifestTest {
 
     private val ns = "http://schemas.android.com/apk/res/android"
 
+    private fun parse(path: String) =
+        DocumentBuilderFactory.newInstance().apply { isNamespaceAware = true }
+            .newDocumentBuilder().parse(File(path))
+
+    // Manifestes écrits à la main : main (commun) et complete (Google Play).
+    private val manifests = listOf("src/main/AndroidManifest.xml", "src/complete/AndroidManifest.xml")
+
     private val components: List<Element> by lazy {
-        val factory = DocumentBuilderFactory.newInstance().apply { isNamespaceAware = true }
-        val doc = factory.newDocumentBuilder().parse(File("src/main/AndroidManifest.xml"))
+        manifests.map(::parse).flatMap { doc -> componentsOf(doc) }
+    }
+
+    private fun componentsOf(doc: org.w3c.dom.Document): List<Element> =
         listOf("activity", "service", "receiver", "provider").flatMap { tag ->
             val nodes = doc.getElementsByTagName(tag)
             (0 until nodes.length).map { nodes.item(it) as Element }
         }
-    }
 
     private fun Element.attr(name: String) = getAttributeNS(ns, name)
 
@@ -81,5 +89,25 @@ class ManifestTest {
             "ACCESS_BACKGROUND_LOCATION", "READ_PHONE_STATE", "READ_CONTACTS",
         ).map { "android.permission.$it" }
         assertTrue(names.none { it in dangerous })
+    }
+
+    // Le manifeste FUSIONNÉ (bibliothèques comprises) est vérifié à chaque
+    // build standard par la tâche checkPlayProtectStandard* (build.gradle.kts).
+    @Test
+    fun `le lecteur de notifications n'est declare que dans la variante complete`() {
+        val playProtectRisk = listOf(
+            "BIND_NOTIFICATION_LISTENER_SERVICE", "NotificationListenerService",
+            "BIND_ACCESSIBILITY_SERVICE", "SMS", "RECEIVE_MMS", "RECEIVE_WAP_PUSH",
+        )
+        val main = File("src/main/AndroidManifest.xml").readText()
+            .replace(Regex("<!--.*?-->", RegexOption.DOT_MATCHES_ALL), "")
+        for (word in playProtectRisk) assertTrue("$word dans src/main", word !in main)
+        assertTrue(!File("src/standard/AndroidManifest.xml").exists())
+
+        val listener = componentsOf(parse("src/complete/AndroidManifest.xml"))
+            .single { it.attr("name") == ".SentinelNotificationListener" }
+        assertEquals("android.permission.BIND_NOTIFICATION_LISTENER_SERVICE", listener.attr("permission"))
+        assertTrue(File("src/complete/kotlin/com/iheb/sentinel/SentinelNotificationListener.kt").isFile)
+        assertTrue(!File("src/main/kotlin/com/iheb/sentinel/SentinelNotificationListener.kt").exists())
     }
 }

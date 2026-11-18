@@ -1,5 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 
+import '../app_info.dart';
 import '../l10n/l10n.dart';
 import '../services/protection_service.dart';
 import '../theme/app_colors.dart';
@@ -8,14 +9,78 @@ import 'actions_row.dart';
 /// Ligne « Protection automatique » de l'onglet Messages.
 /// Le Switch reflète toujours l'état RÉEL lu côté Android.
 /// N'affiche rien hors Android (Windows, web…).
-class AutoProtectionSection extends StatefulWidget {
-  const AutoProtectionSection({super.key});
+///
+/// Variante standard (APK GitHub) : pas de lecteur de notifications, donc
+/// une courte explication à la place de l'interrupteur (voir app_info.dart).
+class AutoProtectionSection extends StatelessWidget {
+  const AutoProtectionSection({
+    super.key,
+    this.available = autoProtectionAvailable,
+  });
+
+  /// false dans la variante standard ; modifiable pour les tests.
+  final bool available;
 
   @override
-  State<AutoProtectionSection> createState() => _AutoProtectionSectionState();
+  Widget build(BuildContext context) {
+    if (!ProtectionService.isSupportedPlatform) return const SizedBox.shrink();
+    return available ? const _AutoProtectionSwitch() : const _PlayOnlyNote();
+  }
 }
 
-class _AutoProtectionSectionState extends State<AutoProtectionSection> {
+/// Variante standard : la fonctionnalité existe seulement dans la version
+/// Google Play ; l'analyse par partage ou copier-coller reste là.
+class _PlayOnlyNote extends StatelessWidget {
+  const _PlayOnlyNote();
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Divider(height: 1, thickness: 1, color: context.colors.ligne),
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 12),
+          child: MergeSemantics(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  l.autoProtectionTitle,
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                    color: context.colors.encre,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  l.autoProtectionPlayOnly,
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: context.colors.secondaire,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        Divider(height: 1, thickness: 1, color: context.colors.ligne),
+      ],
+    );
+  }
+}
+
+/// Interrupteur de la protection automatique (variante complete).
+class _AutoProtectionSwitch extends StatefulWidget {
+  const _AutoProtectionSwitch();
+
+  @override
+  State<_AutoProtectionSwitch> createState() => _AutoProtectionSwitchState();
+}
+
+class _AutoProtectionSwitchState extends State<_AutoProtectionSwitch> {
   final _service = ProtectionService();
   late final AppLifecycleListener _lifecycle;
 

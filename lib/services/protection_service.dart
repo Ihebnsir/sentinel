@@ -34,12 +34,17 @@ class ProtectionService {
   static bool get _isAndroid =>
       !kIsWeb && defaultTargetPlatform == TargetPlatform.android;
 
+  /// La section « Protection automatique » a-t-elle un sens ici ?
+  static bool get isSupportedPlatform => _isAndroid;
+
   /// null si la fonctionnalité n'existe pas (Windows, web…).
   Future<ProtectionStatus?> getStatus() async {
     if (!_isAndroid) return null;
     try {
       final map = await _channel.invokeMapMethod<Object?, Object?>('getStatus');
-      return map == null ? null : ProtectionStatus.fromMap(map);
+      // available: false = variante standard, sans lecteur de notifications.
+      if (map == null || map['available'] == false) return null;
+      return ProtectionStatus.fromMap(map);
     } on MissingPluginException {
       return null;
     } on PlatformException catch (e) {

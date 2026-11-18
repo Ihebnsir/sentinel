@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
 
+import '../app_info.dart';
 import '../l10n/l10n.dart';
 import '../services/phishing/known_brands.dart';
 import '../services/phishing/message_analyzer.dart';
@@ -224,7 +225,7 @@ class _MessagesScreenState extends State<MessagesScreen> {
             ? SnackBarAction(
                 label: l.qrOpenSettings,
                 onPressed: () =>
-                    AppsScannerService().openAppSettings('com.iheb.sentinel'),
+                    AppsScannerService().openAppSettings(ownPackageName),
               )
             : null,
       ),

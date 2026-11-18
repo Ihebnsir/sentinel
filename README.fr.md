@@ -21,6 +21,21 @@
 
 L'interface de l'application est en français. Tout se passe sur le téléphone. Rien ne passe par le réseau sans votre accord : les seuls appels réseau viennent de quatre fonctions facultatives, la vérification des fuites auprès de Have I Been Pwned (5 caractères hexadécimaux d'une empreinte SHA-1, k-anonymity), le pare-feu DNS (transmet les requêtes DNS à Quad9, chiffrées en DNS-over-TLS ou HTTPS), la mise à jour des listes de blocage (téléchargées depuis GitHub) et le signalement d'arnaques (un message à la fois, anonymisé sur le téléphone, envoyé seulement quand vous touchez « Envoyer »).
 
+## Installer : quelle version ?
+
+Sentinel existe en deux variantes Android, construites à partir du même code et signées avec la même clé :
+
+| Variante | Où | Protection automatique | Fichier |
+|---|---|---|---|
+| **Standard** | [Releases GitHub](https://github.com/Ihebnsir/sentinel/releases) | Non | `sentinel-<version>-standard.apk` |
+| **Complète** | Google Play (plus tard) | Oui | Play Store |
+
+**Installez l'APK standard de la page Releases.** Depuis la version 1.0.1, c'est le seul APK publié sur GitHub.
+
+Pourquoi : la protection renforcée contre la fraude de Google Play Protect bloque, sans bouton « Installer quand même », les applis installées depuis un navigateur ou un gestionnaire de fichiers qui déclarent un lecteur de notifications, l'accès aux SMS ou l'accessibilité. La version 1.0.0 avait un lecteur de notifications (la protection automatique) et était bloquée ainsi. La variante standard ne déclare aucun de ces accès : dans l'onglet Messages, la protection automatique est remplacée par une courte explication, et l'on peut toujours vérifier un message en le partageant vers Sentinel, en sélectionnant son texte (« Vérifier avec Sentinel ») ou en le collant. Tout le reste est identique.
+
+La variante standard a son propre nom de paquet (`com.iheb.sentinel.standard`) : elle peut cohabiter avec la future version Google Play sans conflit. Si vous aviez installé la 1.0.0 : exportez une sauvegarde du coffre si vous l'utilisiez, puis désinstallez la 1.0.0.
+
 ## Captures d'écran
 
 > **TODO :** ajouter les captures dans `docs/screenshots/` (voir [docs/screenshots/README.md](docs/screenshots/README.md)), puis décommenter le tableau ci-dessous.
@@ -115,10 +130,11 @@ cd sentinel
 flutter pub get
 flutter analyze
 flutter test
-flutter build apk --debug
+flutter build apk --debug --flavor standard   # ou --flavor complete
+(cd android && ./gradlew testDebugUnitTest)   # tests Kotlin, deux variantes
 ```
 
-Les builds release utilisent encore la configuration de signature de debug. La signature release reste à faire (voir Feuille de route).
+`--flavor` est obligatoire : `standard` (GitHub, sans lecteur de notifications) ou `complete` (Google Play). Le build standard échoue si son manifeste fusionné déclare un accès bloqué par Play Protect. Les builds release sont signés avec la clé de publication : voir [docs/RELEASE.md](docs/RELEASE.md).
 
 ## Apprentissage automatique
 
@@ -166,7 +182,7 @@ L'application a été auditée selon l'OWASP MASVS v2 (analyse statique et dynam
 Les APK officiels de Sentinel sont signés avec une seule clé de publication. Avant d'installer un APK, vérifiez son certificat :
 
 ```
-apksigner verify --print-certs app-release.apk
+apksigner verify --print-certs sentinel-1.0.1-standard.apk
 ```
 
 La sortie doit indiquer `Verifies` et cette empreinte SHA-256 du certificat :
