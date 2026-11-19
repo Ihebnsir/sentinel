@@ -57,10 +57,27 @@ class ScoreArch extends StatelessWidget {
       label: context.l10n.scoreSemantics(score),
       liveRegion: true,
       excludeSemantics: true,
+      // L'arche apparaît en fondu, puis se remplit de bas en haut.
+      // « Supprimer les animations » actif : tout est affiché d'un coup.
       child: TweenAnimationBuilder<double>(
+        tween: Tween(begin: 0, end: 1),
+        duration: AppMotion.of(context, AppMotion.lent),
+        curve: AppMotion.entree,
+        builder: (context, t, child) => Opacity(
+          opacity: t,
+          child: Transform.scale(scale: 0.96 + 0.04 * t, child: child),
+        ),
+        child: _fill(context, color),
+      ),
+    );
+  }
+
+  /// Partie remplie et chiffre, animés de 0 jusqu'au score.
+  Widget _fill(BuildContext context, Color color) {
+    return TweenAnimationBuilder<double>(
         tween: Tween(begin: 0, end: score.toDouble()),
-        duration: const Duration(milliseconds: 1400),
-        curve: Curves.easeOutCubic,
+        duration: AppMotion.of(context, AppMotion.score),
+        curve: AppMotion.entree,
         builder: (context, value, _) {
           // Le chiffre est sur la partie remplie à partir de 45 : texte le
           // plus lisible sur cette couleur (contraste WCAG).
@@ -104,7 +121,6 @@ class ScoreArch extends StatelessWidget {
             ],
           );
         },
-      ),
     );
   }
 

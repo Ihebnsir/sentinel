@@ -317,6 +317,12 @@ abstract class AppLocalizations {
   /// **'Rien à corriger pour le moment.'**
   String get homeNothingToFix;
 
+  /// No description provided for @homeProtections.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vos protections'**
+  String get homeProtections;
+
   /// Bandeau Wi-Fi dangereux ; title = nom du réseau à risque
   ///
   /// In fr, this message translates to:

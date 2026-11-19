@@ -141,7 +141,11 @@ class _UnlockViewState extends State<UnlockView> {
     return ListView(
       padding: const EdgeInsets.only(top: AppSpace.lg, bottom: AppSpace.xl),
       children: [
-        Icon(Icons.lock_outline, size: AppSize.iconHero, color: context.colors.bleu),
+        // Porte bleue fermée, alignée sur le texte (et non centrée).
+        const Align(
+          alignment: AlignmentDirectional.centerStart,
+          child: SidiBouIllustration(SidiBouMotif.porte, size: AppSize.archHero),
+        ),
         const SizedBox(height: AppSpace.lg),
         Text(
           l.vaultLockedTitle,

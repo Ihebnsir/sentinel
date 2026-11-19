@@ -9,7 +9,10 @@ import 'ui.dart';
 /// Section « Protection réseau » de l'accueil : une ligne vers le
 /// pare-feu DNS. N'affiche rien hors Android.
 class NetworkProtectionSection extends StatefulWidget {
-  const NetworkProtectionSection({super.key});
+  const NetworkProtectionSection({super.key, this.showTitle = true});
+
+  /// false : l'accueil la range sous « Vos protections ».
+  final bool showTitle;
 
   @override
   State<NetworkProtectionSection> createState() =>
@@ -53,58 +56,18 @@ class _NetworkProtectionSectionState extends State<NetworkProtectionSection> {
     final l = context.l10n;
     final status = _status;
     if (status == null) return const SizedBox.shrink();
-    final color = status.active
-        ? context.colors.zitouna
-        : context.colors.discret;
-
+    final level = status.active ? StatusLevel.ok : StatusLevel.neutral;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          l.networkProtectionTitle,
-          style: TextStyle(
-            fontSize: AppText.section,
-            fontWeight: FontWeight.w600,
-            color: context.colors.encre,
-          ),
-        ),
-        const SizedBox(height: AppSpace.sm),
-        InkWell(
+        if (widget.showTitle) SectionHeader(title: l.networkProtectionTitle),
+        ListRow(
+          icon: Icons.shield_outlined,
+          iconColor: level.color(context.colors),
+          title: l.firewallTitle,
+          subtitle: status.summary(l),
           onTap: _open,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: AppSpace.lg),
-            child: Row(
-              children: [
-                Icon(Icons.shield_outlined, color: color),
-                const SizedBox(width: AppSpace.lg),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        l.firewallTitle,
-                        style: TextStyle(
-                          fontSize: AppText.intitule,
-                          fontWeight: FontWeight.w500,
-                          color: context.colors.encre,
-                        ),
-                      ),
-                      const SizedBox(height: AppSpace.xs),
-                      Text(
-                        status.summary(l),
-                        style: TextStyle(
-                          fontSize: AppText.detail,
-                          color: context.colors.secondaire,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: AppSpace.md),
-                Icon(Icons.chevron_right, color: context.colors.discret),
-              ],
-            ),
-          ),
+          chevron: true,
         ),
       ],
     );

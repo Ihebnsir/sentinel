@@ -4,6 +4,7 @@ import '../l10n/l10n.dart';
 import '../services/share_service.dart';
 import '../theme/app_colors.dart';
 import '../widgets/arch_icon.dart';
+import '../widgets/ui.dart';
 import 'apps_screen.dart';
 import 'firewall_screen.dart';
 import 'home_screen.dart';
@@ -84,7 +85,12 @@ class _MainShellState extends State<MainShell> {
     return Scaffold(
       // IndexedStack garde toutes les pages en mémoire
       // et n'affiche que celle de l'index choisi.
-      body: IndexedStack(index: _selectedIndex, children: _pages),
+      // Fondu court à chaque changement d'onglet (aucun si les animations
+      // sont supprimées dans Android).
+      body: _TabFade(
+        index: _selectedIndex,
+        child: IndexedStack(index: _selectedIndex, children: _pages),
+      ),
       // Fine ligne de séparation au-dessus de la barre.
       bottomNavigationBar: DecoratedBox(
         decoration: BoxDecoration(
@@ -122,4 +128,47 @@ class _MainShellState extends State<MainShell> {
       ),
     );
   }
+}
+
+/// Fait apparaître la page en fondu quand [index] change. Les pages
+/// restent en mémoire (IndexedStack) : seul l'affichage est animé.
+class _TabFade extends StatefulWidget {
+  const _TabFade({required this.index, required this.child});
+
+  final int index;
+  final Widget child;
+
+  @override
+  State<_TabFade> createState() => _TabFadeState();
+}
+
+class _TabFadeState extends State<_TabFade>
+    with SingleTickerProviderStateMixin {
+  late final _controller = AnimationController(vsync: this, value: 1);
+  late final _opacity = CurvedAnimation(
+    parent: _controller,
+    curve: AppMotion.entree,
+  );
+
+  @override
+  void didUpdateWidget(_TabFade oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.index == widget.index) return;
+    final duration = AppMotion.of(context, AppMotion.moyen);
+    if (duration == Duration.zero) return;
+    _controller
+      ..duration = duration
+      ..forward(from: 0.4);
+  }
+
+  @override
+  void dispose() {
+    _opacity.dispose();
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) =>
+      FadeTransition(opacity: _opacity, child: widget.child);
 }

@@ -129,6 +129,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get homeNothingToFix => 'لا شيء يحتاج إلى إصلاح حاليًا.';
 
   @override
+  String get homeProtections => 'حماياتك';
+
+  @override
   String homeWifiAlert(String title) {
     return '⁨$title⁩: تجنّب العمليات البنكية والشراء.';
   }

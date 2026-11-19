@@ -180,7 +180,7 @@ class AppDetailScreen extends StatelessWidget {
                   const SizedBox(height: AppSpace.xl),
                   _InfoRow(
                     label: l.detailRiskLevel,
-                    trailing: RiskLevelText(level: report.level, fontSize: AppText.corps),
+                    trailing: RiskLevelText(level: report.level),
                   ),
                   const _Separator(),
                   _InfoRow(

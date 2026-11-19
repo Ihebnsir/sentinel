@@ -6,87 +6,55 @@ import '../services/wifi_risk.dart';
 import '../theme/app_colors.dart';
 import 'ui.dart';
 
-/// Couleur selon le niveau du Wi-Fi.
-Color wifiLevelColor(AppColors c, WifiLevel level) => switch (level) {
-  WifiLevel.danger => c.rommen,
-  WifiLevel.faible => c.ocre,
-  WifiLevel.correct || WifiLevel.excellent => c.zitouna,
-  WifiLevel.pasDeWifi || WifiLevel.inconnu => c.discret,
+/// Statut selon le niveau du Wi-Fi.
+StatusLevel wifiStatus(WifiLevel level) => switch (level) {
+  WifiLevel.danger => StatusLevel.danger,
+  WifiLevel.faible => StatusLevel.warning,
+  WifiLevel.correct || WifiLevel.excellent => StatusLevel.ok,
+  WifiLevel.pasDeWifi || WifiLevel.inconnu => StatusLevel.neutral,
 };
 
-/// Section « Réseau Wi-Fi » de l'accueil : titre et une ligne.
+/// Couleur selon le niveau du Wi-Fi.
+Color wifiLevelColor(AppColors c, WifiLevel level) =>
+    wifiStatus(level).color(c);
+
+/// Section « Réseau Wi-Fi » de l'accueil : une ligne et son statut.
 /// [report] null : information indisponible (ligne non cliquable).
+/// [showTitle] false : l'accueil la range sous « Vos protections ».
 class WifiSection extends StatelessWidget {
-  const WifiSection({super.key, required this.report, this.onTap});
+  const WifiSection({
+    super.key,
+    required this.report,
+    this.onTap,
+    this.showTitle = true,
+  });
 
   final WifiReport? report;
   final VoidCallback? onTap;
+  final bool showTitle;
 
   @override
   Widget build(BuildContext context) {
     final l = context.l10n;
     final report = this.report;
-    final color = report == null
-        ? context.colors.discret
-        : wifiLevelColor(context.colors, report.level);
+    final level = report == null
+        ? StatusLevel.neutral
+        : wifiStatus(report.level);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          l.wifiSectionTitle,
-          style: TextStyle(
-            fontSize: AppText.section,
-            fontWeight: FontWeight.w600,
-            color: context.colors.encre,
-          ),
-        ),
-        const SizedBox(height: AppSpace.sm),
-        InkWell(
+        if (showTitle) SectionHeader(title: l.wifiSectionTitle),
+        ListRow(
+          icon: report?.level == WifiLevel.pasDeWifi
+              ? Icons.wifi_off
+              : Icons.wifi,
+          iconColor: level.color(context.colors),
+          title: report?.title ?? l.wifiUnavailableTitle,
+          subtitle: report?.summary ?? l.wifiUnavailableSummary,
           onTap: report == null ? null : onTap,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: AppSpace.lg),
-            child: Row(
-              children: [
-                Icon(
-                  report?.level == WifiLevel.pasDeWifi
-                      ? Icons.wifi_off
-                      : Icons.wifi,
-                  color: color,
-                ),
-                const SizedBox(width: AppSpace.lg),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        report?.title ?? l.wifiUnavailableTitle,
-                        style: TextStyle(
-                          fontSize: AppText.intitule,
-                          fontWeight: FontWeight.w500,
-                          color: context.colors.encre,
-                        ),
-                      ),
-                      const SizedBox(height: AppSpace.xs),
-                      Text(
-                        report?.summary ?? l.wifiUnavailableSummary,
-                        style: TextStyle(
-                          fontSize: AppText.detail,
-                          color: context.colors.secondaire,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                if (report != null) ...[
-                  const SizedBox(width: AppSpace.md),
-                  Text(
-                    report.level.label(l),
-                    style: TextStyle(fontWeight: FontWeight.w600, color: color),
-                  ),
-                ],
-              ],
-            ),
-          ),
+          trailing: report == null
+              ? null
+              : StatusBadge(level: level, label: report.level.label(l)),
         ),
       ],
     );
@@ -144,15 +112,11 @@ class _WifiDetails extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          report.level.label(l),
-          style: TextStyle(
-            fontSize: AppText.corps,
-            fontWeight: FontWeight.w600,
-            color: wifiLevelColor(context.colors, report.level),
-          ),
+        StatusBadge(
+          level: wifiStatus(report.level),
+          label: report.level.label(l),
         ),
-        const SizedBox(height: AppSpace.xs),
+        const SizedBox(height: AppSpace.sm),
         Text(
           report.title,
           style: TextStyle(

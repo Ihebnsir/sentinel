@@ -252,19 +252,7 @@ class _LinksScreenState extends State<LinksScreen> {
             child: ListView(
               padding: const EdgeInsets.fromLTRB(AppSpace.page, AppSpace.xl, AppSpace.page, AppSpace.lg),
               children: [
-                Text(
-                  l.navLinks,
-                  style: TextStyle(
-                    fontSize: AppText.titre,
-                    fontWeight: FontWeight.w600,
-                    color: context.colors.encre,
-                  ),
-                ),
-                const SizedBox(height: AppSpace.xs),
-                Text(
-                  l.linksIntro,
-                  style: TextStyle(fontSize: AppText.corps, color: muted),
-                ),
+                PageHeader(title: l.navLinks, subtitle: l.linksIntro),
                 const SizedBox(height: AppSpace.lg),
                 _LinkField(controller: _controller, onChanged: _onTextChanged),
                 const SizedBox(height: AppSpace.sm),
@@ -330,10 +318,11 @@ class _LinksScreenState extends State<LinksScreen> {
       const SizedBox(height: AppSpace.md),
       Align(
         alignment: AlignmentDirectional.centerStart,
-        child: OutlinedButton(
+        child: SecondaryButton(
           // null : désactivé (lien dangereux).
           onPressed: blocked ? null : () => _open(result),
-          child: Text(_openLabel(l, result)),
+          icon: blocked ? Icons.block : Icons.open_in_new,
+          label: _openLabel(l, result),
         ),
       ),
       if (blocked)
@@ -365,10 +354,11 @@ class _LinksScreenState extends State<LinksScreen> {
                 child: Text(l.linksClear),
               ),
             const SizedBox(width: AppSpace.sm),
-            FilledButton(
-              // null = bouton désactivé (champ vide ou vérification en cours).
-              onPressed: _hasText && !_checking ? _check : null,
-              child: Text(l.linksCheck),
+            PrimaryButton(
+              // null = bouton désactivé (champ vide) ; busy : vérification.
+              onPressed: _hasText ? _check : null,
+              busy: _checking,
+              label: l.linksCheck,
             ),
           ],
         ),
@@ -426,24 +416,12 @@ class _QrScanRow extends StatelessWidget {
     return Column(
       children: [
         const AppDivider(),
-        InkWell(
+        ListRow(
+          icon: Icons.qr_code_scanner,
+          title: l.qrScanButton,
+          subtitle: l.qrScanSubtitle,
+          titleColor: context.colors.bleu,
           onTap: onTap,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: AppSpace.lg),
-            child: Row(
-              children: [
-                Icon(Icons.qr_code_scanner, color: context.colors.bleu),
-                const SizedBox(width: AppSpace.lg),
-                Expanded(
-                  child: _TwoLines(
-                    title: l.qrScanButton,
-                    subtitle: l.qrScanSubtitle,
-                    titleColor: context.colors.bleu,
-                  ),
-                ),
-              ],
-            ),
-          ),
         ),
         const AppDivider(),
       ],
@@ -516,36 +494,19 @@ class _AutoProtectionRowState extends State<AutoProtectionRow> {
     final active = status.active;
     return Column(
       children: [
-        InkWell(
+        ListRow(
+          icon: Icons.shield_outlined,
+          iconColor: active ? context.colors.zitouna : context.colors.discret,
+          title: l.linksAutoTitle,
+          subtitle: active ? l.linksAutoOn : l.linksAutoOff,
           onTap: active ? _openFirewall : null,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: AppSpace.lg),
-            child: Row(
-              children: [
-                Icon(
-                  Icons.shield_outlined,
-                  color: active
-                      ? context.colors.zitouna
-                      : context.colors.discret,
+          chevron: active,
+          trailing: active
+              ? null
+              : TextButton(
+                  onPressed: _busy ? null : _enable,
+                  child: Text(l.linksAutoEnable),
                 ),
-                const SizedBox(width: AppSpace.lg),
-                Expanded(
-                  child: _TwoLines(
-                    title: l.linksAutoTitle,
-                    subtitle: active ? l.linksAutoOn : l.linksAutoOff,
-                  ),
-                ),
-                const SizedBox(width: AppSpace.md),
-                if (active)
-                  Icon(Icons.chevron_right, color: context.colors.discret)
-                else
-                  TextButton(
-                    onPressed: _busy ? null : _enable,
-                    child: Text(l.linksAutoEnable),
-                  ),
-              ],
-            ),
-          ),
         ),
         const AppDivider(),
       ],
@@ -553,37 +514,3 @@ class _AutoProtectionRowState extends State<AutoProtectionRow> {
   }
 }
 
-/// Titre et sous-titre d'une ligne.
-class _TwoLines extends StatelessWidget {
-  const _TwoLines({
-    required this.title,
-    required this.subtitle,
-    this.titleColor,
-  });
-
-  final String title;
-  final String subtitle;
-  final Color? titleColor;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          title,
-          style: TextStyle(
-            fontSize: AppText.intitule,
-            fontWeight: FontWeight.w500,
-            color: titleColor ?? context.colors.encre,
-          ),
-        ),
-        const SizedBox(height: AppSpace.xs),
-        Text(
-          subtitle,
-          style: TextStyle(fontSize: AppText.detail, color: context.colors.secondaire),
-        ),
-      ],
-    );
-  }
-}

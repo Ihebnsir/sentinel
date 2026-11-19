@@ -189,8 +189,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     final report = status == null
         ? null
         : calculateSecurityScore(l, status, DateTime.now());
-    final wifi = _wifi;
-    final wifiReport = wifi == null ? null : assessWifi(l, wifi);
     return Scaffold(
       body: SafeArea(
         // RefreshIndicator : tirer vers le bas relance l'analyse.
@@ -200,7 +198,12 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           // AlwaysScrollable : on peut tirer même si l'écran ne déborde pas.
           child: SingleChildScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
-            padding: const EdgeInsets.symmetric(horizontal: AppSpace.page, vertical: AppSpace.xl),
+            padding: const EdgeInsets.fromLTRB(
+              AppSpace.page,
+              AppSpace.md,
+              AppSpace.page,
+              AppSpace.xl,
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -228,37 +231,11 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                     ),
                   ],
                 ),
-                const SizedBox(height: AppSpace.sm),
-                Text(
-                  _title(l, report),
-                  style: TextStyle(
-                    fontSize: AppText.titre,
-                    fontWeight: FontWeight.w600,
-                    color: context.colors.encre,
-                  ),
-                ),
-                const SizedBox(height: AppSpace.xxl),
+                PageHeader(title: _title(l, report)),
+                const SizedBox(height: AppSpace.xl),
+                // 1. Le score, 2. ce qu'il reste à faire, 3. les protections.
                 ..._content(l, status, report),
-                // Hors Android (Windows) : section masquée.
-                if (WifiService.isSupported && _wifiLoaded && !_loading) ...[
-                  const SizedBox(height: AppSpace.xxl),
-                  WifiSection(report: wifiReport, onTap: _showWifiDetails),
-                ],
-                if (FirewallService.isSupported && !_loading) ...[
-                  const SizedBox(height: AppSpace.xxl),
-                  const NetworkProtectionSection(),
-                ],
-                if (WeeklyReportService.isSupported && !_loading) ...[
-                  const SizedBox(height: AppSpace.xl),
-                  const AppDivider(),
-                  _WeeklyEntry(
-                    onTap: () => Navigator.of(context).push(
-                      MaterialPageRoute<void>(
-                        builder: (_) => const WeeklyReportScreen(),
-                      ),
-                    ),
-                  ),
-                ],
+                if (!_loading) ..._protections(l),
               ],
             ),
           ),
@@ -267,7 +244,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     );
   }
 
-  /// Le contenu sous le titre, selon l'état de l'analyse.
+  /// Le score et les actions conseillées, selon l'état de l'analyse.
   List<Widget> _content(
     AppLocalizations l,
     DeviceSecurityStatus? status,
@@ -277,46 +254,88 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       return [Center(child: ScoreArch.empty(message: l.homeAnalyzing))];
     }
     if (_failed) {
-      return [_InfoMessage(l.commonAnalysisFailedPull)];
+      return [InfoMessage(l.commonAnalysisFailedPull)];
     }
     if (status == null || report == null) {
-      return [_InfoMessage(l.homeAndroidOnly)];
+      return [InfoMessage(l.homeAndroidOnly)];
     }
 
-    final actions = report.actions;
+    // Les plus importantes d'abord (celles qui rapportent le plus).
+    final actions = [...report.actions]
+      ..sort((a, b) => b.points.compareTo(a.points));
     return [
       Center(child: ScoreArch(score: report.score)),
       const SizedBox(height: AppSpace.md),
       Center(
         child: Text(
           _versionLine(l, status),
-          style: TextStyle(fontSize: AppText.detail, color: context.colors.discret),
-        ),
-      ),
-      const SizedBox(height: AppSpace.xxl),
-      Text(
-        l.homeToGainPoints,
-        style: TextStyle(
-          fontSize: AppText.section,
-          fontWeight: FontWeight.w600,
-          color: context.colors.encre,
-        ),
-      ),
-      const SizedBox(height: AppSpace.sm),
-      if (actions.isEmpty)
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: AppSpace.lg),
-          child: Text(
-            l.homeNothingToFix,
-            style: TextStyle(fontSize: AppText.corps, color: context.colors.secondaire),
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontSize: AppText.detail,
+            color: context.colors.discret,
           ),
         ),
-      // Boucle for dans la liste : on crée une ligne par action,
-      // avec un séparateur fin entre deux lignes (pas avant la première).
+      ),
+      const SizedBox(height: AppSpace.section),
+      SectionHeader(title: l.homeToGainPoints),
+      if (actions.isEmpty)
+        // Rien à faire : un brin de jasmin en récompense.
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: AppSpace.lg),
+          child: Row(
+            children: [
+              const SidiBouIllustration(
+                SidiBouMotif.jasmin,
+                size: AppSize.appIconLarge,
+              ),
+              const SizedBox(width: AppSpace.lg),
+              Expanded(
+                child: Text(
+                  l.homeNothingToFix,
+                  style: TextStyle(
+                    fontSize: AppText.corps,
+                    color: context.colors.secondaire,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      // Une ligne par action, séparateur fin entre deux lignes.
       for (var i = 0; i < actions.length; i++) ...[
-        if (i > 0)
-          const AppDivider(),
+        if (i > 0) const AppDivider(),
         ActionTile(action: actions[i], onTap: _onTapFor(actions[i])),
+      ],
+    ];
+  }
+
+  /// « Vos protections » : Wi-Fi, pare-feu et bilan de la semaine.
+  /// Hors Android (Windows), seules les lignes disponibles s'affichent.
+  List<Widget> _protections(AppLocalizations l) {
+    final wifi = _wifi;
+    final rows = <Widget>[
+      if (WifiService.isSupported && _wifiLoaded)
+        WifiSection(
+          report: wifi == null ? null : assessWifi(l, wifi),
+          onTap: _showWifiDetails,
+          showTitle: false,
+        ),
+      if (FirewallService.isSupported)
+        const NetworkProtectionSection(showTitle: false),
+      if (WeeklyReportService.isSupported)
+        _WeeklyEntry(
+          onTap: () => Navigator.of(context).push(
+            MaterialPageRoute<void>(builder: (_) => const WeeklyReportScreen()),
+          ),
+        ),
+    ];
+    if (rows.isEmpty) return const [];
+    return [
+      const SizedBox(height: AppSpace.section),
+      SectionHeader(title: l.homeProtections),
+      for (var i = 0; i < rows.length; i++) ...[
+        if (i > 0) const AppDivider(),
+        rows[i],
       ],
     ];
   }
@@ -345,28 +364,6 @@ class _WeeklyEntry extends StatelessWidget {
       subtitle: l.weeklyHomeEntryDetail,
       onTap: onTap,
       chevron: true,
-    );
-  }
-}
-
-/// Message centré affiché à la place de l'arche.
-
-class _InfoMessage extends StatelessWidget {
-  const _InfoMessage(this.text);
-
-  final String text;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: AppSpace.xxxl),
-      child: Center(
-        child: Text(
-          text,
-          textAlign: TextAlign.center,
-          style: TextStyle(fontSize: AppText.intitule, color: context.colors.secondaire),
-        ),
-      ),
     );
   }
 }

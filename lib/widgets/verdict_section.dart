@@ -5,14 +5,19 @@ import '../services/links/link_checker.dart';
 import '../theme/app_colors.dart';
 import 'ui.dart';
 
-/// Couleur d'un verdict : rouge, ocre ou vert.
-Color verdictColor(AppColors c, Verdict verdict) => switch (verdict) {
-  Verdict.dangereux => c.rommen,
-  Verdict.suspect => c.ocre,
-  Verdict.rien => c.zitouna,
+/// Statut d'un verdict : danger, avertissement ou rien de connu.
+StatusLevel verdictStatus(Verdict verdict) => switch (verdict) {
+  Verdict.dangereux => StatusLevel.danger,
+  Verdict.suspect => StatusLevel.warning,
+  Verdict.rien => StatusLevel.ok,
 };
 
-/// Verdict en grand, sous-titre, raisons séparées par des traits, conseil.
+/// Couleur d'un verdict : rouge, ocre ou vert.
+Color verdictColor(AppColors c, Verdict verdict) =>
+    verdictStatus(verdict).color(c);
+
+/// Verdict très lisible (arche teintée + icône + mot + couleur),
+/// raisons séparées par des traits fins, puis le conseil.
 /// Utilisé par l'onglet Liens et par le résultat d'un QR code.
 class VerdictSection extends StatelessWidget {
   const VerdictSection({
@@ -31,44 +36,42 @@ class VerdictSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l = context.l10n;
-    final muted = context.colors.secondaire;
+    final c = context.colors;
+    final level = verdictStatus(verdict);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SizedBox(height: AppSpace.xl),
-        // liveRegion : TalkBack annonce le verdict dès qu'il s'affiche,
-        // titre et sous-titre ensemble.
-        MergeSemantics(
-          child: Semantics(
-            liveRegion: true,
-            header: true,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  verdict.label(l),
-                  style: TextStyle(
-                    fontSize: AppText.titre,
-                    fontWeight: FontWeight.w600,
-                    color: verdictColor(context.colors, verdict),
-                  ),
-                ),
-                if (subtitle != null) ...[
-                  const SizedBox(height: AppSpace.xs),
-                  Text(subtitle!, style: TextStyle(fontSize: AppText.corps, color: muted)),
-                ],
-              ],
-            ),
-          ),
+        VerdictHeader(
+          level: level,
+          label: verdict.label(l),
+          subtitle: subtitle,
         ),
-        const SizedBox(height: AppSpace.md),
+        const SizedBox(height: AppSpace.lg),
         for (final reason in reasons) ...[
           const AppDivider(),
           Padding(
-            padding: const EdgeInsets.symmetric(vertical: AppSpace.lg),
-            child: Text(
-              reason,
-              style: TextStyle(fontSize: AppText.corps, color: context.colors.encre),
+            padding: const EdgeInsets.symmetric(vertical: AppSpace.md),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Petit repère de la couleur du verdict devant chaque raison.
+                Padding(
+                  padding: const EdgeInsets.only(top: AppSpace.xs),
+                  child: Icon(
+                    level.icon,
+                    size: AppSize.iconSmall,
+                    color: level.color(c),
+                  ),
+                ),
+                const SizedBox(width: AppSpace.md),
+                Expanded(
+                  child: Text(
+                    reason,
+                    style: TextStyle(fontSize: AppText.corps, color: c.encre),
+                  ),
+                ),
+              ],
             ),
           ),
         ],
@@ -80,7 +83,7 @@ class VerdictSection extends StatelessWidget {
             style: TextStyle(
               fontSize: AppText.corps,
               fontWeight: FontWeight.w500,
-              color: context.colors.encre,
+              color: c.encre,
             ),
           ),
         ),

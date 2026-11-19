@@ -367,15 +367,11 @@ class _WifiBlock extends StatelessWidget {
       children: [
         const AppDivider(),
         const SizedBox(height: AppSpace.xl),
-        Text(
-          report.level.label(l),
-          style: TextStyle(
-            fontSize: AppText.titre,
-            fontWeight: FontWeight.w600,
-            color: wifiLevelColor(context.colors, report.level),
-          ),
+        VerdictHeader(
+          level: wifiStatus(report.level),
+          label: report.level.label(l),
         ),
-        const SizedBox(height: AppSpace.xs),
+        const SizedBox(height: AppSpace.md),
         Text(
           report.title,
           style: TextStyle(

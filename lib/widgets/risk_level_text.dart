@@ -3,31 +3,28 @@ import 'package:material_ui/material_ui.dart';
 import '../l10n/l10n.dart';
 import '../services/app_risk_calculator.dart';
 import '../theme/app_colors.dart';
+import 'ui.dart';
 
-/// Le niveau de risque en texte coloré : « Élevé », « Modéré », « Faible » ou « Système ».
+/// Statut correspondant à un niveau de risque.
+StatusLevel riskStatus(RiskLevel level) => switch (level) {
+  RiskLevel.eleve => StatusLevel.danger,
+  RiskLevel.modere => StatusLevel.warning,
+  RiskLevel.faible => StatusLevel.ok,
+  RiskLevel.systeme => StatusLevel.neutral,
+};
+
+/// Le niveau de risque en badge : icône + mot + couleur
+/// (« Élevé », « Modéré », « Faible » ou « Système »).
 class RiskLevelText extends StatelessWidget {
-  const RiskLevelText({super.key, required this.level, this.fontSize = 14});
+  const RiskLevelText({super.key, required this.level});
 
   final RiskLevel level;
-  final double fontSize;
 
   /// Couleur selon le niveau.
-  static Color colorFor(AppColors c, RiskLevel level) => switch (level) {
-    RiskLevel.eleve => c.rommen,
-    RiskLevel.modere => c.ocre,
-    RiskLevel.faible => c.zitouna,
-    RiskLevel.systeme => c.discret,
-  };
+  static Color colorFor(AppColors c, RiskLevel level) =>
+      riskStatus(level).color(c);
 
   @override
-  Widget build(BuildContext context) {
-    return Text(
-      level.label(context.l10n),
-      style: TextStyle(
-        fontSize: fontSize,
-        fontWeight: FontWeight.w600,
-        color: colorFor(context.colors, level),
-      ),
-    );
-  }
+  Widget build(BuildContext context) =>
+      StatusBadge(level: riskStatus(level), label: level.label(context.l10n));
 }

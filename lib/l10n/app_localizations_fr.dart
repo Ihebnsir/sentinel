@@ -130,6 +130,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get homeNothingToFix => 'Rien à corriger pour le moment.';
 
   @override
+  String get homeProtections => 'Vos protections';
+
+  @override
   String homeWifiAlert(String title) {
     return '$title : évitez la banque et les achats.';
   }

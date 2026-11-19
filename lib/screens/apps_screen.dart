@@ -220,10 +220,10 @@ class _AppsScreenState extends State<AppsScreen> with WidgetsBindingObserver {
     final l = context.l10n;
     final apps = _apps;
     if (_failed) {
-      return [_InfoMessage(l.commonAnalysisFailedPull)];
+      return [InfoMessage(l.commonAnalysisFailedPull)];
     }
     if (apps == null) {
-      return [_InfoMessage(l.appsAndroidOnly)];
+      return [InfoMessage(l.appsAndroidOnly)];
     }
 
     final visible = _showSystemApps
@@ -275,16 +275,7 @@ class _PageTitle extends StatelessWidget {
   const _PageTitle();
 
   @override
-  Widget build(BuildContext context) {
-    return Text(
-      context.l10n.navApps,
-      style: TextStyle(
-        fontSize: AppText.titre,
-        fontWeight: FontWeight.w600,
-        color: context.colors.encre,
-      ),
-    );
-  }
+  Widget build(BuildContext context) => PageHeader(title: context.l10n.navApps);
 }
 
 /// Lien vers « Accès sensibles », toujours visible sous le titre.
@@ -295,43 +286,17 @@ class _SensitiveAccessEntry extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l = context.l10n;
-    final c = context.colors;
     return Column(
       children: [
-        const SizedBox(height: AppSpace.md),
-        InkWell(
+        const SizedBox(height: AppSpace.sm),
+        ListRow(
+          icon: Icons.visibility_outlined,
+          title: l.accessEntryTitle,
+          subtitle: l.accessEntrySubtitle,
+          chevron: true,
           onTap: () => Navigator.of(context).push(
             MaterialPageRoute<void>(
               builder: (_) => const SensitiveAccessScreen(),
-            ),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: AppSpace.md),
-            child: Row(
-              children: [
-                Icon(Icons.visibility_outlined, color: c.bleu),
-                const SizedBox(width: AppSpace.lg),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        l.accessEntryTitle,
-                        style: TextStyle(
-                          fontSize: AppText.intitule,
-                          fontWeight: FontWeight.w500,
-                          color: c.encre,
-                        ),
-                      ),
-                      const SizedBox(height: AppSpace.xs),
-                      Text(
-                        l.accessEntrySubtitle,
-                        style: TextStyle(fontSize: AppText.detail, color: c.secondaire),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
             ),
           ),
         ),
@@ -448,69 +413,17 @@ class _AppTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final l = context.l10n;
     final report = scanned.report;
-    return InkWell(
+    return ListRow(
+      leading: AppIcon(app: scanned.app, size: AppSize.appIcon),
+      title: scanned.app.label,
+      titleMaxLines: 1,
+      subtitle: report.level == RiskLevel.systeme
+          ? l.appsSystemApp
+          : report.mainReason(l) ?? l.appsNoWorry,
+      subtitleMaxLines: 2,
+      trailing: RiskLevelText(level: report.level),
       onTap: onTap,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: AppSpace.lg),
-        child: Row(
-          children: [
-            AppIcon(app: scanned.app, size: AppSize.appIcon),
-            const SizedBox(width: AppSpace.lg),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    scanned.app.label,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: AppText.intitule,
-                      fontWeight: FontWeight.w500,
-                      color: context.colors.encre,
-                    ),
-                  ),
-                  const SizedBox(height: AppSpace.xs),
-                  Text(
-                    report.level == RiskLevel.systeme
-                        ? l.appsSystemApp
-                        : report.mainReason(l) ?? l.appsNoWorry,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: AppText.detail,
-                      color: context.colors.secondaire,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(width: AppSpace.md),
-            RiskLevelText(level: report.level),
-          ],
-        ),
-      ),
     );
   }
 }
 
-/// Message centré affiché à la place de la liste.
-class _InfoMessage extends StatelessWidget {
-  const _InfoMessage(this.text);
-
-  final String text;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: AppSpace.xxxl),
-      child: Center(
-        child: Text(
-          text,
-          textAlign: TextAlign.center,
-          style: TextStyle(fontSize: AppText.intitule, color: context.colors.secondaire),
-        ),
-      ),
-    );
-  }
-}

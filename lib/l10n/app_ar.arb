@@ -37,6 +37,7 @@
   "homeAndroidOnly": "تحليل الهاتف متاح على أندرويد.",
   "homeToGainPoints": "لكسب المزيد من النقاط",
   "homeNothingToFix": "لا شيء يحتاج إلى إصلاح حاليًا.",
+  "homeProtections": "حماياتك",
   "homeWifiAlert": "\u2068{title}\u2069: تجنّب العمليات البنكية والشراء.",
   "scoreLockTitle": "اضبط قفل الشاشة",
   "scoreLockDesc": "رمز أو نمط يمنع الوصول إلى بياناتك إذا ضاع الهاتف",

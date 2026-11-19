@@ -37,6 +37,7 @@
   "homeAndroidOnly": "Phone analysis is available on Android.",
   "homeToGainPoints": "To earn points",
   "homeNothingToFix": "Nothing to fix for now.",
+  "homeProtections": "Your protections",
   "homeWifiAlert": "{title}: avoid banking and shopping.",
   "scoreLockTitle": "Set up a screen lock",
   "scoreLockDesc": "A PIN or pattern protects your data if you lose your phone",

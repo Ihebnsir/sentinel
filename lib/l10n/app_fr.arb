@@ -88,6 +88,7 @@
   "homeAndroidOnly": "L'analyse du téléphone est disponible sur Android.",
   "homeToGainPoints": "Pour gagner des points",
   "homeNothingToFix": "Rien à corriger pour le moment.",
+  "homeProtections": "Vos protections",
   "homeWifiAlert": "{title} : évitez la banque et les achats.",
   "@homeWifiAlert": {
     "description": "Bandeau Wi-Fi dangereux ; title = nom du réseau à risque",

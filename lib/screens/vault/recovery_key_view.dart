@@ -62,7 +62,14 @@ class _RecoveryKeyViewState extends State<RecoveryKeyView> {
     return ListView(
       padding: const EdgeInsets.only(top: AppSpace.lg, bottom: AppSpace.xl),
       children: [
-        Icon(Icons.key_outlined, size: AppSize.iconHero, color: context.colors.bleu),
+        Align(
+          alignment: AlignmentDirectional.centerStart,
+          child: Icon(
+            Icons.key_outlined,
+            size: AppSize.iconHero,
+            color: context.colors.bleu,
+          ),
+        ),
         const SizedBox(height: AppSpace.lg),
         Text(
           l.vaultYourRecoveryKey,
@@ -184,7 +191,14 @@ class _RecoveryKeyOfferViewState extends State<RecoveryKeyOfferView> {
     return ListView(
       padding: const EdgeInsets.only(top: AppSpace.lg, bottom: AppSpace.xl),
       children: [
-        Icon(Icons.key_outlined, size: AppSize.iconHero, color: context.colors.bleu),
+        Align(
+          alignment: AlignmentDirectional.centerStart,
+          child: Icon(
+            Icons.key_outlined,
+            size: AppSize.iconHero,
+            color: context.colors.bleu,
+          ),
+        ),
         const SizedBox(height: AppSpace.lg),
         Text(
           l.vaultKeyOfferTitle,
