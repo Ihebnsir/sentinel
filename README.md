@@ -29,15 +29,17 @@ Sentinel declares no notification listener, no accessibility service and no SMS 
 
 If you installed 1.0.1 (`com.iheb.sentinel.standard`), it is a separate app: export a vault backup if you used the vault, restore it in 1.1.0, then uninstall 1.0.1. If you still have 1.0.0 (`com.iheb.sentinel`, same key), 1.1.0 installs over it as a normal update.
 
-## Screenshots
+## Preview
 
-> **TODO:** add screenshots to `docs/screenshots/` (see [docs/screenshots/README.md](docs/screenshots/README.md)), then uncomment the table below.
-
-<!--
-| Home | Apps | Links | Vault |
+| Home | Apps | Link checker | Vault |
 |:---:|:---:|:---:|:---:|
-| <img src="docs/screenshots/home.png" width="200"> | <img src="docs/screenshots/apps.png" width="200"> | <img src="docs/screenshots/links.png" width="200"> | <img src="docs/screenshots/vault.png" width="200"> |
--->
+| <img src="docs/screenshots/home.png" width="200" alt="Home: security score, actions to take, protections"> | <img src="docs/screenshots/apps.png" width="200" alt="Apps: risk level of each installed app"> | <img src="docs/screenshots/links.png" width="200" alt="Link checker: a Dangerous verdict with the reasons"> | <img src="docs/screenshots/vault.png" width="200" alt="Vault: sample entries"> |
+
+| DNS firewall | Weekly report | Home in Arabic (dark theme) |
+|:---:|:---:|:---:|
+| <img src="docs/screenshots/firewall.png" width="200" alt="DNS firewall: blocked requests by category"> | <img src="docs/screenshots/weekly.png" width="200" alt="Weekly report"> | <img src="docs/screenshots/home-ar-dark.png" width="200" alt="Home screen in Arabic, right to left, dark theme"> |
+
+Fictitious data only (sample apps and vault entries, no real password). Rendered by Flutter at Pixel 8 size (see [docs/screenshots/README.md](docs/screenshots/README.md)); the design system is described in [docs/DESIGN.md](docs/DESIGN.md).
 
 ## Features
 
@@ -140,7 +142,7 @@ These items come from the known limitations in the code and docs. **TODO:** revi
 - [x] Release signing with a dedicated release key (SEN-01, see "Verify an APK").
 - [ ] Persist the failed-unlock counter across app restarts.
 - [x] Encrypted vault export/import, to move the vault to a new phone (Android backup is disabled on purpose).
-- [ ] Add screenshots.
+- [x] Add screenshots.
 - [ ] Fill in the reference certificate fingerprints in `lib/services/apps/known_apps.dart` with `tools/signatures/extract_cert.py`, and the packages of Tunisian banking and postal apps (TODO in the code).
 - [ ] Add verified Tunisian help contacts to the stalkerware advice screen (TODO in `spyware_advice_screen.dart`).
 

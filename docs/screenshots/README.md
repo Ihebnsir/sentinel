@@ -1,14 +1,28 @@
 # Screenshots
 
-TODO: add the screenshots here, then uncomment the table in `README.md` and `README.fr.md`.
-
-Expected files (PNG, portrait, ideally the same device and size):
+Shown in the "Preview" / "Aperçu" section of `README.md` and `README.fr.md`.
 
 | File | Screen |
 |---|---|
-| `home.png` | Accueil: security score and Wi-Fi |
-| `apps.png` | Applications: app list with risk levels |
-| `links.png` | Links: a "Dangerous" verdict, the real destination and the reasons |
-| `vault.png` | Coffre: unlocked vault list |
+| `home.png` | Home: security score, actions sorted by importance, protections |
+| `apps.png` | Apps: installed apps with their risk badge |
+| `links.png` | Link checker: a "Dangerous" verdict, the real destination and the reasons |
+| `vault.png` | Vault: unlocked, filled with sample entries |
+| `firewall.png` | DNS firewall: status, blocked requests, block lists |
+| `weekly.png` | Weekly report |
+| `home-ar-dark.png` | Home in Arabic (right to left), dark theme |
 
-Use fake data only. No real passwords, messages or phone numbers.
+**Fictitious data only**: sample apps ("Lampe Torche Pro", "Météo du Cap"…), sample vault entries with made-up passwords, `exemple.tn` addresses. No real password, message or phone number.
+
+## How they are made
+
+They are rendered by Flutter, not taken on a phone: `test/design/screens_capture_test.dart` draws each screen at Pixel 8 size (1080 × 2400, density 2.625) with the real fonts and a fake Android that returns sample data. The status bar (10:00, full battery) is drawn by the same test. On a real phone the vault tab could not be captured anyway (`FLAG_SECURE`).
+
+```powershell
+$env:SENTINEL_CAPTURE = "C:\path\out"
+$env:SENTINEL_CAPTURE_ONLY = "accueil,applications,liens-dangereux,coffre,pare-feu,bilan"
+$env:SENTINEL_CAPTURE_VARIANTS = "fr-clair,ar-sombre"
+flutter test test/design/screens_capture_test.dart
+```
+
+Before/after captures of every screen (light, dark, Arabic) are in `docs/design/avant/` and `docs/design/apres/`.

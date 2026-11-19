@@ -29,15 +29,17 @@ Sentinel ne déclare ni lecteur de notifications, ni service d'accessibilité, n
 
 Si vous avez installé la 1.0.1 (`com.iheb.sentinel.standard`), c'est une appli distincte : exportez une sauvegarde du coffre si vous l'utilisiez, restaurez-la dans la 1.1.0, puis désinstallez la 1.0.1. Si vous avez encore la 1.0.0 (`com.iheb.sentinel`, même clé), la 1.1.0 s'installe par-dessus comme une mise à jour normale.
 
-## Captures d'écran
+## Aperçu
 
-> **TODO :** ajouter les captures dans `docs/screenshots/` (voir [docs/screenshots/README.md](docs/screenshots/README.md)), puis décommenter le tableau ci-dessous.
-
-<!--
-| Accueil | Applications | Messages | Coffre |
+| Accueil | Applications | Vérificateur de liens | Coffre |
 |:---:|:---:|:---:|:---:|
-| <img src="docs/screenshots/home.png" width="200"> | <img src="docs/screenshots/apps.png" width="200"> | <img src="docs/screenshots/links.png" width="200"> | <img src="docs/screenshots/vault.png" width="200"> |
--->
+| <img src="docs/screenshots/home.png" width="200" alt="Accueil : score de sécurité, actions à faire, protections"> | <img src="docs/screenshots/apps.png" width="200" alt="Applications : niveau de risque de chaque app installée"> | <img src="docs/screenshots/links.png" width="200" alt="Vérificateur de liens : verdict Dangereux et ses raisons"> | <img src="docs/screenshots/vault.png" width="200" alt="Coffre : éléments d'exemple"> |
+
+| Pare-feu DNS | Bilan de la semaine | Accueil en arabe (thème sombre) |
+|:---:|:---:|:---:|
+| <img src="docs/screenshots/firewall.png" width="200" alt="Pare-feu DNS : requêtes bloquées par catégorie"> | <img src="docs/screenshots/weekly.png" width="200" alt="Bilan de la semaine"> | <img src="docs/screenshots/home-ar-dark.png" width="200" alt="Accueil en arabe, de droite à gauche, thème sombre"> |
+
+Données entièrement fictives (apps et éléments du coffre d'exemple, aucun vrai mot de passe). Rendu par Flutter au format d'un Pixel 8 (voir [docs/screenshots/README.md](docs/screenshots/README.md)) ; le système de design est décrit dans [docs/DESIGN.md](docs/DESIGN.md).
 
 ## Fonctionnalités
 
@@ -140,7 +142,7 @@ Ces points viennent des limites connues relevées dans le code et la documentati
 - [x] Signature release avec une clé de publication dédiée (SEN-01, voir « Vérifier un APK »).
 - [ ] Conserver le compteur d'échecs d'ouverture après un redémarrage de l'application.
 - [x] Export / import chiffré du coffre, pour le transférer sur un nouveau téléphone (la sauvegarde Android est volontairement désactivée).
-- [ ] Ajouter les captures d'écran.
+- [x] Ajouter les captures d'écran.
 - [ ] Remplir les empreintes de certificat de référence dans `lib/services/apps/known_apps.dart` avec `tools/signatures/extract_cert.py`, ainsi que les packages des applications bancaires et postales tunisiennes (TODO dans le code).
 - [ ] Ajouter des contacts d'aide tunisiens vérifiés à l'écran de conseils (TODO dans `spyware_advice_screen.dart`).
 
