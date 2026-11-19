@@ -19,10 +19,19 @@ import 'vault/vault_settings_screen.dart';
 
 /// Onglet « Coffre » : mots de passe et notes chiffrés sur le téléphone.
 class VaultScreen extends StatefulWidget {
-  const VaultScreen({super.key, this.visible = false});
+  const VaultScreen({
+    super.key,
+    this.visible = false,
+    this.session,
+    this.breaches,
+  });
 
   /// L'onglet est affiché : on protège l'écran des captures.
   final bool visible;
+
+  /// Remplacés dans les tests (coffre d'exemple dans un dossier temporaire).
+  final VaultSession? session;
+  final BreachChecker? breaches;
 
   @override
   State<VaultScreen> createState() => _VaultScreenState();
@@ -32,9 +41,10 @@ class _VaultScreenState extends State<VaultScreen> {
   /// Temps en arrière-plan avant le verrouillage automatique.
   static const autoLockDelay = Duration(seconds: 30);
 
-  final _session = VaultSession();
+  late final _session = widget.session ?? VaultSession();
   final _clipboard = ClipboardGuard();
-  final _breaches = BreachChecker(); // résultats effacés au verrouillage
+  // Résultats effacés au verrouillage.
+  late final _breaches = widget.breaches ?? BreachChecker();
   late final AppLifecycleListener _lifecycle;
 
   bool _creating = false; // formulaire de création affiché
@@ -47,7 +57,8 @@ class _VaultScreenState extends State<VaultScreen> {
   void initState() {
     super.initState();
     _session.addListener(_onSessionChanged);
-    _session.load();
+    // Session fournie déjà chargée (tests) : pas de relecture.
+    if (_session.status == VaultStatus.chargement) _session.load();
     _breaches.loadConsent();
     _lifecycle = AppLifecycleListener(
       onHide: _onHide,

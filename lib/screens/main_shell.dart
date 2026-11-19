@@ -13,7 +13,13 @@ import 'vault_screen.dart';
 /// La coquille de l'app : la barre de navigation en bas et la page choisie.
 /// StatefulWidget car il doit se souvenir de l'onglet sélectionné.
 class MainShell extends StatefulWidget {
-  const MainShell({super.key});
+  const MainShell({super.key, this.initialIndex = 0, this.vaultBuilder});
+
+  /// Onglet affiché au départ (captures d'écran et tests).
+  final int initialIndex;
+
+  /// Remplace l'onglet Coffre dans les tests (coffre d'exemple).
+  final Widget Function(bool visible)? vaultBuilder;
 
   @override
   State<MainShell> createState() => _MainShellState();
@@ -21,7 +27,7 @@ class MainShell extends StatefulWidget {
 
 class _MainShellState extends State<MainShell> {
   // Index de l'onglet affiché (0 = Accueil).
-  int _selectedIndex = 0;
+  late int _selectedIndex = widget.initialIndex;
 
   static const _linksIndex = 2;
   static const _vaultIndex = 3;
@@ -35,7 +41,8 @@ class _MainShellState extends State<MainShell> {
         const HomeScreen(),
         const AppsScreen(),
         LinksScreen(sharedText: _share.received),
-        VaultScreen(visible: _selectedIndex == _vaultIndex),
+        widget.vaultBuilder?.call(_selectedIndex == _vaultIndex) ??
+            VaultScreen(visible: _selectedIndex == _vaultIndex),
       ];
 
   @override

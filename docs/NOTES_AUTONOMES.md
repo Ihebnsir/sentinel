@@ -320,3 +320,17 @@ Non vérifié : pas essayé sur un téléphone (règle : pas de `flutter run`). 
 - Lancement complet réel sur les CSV locaux (perso vide) : candidat accepté, export, `flutter test` parité OK (52 tests) ; puis modèle et fixtures **remis** à la version livrée (le candidat était identique hors version). Le rapport commité est celui du mode `--essai`.
 
 Limite : un candidat identique au modèle livré est quand même réexporté (nouvelle `version`). Aucune connexion à Neon : les données réelles arrivent toujours par `backend/tools/review.py export`.
+
+## Refonte du design 1.1.0 (2026-11-19)
+
+### Blocage : émulateur indisponible
+
+- L'émulateur Pixel 8 refuse de démarrer : « x86_64 emulation currently requires hardware acceleration », hyperviseur Windows arrêté (`HypervisorPresent = False`, services `HvHost` et `vmcompute` arrêtés), pas de droits administrateur pour l'activer, et aucun téléphone branché. Je n'ai rien changé à la configuration de Windows.
+- **Contournement** plutôt qu'arrêt : les écrans sont rendus par le moteur de Flutter dans un test (`test/design/screens_capture_test.dart`), au format exact du Pixel 8 (1080 × 2400, densité 2,625), avec les vraies polices et un faux Android aux données fictives. Les captures « avant », « après » et celles du README en sortent.
+- Conséquences : la barre d'état (10:00, batterie pleine) est **dessinée** par le banc de capture, au lieu du mode démo Android. Le passage réel sur téléphone reste à faire à la main (voir la fin de cette section).
+- Lancer le banc : `$env:SENTINEL_CAPTURE="C:\dossier"; flutter test test/design/screens_capture_test.dart` (options dans l'en-tête du fichier). Sans cette variable, ses tests sont ignorés.
+
+### Choix faits sans demander
+
+- Pour pouvoir capturer les onglets avec la vraie barre de navigation : `MainShell` accepte `initialIndex` et `vaultBuilder`, `VaultScreen` accepte `session` et `breaches` (même modèle que `LinksScreen`, « remplacés dans les tests »). Comportement inchangé dans l'app.
+- `VaultScreen` ne relit plus une session déjà chargée (`status != chargement`) : sans effet dans l'app (session toujours neuve), utile pour les tests.
