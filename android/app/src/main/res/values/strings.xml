@@ -3,15 +3,7 @@
     <!-- Textes des notifications et du système, en français (langue par défaut).
          Mêmes clés dans values-en et values-ar (vérifié par StringsResourcesTest). -->
     <!-- Menu de sélection de texte des autres apps -->
-    <string name="process_text_label">Vérifier avec Sentinel</string>
-    <!-- Réglage Android « Accès aux notifications » -->
-    <string name="listener_label">Sentinel – protection anti-arnaque</string>
-    <string name="scam_channel_name">Alertes arnaques</string>
-    <string name="scam_channel_description">Prévient quand un message reçu ressemble à une arnaque.</string>
-    <!-- Écran verrouillé : version neutre -->
-    <string name="scam_public_text">Arnaque probable détectée</string>
-    <!-- Titre de secours si Dart n'en envoie pas -->
-    <string name="scam_default_title">Arnaque probable</string>
+    <string name="process_text_label">Vérifier le lien avec Sentinel</string>
     <string name="firewall_channel_name">Alertes pare-feu</string>
     <string name="firewall_channel_description">Prévient quand le pare-feu bloque un site dangereux.</string>
     <string name="firewall_alert_title">Site dangereux bloqué</string>

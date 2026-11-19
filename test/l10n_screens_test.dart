@@ -3,9 +3,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:sentinel/l10n/l10n.dart';
 import 'package:sentinel/screens/home_screen.dart';
-import 'package:sentinel/screens/messages_screen.dart';
+import 'package:sentinel/screens/links_screen.dart';
+import 'package:sentinel/services/links/link_checker.dart';
 import 'package:sentinel/services/phishing/known_brands.dart';
-import 'package:sentinel/services/phishing/phishing_model.dart';
 import 'package:sentinel/utils/bidi.dart';
 
 import 'support/l10n.dart';
@@ -46,10 +46,16 @@ Future<void> _pumpHome(WidgetTester tester, Locale locale) async {
   await tester.pumpAndSettle(); // fin de l'animation de l'arche
 }
 
-Future<void> _analyzeScam(WidgetTester tester, Locale locale) async {
+// Fausses listes du pare-feu : domaine inconnu.
+Future<DomainCheck?> _lists(String host) async =>
+    const DomainCheck(allowed: false, dangerous: false);
+
+Future<void> _checkScam(WidgetTester tester, Locale locale) async {
+  tester.view.physicalSize = const Size(1080, 4000);
+  addTearDown(tester.view.reset);
   await tester.pumpWidget(
     testApp(
-      home: const Scaffold(body: MessagesScreen()),
+      home: const Scaffold(body: LinksScreen(checkDomain: _lists)),
       locale: locale,
     ),
   );
@@ -59,20 +65,13 @@ Future<void> _analyzeScam(WidgetTester tester, Locale locale) async {
   );
   await tester.pump();
   await tester.tap(find.byType(FilledButton));
-  // Le modèle a été chargé hors du temps simulé : on laisse passer le vrai.
-  await tester.runAsync(
-    () => Future<void>.delayed(const Duration(milliseconds: 50)),
-  );
   await tester.pumpAndSettle();
 }
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   // Chargés une fois hors du temps simulé des tests widget.
-  setUpAll(() async {
-    await loadPhishingModel();
-    await loadKnownBrands();
-  });
+  setUpAll(loadKnownBrands);
 
   group('arabe (de droite à gauche)', () {
     const locale = Locale('ar');
@@ -103,24 +102,27 @@ void main() {
       expect(greeting.dx, greaterThan(settings.dx));
     });
 
-    testWidgets('Messages : verdict, raisons et conseil en arabe', (
+    testWidgets('Liens : verdict, destination, raisons et conseil en arabe', (
       tester,
     ) async {
-      await _analyzeScam(tester, locale);
+      await _checkScam(tester, locale);
 
       expect(_direction(tester, find.byType(TextField)), TextDirection.rtl);
-      expect(find.text(ar.navMessages), findsOneWidget);
-      expect(find.text(ar.messagesAnalyze), findsOneWidget);
-      expect(find.text(ar.verdictScam), findsOneWidget);
-      expect(find.textContaining('احتمال الاحتيال'), findsOneWidget);
+      expect(find.text(ar.navLinks), findsOneWidget);
+      expect(find.text(ar.linksCheck), findsOneWidget);
+      expect(find.text(ar.verdictDangerous), findsOneWidget);
+      expect(
+        find.text(ar.linksRealDestination('poste-tn-livraison[.]xyz')),
+        findsOneWidget,
+      );
       // Raison produite par la règle sur les liens.
       expect(
         find.textContaining('«${fsi}poste-tn-livraison.xyz$pdi» ينتحل صفة'),
         findsOneWidget,
       );
       expect(find.text(ar.reasonLinkTld('xyz')), findsOneWidget);
-      expect(find.text(ar.adviceScam), findsOneWidget);
-      expect(find.text(fr.verdictScam), findsNothing);
+      expect(find.text(ar.adviceDangerous), findsOneWidget);
+      expect(find.text(fr.verdictDangerous), findsNothing);
     });
   });
 
@@ -143,19 +145,22 @@ void main() {
       expect(find.text(fr.homeGreeting), findsNothing);
     });
 
-    testWidgets('Messages : verdict, raisons et conseil en anglais', (
+    testWidgets('Liens : verdict, destination, raisons et conseil en anglais', (
       tester,
     ) async {
-      await _analyzeScam(tester, locale);
+      await _checkScam(tester, locale);
 
-      expect(find.text('Likely scam'), findsOneWidget);
-      expect(find.textContaining('Scam probability:'), findsOneWidget);
+      expect(find.text('Dangerous'), findsOneWidget);
+      expect(
+        find.text('This link really leads to poste-tn-livraison[.]xyz'),
+        findsOneWidget,
+      );
       expect(
         find.textContaining('"poste-tn-livraison.xyz" imitates'),
         findsOneWidget,
       );
-      expect(find.text(en.adviceScam), findsOneWidget);
-      expect(find.text(fr.adviceScam), findsNothing);
+      expect(find.text(en.adviceDangerous), findsOneWidget);
+      expect(find.text(fr.adviceDangerous), findsNothing);
     });
   });
 

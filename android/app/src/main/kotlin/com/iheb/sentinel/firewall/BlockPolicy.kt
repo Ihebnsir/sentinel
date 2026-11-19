@@ -95,7 +95,8 @@ class BlockPolicy(
     companion object {
         val EMPTY = BlockPolicy(emptyMap(), emptySet(), DomainSet.EMPTY)
 
-        private fun matchesWithParents(set: DomainSet, name: String): Boolean {
+        /** [name] ou l'un de ses parents est dans [set] (liste blanche). */
+        fun matchesWithParents(set: DomainSet, name: String): Boolean {
             if (set.size == 0) return false
             var start = 0
             while (true) {

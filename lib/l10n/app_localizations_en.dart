@@ -39,9 +39,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get commonOff => 'Off';
 
   @override
-  String get commonOffFeminine => 'Off';
-
-  @override
   String get commonUnknown => 'Unknown';
 
   @override
@@ -87,9 +84,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get navApps => 'Apps';
-
-  @override
-  String get navMessages => 'Messages';
 
   @override
   String get navVault => 'Vault';
@@ -256,7 +250,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get onboarding1Line2 => 'Suspicious apps: fake apps, spyware.';
 
   @override
-  String get onboarding1Line3 => 'Scam messages, analyzed on the phone.';
+  String get onboarding1Line3 =>
+      'A link checker: where a link really leads, before you open it.';
 
   @override
   String get onboarding1Line4 => 'An encrypted vault for your passwords.';
@@ -270,11 +265,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get onboarding2Line1 =>
-      'No account, no ads, no analytics. Your messages, your passwords and your list of apps do not leave the phone, except a message you choose to report.';
+      'No account, no ads, no analytics. The links you check, your passwords and your list of apps never leave the phone.';
 
   @override
   String get onboarding2Line2 =>
-      'There are only four network exchanges, all optional, and only if you turn them on:';
+      'There are only three network exchanges, all optional, and only if you turn them on:';
 
   @override
   String get onboarding2Line3 =>
@@ -289,10 +284,6 @@ class AppLocalizationsEn extends AppLocalizations {
       '• Blocklist updates: a simple download from GitHub.';
 
   @override
-  String get onboarding2Line6 =>
-      '• Report a message: the anonymized text, reviewed by you, sent only when you tap \"Send\".';
-
-  @override
   String get onboarding3Title => 'Permissions, at the right time';
 
   @override
@@ -300,7 +291,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get onboarding3Line2 =>
-      'Each permission (notifications, notification access, VPN, biometrics) is requested only when you turn on the feature that needs it, with an explanation.';
+      'Each permission (notifications, VPN, camera, biometrics) is requested only when you turn on the feature that needs it, with an explanation.';
 
   @override
   String get onboarding3Line3 => 'You can turn everything off at any time.';
@@ -310,11 +301,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get privacyBrief1 =>
-      'Sentinel has no account, no ads, no usage analytics and no crash reports. All analyses run on the phone. A server only receives the messages you choose to report, one by one.';
+      'Sentinel has no account, no ads, no usage analytics and no crash reports. All checks run on the phone: no message and no link is ever sent to a server.';
 
   @override
   String get privacyBrief2 =>
-      'Sentinel only connects to the Internet for the four optional features below, and only after you agree.';
+      'Sentinel only connects to the Internet for the three optional features below, and only after you agree.';
 
   @override
   String get privacyNetworkTitle => 'The only network exchanges (optional)';
@@ -336,10 +327,6 @@ class AppLocalizationsEn extends AppLocalizations {
       '\"Open the website\" links (advice, sources, audit report) open in your browser, only when you tap them.';
 
   @override
-  String get privacyNetwork5 =>
-      '4. Reporting a message (Messages tab, when the service is available). Nothing is sent automatically: you tap \"Report this message\", read the text, already anonymized on the phone (numbers, emails, IBANs, cards, codes; links keep only their domain), can edit it, then tap \"Send\". What is sent: this text, your opinion, Sentinel\'s verdict and probability, the language and the app version; no number, no phone identifier. The server anonymizes the text again, keeps neither your IP address nor the time (only the day), and a person reviews each report before it is used to improve detection.';
-
-  @override
   String get privacyLocalTitle => 'What stays on the phone';
 
   @override
@@ -348,7 +335,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get privacyLocal2 =>
-      'Your choices: consent to the leak check, firewall settings and list of allowed sites, automatic protection on or off, introduction already seen, language, theme.';
+      'Your choices: consent to the leak check, firewall settings and list of allowed sites, introduction already seen, language, theme.';
 
   @override
   String get privacyLocal3 => 'The blocklists and their updates.';
@@ -362,15 +349,11 @@ class AppLocalizationsEn extends AppLocalizations {
       'Android backup is turned off: nothing goes to the cloud. A vault backup (encrypted .sentinel file) is only created if you ask for it, in the place you choose.';
 
   @override
-  String get privacyLocal6 =>
-      'The time of your reports from the last hour, for the limit of 5 per hour (never their content).';
-
-  @override
   String get privacyNeverTitle => 'What Sentinel never records';
 
   @override
   String get privacyNever1 =>
-      'The text of analyzed messages and QR codes (pasted, shared, scanned or read from notifications): it is analyzed in memory and then forgotten. The camera image is never saved. Only the messages you report yourself are sent (point 4), and no copy is kept on the phone.';
+      'The links, texts and QR codes you check (pasted, shared, selected or scanned): they are checked in memory and then forgotten, never sent. The camera image is never saved.';
 
   @override
   String get privacyNever2 =>
@@ -389,11 +372,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get privacyPermissions2 =>
-      'Notifications: requested when you turn on automatic protection or the firewall, to show alerts.';
-
-  @override
-  String get privacyPermissions3 =>
-      'Notification access: an Android setting you open yourself for automatic protection; Sentinel reads incoming messages to look for scams.';
+      'Notifications: requested when you turn on the firewall or the weekly report notification, to show alerts.';
 
   @override
   String get privacyPermissions4 =>
@@ -412,7 +391,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get privacyErase1 =>
-      'Uninstalling Sentinel erases everything it saved on the phone. Elsewhere, there are only the reports you sent, which are linked neither to you nor to your phone.';
+      'Uninstalling Sentinel erases everything it saved on the phone. No copy exists anywhere else: Sentinel sends your data to no server.';
 
   @override
   String get auditFrameTitle => 'Scope';
@@ -451,39 +430,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get auditReadFull => 'Read the full report on GitHub';
 
   @override
-  String get verdictScam => 'Likely scam';
-
-  @override
   String get verdictSuspect => 'Suspicious';
 
   @override
-  String get verdictNothing => 'Nothing suspicious';
-
-  @override
-  String get adviceScam =>
-      'Don\'t click the link and don\'t share any code. Your bank or the post office will never ask you to pay by SMS. Delete this message.';
-
-  @override
   String get adviceSuspect =>
-      'Be careful: don\'t open the link and don\'t give any information. If in doubt, call the organization on the number shown on its official website.';
-
-  @override
-  String get adviceNothing =>
-      'No sign of a scam found. Stay alert anyway: never share your codes or passwords.';
+      'Be careful: only open this link if you know the sender and were expecting this message. If in doubt, type the official website\'s address yourself.';
 
   @override
   String get reasonHiddenCharacters =>
       'Invisible or text-reversing characters (a scam technique)';
-
-  @override
-  String reasonScamWords(String words) {
-    return 'Words typical of scams: $words';
-  }
-
-  @override
-  String reasonQuotedWord(String word) {
-    return '\"$word\"';
-  }
 
   @override
   String get listSeparator => ', ';
@@ -525,184 +480,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get reasonLinkHttp => 'The link is not secure (http instead of https)';
-
-  @override
-  String get messagesHint => 'Paste an SMS, a WhatsApp message or a link';
-
-  @override
-  String get messagesPaste => 'Paste';
-
-  @override
-  String get messagesClear => 'Clear';
-
-  @override
-  String get messagesAnalyze => 'Analyze';
-
-  @override
-  String get messagesFailed => 'The analysis failed. Try again.';
-
-  @override
-  String get messagesLocalNote =>
-      'The analysis runs on your phone. The message is not sent anywhere.';
-
-  @override
-  String get messagesLocalNoteReport =>
-      'The analysis runs on your phone. The message is not sent anywhere, unless you choose to report it.';
-
-  @override
-  String get reportButton => 'Report this message';
-
-  @override
-  String get reportTitle => 'Report this message';
-
-  @override
-  String get reportIntro =>
-      'Help Sentinel recognize scams better: read this message again, then send it. Nothing is sent without your consent.';
-
-  @override
-  String get reportPreviewLabel => 'Text to send (already anonymized)';
-
-  @override
-  String get reportReminder =>
-      'Check that no name, address or personal information is left. You can edit the text.';
-
-  @override
-  String get reportQuestion => 'Your opinion';
-
-  @override
-  String get reportFeedbackScam => 'It\'s a scam';
-
-  @override
-  String get reportFeedbackNotScam => 'It\'s not a scam';
-
-  @override
-  String get reportFeedbackUnsure => 'I don\'t know';
-
-  @override
-  String get reportSentTitle => 'What is sent';
-
-  @override
-  String get reportSentText =>
-      'The text above, your opinion, Sentinel\'s verdict and its probability, the message language and the app version.';
-
-  @override
-  String get reportWhereTitle => 'Where and why';
-
-  @override
-  String reportWhereText(String host) {
-    return 'To the Sentinel server ($host), to improve scam detection. A person reviews each report before it is used to train the model.';
-  }
-
-  @override
-  String get reportNotSentTitle => 'What is not sent';
-
-  @override
-  String get reportNotSentText =>
-      'Not your number, not the sender\'s, no phone identifier, no location, no account. The server does not keep your IP address and only records the day it was sent.';
-
-  @override
-  String get reportSend => 'Send';
-
-  @override
-  String get reportSending => 'Sending…';
-
-  @override
-  String get reportWakingServer =>
-      'Waking up the server, please wait… (up to a minute)';
-
-  @override
-  String get reportRetry => 'Try again';
-
-  @override
-  String get reportThanks =>
-      'Thank you, your report will help improve detection.';
-
-  @override
-  String get reportErrorOffline =>
-      'Cannot reach the server. Check your Internet connection, then try again.';
-
-  @override
-  String get reportErrorTimeout =>
-      'The server did not respond, even after a minute. Try again in a moment.';
-
-  @override
-  String get reportErrorTooMany =>
-      'Too many reports for now (at most 5 per hour). Try again later.';
-
-  @override
-  String get reportErrorRejected =>
-      'The server refused this report. Check the text, then try again.';
-
-  @override
-  String get reportErrorServer => 'Server error. Try again later.';
-
-  @override
-  String messagesProbability(String percent) {
-    return 'Scam probability: $percent%';
-  }
-
-  @override
-  String get alertDefaultReason =>
-      'This message looks like known scams. Do not click any link.';
-
-  @override
-  String get alertTitleSms => 'Likely scam in an SMS';
-
-  @override
-  String get alertTitleMessage => 'Likely scam in a message';
-
-  @override
-  String alertTitleApp(String app) {
-    return 'Likely scam on $app';
-  }
-
-  @override
-  String get autoProtectionTitle => 'Automatic protection';
-
-  @override
-  String get autoProtectionOn =>
-      'Analyzes incoming messages and warns you about scams.';
-
-  @override
-  String get autoProtectionNotificationsBlocked =>
-      'Sentinel\'s notifications are blocked: you won\'t be warned about scams.';
-
-  @override
-  String get autoProtectionAllowNotifications =>
-      'Allow Sentinel\'s notifications';
-
-  @override
-  String get autoProtectionRemoveAccess =>
-      'Also remove access in Android settings';
-
-  @override
-  String get autoProtectionPlayOnly =>
-      'Available in the Google Play version of Sentinel. Here, check a message by sharing it to Sentinel or pasting it below.';
-
-  @override
-  String get autoProtectionDoesTitle => 'What Sentinel does';
-
-  @override
-  String get autoProtectionDoes1 =>
-      'Reads the text of notifications from your messaging apps.';
-
-  @override
-  String get autoProtectionDoes2 => 'Analyzes it on your phone.';
-
-  @override
-  String get autoProtectionDoes3 => 'Warns you if it\'s a scam.';
-
-  @override
-  String get autoProtectionNeverTitle => 'What Sentinel never does';
-
-  @override
-  String get autoProtectionNever1 => 'Send your messages over the Internet.';
-
-  @override
-  String get autoProtectionNever2 => 'Save them.';
-
-  @override
-  String get autoProtectionNever3 => 'Read notifications from other apps.';
 
   @override
   String get wifiLevelDanger => 'Danger';
@@ -2740,7 +2517,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get qrActionPayment => 'Open in a payment app';
 
   @override
-  String get qrActionBlocked => 'Blocked by Sentinel: likely scam.';
+  String get qrActionBlocked => 'Blocked by Sentinel: dangerous link.';
 
   @override
   String get qrActionFailed =>
@@ -2804,15 +2581,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get weeklyBlockedTotal => 'Total';
 
   @override
-  String get weeklyMessages => 'Messages';
-
-  @override
-  String get weeklyMessagesAnalyzed => 'Messages checked';
-
-  @override
-  String get weeklyScamAlerts => 'Scam alerts';
-
-  @override
   String get weeklyApps => 'Apps';
 
   @override
@@ -2835,7 +2603,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get weeklyPrivacyNote =>
-      'Only counters, kept on this phone for 8 weeks and then deleted. No website, message or Wi-Fi name is ever saved.';
+      'Only counters, kept on this phone for 8 weeks and then deleted. No website, link or Wi-Fi name is ever saved.';
 
   @override
   String get weeklyAndroidOnly => 'The weekly summary is available on Android.';
@@ -2850,4 +2618,96 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get settingsWeeklyNotificationDenied =>
       'Notifications are blocked: allow them in Android settings.';
+
+  @override
+  String get navLinks => 'Links';
+
+  @override
+  String get linksIntro =>
+      'Check a link before opening it: where it really leads, and whether it is known to be dangerous.';
+
+  @override
+  String get linksHint => 'Paste a link, or a message that contains one';
+
+  @override
+  String get linksPaste => 'Paste';
+
+  @override
+  String get linksClear => 'Clear';
+
+  @override
+  String get linksCheck => 'Check';
+
+  @override
+  String get linksChecking => 'Checking…';
+
+  @override
+  String get linksNoLink => 'No link found in this text.';
+
+  @override
+  String get linksFailed => 'The check failed. Try again.';
+
+  @override
+  String get linksLocalNote =>
+      'The check runs on your phone. Nothing is sent, nothing is saved.';
+
+  @override
+  String linksRealDestination(String domain) {
+    return 'This link really leads to $domain';
+  }
+
+  @override
+  String get linksShortenerHelp =>
+      'Sentinel does not open a shortened link to find out where it goes: that would already connect you to the site. Only open it if you know the sender.';
+
+  @override
+  String get linksOpenBlocked => 'Opening disabled: this link is dangerous.';
+
+  @override
+  String get linksAutoTitle => 'Automatic protection when you tap a link';
+
+  @override
+  String get linksAutoOn =>
+      'On: the firewall blocks known dangerous sites, even when opened from an SMS or WhatsApp.';
+
+  @override
+  String get linksAutoOff =>
+      'Off: turn on the firewall to block known dangerous sites, even without going through Sentinel.';
+
+  @override
+  String get linksAutoEnable => 'Turn on';
+
+  @override
+  String linkReasonListed(String host) {
+    return '\"$host\" is on the list of dangerous sites (phishing, malware)';
+  }
+
+  @override
+  String linkReasonAllowed(String host) {
+    return 'You allowed \"$host\" in the firewall (allowlist): Sentinel does not check it.';
+  }
+
+  @override
+  String get linkReasonNotListed =>
+      'Not on Sentinel\'s lists of dangerous sites';
+
+  @override
+  String get verdictDangerous => 'Dangerous';
+
+  @override
+  String get verdictNothingKnown => 'No known problem';
+
+  @override
+  String get adviceDangerous =>
+      'Don\'t open this link and don\'t enter any code or password. Delete the message that contains it.';
+
+  @override
+  String get adviceNothingKnown =>
+      'No check is perfect: after opening a link you received, never give your codes or passwords.';
+
+  @override
+  String get weeklyLinks => 'Links';
+
+  @override
+  String get weeklyLinksChecked => 'Links checked';
 }

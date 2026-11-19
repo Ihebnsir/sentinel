@@ -13,8 +13,9 @@ class SharedText {
 }
 
 /// Reçoit le texte partagé depuis les autres apps (bouton « Partager »
-/// ou menu « Vérifier avec Sentinel »), via MainActivity.kt. Reçoit aussi
-/// les demandes d'ouverture du pare-feu (tuile des Paramètres rapides).
+/// ou menu « Vérifier le lien avec Sentinel »), via MainActivity.kt :
+/// l'onglet Liens y cherche le premier lien. Reçoit aussi les demandes
+/// d'ouverture du pare-feu (tuile des Paramètres rapides).
 class ShareService {
   // Même nom que dans MainActivity.kt, sinon les messages se perdent.
   static const _channel = MethodChannel('com.iheb.sentinel/share');

@@ -16,11 +16,9 @@ class ManifestTest {
         DocumentBuilderFactory.newInstance().apply { isNamespaceAware = true }
             .newDocumentBuilder().parse(File(path))
 
-    // Manifestes écrits à la main : main (commun) et complete (Google Play).
-    private val manifests = listOf("src/main/AndroidManifest.xml", "src/complete/AndroidManifest.xml")
-
+    // Une seule variante depuis la 1.1.0 : un seul manifeste écrit à la main.
     private val components: List<Element> by lazy {
-        manifests.map(::parse).flatMap { doc -> componentsOf(doc) }
+        componentsOf(parse("src/main/AndroidManifest.xml"))
     }
 
     private fun componentsOf(doc: org.w3c.dom.Document): List<Element> =
@@ -39,8 +37,10 @@ class ManifestTest {
     }
 
     @Test
-    fun `le relais des alertes n'est pas exporte`() {
-        assertEquals("false", component(".AlertRelayActivity").attr("exported"))
+    fun `plus de relais d'alertes ni de lecteur de notifications`() {
+        val names = components.map { it.attr("name") }
+        assertTrue(".AlertRelayActivity" !in names)
+        assertTrue(".SentinelNotificationListener" !in names)
     }
 
     @Test
@@ -91,23 +91,31 @@ class ManifestTest {
         assertTrue(names.none { it in dangerous })
     }
 
-    // Le manifeste FUSIONNÉ (bibliothèques comprises) est vérifié à chaque
-    // build standard par la tâche checkPlayProtectStandard* (build.gradle.kts).
+    // Le manifeste FUSIONNÉ (bibliothèques comprises) est vérifié par la
+    // tâche checkPlayProtect* (build.gradle.kts), lancée avant ces tests.
     @Test
-    fun `le lecteur de notifications n'est declare que dans la variante complete`() {
+    fun `aucun acces bloque par Play Protect, une seule variante`() {
         val playProtectRisk = listOf(
             "BIND_NOTIFICATION_LISTENER_SERVICE", "NotificationListenerService",
-            "BIND_ACCESSIBILITY_SERVICE", "SMS", "RECEIVE_MMS", "RECEIVE_WAP_PUSH",
+            "BIND_ACCESSIBILITY_SERVICE", "AccessibilityService",
+            "SMS", "RECEIVE_MMS", "RECEIVE_WAP_PUSH", "READ_CELL_BROADCASTS",
         )
         val main = File("src/main/AndroidManifest.xml").readText()
             .replace(Regex("<!--.*?-->", RegexOption.DOT_MATCHES_ALL), "")
         for (word in playProtectRisk) assertTrue("$word dans src/main", word !in main)
-        assertTrue(!File("src/standard/AndroidManifest.xml").exists())
+        for (old in listOf("standard", "complete")) {
+            assertTrue("src/$old ne doit plus exister", !File("src/$old").exists())
+        }
+    }
 
-        val listener = componentsOf(parse("src/complete/AndroidManifest.xml"))
-            .single { it.attr("name") == ".SentinelNotificationListener" }
-        assertEquals("android.permission.BIND_NOTIFICATION_LISTENER_SERVICE", listener.attr("permission"))
-        assertTrue(File("src/complete/kotlin/com/iheb/sentinel/SentinelNotificationListener.kt").isFile)
-        assertTrue(!File("src/main/kotlin/com/iheb/sentinel/SentinelNotificationListener.kt").exists())
+    @Test
+    fun `rapport du manifeste fusionne - aucun acces a risque`() {
+        // Écrit par checkPlayProtectDebug (dépendance de testDebugUnitTest),
+        // chemin transmis par build.gradle.kts.
+        val path = System.getProperty("sentinel.playProtectReport")
+        assertTrue("lancer ./gradlew testDebugUnitTest", !path.isNullOrEmpty())
+        val report = File(path!!)
+        assertTrue("rapport absent : $report", report.isFile)
+        assertTrue(report.readText().startsWith("OK"))
     }
 }

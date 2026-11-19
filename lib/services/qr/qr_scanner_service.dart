@@ -90,6 +90,17 @@ class QrScannerService {
       _ => (null, null),
     };
     if (method == null) return false;
+    return _invoke(method, arguments);
+  }
+
+  /// Onglet Liens : ouvre [url] (http ou https) dans le navigateur, après
+  /// confirmation de l'utilisateur. Kotlin refuse tout autre type de lien.
+  Future<bool> openLink(String url) async {
+    if (!isSupported) return false;
+    return _invoke('openLink', {'url': url});
+  }
+
+  Future<bool> _invoke(String method, Map<String, Object>? arguments) async {
     try {
       await _channel.invokeMethod<void>(method, arguments);
       return true;

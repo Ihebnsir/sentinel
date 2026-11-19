@@ -1,12 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Anglais. À RELIRE PAR UN HUMAIN : traduction produite sans relecture. -->
-    <string name="process_text_label">Check with Sentinel</string>
-    <string name="listener_label">Sentinel – scam protection</string>
-    <string name="scam_channel_name">Scam alerts</string>
-    <string name="scam_channel_description">Warns you when a message you receive looks like a scam.</string>
-    <string name="scam_public_text">Likely scam detected</string>
-    <string name="scam_default_title">Likely scam</string>
+    <string name="process_text_label">Check link with Sentinel</string>
     <string name="firewall_channel_name">Firewall alerts</string>
     <string name="firewall_channel_description">Warns you when the firewall blocks a dangerous site.</string>
     <string name="firewall_alert_title">Dangerous site blocked</string>

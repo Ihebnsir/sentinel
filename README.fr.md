@@ -5,7 +5,7 @@
 <h1 align="center">Sentinel</h1>
 
 <p align="center">
-  Application de sécurité Android qui audite le téléphone, note les applications installées, détecte les messages d'arnaque sur l'appareil et protège les secrets dans un coffre chiffré.
+  Application de sécurité Android qui audite le téléphone, note les applications installées, vérifie les liens avant de les ouvrir, bloque les sites dangereux et protège les secrets dans un coffre chiffré.
 </p>
 
 <p align="center">
@@ -19,22 +19,15 @@
 
 ---
 
-L'interface de l'application est en français. Tout se passe sur le téléphone. Rien ne passe par le réseau sans votre accord : les seuls appels réseau viennent de quatre fonctions facultatives, la vérification des fuites auprès de Have I Been Pwned (5 caractères hexadécimaux d'une empreinte SHA-1, k-anonymity), le pare-feu DNS (transmet les requêtes DNS à Quad9, chiffrées en DNS-over-TLS ou HTTPS), la mise à jour des listes de blocage (téléchargées depuis GitHub) et le signalement d'arnaques (un message à la fois, anonymisé sur le téléphone, envoyé seulement quand vous touchez « Envoyer »).
+L'interface de l'application est en français, en arabe et en anglais. Tout se passe sur le téléphone. Rien ne passe par le réseau sans votre accord : les seuls appels réseau viennent de trois fonctions facultatives, la vérification des fuites auprès de Have I Been Pwned (5 caractères hexadécimaux d'une empreinte SHA-1, k-anonymity), le pare-feu DNS (transmet les requêtes DNS à Quad9, chiffrées en DNS-over-TLS ou HTTPS) et la mise à jour des listes de blocage (téléchargées depuis GitHub). Aucun message ni aucun lien n'est envoyé à un serveur.
 
 ## Installer : quelle version ?
 
-Sentinel existe en deux variantes Android, construites à partir du même code et signées avec la même clé :
+**Installez `sentinel-<version>.apk` depuis la [page Releases](https://github.com/Ihebnsir/sentinel/releases).** Depuis la version 1.1.0, il n'existe qu'une seule variante Android (paquet `com.iheb.sentinel`).
 
-| Variante | Où | Protection automatique | Fichier |
-|---|---|---|---|
-| **Standard** | [Releases GitHub](https://github.com/Ihebnsir/sentinel/releases) | Non | `sentinel-<version>-standard.apk` |
-| **Complète** | Google Play (plus tard) | Oui | Play Store |
+Sentinel ne déclare ni lecteur de notifications, ni service d'accessibilité, ni permission SMS (une vérification Gradle fait échouer le build sinon) : la protection renforcée contre la fraude de Google Play Protect ne bloque plus l'APK. Les versions 1.0.0 et 1.0.1 avaient un onglet « Messages » (détection des messages d'arnaque sur le téléphone) ; il a été retiré en 1.1.0 et remplacé par le vérificateur de liens.
 
-**Installez l'APK standard de la page Releases.** Depuis la version 1.0.1, c'est le seul APK publié sur GitHub.
-
-Pourquoi : la protection renforcée contre la fraude de Google Play Protect bloque, sans bouton « Installer quand même », les applis installées depuis un navigateur ou un gestionnaire de fichiers qui déclarent un lecteur de notifications, l'accès aux SMS ou l'accessibilité. La version 1.0.0 avait un lecteur de notifications (la protection automatique) et était bloquée ainsi. La variante standard ne déclare aucun de ces accès : dans l'onglet Messages, la protection automatique est remplacée par une courte explication, et l'on peut toujours vérifier un message en le partageant vers Sentinel, en sélectionnant son texte (« Vérifier avec Sentinel ») ou en le collant. Tout le reste est identique.
-
-La variante standard a son propre nom de paquet (`com.iheb.sentinel.standard`) : elle peut cohabiter avec la future version Google Play sans conflit. Si vous aviez installé la 1.0.0 : exportez une sauvegarde du coffre si vous l'utilisiez, puis désinstallez la 1.0.0.
+Si vous avez installé la 1.0.1 (`com.iheb.sentinel.standard`), c'est une appli distincte : exportez une sauvegarde du coffre si vous l'utilisiez, restaurez-la dans la 1.1.0, puis désinstallez la 1.0.1. Si vous avez encore la 1.0.0 (`com.iheb.sentinel`, même clé), la 1.1.0 s'installe par-dessus comme une mise à jour normale.
 
 ## Captures d'écran
 
@@ -43,7 +36,7 @@ La variante standard a son propre nom de paquet (`com.iheb.sentinel.standard`) :
 <!--
 | Accueil | Applications | Messages | Coffre |
 |:---:|:---:|:---:|:---:|
-| <img src="docs/screenshots/home.png" width="200"> | <img src="docs/screenshots/apps.png" width="200"> | <img src="docs/screenshots/messages.png" width="200"> | <img src="docs/screenshots/vault.png" width="200"> |
+| <img src="docs/screenshots/home.png" width="200"> | <img src="docs/screenshots/apps.png" width="200"> | <img src="docs/screenshots/links.png" width="200"> | <img src="docs/screenshots/vault.png" width="200"> |
 -->
 
 ## Fonctionnalités
@@ -51,9 +44,8 @@ La variante standard a son propre nom de paquet (`com.iheb.sentinel.standard`) :
 - **Audit du téléphone.** Score de sécurité sur 100 calculé à partir de 7 vérifications : verrouillage d'écran, indices de root, âge du correctif de sécurité (< 90 jours), biométrie forte, options pour les développeurs, débogage USB et chiffrement du stockage. Les vérifications échouées ouvrent l'écran de réglages Android correspondant (sauf le root, qui ne se corrige pas depuis les réglages).
 - **Analyse des applications.** Liste les applications installées et leur donne un score de risque de 0 à 100 avec des règles explicables : service d'accessibilité, source d'installation, administrateur de l'appareil, accès aux SMS, lecture des notifications, superposition, micro, localisation en arrière-plan, `targetSdk` ancien, etc. Les applications système préinstallées ne sont signalées que pour l'accessibilité ou l'administration de l'appareil.
 - **Fausses applications et logiciels espions.** Lit le certificat de signature de chaque application (SHA-256/SHA-1, sujet) et vérifie si son icône a été cachée. Signale les applications qui prennent le nom d'une application connue (WhatsApp, Facebook, Instagram, TikTok…) avec un autre package, les packages officiels signés par quelqu'un d'autre (une fois les empreintes de référence remplies), les versions modifiées de WhatsApp (GB WhatsApp, FM WhatsApp…), les signatures de test et les stalkerwares connus de la liste publique [Stalkerware Indicators](https://github.com/AssoEchap/stalkerware-indicators), même déguisés en application système. En cas de logiciel espion possible, Sentinel affiche des conseils de sécurité **avant** de proposer la désinstallation, et n'envoie jamais de notification à ce sujet.
-- **Détection des arnaques.** On colle un message, on le partage depuis une autre application, ou on sélectionne du texte puis « Vérifier avec Sentinel ». Un modèle embarqué (TF-IDF sur n-grammes de caractères + régression logistique) est combiné à des règles sur les liens : usurpation de marque, adresse IP, punycode, `@` dans l'URL, raccourcisseurs, extensions suspectes, trop de sous-domaines, `http` sans chiffrement. Le verdict est accompagné de ses raisons.
-- **Vérification des QR codes (quishing).** « Scanner un QR code », dans l'onglet Messages, lit le code sur le téléphone avec ZXing (sans réseau ni modèle téléchargé). La caméra n'est demandée qu'au moment du scan, après une explication. Sentinel affiche le contenu brut, puis vérifie liens et texte avec le même analyseur. Les QR Wi-Fi montrent la protection (alerte si réseau ouvert) ; numéros, SMS et paiements (crypto, UPI, SEPA, EMVCo) affichent l'action exacte et demandent confirmation. Les liens `javascript:`/`intent:` et les codes USSD (`*`, `#`) sont bloqués. Rien ne s'ouvre tout seul, et « Ouvrir quand même » est désactivé pour une arnaque probable.
-- **Protection automatique (facultative).** Un service d'écoute des notifications lit les messages reçus dans les applications SMS, WhatsApp, WhatsApp Business, Messenger, Telegram et Viber. Ils sont analysés par le même modèle Dart, dans un moteur Flutter sans écran (headless), et une alerte « Arnaque probable » s'affiche quand le verdict est une arnaque.
+- **Vérificateur de liens (onglet « Liens »).** On colle un lien (ou un message qui en contient un), on touche « Coller », on partage un lien depuis une autre application, ou on sélectionne du texte puis « Vérifier le lien avec Sentinel » : Sentinel prend le premier lien (y compris dans un texte en arabe ou en derja) et affiche **Dangereux**, **Suspect** ou **Aucun problème connu**, « Ce lien mène en réalité à … » (le domaine enregistrable, neutralisé : `site[.]xyz`), les raisons et un conseil. Vérifications : usurpation de marque (banques tunisiennes, La Poste, opérateurs…), adresse IP, punycode, `@` dans l'URL, raccourcisseurs, extensions suspectes, trop de sous-domaines, `http` sans chiffrement, plus la liste « Malware et hameçonnage » du pare-feu et votre liste blanche (lues par Kotlin, même pare-feu arrêté). 100 % sur le téléphone, sans permission : rien n'est envoyé, rien n'est enregistré, un lien raccourci n'est jamais suivi pour découvrir sa destination. Rien ne s'ouvre tout seul, et « Ouvrir quand même » est désactivé pour un lien dangereux. Une ligne indique si le pare-feu protège vos clics partout (« Activer » en un appui).
+- **Vérification des QR codes (quishing).** « Scanner un QR code », dans l'onglet Liens, lit le code sur le téléphone avec ZXing (sans réseau ni modèle téléchargé). La caméra n'est demandée qu'au moment du scan, après une explication. Sentinel affiche le contenu brut, puis vérifie le lien avec le vérificateur de liens. Les QR Wi-Fi montrent la protection (alerte si réseau ouvert) ; numéros, SMS et paiements (crypto, UPI, SEPA, EMVCo) affichent l'action exacte et demandent confirmation. Les liens `javascript:`/`intent:` et les codes USSD (`*`, `#`) sont bloqués. Rien ne s'ouvre tout seul, et « Ouvrir quand même » est désactivé pour un lien dangereux.
 - **Analyse du Wi-Fi.** Affiche le type de chiffrement (ouvert, WEP, WPA2, WPA3, OWE, entreprise), la présence d'un portail captif et l'état du DNS privé, sans permission de localisation et sans lire le nom du réseau.
 - **Tuile « Pare-feu Sentinel ».** Dans les Paramètres rapides d'Android (le panneau qu'on tire du haut de l'écran), une tuile avec l'arche montre si le pare-feu DNS est actif. Un appui l'active ou le coupe. Si l'écran est verrouillé, Android demande d'abord de le déverrouiller. Si l'autorisation VPN n'a jamais été donnée ou si le DNS privé est en mode strict, la tuile ouvre l'écran du pare-feu, qui explique quoi faire.
 - **Coffre chiffré.** Range des mots de passe et des notes secrètes, chiffrés avec Argon2id + AES-256-GCM. On l'ouvre avec le mot de passe maître, une clé de récupération ou l'empreinte digitale (Android Keystore). Une sauvegarde chiffrée (fichier `.sentinel`) permet de le transférer sur un nouveau téléphone.
@@ -62,9 +54,8 @@ La variante standard a son propre nom de paquet (`com.iheb.sentinel.standard`) :
 
 ## Points forts en sécurité
 
-- **Respect de la vie privée dès la conception.** Pas de compte, pas de statistiques d'usage. Le seul serveur est celui, facultatif, des signalements (`backend/`) : il ne reçoit un message que si l'utilisateur le signale. Le texte des messages n'est jamais journalisé ni enregistré sur le téléphone. Kotlin ne garde que des valeurs `hashCode()` pour ignorer les doublons.
+- **Respect de la vie privée dès la conception.** Pas de compte, pas de statistiques d'usage, pas de serveur : l'application n'envoie aucun message ni aucun lien. Les liens vérifiés restent en mémoire et ne sont jamais journalisés. (Les dossiers `backend/` et `ml/` restent dans le dépôt mais ne sont plus utilisés par l'application depuis la 1.1.0.)
 - **Appels réseau sur accord uniquement.** Aucun appel réseau au démarrage (la police est embarquée). La vérification des fuites demande un consentement explicite. Elle utilise l'API « range » de Pwned Passwords (k-anonymity) : seuls les 5 premiers caractères hexadécimaux de l'empreinte SHA-1 quittent le téléphone, et l'en-tête `Add-Padding: true` masque la taille de la réponse. Les résultats restent en mémoire et sont effacés au verrouillage du coffre.
-- **Signalement d'arnaques (volontaire, un par un).** « Signaler ce message » n'apparaît sous un résultat de l'onglet Messages que si le build définit `--dart-define=SENTINEL_API_URL` (le script de release y met le serveur déployé, `https://sentinel-api-b2gs.onrender.com` ; sans elle, le bouton n'existe pas). Le texte est anonymisé sur le téléphone avec les mêmes règles que le serveur (`anonymizer.dart`, test de parité sur les 96 cas communs de `backend/tests/fixtures/anonymize_cases.json`), montré à l'utilisateur, qui peut le modifier, puis envoyé avec son avis, le verdict, la probabilité, la langue et la version de l'app. Ni numéro, ni identifiant du téléphone. HTTPS obligatoire ; HTTP en clair permis seulement en debug, seulement vers `10.0.2.2` (l'ordinateur vu depuis l'émulateur), via `android/app/src/debug/res/xml/network_security_config.xml`. Délai de 60 s (le serveur gratuit met environ une minute à se réveiller ; un message s'affiche après 4 s), pas de file d'attente, pas de nouvel essai automatique, 5 signalements par heure sur le téléphone (le serveur limite aussi).
 - **Cryptographie du coffre.** Une clé de données (DEK) aléatoire de 256 bits chiffre les éléments en AES-256-GCM, avec un nonce neuf de 12 octets à chaque écriture. La DEK est enveloppée par une clé de chiffrement de clé (KEK) pour chaque *emplacement de clé* (key slot) :
   - mot de passe : Argon2id, 46 Mio, 2 passes, parallélisme 1, sel aléatoire de 16 octets, calculé dans un isolate séparé ;
   - clé de récupération : 28 caractères parmi 32 symboles (140 bits), HKDF-SHA256 ;
@@ -72,7 +63,7 @@ La variante standard a son propre nom de paquet (`com.iheb.sentinel.standard`) :
 - **En-tête authentifié.** Tout l'en-tête du fichier (emplacements, paramètres de dérivation, date de dernière ouverture par mot de passe) sert de données associées AES-GCM. Modifier un seul octet fait échouer le déchiffrement. Les paramètres de dérivation lus dans le fichier sont bornés : un fichier trafiqué ne peut pas exiger une mémoire ou un nombre de passes extrêmes.
 - **Ouverture renforcée.** Délai croissant après un mauvais mot de passe (1 s, 2 s, 4 s… plafonné à 30 s). Le mot de passe maître est de nouveau exigé après 7 jours d'ouvertures par empreinte seule.
 - **Protection à l'écran.** `FLAG_SECURE` sur l'onglet Coffre (pas de capture d'écran, aperçu masqué dans les applications récentes). Le coffre se verrouille quand l'écran s'éteint et après 30 s en arrière-plan. Les secrets copiés sont marqués sensibles (Android 13+) et effacés du presse-papiers après 30 s.
-- **Alertes sûres.** Les alertes d'arnaque affichent un texte neutre sur l'écran verrouillé. Les domaines cités dans l'alerte sont neutralisés (`site[.]xyz`), et les actions automatiques « Ouvrir le lien » d'Android sont désactivées.
+- **Alertes sûres.** Les alertes du pare-feu neutralisent les domaines (`site[.]xyz`) et désactivent les actions automatiques « Ouvrir le lien » d'Android. Le vérificateur de liens affiche lui aussi les domaines neutralisés.
 - **Écriture atomique.** Le coffre est écrit dans un fichier temporaire puis renommé : un plantage ne peut pas l'abîmer.
 - **Pas de sauvegarde Android.** `allowBackup="false"`, complété par des `dataExtractionRules` sur Android 12+, empêche les données de l'application de partir dans les sauvegardes cloud ou lors d'un transfert vers un autre téléphone. Pour changer de téléphone, on exporte le coffre à la place (point suivant).
 - **Export / import chiffré.** « Exporter une sauvegarde chiffrée » (réglages du coffre) écrit un fichier `.sentinel` versionné : Argon2id d'un mot de passe d'export distinct (mêmes règles de force que le mot de passe maître) + AES-256-GCM, avec l'en-tête en données associées. Il est enregistré et ouvert via le sélecteur de fichiers d'Android (Storage Access Framework) : aucune permission de stockage. « Restaurer une sauvegarde » (écran de création du coffre) demande le fichier, son mot de passe, puis un nouveau mot de passe maître, et crée un coffre neuf avec une nouvelle clé de récupération. Mauvais mot de passe ou fichier modifié : message clair, jamais de plantage.
@@ -81,7 +72,7 @@ Modèle de menaces complet et limites connues : [docs/SECURITY_DESIGN.md](docs/S
 
 ## Architecture
 
-Flutter (Dart) gère l'interface et toute la logique : calcul des scores, inférence ML, cryptographie. Kotlin accède aux API Android via des `MethodChannel` : état du téléphone, gestionnaire de paquets, Wi-Fi, Keystore et biométrie, écoute des notifications. Pour l'analyse en arrière-plan, Kotlin démarre un moteur Flutter sans écran qui exécute le même modèle Dart que l'interface.
+Flutter (Dart) gère l'interface et l'essentiel de la logique : calcul des scores, règles sur les liens, cryptographie. Kotlin accède aux API Android via des `MethodChannel` : état du téléphone, gestionnaire de paquets, Wi-Fi, Keystore et biométrie, pare-feu DNS (VpnService) et ses listes, qui répondent aussi au vérificateur de liens.
 
 Schémas et détails : [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) (en anglais).
 
@@ -92,21 +83,22 @@ Schémas et détails : [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) (en anglais)
 | Application | Flutter 3.47.7, Dart 3.13.5 |
 | Android | Kotlin, Java 17, Android Gradle Plugin 9.1.0, Gradle 9.3.1 |
 | Cryptographie | [`cryptography`](https://pub.dev/packages/cryptography) (Argon2id, AES-GCM, HKDF), [`crypto`](https://pub.dev/packages/crypto) (SHA-1), Android Keystore |
-| Réseau | [`http`](https://pub.dev/packages/http) (API Pwned Passwords et API de signalement de Sentinel) |
-| Apprentissage automatique | Python 3.14, scikit-learn 1.9.1, pandas, numpy (entraînement seulement ; l'inférence est en Dart) |
+| Réseau | [`http`](https://pub.dev/packages/http) (API Pwned Passwords) |
 | CI | GitHub Actions, Gitleaks, Dependabot |
 
 ## Tests
 
-**631 tests** répartis dans 45 fichiers (`flutter test`). Ils couvrent :
+**696 tests** répartis dans 51 fichiers (`flutter test`), plus 172 tests Kotlin sur la JVM (`./gradlew testDebugUnitTest`). Ils couvrent :
 
 - le coffre : vecteur de test Argon2id de la RFC 9106, chiffrement, emplacements de clé, migration v1 → v2, détection des modifications (chiffré, clé enveloppée, en-tête), session et verrouillage ;
 - la sauvegarde chiffrée : aller-retour export/import, mauvais mot de passe, fichier altéré, version inconnue, fichier vide, restauration dans un coffre neuf ;
-- la **parité exacte** entre le modèle Dart et scikit-learn sur 30 textes de référence (5 langues et cas limites Unicode, tolérance 1e-9) ;
+- le vérificateur de liens : extraction du premier lien (français, arabe, derja, plusieurs liens, aucun lien, caractères cachés), verdicts sur des arnaques connues, de vrais sites tunisiens et la liste blanche, l'onglet Liens en français et en arabe (de droite à gauche) ;
+- la **parité** de la règle d'usurpation de marque entre Dart et Kotlin (`test/fixtures/brand_parity.json`) ;
 - le client k-anonymity, avec un faux client HTTP ;
 - les règles de risque des applications, du téléphone et du Wi-Fi ;
 - le bilan de santé des mots de passe et le générateur ;
-- les ponts vers Android (pare-feu, protection, applications, biométrie, texte partagé) : arguments envoyés et chaque code d'erreur qu'Android peut renvoyer ;
+- les ponts vers Android (pare-feu, notifications, applications, biométrie, texte partagé) : arguments envoyés et chaque code d'erreur qu'Android peut renvoyer ;
+- le manifeste Android fusionné : ni lecteur de notifications, ni service d'accessibilité, ni permission SMS (tâche Gradle `checkPlayProtect*`, lancée avant les tests Kotlin) ;
 - les thèmes : contraste WCAG des principales paires de couleurs, et écrans principaux affichés en sombre ;
 - l'accessibilité : zones tactiles de 48 dp, libellés TalkBack, contraste AA et police à 200 % sans débordement sur 19 écrans (voir [docs/ACCESSIBILITE.md](docs/ACCESSIBILITE.md)) ;
 - les QR codes : lecture de chaque format (lien, `WIFI:`, `tel:`, `sms:`, paiements, texte), décisions de sécurité, et rien ne s'ouvre sans confirmation.
@@ -130,39 +122,20 @@ cd sentinel
 flutter pub get
 flutter analyze
 flutter test
-flutter build apk --debug --flavor standard   # ou --flavor complete
-(cd android && ./gradlew testDebugUnitTest)   # tests Kotlin, deux variantes
+flutter build apk --debug
+(cd android && ./gradlew testDebugUnitTest)   # tests Kotlin + vérification du manifeste
 ```
 
-`--flavor` est obligatoire : `standard` (GitHub, sans lecteur de notifications) ou `complete` (Google Play). Le build standard échoue si son manifeste fusionné déclare un accès bloqué par Play Protect. Les builds release sont signés avec la clé de publication : voir [docs/RELEASE.md](docs/RELEASE.md).
+Le build échoue si le manifeste fusionné déclare un accès bloqué par Play Protect. Les builds release sont signés avec la clé de publication : voir [docs/RELEASE.md](docs/RELEASE.md).
 
-## Apprentissage automatique
+## Apprentissage automatique (non utilisé par l'application)
 
-Le classifieur d'arnaques est entraîné en Python (`ml/train.py`) et exporté dans `assets/models/phishing_model.json`. L'application réimplémente le prétraitement et la prédiction en Dart pur (`lib/services/phishing/phishing_model.dart`). La spécification exacte est dans [ml/README.md](ml/README.md).
-
-Chaîne de traitement :
-
-1. Fusion de `ml/data/messages_seed.csv` (400 messages synthétiques : 200 arnaques, 200 normaux) et de `ml/data/messages_perso.csv` (vrais messages ; vide pour l'instant), puis suppression des doublons.
-2. Découpage stratifié 80 / 20 (`random_state=42`).
-3. `TfidfVectorizer(analyzer="char_wb", ngram_range=(2, 5), sublinear_tf=True, min_df=2, max_features=8000)`.
-4. `LogisticRegression(class_weight="balanced")`, avec `C` choisi par validation croisée à 5 plis sur le F1 (retenu : `C = 30`).
-5. Export du modèle et des textes de parité. Une implémentation de référence sans scikit-learn revérifie la spécification.
-
-Langues : français, arabe, derja tunisienne (alphabet latin et arabe), anglais.
-
-Métriques sur le jeu de test, telles qu'écrites par `train.py` dans `metrics_test` du modèle livré (80 messages) :
-
-| Précision | Rappel | F1 | Exactitude | Matrice de confusion `[[VN, FP], [FN, VP]]` |
-|---:|---:|---:|---:|---|
-| 0,952 | 1,000 | 0,976 | 0,975 | `[[38, 2], [0, 40]]` |
-
-> **Avertissement honnête.** Les données sont synthétiques et écrites à la main, et ces chiffres sont **trop optimistes**. Ils ne montrent pas les performances réelles. Dans les données synthétiques, tous les liens d'arnaque utilisent `.xyz`/`.top` ou `bit.ly` : le modèle s'appuie donc beaucoup sur ces n-grammes. Dans l'application, les règles sur les liens et un seuil prudent (≥ 0,8 pour « Arnaque probable » avec le modèle seul) compensent en partie. Des métriques crédibles demandent de vrais messages variés.
+Jusqu'à la 1.0.1, un onglet « Messages » classait les messages d'arnaque avec un modèle embarqué entraîné dans `ml/`. Il a été retiré en 1.1.0 : le modèle n'avait pas de vraies données tunisiennes, et le copier-coller de messages n'était pas utilisé. Les dossiers `ml/` (entraînement) et `backend/` (serveur de signalement) restent dans le dépôt, sans être utilisés par l'application ; le modèle s'exporte désormais dans `ml/export/`. Voir [ml/README.md](ml/README.md).
 
 ## Feuille de route
 
 Ces points viennent des limites connues relevées dans le code et la documentation. **TODO :** les relire et les classer.
 
-- [ ] Collecter de vrais messages (anonymisés) et réentraîner pour obtenir des métriques crédibles.
 - [ ] Vérifier à la main les domaines officiels de `lib/services/phishing/known_brands.dart` (TODO dans le code).
 - [x] Signature release avec une clé de publication dédiée (SEN-01, voir « Vérifier un APK »).
 - [ ] Conserver le compteur d'échecs d'ouverture après un redémarrage de l'application.
@@ -182,7 +155,7 @@ L'application a été auditée selon l'OWASP MASVS v2 (analyse statique et dynam
 Les APK officiels de Sentinel sont signés avec une seule clé de publication. Avant d'installer un APK, vérifiez son certificat :
 
 ```
-apksigner verify --print-certs sentinel-1.0.1-standard.apk
+apksigner verify --print-certs sentinel-1.1.0.apk
 ```
 
 La sortie doit indiquer `Verifies` et cette empreinte SHA-256 du certificat :

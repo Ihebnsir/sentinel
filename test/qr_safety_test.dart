@@ -1,31 +1,17 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:sentinel/services/links/link_checker.dart';
 import 'package:sentinel/services/phishing/known_brands.dart';
-import 'package:sentinel/services/phishing/message_analyzer.dart';
-import 'package:sentinel/services/phishing/phishing_model.dart';
 import 'package:sentinel/services/qr/qr_content.dart';
 import 'package:sentinel/services/qr/qr_safety.dart';
 
 import 'support/l10n.dart';
 
-// Faux modèle : même probabilité pour tout texte, et note ce qu'il lit.
-final _analyzed = <String>[];
-
-PhishingPrediction Function(String) _ai(double p) => (text) {
-  _analyzed.add(text);
-  return PhishingPrediction(
-    probability: p,
-    suspiciousNgrams: const [],
-    suspiciousWords: const [],
-  );
-};
-
-QrAssessment _assess(String raw, {double p = 0.05}) =>
-    assessQr(parseQr(raw), _ai(p));
+QrAssessment _assess(String raw, {DomainCheck? lists}) =>
+    assessQr(parseQr(raw), lists: lists);
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   setUpAll(loadKnownBrands);
-  setUp(_analyzed.clear);
 
   group('liens', () {
     test('lien sain : ouvrable, après confirmation', () {
@@ -33,7 +19,7 @@ void main() {
       expect(a.verdict, Verdict.rien);
       expect(a.action, QrAction.ouvrirLien);
       expect(a.actionAllowed, isTrue);
-      expect(_analyzed, ['https://www.exemple.tn']);
+      expect(hostToCheck(parseQr('https://www.exemple.tn')), 'www.exemple.tn');
     });
 
     test('lien suspect (http) : ouvrable « quand même »', () {
@@ -42,45 +28,61 @@ void main() {
       expect(a.actionAllowed, isTrue);
     });
 
-    test('arnaque probable : bouton désactivé', () {
-      // Adresse IP au lieu d'un nom de site : arnaque pour l'analyseur.
+    test('lien dangereux : bouton désactivé', () {
+      // Adresse IP au lieu d'un nom de site.
       final ip = _assess('http://192.168.4.1/banque/login');
-      expect(ip.verdict, Verdict.arnaque);
+      expect(ip.verdict, Verdict.dangereux);
       expect(ip.action, QrAction.ouvrirLien);
       expect(ip.actionAllowed, isFalse);
 
       // Faux site d'une marque connue (« quishing » de colis).
       expect(_assess('https://poste-tn.com/suivi').actionAllowed, isFalse);
 
-      // L'IA seule suffit aussi.
-      expect(_assess('https://exemple.tn', p: 0.95).actionAllowed, isFalse);
+      // Domaine de la liste Malware du pare-feu.
+      const listed = DomainCheck(allowed: false, dangerous: true);
+      expect(
+        _assess('https://exemple.tn', lists: listed).actionAllowed,
+        isFalse,
+      );
     });
 
-    test('javascript:, intent: : arnaque, jamais d\'action', () {
+    test('liste blanche : aucun problème connu', () {
+      const allowed = DomainCheck(allowed: true, dangerous: false);
+      final a = _assess('https://poste-tn.com/suivi', lists: allowed);
+      expect(a.verdict, Verdict.rien);
+      expect(a.actionAllowed, isTrue);
+    });
+
+    test('javascript:, intent: : dangereux, jamais d\'action', () {
       for (final raw in ['javascript:alert(1)', 'intent://x#Intent;end']) {
         final a = _assess(raw);
-        expect(a.verdict, Verdict.arnaque, reason: raw);
+        expect(a.verdict, Verdict.dangereux, reason: raw);
         expect(a.warnings, [QrWarning.lienDangereux]);
         expect(a.action, isNull);
         expect(a.actionAllowed, isFalse);
+        expect(hostToCheck(parseQr(raw)), isNull);
       }
-      expect(_analyzed, isEmpty);
     });
   });
 
   group('texte', () {
-    test('analysé comme un message, sans action', () {
-      final a = _assess('Colis bloqué : payez sur bit.ly/xyz', p: 0.9);
-      expect(a.verdict, Verdict.arnaque);
-      expect(a.analysis, isNotNull);
+    test('le lien du texte est vérifié, sans action', () {
+      final a = _assess('Colis bloqué : payez sur bit.ly/xyz');
+      expect(a.verdict, Verdict.suspect); // raccourcisseur
+      expect(a.link!.link.host, 'bit.ly');
       expect(a.action, isNull);
+    });
+
+    test('texte sans lien : rien à juger', () {
+      final a = _assess('Bonjour, rendez-vous demain');
+      expect(a.verdict, isNull);
+      expect(a.link, isNull);
     });
 
     test('QR vide : rien à juger', () {
       final a = _assess('   ');
       expect(a.verdict, isNull);
-      expect(a.analysis, isNull);
-      expect(_analyzed, isEmpty);
+      expect(a.link, isNull);
     });
   });
 
@@ -88,10 +90,10 @@ void main() {
     test('réseau ouvert : alerte, niveau « danger » de wifi_risk', () {
       final a = _assess('WIFI:T:nopass;S:Gare;;');
       expect(a.warnings, [QrWarning.wifiOuvert]);
-      expect(a.verdict, isNull); // pas une arnaque, un réseau risqué
+      expect(a.verdict, isNull); // pas un lien dangereux, un réseau risqué
       expect(a.action, isNull);
       expect(a.wifiStatus!.connected, isTrue);
-      expect(_analyzed, isEmpty, reason: 'le nom du réseau n\'est pas analysé');
+      expect(a.link, isNull, reason: 'le nom du réseau n\'est pas vérifié');
     });
 
     test('WEP : alerte ; WPA2 et WPA3 : aucune', () {
@@ -109,11 +111,11 @@ void main() {
       expect(a.verdict, isNull);
     });
 
-    test('code USSD (* ou #) : arnaque, appel interdit', () {
+    test('code USSD (* ou #) : dangereux, appel interdit', () {
       for (final raw in ['tel:*#06#', 'tel:*2767*3855%23', 'tel:%2321%23']) {
         final a = _assess(raw);
         expect(a.warnings, [QrWarning.codeUssd], reason: raw);
-        expect(a.verdict, Verdict.arnaque);
+        expect(a.verdict, Verdict.dangereux);
         expect(a.actionAllowed, isFalse);
       }
     });
@@ -124,12 +126,11 @@ void main() {
       expect(a.verdict, Verdict.suspect);
       expect(a.action, QrAction.envoyerSms);
       expect(a.actionAllowed, isTrue);
-      expect(_analyzed, ['OUI'], reason: 'le texte du SMS est analysé');
     });
 
-    test('SMS dont le texte est une arnaque : envoi interdit', () {
-      final a = _assess('SMSTO:+21698000000:Gagnez un iPhone', p: 0.9);
-      expect(a.verdict, Verdict.arnaque);
+    test('SMS dont le texte contient un faux site : envoi interdit', () {
+      final a = _assess('SMSTO:+21698000000:Suivez https://poste-tn.com');
+      expect(a.verdict, Verdict.dangereux);
       expect(a.actionAllowed, isFalse);
     });
 

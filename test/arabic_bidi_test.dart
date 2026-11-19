@@ -5,7 +5,6 @@ import 'package:flutter/rendering.dart' show RenderParagraph;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:sentinel/screens/qr_result_screen.dart';
-import 'package:sentinel/services/phishing/phishing_model.dart';
 import 'package:sentinel/utils/bidi.dart';
 
 import 'support/l10n.dart';
@@ -56,34 +55,20 @@ void main() {
       expect(_left(tester, f, close), lessThan(_left(tester, f, dot)));
     });
 
-    testWidgets('« payez », « code », « appelez » : chacun ses guillemets', (
+    testWidgets('« poste-tn[.]xyz » : destination lue de gauche à droite', (
       tester,
     ) async {
-      const words = ['payez', 'code', 'appelez'];
-      final text = ar.reasonScamWords(
-        words.map(ar.reasonQuotedWord).join(ar.listSeparator),
-      );
+      const domain = 'poste-tn[.]xyz';
+      final text = ar.linksRealDestination(domain);
       await _showArabic(tester, [text]);
       final f = find.text(text);
-      final starts = [for (final w in words) text.indexOf(w)];
-      double? previousLeft;
-      for (var i = 0; i < words.length; i++) {
-        final start = starts[i];
-        final end = start + words[i].length - 1;
-        // Le mot se lit de gauche à droite.
-        expect(_left(tester, f, start), lessThan(_left(tester, f, end)));
-        // Son « ouvrant » juste à droite, son « fermant » juste à gauche.
-        final open = text.lastIndexOf('«', start);
-        final close = text.indexOf('»', end);
-        expect(_left(tester, f, open), greaterThan(_left(tester, f, end)));
-        expect(_left(tester, f, close), lessThan(_left(tester, f, start)));
-        // Lecture de droite à gauche : chaque mot à gauche du précédent,
-        // guillemets compris (pas de « payez», «code » mélangés).
-        if (previousLeft != null) {
-          expect(_left(tester, f, open), lessThan(previousLeft));
-        }
-        previousLeft = _left(tester, f, close);
+      final start = text.indexOf(domain);
+      // Chaque caractère du domaine à droite du précédent.
+      for (var i = start; i < start + domain.length - 1; i++) {
+        expect(_left(tester, f, i), lessThan(_left(tester, f, i + 1)));
       }
+      // Phrase arabe à droite, domaine à la fin (donc à gauche).
+      expect(_left(tester, f, 0), greaterThan(_left(tester, f, start)));
     });
 
     testWidgets('« poste-tn-livraison.xyz » : domaine entier et entre '
@@ -160,15 +145,7 @@ void main() {
       await tester.pumpWidget(
         testApp(
           locale: const Locale('ar'),
-          home: QrResultScreen(
-            raw: 'tel:+21622333444',
-            loadPredictor: () async =>
-                (_) => const PhishingPrediction(
-                  probability: 0.05,
-                  suspiciousNgrams: [],
-                  suspiciousWords: [],
-                ),
-          ),
+          home: const QrResultScreen(raw: 'tel:+21622333444'),
         ),
       );
       await tester.pumpAndSettle();

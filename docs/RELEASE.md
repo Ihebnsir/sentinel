@@ -2,27 +2,17 @@
 
 Une version publiée est **signée avec la clé de publication** (SEN-01) et **obfusquée** (SEN-04). Le build release refuse de démarrer sans la clé : il n'y a plus aucun repli sur la clé de debug.
 
-## 0. Deux variantes (product flavors)
+## 0. Une seule variante, aucun accès bloqué par Play Protect
 
-Même code, même clé de signature, deux variantes déclarées dans `android/app/build.gradle.kts` :
+Depuis la 1.1.0, il n'y a plus de *product flavors* : une seule variante, `applicationId` **`com.iheb.sentinel`**, pour GitHub et (plus tard) Google Play. L'onglet Messages et la protection automatique (lecteur de notifications) ont été retirés.
 
-| Variante | Distribution | `applicationId` | Protection automatique |
-|---|---|---|---|
-| `standard` | APK sur GitHub (défaut du script) | `com.iheb.sentinel.standard` | Non |
-| `complete` | Google Play (plus tard) | `com.iheb.sentinel` | Oui |
+**Pourquoi c'est important.** La « protection renforcée contre la fraude » de Google Play Protect bloque, sans bouton pour passer outre, les applis installées depuis un navigateur ou un gestionnaire de fichiers qui déclarent l'un de ces accès : lecteur de notifications (`BIND_NOTIFICATION_LISTENER_SERVICE`), service d'accessibilité, SMS (`RECEIVE_SMS`, `READ_SMS`…). L'APK 1.0.0 était bloqué à cause du lecteur de notifications.
 
-**Pourquoi.** La « protection renforcée contre la fraude » de Google Play Protect bloque, sans bouton pour passer outre, les applis installées depuis un navigateur ou un gestionnaire de fichiers qui déclarent l'un de ces accès : lecteur de notifications (`BIND_NOTIFICATION_LISTENER_SERVICE`), service d'accessibilité, SMS (`RECEIVE_SMS`, `READ_SMS`…). L'APK 1.0.0 était bloqué à cause du lecteur de notifications (`SentinelNotificationListener`, la protection automatique).
+**Vérification automatique.** La tâche Gradle `checkPlayProtect<Debug|Profile|Release>` lit le manifeste **fusionné** (bibliothèques comprises) et fait échouer `assemble…`, `bundle…` et `testDebugUnitTest` s'il contient un lecteur de notifications, un service d'accessibilité ou une permission SMS/MMS/WAP push. Son rapport (`build/app/reports/playProtect/<variante>.txt`) est relu par `ManifestTest`. Elle tourne aussi avec `./gradlew check`.
 
-**Comment.**
-- Le service et sa classe Kotlin sont dans `android/app/src/complete/` seulement. La variante standard ne les contient pas.
-- `BuildConfig.AUTO_PROTECTION` (Kotlin) et `appFlavor` (Dart, fixé par `--flavor`, voir `lib/app_info.dart`) masquent la fonctionnalité : l'onglet Messages affiche une courte explication (fr/ar/en) à la place de l'interrupteur. L'analyse par partage, sélection de texte ou copier-coller reste disponible.
-- **Vérification automatique** : la tâche Gradle `checkPlayProtectStandard<Debug|Profile|Release>` lit le manifeste **fusionné** (bibliothèques comprises) et fait échouer `assembleStandard…` / `bundleStandard…` s'il contient un lecteur de notifications, un service d'accessibilité ou une permission SMS/MMS/WAP push. Elle tourne aussi avec `./gradlew check`.
-- `flutter build apk` et `flutter run` demandent maintenant `--flavor standard` ou `--flavor complete`. `./gradlew testDebugUnitTest` lance les tests Kotlin des deux variantes.
-
-**`applicationId` : pourquoi un suffixe `.standard`.**
-- *Même identifiant* pour les deux : une seule des deux peut être installée. Avec Play App Signing, l'APK du Play Store est signé par la clé de Google, pas par la nôtre : passer de l'APK GitHub à la version Play (ou l'inverse) donnerait « Application non installée » et obligerait à **désinstaller d'abord**, donc à perdre les données (coffre compris).
-- *Suffixe `.standard`* : ce sont deux applis distinctes. Elles peuvent cohabiter ; l'utilisateur installe la version Play quand il veut, sans erreur, y déplace son coffre par la sauvegarde chiffrée, puis désinstalle l'APK GitHub. Les mises à jour GitHub (1.0.1 → 1.0.2…) restent des mises à jour normales : même identifiant, même clé.
-- Choix retenu : **le suffixe**, le plus simple pour l'utilisateur. Seule conséquence : l'APK 1.0.0 (`com.iheb.sentinel`) n'est pas remplacé par la 1.0.1 standard ; il faut le désinstaller (peu d'installations, puisqu'il était bloqué).
+**Anciennes versions.**
+- 1.0.0 (`com.iheb.sentinel`, même clé) : la 1.1.0 s'installe par-dessus, comme une mise à jour normale.
+- 1.0.1 (`com.iheb.sentinel.standard`) : autre identifiant, donc autre appli. L'utilisateur exporte une sauvegarde chiffrée du coffre, la restaure dans la 1.1.0, puis désinstalle la 1.0.1.
 
 ## 1. Créer la clé (une seule fois)
 
@@ -61,44 +51,26 @@ Le build release s'arrête avec un message clair si : `key.properties` manque, `
 ## 3. Construire
 
 ```powershell
-# Variante standard (APK GitHub) : c'est le défaut
 powershell -ExecutionPolicy Bypass -File tools\release\build_release.ps1
-
-# Variante complete (Google Play)
-powershell -ExecutionPolicy Bypass -File tools\release\build_release.ps1 -Flavor complete
 ```
 
 Le script :
-1. vérifie l'adresse du serveur de signalement (`-ApiUrl`, voir ci-dessous) ;
-2. vérifie que `android\key.properties` existe ;
-3. demande le mot de passe (saisie masquée, jamais écrite sur le disque) ;
-4. lance `flutter build apk --release --flavor <variante> --obfuscate --split-debug-info=build/symbols --extra-gen-snapshot-options=--strip --dart-define=SENTINEL_API_URL=<ApiUrl>` (pour `standard`, la vérification Play Protect tourne pendant ce build) ;
-5. copie les symboles dans `%LOCALAPPDATA%\Sentinel\symbols\<version>-<variante>-<commit>` (hors du dépôt : `flutter clean` efface `build\`) ;
-6. copie l'APK sous son nom de publication, `build\sentinel-<version>-<variante>.apk` (par exemple `build\sentinel-1.0.1-standard.apk`) ;
-7. affiche la variante, le SHA-256 de cet APK et l'adresse du serveur intégrée.
+1. vérifie que `android\key.properties` existe ;
+2. demande le mot de passe (saisie masquée, jamais écrite sur le disque) ;
+3. lance `flutter build apk --release --obfuscate --split-debug-info=build/symbols --extra-gen-snapshot-options=--strip` (la vérification Play Protect tourne pendant ce build) ;
+4. copie les symboles dans `%LOCALAPPDATA%\Sentinel\symbols\<version>-<commit>` (hors du dépôt : `flutter clean` efface `build\`) ;
+5. copie l'APK sous son nom de publication, `build\sentinel-<version>.apk` (par exemple `build\sentinel-1.1.0.apk`) ;
+6. affiche le chemin et le SHA-256 de cet APK.
 
 **`--extra-gen-snapshot-options=--strip`** : sur Android, Flutter ne retire plus lui-même les informations de débogage DWARF de `libapp.so`. Avec `--obfuscate`, elles contiennent les noms Dart **en clair** (avertissement *« The generated ELF library contains unobfuscated DWARF debugging information »*), ce qui annulerait l'obfuscation. `--strip` les retire de l'APK ; elles restent dans `build\symbols` grâce à `--split-debug-info`.
 
-### Serveur de signalement (`-ApiUrl`)
-
-Le bouton « Signaler ce message » n'existe dans l'APK que si l'adresse du serveur est fixée au moment du build (`--dart-define=SENTINEL_API_URL`). Le script la passe toujours :
-
-- par défaut : `https://sentinel-api-b2gs.onrender.com` (le serveur déployé, voir [DEPLOIEMENT.md](DEPLOIEMENT.md)) ;
-- pour un autre serveur :
-
-```powershell
-powershell -ExecutionPolicy Bypass -File tools\release\build_release.ps1 -ApiUrl https://mon-serveur.example
-```
-
-Le script **refuse** l'adresse, avant toute question, si elle ne commence pas par `https://` (HTTP en clair interdit), n'a pas de nom d'hôte, ou contient des identifiants (`user:motdepasse@`), des paramètres (`?…`) ou un fragment (`#…`). Ce sont les règles de l'app (`parseServerUrl` dans `lib/services/report/report_client.dart`) : une adresse qu'elle refuserait masquerait le bouton sans prévenir.
-
-L'adresse est écrite dans l'APK et donc publique : n'y mettez jamais de secret.
+L'app ne contacte plus de serveur de Sentinel depuis la 1.1.0 (signalement retiré) : plus de `-ApiUrl` ni de `--dart-define=SENTINEL_API_URL`.
 
 ## 4. Vérifier la signature
 
 ```powershell
 $bt = Get-ChildItem "$env:LOCALAPPDATA\Android\sdk\build-tools" | Sort-Object Name | Select-Object -Last 1
-& "$($bt.FullName)\apksigner.bat" verify --verbose --print-certs build\sentinel-1.0.1-standard.apk
+& "$($bt.FullName)\apksigner.bat" verify --verbose --print-certs build\sentinel-1.1.0.apk
 keytool -list -v -keystore "$env:USERPROFILE\cles-sentinel\sentinel-release.p12" -alias sentinel
 ```
 
@@ -114,7 +86,7 @@ Noter cette empreinte (par exemple dans la page de la version sur GitHub) : elle
 Une trace de pile d'une version obfusquée contient des noms illisibles. Pour la relire :
 
 ```powershell
-flutter symbolize -i trace.txt -d "$env:LOCALAPPDATA\Sentinel\symbols\<version>-<variante>-<commit>\app.android-arm64.symbols"
+flutter symbolize -i trace.txt -d "$env:LOCALAPPDATA\Sentinel\symbols\<version>-<commit>\app.android-arm64.symbols"
 ```
 
 Prendre le fichier de l'architecture du téléphone (`arm64` pour la plupart). Les symboles ne sont **jamais** commités (`build/` est ignoré par Git) : il faut garder la copie de chaque version publiée.
@@ -125,4 +97,4 @@ Prendre le fichier de l'architecture du téléphone (`arm64` pour la plupart). L
 - Ranger le keystore dans le dossier du projet (le build le refuse).
 - Envoyer la clé ou la phrase de passe à qui que ce soit, y compris un assistant ou un outil en ligne.
 - Distribuer un APK `profile` ou `debug` : ils sont signés avec la clé de debug.
-- Publier sur GitHub un APK `complete` : Play Protect le bloque hors du Play Store.
+- Ajouter au manifeste un lecteur de notifications, un service d'accessibilité ou une permission SMS : Play Protect bloquerait l'APK hors du Play Store (le build échoue de toute façon).

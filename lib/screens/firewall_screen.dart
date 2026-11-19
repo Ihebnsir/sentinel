@@ -5,7 +5,7 @@ import 'package:material_ui/material_ui.dart';
 import '../l10n/l10n.dart';
 import '../services/app_analysis.dart';
 import '../services/firewall_service.dart';
-import '../services/protection_service.dart';
+import '../services/notification_permission.dart';
 import '../services/wifi_service.dart';
 import '../theme/app_colors.dart';
 import '../widgets/actions_row.dart';
@@ -218,7 +218,7 @@ class _FirewallScreenState extends State<FirewallScreen> {
       if (await _service.prepare()) {
         // Android 13+ : sans cette autorisation, la notification
         // (et son bouton « Arrêter ») reste invisible.
-        await ProtectionService().requestNotificationPermission();
+        await const NotificationPermission().request();
         await _service.start();
       }
     } else {

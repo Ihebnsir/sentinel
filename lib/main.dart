@@ -13,10 +13,6 @@ import 'services/onboarding_store.dart';
 import 'services/theme_store.dart';
 import 'theme/app_theme.dart';
 
-// Le point d'entrée d'arrière-plan doit être relié à main.dart, sinon
-// le compilateur (mode release) ne l'inclut pas dans l'app.
-export 'background/background_analyzer.dart' show backgroundAnalyzerMain;
-
 // Point d'entrée : Flutter démarre l'app ici.
 Future<void> main() async {
   LicenseRegistry.addLicense(readexProLicense);

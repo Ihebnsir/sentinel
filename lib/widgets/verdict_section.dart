@@ -1,18 +1,18 @@
 import 'package:material_ui/material_ui.dart';
 
 import '../l10n/l10n.dart';
-import '../services/phishing/message_analyzer.dart';
+import '../services/links/link_checker.dart';
 import '../theme/app_colors.dart';
 
 /// Couleur d'un verdict : rouge, ocre ou vert.
 Color verdictColor(AppColors c, Verdict verdict) => switch (verdict) {
-  Verdict.arnaque => c.rommen,
+  Verdict.dangereux => c.rommen,
   Verdict.suspect => c.ocre,
   Verdict.rien => c.zitouna,
 };
 
 /// Verdict en grand, sous-titre, raisons séparées par des traits, conseil.
-/// Utilisé par l'onglet Messages et par le résultat d'un QR code.
+/// Utilisé par l'onglet Liens et par le résultat d'un QR code.
 class VerdictSection extends StatelessWidget {
   const VerdictSection({
     super.key,
@@ -23,7 +23,7 @@ class VerdictSection extends StatelessWidget {
   });
 
   final Verdict verdict;
-  final String? subtitle; // ex : « Probabilité d'arnaque : 87 % »
+  final String? subtitle; // ex : « Ce lien mène en réalité à site[.]xyz »
   final List<String> reasons;
   final String advice;
 
@@ -36,7 +36,7 @@ class VerdictSection extends StatelessWidget {
       children: [
         const SizedBox(height: 28),
         // liveRegion : TalkBack annonce le verdict dès qu'il s'affiche,
-        // titre et probabilité ensemble.
+        // titre et sous-titre ensemble.
         MergeSemantics(
           child: Semantics(
             liveRegion: true,

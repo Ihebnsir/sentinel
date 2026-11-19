@@ -1,8 +1,15 @@
 # Sentinel — détecteur d'arnaques SMS (partie Python)
 
-Ce dossier entraîne le modèle utilisé par l'onglet **Messages** de l'application.
-Le modèle tourne ensuite **100 % sur le téléphone, hors ligne** : l'app Dart ne fait
-que relire `assets/models/phishing_model.json` et refaire les calculs décrits plus bas.
+> **Depuis la 1.1.0, l'application n'utilise plus ce modèle.** L'onglet « Messages » a été
+> retiré (pas de vraies données tunisiennes, copier-coller non utilisé) et remplacé par un
+> vérificateur de liens. Ce dossier reste dans le dépôt : `train.py` et `retrain.py`
+> fonctionnent toujours, mais exportent dans `ml/export/` (plus dans l'app), et l'étape
+> « flutter test » de `retrain.py` est sans objet. Les mentions de Dart ci-dessous décrivent
+> l'implémentation des versions 1.0.x (voir l'historique Git).
+
+Ce dossier entraîne le modèle utilisé par l'onglet **Messages** des versions 1.0.x.
+Le modèle tournait **100 % sur le téléphone, hors ligne** : l'app Dart relisait
+`assets/models/phishing_model.json` et refaisait les calculs décrits plus bas.
 
 Modèle : TF-IDF sur n-grammes de caractères (`char_wb`, 2 à 5) + régression logistique.
 Il est **explicable** : le score d'un message est une somme de poids, un par n-gramme,
@@ -16,8 +23,8 @@ donc on peut toujours montrer « quels morceaux du message ont fait monter le sc
 | `data/messages_perso.csv` | Tes vrais messages (`source = reel`), vide au départ |
 | `train.py` | Entraîne, évalue, exporte le modèle et les fixtures de parité |
 | `requirements.txt` | Versions exactes des bibliothèques |
-| `../assets/models/phishing_model.json` | Modèle exporté (lu par Flutter) |
-| `../test/fixtures/phishing_parity.json` | 38 textes + probabilités exactes (test Dart) |
+| `export/phishing_model.json` | Modèle exporté (lu par Flutter jusqu'à la 1.0.1) |
+| `export/phishing_parity.json` | 38 textes + probabilités exactes (ancien test Dart) |
 
 Format CSV : `text,label,langue,source` avec `label` = `0` (normal) ou `1` (arnaque) et
 `langue` parmi `fr`, `ar`, `derja_latin`, `derja_arabe`, `en`. Mets le texte entre

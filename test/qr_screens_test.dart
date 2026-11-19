@@ -1,10 +1,10 @@
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
-import 'package:sentinel/screens/messages_screen.dart';
+import 'package:sentinel/screens/links_screen.dart';
 import 'package:sentinel/screens/qr_result_screen.dart';
+import 'package:sentinel/services/links/link_checker.dart';
 import 'package:sentinel/services/phishing/known_brands.dart';
-import 'package:sentinel/services/phishing/phishing_model.dart';
 import 'package:sentinel/services/qr/qr_content.dart';
 import 'package:sentinel/services/qr/qr_safety.dart';
 import 'package:sentinel/services/qr/qr_scanner_service.dart';
@@ -32,26 +32,17 @@ void main() {
   setUp(() => calls = []);
   tearDown(() => messenger.setMockMethodCallHandler(channel, null));
 
-  // Faux modèle : probabilité fixe.
-  PredictorLoader ai(double p) =>
-      () async =>
-          (_) => PhishingPrediction(
-            probability: p,
-            suspiciousNgrams: const [],
-            suspiciousWords: const [],
-          );
+  // Fausses listes du pare-feu : rien de connu.
+  Future<DomainCheck?> lists(String host) async =>
+      const DomainCheck(allowed: false, dangerous: false);
 
-  Future<void> showResult(
-    WidgetTester tester,
-    String raw, {
-    double p = 0.05,
-  }) async {
+  Future<void> showResult(WidgetTester tester, String raw) async {
     // Écran haut : toute la liste est construite (boutons compris).
     tester.view.physicalSize = const Size(1080, 4000);
     addTearDown(tester.view.reset);
     await tester.pumpWidget(
       testApp(
-        home: QrResultScreen(raw: raw, loadPredictor: ai(p)),
+        home: QrResultScreen(raw: raw, checkDomain: lists),
       ),
     );
     await tester.pumpAndSettle();
@@ -68,7 +59,7 @@ void main() {
       await showResult(tester, 'https://www.exemple.tn');
       expect(find.text(fr.qrRawContent), findsOneWidget);
       expect(find.text('https://www.exemple.tn'), findsOneWidget);
-      expect(find.text(fr.verdictNothing), findsOneWidget);
+      expect(find.text(fr.verdictNothingKnown), findsOneWidget);
 
       // Annuler : rien n'est ouvert.
       await tester.tap(find.text(fr.qrActionOpenLink));
@@ -87,12 +78,12 @@ void main() {
       expect(calls.single.arguments, {'url': 'https://www.exemple.tn'});
     });
 
-    testWidgets('arnaque probable : « Ouvrir quand même » désactivé', (
+    testWidgets('lien dangereux : « Ouvrir quand même » désactivé', (
       tester,
     ) async {
       android((call) => null);
       await showResult(tester, 'http://192.168.4.1/login');
-      expect(find.text(fr.verdictScam), findsOneWidget);
+      expect(find.text(fr.verdictDangerous), findsOneWidget);
       expect(button(tester, fr.qrActionOpenAnyway).onPressed, isNull);
       expect(find.text(fr.qrActionBlocked), findsOneWidget);
       await tester.tap(find.text(fr.qrActionOpenAnyway));
@@ -159,7 +150,7 @@ void main() {
           locale: const Locale('ar'),
           home: QrResultScreen(
             raw: 'bitcoin:bc1qxyz?amount=1',
-            loadPredictor: ai(0.05),
+            checkDomain: lists,
           ),
         ),
       );
@@ -172,19 +163,19 @@ void main() {
       );
     });
 
-    testWidgets('IA introuvable : échec affiché, aucune action', (
+    testWidgets('vérification impossible : échec affiché, aucune action', (
       tester,
     ) async {
       await tester.pumpWidget(
         testApp(
           home: QrResultScreen(
             raw: 'https://exemple.tn',
-            loadPredictor: () => Future.error(StateError('modèle absent')),
+            checkDomain: (_) => Future.error(StateError('listes illisibles')),
           ),
         ),
       );
       await tester.pumpAndSettle();
-      expect(find.text(fr.messagesFailed), findsOneWidget);
+      expect(find.text(fr.linksFailed), findsOneWidget);
       expect(find.byType(FilledButton), findsNothing);
     });
   });
@@ -221,10 +212,7 @@ void main() {
 
     test('action interdite : jamais envoyée à Android', () async {
       android((call) => null);
-      final scam = assessQr(
-        parseQr('tel:*#06#'),
-        (_) => throw StateError('pas de texte'),
-      );
+      final scam = assessQr(parseQr('tel:*#06#'));
       expect(await service.perform(scam), isFalse);
       expect(calls, isEmpty);
     });
@@ -237,10 +225,12 @@ void main() {
     });
   });
 
-  group('onglet Messages', () {
+  group('onglet Liens', () {
     Future<void> tapScan(WidgetTester tester) async {
+      tester.view.physicalSize = const Size(1080, 4000);
+      addTearDown(tester.view.reset);
       await tester.pumpWidget(
-        testApp(home: const Scaffold(body: MessagesScreen())),
+        testApp(home: Scaffold(body: LinksScreen(checkDomain: lists))),
       );
       await tester.pumpAndSettle();
       await tester.tap(find.text(fr.qrScanButton));

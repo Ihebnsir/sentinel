@@ -330,6 +330,9 @@ def quality_gate(cand: dict, ship: dict | None) -> tuple[bool, list[dict]]:
 
 # --- Export -----------------------------------------------------------------------------
 def run_flutter_parity() -> tuple[bool, str]:
+    # Depuis la 1.1.0, l'app n'utilise plus le modèle : plus de test Dart.
+    if not (T.ROOT / PARITY_TEST).exists():
+        return True, "sans objet (l'app n'utilise plus le modèle depuis la 1.1.0)"
     exe = shutil.which("flutter")
     if exe is None:
         return False, "flutter introuvable dans le PATH"

@@ -2,7 +2,7 @@
 
 Reçoit des **signalements volontaires** de messages d'arnaque, pour améliorer plus tard le modèle anti-arnaque tunisien. La vie privée passe en premier : le texte est **anonymisé avant tout stockage**, et le serveur ne garde **ni adresse IP, ni identifiant d'appareil, ni heure exacte**.
 
-L'app l'appelle depuis B2 (bouton « Signaler ce message »). Le déploiement (Render + Neon) se fait à la main en suivant [docs/DEPLOIEMENT.md](../docs/DEPLOIEMENT.md) ; la configuration est décrite dans [`render.yaml`](../render.yaml).
+L'app l'appelait de B2 à la 1.0.1 (bouton « Signaler ce message », retiré en 1.1.0). Le déploiement (Render + Neon) se fait à la main en suivant [docs/DEPLOIEMENT.md](../docs/DEPLOIEMENT.md) ; la configuration est décrite dans [`render.yaml`](../render.yaml).
 
 ## Choix techniques
 
@@ -112,7 +112,7 @@ Avant tout stockage, ces éléments sont remplacés par des marqueurs :
 
 Le reste n'est **pas modifié** (mots d'arnaque, domaines, montants, dates) : c'est ce qui sert au modèle. Les chiffres arabes (٠١٢…) sont reconnus. Ré-anonymiser un texte déjà anonymisé ne change rien.
 
-`tests/fixtures/anonymize_cases.json` contient 96 cas (entrée → sortie attendue), dont beaucoup en derja et en arabe. La version Dart du téléphone (`lib/services/report/anonymizer.dart`) donne exactement les mêmes sorties (test de parité).
+`tests/fixtures/anonymize_cases.json` contient 96 cas (entrée → sortie attendue), dont beaucoup en derja et en arabe. Jusqu'à la 1.0.1, la version Dart du téléphone (`lib/services/report/anonymizer.dart`) donnait exactement les mêmes sorties (test de parité). Depuis la 1.1.0, l'application n'envoie plus de signalement : ce serveur reste dans le dépôt, non utilisé par l'app.
 
 ## Doublons et limites
 

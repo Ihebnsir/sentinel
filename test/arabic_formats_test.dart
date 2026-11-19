@@ -95,27 +95,13 @@ void main() {
       );
     });
 
-    testWidgets('pourcentage et durée lisibles', (tester) async {
-      final percent = ar.messagesProbability('87');
+    testWidgets('durée lisible', (tester) async {
       final duration = ar.durationMinutesSeconds('3', '20');
       await tester.pumpWidget(
         testApp(
           locale: const Locale('ar'),
-          home: Scaffold(
-            body: Column(children: [Text(percent), Text(duration)]),
-          ),
+          home: Scaffold(body: Text(duration)),
         ),
-      );
-      // « 87% » : le 8 avant le 7, puis le signe % à droite.
-      final p = find.text(percent);
-      final eight = percent.indexOf('8');
-      expect(
-        _charLeft(tester, p, eight),
-        lessThan(_charLeft(tester, p, eight + 1)),
-      );
-      expect(
-        _charLeft(tester, p, eight + 1),
-        lessThan(_charLeft(tester, p, percent.indexOf('%'))),
       );
       // « 20 » reste « 20 » (pas « 02 »).
       final d = find.text(duration);

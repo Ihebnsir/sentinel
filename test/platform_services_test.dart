@@ -3,7 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:sentinel/models/security_action.dart';
 import 'package:sentinel/services/apps_scanner_service.dart';
 import 'package:sentinel/services/device_security_service.dart';
-import 'package:sentinel/services/protection_service.dart';
+import 'package:sentinel/services/notification_permission.dart';
 
 // Services qui parlent à MainActivity.kt : un faux canal joue Android,
 // pour vérifier les arguments envoyés et la réaction aux erreurs.
@@ -25,7 +25,7 @@ void main() {
 
   setUp(() => calls = []);
   tearDown(() {
-    for (final name in ['protection', 'apps', 'device_security']) {
+    for (final name in ['notifications', 'apps', 'device_security']) {
       messenger.setMockMethodCallHandler(
         MethodChannel('com.iheb.sentinel/$name'),
         null,
@@ -33,75 +33,22 @@ void main() {
     }
   });
 
-  group('ProtectionService', () {
-    const canal = 'com.iheb.sentinel/protection';
-    final service = ProtectionService();
+  group('NotificationPermission', () {
+    const canal = 'com.iheb.sentinel/notifications';
+    const service = NotificationPermission();
 
-    test('active seulement si l\'option ET l\'accès sont là', () async {
-      android(
-        canal,
-        (call) => {
-          'enabled': true,
-          'listenerAccess': false,
-          'notificationsAllowed': true,
-        },
-      );
-      final status = await service.getStatus();
-      expect(status!.enabled, isTrue);
-      expect(status.notificationsAllowed, isTrue);
-      expect(status.isActive, isFalse);
-
-      android(canal, (call) => {'enabled': true, 'listenerAccess': true});
-      expect((await service.getStatus())!.isActive, isTrue);
-    });
-
-    test('variante standard (available: false) : pas de protection', () async {
-      android(
-        canal,
-        (call) => {
-          'available': false,
-          'enabled': false,
-          'listenerAccess': false,
-          'notificationsAllowed': true,
-        },
-      );
-      expect(await service.getStatus(), isNull);
-    });
-
-    test('commandes : nom et arguments transmis', () async {
+    test('demande : réponse d\'Android transmise', () async {
       android(canal, (call) => true);
-      await service.setEnabled(true);
-      await service.openListenerSettings();
-      await service.openNotificationSettings();
-      expect(await service.requestNotificationPermission(), isTrue);
-      expect(
-        [for (final c in calls) c.method],
-        [
-          'setEnabled',
-          'openListenerSettings',
-          'openNotificationSettings',
-          'requestNotificationPermission',
-        ],
-      );
-      expect(calls.first.arguments, {'enabled': true});
+      expect(await service.request(), isTrue);
+      expect([for (final c in calls) c.method], ['requestPermission']);
     });
 
-    test('Android refuse : null ou false, sans exception', () async {
+    test('Android refuse, pas de code Android ou réponse vide : false', () async {
+      expect(await service.request(), isFalse);
       android(canal, refuse);
-      expect(await service.getStatus(), isNull);
-      expect(await service.requestNotificationPermission(), isFalse);
-      await service.setEnabled(false);
-      expect(calls, hasLength(3));
-    });
-
-    test('pas de code Android ou réponse vide', () async {
-      expect(await service.getStatus(), isNull);
-      expect(await service.requestNotificationPermission(), isFalse);
-      await service.openListenerSettings();
-
+      expect(await service.request(), isFalse);
       android(canal, (call) => null);
-      expect(await service.getStatus(), isNull);
-      expect(await service.requestNotificationPermission(), isFalse);
+      expect(await service.request(), isFalse);
     });
   });
 

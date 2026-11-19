@@ -7,7 +7,7 @@ import '../widgets/arch_icon.dart';
 import 'apps_screen.dart';
 import 'firewall_screen.dart';
 import 'home_screen.dart';
-import 'messages_screen.dart';
+import 'links_screen.dart';
 import 'vault_screen.dart';
 
 /// La coquille de l'app : la barre de navigation en bas et la page choisie.
@@ -23,10 +23,10 @@ class _MainShellState extends State<MainShell> {
   // Index de l'onglet affiché (0 = Accueil).
   int _selectedIndex = 0;
 
-  static const _messagesIndex = 2;
+  static const _linksIndex = 2;
   static const _vaultIndex = 3;
 
-  // Texte partagé depuis les autres apps.
+  // Lien (ou texte qui en contient un) partagé depuis les autres apps.
   final _share = ShareService();
 
   // Les pages, dans le même ordre que les onglets. Recréées à chaque
@@ -34,29 +34,29 @@ class _MainShellState extends State<MainShell> {
   List<Widget> get _pages => [
         const HomeScreen(),
         const AppsScreen(),
-        MessagesScreen(sharedText: _share.received),
+        LinksScreen(sharedText: _share.received),
         VaultScreen(visible: _selectedIndex == _vaultIndex),
       ];
 
   @override
   void initState() {
     super.initState();
-    _share.received.addListener(_showMessages);
+    _share.received.addListener(_showLinks);
     _share.firewallRequests.addListener(_showFirewall);
     _share.start();
   }
 
   @override
   void dispose() {
-    _share.received.removeListener(_showMessages);
+    _share.received.removeListener(_showLinks);
     _share.firewallRequests.removeListener(_showFirewall);
     _share.dispose();
     super.dispose();
   }
 
-  // Un texte arrive : on affiche l'onglet Messages qui va l'analyser.
-  void _showMessages() {
-    setState(() => _selectedIndex = _messagesIndex);
+  // Un texte arrive : on affiche l'onglet Liens qui va le vérifier.
+  void _showLinks() {
+    setState(() => _selectedIndex = _linksIndex);
   }
 
   // Tuile du pare-feu : écran du pare-feu par-dessus l'accueil, une seule
@@ -101,9 +101,9 @@ class _MainShellState extends State<MainShell> {
               label: l.navApps,
             ),
             NavigationDestination(
-              icon: const Icon(Icons.sms_outlined),
-              selectedIcon: const Icon(Icons.sms),
-              label: l.navMessages,
+              icon: const Icon(Icons.link),
+              selectedIcon: const Icon(Icons.link),
+              label: l.navLinks,
             ),
             NavigationDestination(
               icon: const Icon(Icons.lock_outline),

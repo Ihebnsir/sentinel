@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import '../l10n/l10n.dart';
 import '../utils/debug_log.dart';
 import 'app_analysis.dart';
+import 'links/link_checker.dart';
 
 /// L'état du pare-feu DNS, lu côté Android.
 /// Comment partent les requêtes DNS vers Quad9 (SEN-10).
@@ -387,6 +388,14 @@ class FirewallService {
   }
 
   Future<void> deleteReport(String id) => _call('deleteReport', {'id': id});
+
+  /// Onglet Liens : liste blanche et liste Malware pour [host], même
+  /// pare-feu arrêté. Rien n'est enregistré. null hors Android, pour une
+  /// adresse IP ou en cas d'échec.
+  Future<DomainCheck?> checkDomain(String host) async {
+    final map = await _invokeMap('checkDomain', {'domain': host});
+    return map == null ? null : DomainCheck.fromMap(map);
+  }
 
   /// Ouvre l'application analysée. false si elle ne peut pas s'ouvrir.
   Future<bool> openApp(String packageName) async {

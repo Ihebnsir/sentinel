@@ -56,7 +56,9 @@ void main() {
           counters: {
             'blocked_trackers': 120,
             'blocked_malware': 3,
-            'messages': 9,
+            'links_checked': 9,
+            // Anciens compteurs (avant 1.1.0) : ignorés.
+            'messages': 4,
             'scam_alerts': 2,
           },
           gauges: {'risky_apps': 1, 'pw_weak': 0},
@@ -69,8 +71,7 @@ void main() {
       expect(week.blockedIn('trackers'), 120);
       expect(week.blockedIn('ads'), 0);
       expect(week.blockedTotal, 123);
-      expect(week.messages, 9);
-      expect(week.scamAlerts, 2);
+      expect(week.linksChecked, 9);
       expect(week.scoreStart, 58);
       expect(week.scoreEnd, 71);
       expect(week.gauges, {
@@ -82,12 +83,12 @@ void main() {
     test('valeurs inattendues ignorées', () {
       final week = WeekSummary.fromMap({
         'week': _monday,
-        'counters': {'blocked_ads': -5, 'messages': 'beaucoup', 7: 1},
+        'counters': {'blocked_ads': -5, 'links_checked': 'beaucoup', 7: 1},
         'gauges': 'rien',
         'scoreEnd': 250,
       });
       expect(week.blockedTotal, 0);
-      expect(week.messages, 0);
+      expect(week.linksChecked, 0);
       expect(week.gauges, isEmpty);
       expect(week.scoreEnd, isNull);
     });
@@ -112,12 +113,12 @@ void main() {
     addTearDown(() => messenger.setMockMethodCallHandler(channel, null));
 
     const service = WeeklyReportService();
-    await service.count(WeeklyCounter.scamAlerts);
+    await service.count(WeeklyCounter.linksChecked);
     await service.setGauge(WeeklyGauge.passwordsReused, 2);
     await service.recordScore(64);
 
     expect(calls.map((c) => c.method), ['count', 'setGauge', 'recordScore']);
-    expect(calls[0].arguments, {'key': 'scam_alerts', 'n': 1});
+    expect(calls[0].arguments, {'key': 'links_checked', 'n': 1});
     expect(calls[1].arguments, {'key': 'pw_reused', 'value': 2});
     expect(calls[2].arguments, {'score': 64});
   });
@@ -126,7 +127,7 @@ void main() {
     final report = WeeklyReport.fromMap({
       'current': _week(
         _monday,
-        counters: {'blocked_trackers': 1234, 'messages': 5, 'scam_alerts': 1},
+        counters: {'blocked_trackers': 1234, 'links_checked': 5},
         gauges: {'risky_apps': 2},
         scoreStart: 58,
         scoreEnd: 71,
@@ -155,6 +156,8 @@ void main() {
       expect(find.text(fr.number(1234))
 , findsWidgets); // traqueurs et total
       expect(find.text('800'), findsWidgets);
+      // Liens vérifiés, sans section Messages.
+      expect(find.text(fr.weeklyLinksChecked), findsOneWidget);
       // Mots de passe pas mesurés : tiret.
       expect(find.text('–'), findsWidgets);
     });

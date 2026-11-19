@@ -10,7 +10,7 @@ import org.json.JSONObject
 data class WeekStats(
     /** Lundi de la semaine, en jours depuis le 1er janvier 1970. */
     val week: Long,
-    /** Totaux qui s'additionnent (requêtes bloquées, messages…). */
+    /** Totaux qui s'additionnent (requêtes bloquées, liens vérifiés…). */
     val counters: Map<String, Long> = emptyMap(),
     /** Dernière valeur vue (apps à risque, mots de passe faibles…). */
     val gauges: Map<String, Int> = emptyMap(),
@@ -37,8 +37,7 @@ object WeeklyLedger {
 
     /** Liste fermée : toute autre clé est refusée (pas de texte libre). */
     val COUNTERS = setOf(
-        "messages",
-        "scam_alerts",
+        "links_checked",
         "blocked_malware",
         "blocked_trackers",
         "blocked_ads",

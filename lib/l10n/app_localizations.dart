@@ -155,12 +155,6 @@ abstract class AppLocalizations {
   /// **'Désactivé'**
   String get commonOff;
 
-  /// Pour « la protection »
-  ///
-  /// In fr, this message translates to:
-  /// **'Désactivée'**
-  String get commonOffFeminine;
-
   /// No description provided for @commonUnknown.
   ///
   /// In fr, this message translates to:
@@ -244,12 +238,6 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Applications'**
   String get navApps;
-
-  /// No description provided for @navMessages.
-  ///
-  /// In fr, this message translates to:
-  /// **'Messages'**
-  String get navMessages;
 
   /// No description provided for @navVault.
   ///
@@ -554,7 +542,7 @@ abstract class AppLocalizations {
   /// No description provided for @onboarding1Line3.
   ///
   /// In fr, this message translates to:
-  /// **'Les messages d\'arnaque, analysés sur le téléphone.'**
+  /// **'Un vérificateur de liens : où mène vraiment un lien, avant de l\'ouvrir.'**
   String get onboarding1Line3;
 
   /// No description provided for @onboarding1Line4.
@@ -578,13 +566,13 @@ abstract class AppLocalizations {
   /// No description provided for @onboarding2Line1.
   ///
   /// In fr, this message translates to:
-  /// **'Pas de compte, pas de publicité, pas de statistiques. Vos messages, vos mots de passe et la liste de vos applications ne quittent pas le téléphone, sauf un message que vous choisissez de signaler.'**
+  /// **'Pas de compte, pas de publicité, pas de statistiques. Les liens vérifiés, vos mots de passe et la liste de vos applications ne quittent pas le téléphone.'**
   String get onboarding2Line1;
 
   /// No description provided for @onboarding2Line2.
   ///
   /// In fr, this message translates to:
-  /// **'Seuls quatre échanges réseau existent, tous facultatifs, et seulement si vous les activez :'**
+  /// **'Seuls trois échanges réseau existent, tous facultatifs, et seulement si vous les activez :'**
   String get onboarding2Line2;
 
   /// No description provided for @onboarding2Line3.
@@ -605,12 +593,6 @@ abstract class AppLocalizations {
   /// **'• Mise à jour des listes de blocage : un simple téléchargement depuis GitHub.'**
   String get onboarding2Line5;
 
-  /// No description provided for @onboarding2Line6.
-  ///
-  /// In fr, this message translates to:
-  /// **'• Signaler un message : le texte anonymisé, relu par vous, envoyé seulement quand vous touchez « Envoyer ».'**
-  String get onboarding2Line6;
-
   /// No description provided for @onboarding3Title.
   ///
   /// In fr, this message translates to:
@@ -626,7 +608,7 @@ abstract class AppLocalizations {
   /// No description provided for @onboarding3Line2.
   ///
   /// In fr, this message translates to:
-  /// **'Chaque autorisation (notifications, accès aux notifications, VPN, biométrie) est demandée seulement quand vous activez la fonction qui en a besoin, avec une explication.'**
+  /// **'Chaque autorisation (notifications, VPN, caméra, biométrie) est demandée seulement quand vous activez la fonction qui en a besoin, avec une explication.'**
   String get onboarding3Line2;
 
   /// No description provided for @onboarding3Line3.
@@ -644,13 +626,13 @@ abstract class AppLocalizations {
   /// No description provided for @privacyBrief1.
   ///
   /// In fr, this message translates to:
-  /// **'Sentinel n\'a ni compte, ni publicité, ni statistiques d\'utilisation, ni rapport de plantage. Toutes les analyses se font sur le téléphone. Un serveur ne reçoit que les messages que vous choisissez de signaler, un par un.'**
+  /// **'Sentinel n\'a ni compte, ni publicité, ni statistiques d\'utilisation, ni rapport de plantage. Toutes les vérifications se font sur le téléphone : aucun message ni aucun lien n\'est envoyé à un serveur.'**
   String get privacyBrief1;
 
   /// No description provided for @privacyBrief2.
   ///
   /// In fr, this message translates to:
-  /// **'Sentinel ne contacte Internet que pour les quatre fonctions facultatives ci-dessous, et seulement après votre accord.'**
+  /// **'Sentinel ne contacte Internet que pour les trois fonctions facultatives ci-dessous, et seulement après votre accord.'**
   String get privacyBrief2;
 
   /// No description provided for @privacyNetworkTitle.
@@ -683,12 +665,6 @@ abstract class AppLocalizations {
   /// **'Les liens « Ouvrir le site » (conseils, sources, rapport d\'audit) s\'ouvrent dans votre navigateur, seulement quand vous les touchez.'**
   String get privacyNetwork4;
 
-  /// No description provided for @privacyNetwork5.
-  ///
-  /// In fr, this message translates to:
-  /// **'4. Signalement d\'un message (onglet Messages, quand le service est disponible). Rien ne part automatiquement : vous touchez « Signaler ce message », vous relisez le texte, déjà anonymisé sur le téléphone (numéros, e-mails, IBAN, cartes, codes ; les liens ne gardent que leur domaine), vous pouvez le modifier, puis vous touchez « Envoyer ». Sont envoyés : ce texte, votre avis, le verdict et la probabilité de Sentinel, la langue et la version de l\'app ; ni numéro, ni identifiant du téléphone. Le serveur anonymise à nouveau le texte, ne garde ni votre adresse IP ni l\'heure (seulement le jour), et une personne relit chaque signalement avant qu\'il serve à améliorer la détection.'**
-  String get privacyNetwork5;
-
   /// No description provided for @privacyLocalTitle.
   ///
   /// In fr, this message translates to:
@@ -704,7 +680,7 @@ abstract class AppLocalizations {
   /// No description provided for @privacyLocal2.
   ///
   /// In fr, this message translates to:
-  /// **'Vos choix : accord pour la vérification des fuites, réglages du pare-feu et liste des sites autorisés, protection automatique activée ou non, présentation déjà vue, langue, thème.'**
+  /// **'Vos choix : accord pour la vérification des fuites, réglages du pare-feu et liste des sites autorisés, présentation déjà vue, langue, thème.'**
   String get privacyLocal2;
 
   /// No description provided for @privacyLocal3.
@@ -725,12 +701,6 @@ abstract class AppLocalizations {
   /// **'La sauvegarde Android est désactivée : rien ne part dans le cloud. Une sauvegarde du coffre (fichier .sentinel chiffré) n\'est créée que si vous la demandez, à l\'endroit que vous choisissez.'**
   String get privacyLocal5;
 
-  /// No description provided for @privacyLocal6.
-  ///
-  /// In fr, this message translates to:
-  /// **'L\'heure de vos signalements de la dernière heure, pour la limite de 5 par heure (jamais leur contenu).'**
-  String get privacyLocal6;
-
   /// No description provided for @privacyNeverTitle.
   ///
   /// In fr, this message translates to:
@@ -740,7 +710,7 @@ abstract class AppLocalizations {
   /// No description provided for @privacyNever1.
   ///
   /// In fr, this message translates to:
-  /// **'Le texte des messages et des QR codes analysés (collés, partagés, scannés ou lus dans les notifications) : il est analysé en mémoire puis oublié. L\'image de la caméra n\'est jamais enregistrée. Seuls les messages que vous signalez vous-même sont envoyés (point 4), sans copie gardée sur le téléphone.'**
+  /// **'Les liens, textes et QR codes vérifiés (collés, partagés, sélectionnés ou scannés) : ils sont vérifiés en mémoire puis oubliés, jamais envoyés. L\'image de la caméra n\'est jamais enregistrée.'**
   String get privacyNever1;
 
   /// No description provided for @privacyNever2.
@@ -770,14 +740,8 @@ abstract class AppLocalizations {
   /// No description provided for @privacyPermissions2.
   ///
   /// In fr, this message translates to:
-  /// **'Notifications : demandée quand vous activez la protection automatique ou le pare-feu, pour afficher les alertes.'**
+  /// **'Notifications : demandée quand vous activez le pare-feu ou la notification du bilan de la semaine, pour afficher les alertes.'**
   String get privacyPermissions2;
-
-  /// No description provided for @privacyPermissions3.
-  ///
-  /// In fr, this message translates to:
-  /// **'Accès aux notifications : réglage Android que vous ouvrez vous-même pour la protection automatique ; Sentinel lit les messages reçus pour y chercher des arnaques.'**
-  String get privacyPermissions3;
 
   /// No description provided for @privacyPermissions4.
   ///
@@ -806,7 +770,7 @@ abstract class AppLocalizations {
   /// No description provided for @privacyErase1.
   ///
   /// In fr, this message translates to:
-  /// **'Désinstaller Sentinel efface tout ce qu\'il a enregistré sur le téléphone. Ailleurs, il n\'existe que les signalements que vous avez envoyés, qui ne sont reliés ni à vous ni à votre téléphone.'**
+  /// **'Désinstaller Sentinel efface tout ce qu\'il a enregistré sur le téléphone. Il n\'en existe aucune copie ailleurs : Sentinel n\'envoie vos données à aucun serveur.'**
   String get privacyErase1;
 
   /// No description provided for @auditFrameTitle.
@@ -869,59 +833,23 @@ abstract class AppLocalizations {
   /// **'Lire le rapport complet sur GitHub'**
   String get auditReadFull;
 
-  /// No description provided for @verdictScam.
-  ///
-  /// In fr, this message translates to:
-  /// **'Arnaque probable'**
-  String get verdictScam;
-
   /// No description provided for @verdictSuspect.
   ///
   /// In fr, this message translates to:
   /// **'Suspect'**
   String get verdictSuspect;
 
-  /// No description provided for @verdictNothing.
-  ///
-  /// In fr, this message translates to:
-  /// **'Rien de suspect'**
-  String get verdictNothing;
-
-  /// No description provided for @adviceScam.
-  ///
-  /// In fr, this message translates to:
-  /// **'Ne cliquez pas sur le lien et ne communiquez aucun code. Votre banque ou La Poste ne vous demandent jamais de payer par SMS. Supprimez ce message.'**
-  String get adviceScam;
-
   /// No description provided for @adviceSuspect.
   ///
   /// In fr, this message translates to:
-  /// **'Soyez prudent : n\'ouvrez pas le lien et ne donnez aucune information. En cas de doute, appelez l\'organisme au numéro de son site officiel.'**
+  /// **'Prudence : n\'ouvrez ce lien que si vous connaissez l\'expéditeur et attendiez ce message. En cas de doute, tapez vous-même l\'adresse du site officiel.'**
   String get adviceSuspect;
-
-  /// No description provided for @adviceNothing.
-  ///
-  /// In fr, this message translates to:
-  /// **'Aucun signe d\'arnaque trouvé. Restez quand même vigilant : ne communiquez jamais vos codes ni vos mots de passe.'**
-  String get adviceNothing;
 
   /// No description provided for @reasonHiddenCharacters.
   ///
   /// In fr, this message translates to:
   /// **'Caractères invisibles ou d\'inversion de texte (technique d\'arnaque)'**
   String get reasonHiddenCharacters;
-
-  /// words = liste de mots entre guillemets
-  ///
-  /// In fr, this message translates to:
-  /// **'Mots typiques des arnaques : {words}'**
-  String reasonScamWords(String words);
-
-  /// Un mot cité
-  ///
-  /// In fr, this message translates to:
-  /// **'« {word} »'**
-  String reasonQuotedWord(String word);
 
   /// Entre deux éléments d'une liste
   ///
@@ -976,312 +904,6 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Le lien n\'est pas sécurisé (http au lieu de https)'**
   String get reasonLinkHttp;
-
-  /// No description provided for @messagesHint.
-  ///
-  /// In fr, this message translates to:
-  /// **'Collez un SMS, un message WhatsApp ou un lien'**
-  String get messagesHint;
-
-  /// No description provided for @messagesPaste.
-  ///
-  /// In fr, this message translates to:
-  /// **'Coller'**
-  String get messagesPaste;
-
-  /// No description provided for @messagesClear.
-  ///
-  /// In fr, this message translates to:
-  /// **'Effacer'**
-  String get messagesClear;
-
-  /// No description provided for @messagesAnalyze.
-  ///
-  /// In fr, this message translates to:
-  /// **'Analyser'**
-  String get messagesAnalyze;
-
-  /// No description provided for @messagesFailed.
-  ///
-  /// In fr, this message translates to:
-  /// **'L\'analyse a échoué. Réessayez.'**
-  String get messagesFailed;
-
-  /// No description provided for @messagesLocalNote.
-  ///
-  /// In fr, this message translates to:
-  /// **'L\'analyse se fait sur votre téléphone. Le message n\'est envoyé nulle part.'**
-  String get messagesLocalNote;
-
-  /// No description provided for @messagesLocalNoteReport.
-  ///
-  /// In fr, this message translates to:
-  /// **'L\'analyse se fait sur votre téléphone. Le message n\'est envoyé nulle part, sauf si vous choisissez de le signaler.'**
-  String get messagesLocalNoteReport;
-
-  /// No description provided for @reportButton.
-  ///
-  /// In fr, this message translates to:
-  /// **'Signaler ce message'**
-  String get reportButton;
-
-  /// No description provided for @reportTitle.
-  ///
-  /// In fr, this message translates to:
-  /// **'Signaler ce message'**
-  String get reportTitle;
-
-  /// No description provided for @reportIntro.
-  ///
-  /// In fr, this message translates to:
-  /// **'Aidez Sentinel à mieux reconnaître les arnaques : relisez ce message, puis envoyez-le. Rien ne part sans votre accord.'**
-  String get reportIntro;
-
-  /// No description provided for @reportPreviewLabel.
-  ///
-  /// In fr, this message translates to:
-  /// **'Texte envoyé (déjà anonymisé)'**
-  String get reportPreviewLabel;
-
-  /// No description provided for @reportReminder.
-  ///
-  /// In fr, this message translates to:
-  /// **'Vérifiez qu\'il ne reste ni nom, ni adresse, ni information personnelle. Vous pouvez modifier le texte.'**
-  String get reportReminder;
-
-  /// No description provided for @reportQuestion.
-  ///
-  /// In fr, this message translates to:
-  /// **'Votre avis'**
-  String get reportQuestion;
-
-  /// No description provided for @reportFeedbackScam.
-  ///
-  /// In fr, this message translates to:
-  /// **'C\'est une arnaque'**
-  String get reportFeedbackScam;
-
-  /// No description provided for @reportFeedbackNotScam.
-  ///
-  /// In fr, this message translates to:
-  /// **'Ce n\'est pas une arnaque'**
-  String get reportFeedbackNotScam;
-
-  /// No description provided for @reportFeedbackUnsure.
-  ///
-  /// In fr, this message translates to:
-  /// **'Je ne sais pas'**
-  String get reportFeedbackUnsure;
-
-  /// No description provided for @reportSentTitle.
-  ///
-  /// In fr, this message translates to:
-  /// **'Ce qui est envoyé'**
-  String get reportSentTitle;
-
-  /// No description provided for @reportSentText.
-  ///
-  /// In fr, this message translates to:
-  /// **'Le texte ci-dessus, votre avis, le verdict de Sentinel et sa probabilité, la langue du message et la version de l\'app.'**
-  String get reportSentText;
-
-  /// No description provided for @reportWhereTitle.
-  ///
-  /// In fr, this message translates to:
-  /// **'Où et pour quoi faire'**
-  String get reportWhereTitle;
-
-  /// No description provided for @reportWhereText.
-  ///
-  /// In fr, this message translates to:
-  /// **'Au serveur de Sentinel ({host}), pour améliorer la détection des arnaques. Une personne relit chaque signalement avant qu\'il serve à entraîner le modèle.'**
-  String reportWhereText(String host);
-
-  /// No description provided for @reportNotSentTitle.
-  ///
-  /// In fr, this message translates to:
-  /// **'Ce qui n\'est pas envoyé'**
-  String get reportNotSentTitle;
-
-  /// No description provided for @reportNotSentText.
-  ///
-  /// In fr, this message translates to:
-  /// **'Ni votre numéro, ni celui de l\'expéditeur, ni identifiant du téléphone, ni position, ni compte. Le serveur ne garde pas votre adresse IP et ne note que le jour de l\'envoi.'**
-  String get reportNotSentText;
-
-  /// No description provided for @reportSend.
-  ///
-  /// In fr, this message translates to:
-  /// **'Envoyer'**
-  String get reportSend;
-
-  /// No description provided for @reportSending.
-  ///
-  /// In fr, this message translates to:
-  /// **'Envoi en cours…'**
-  String get reportSending;
-
-  /// Envoi qui tarde : le serveur gratuit (Render) se réveille, jusqu'à ~60 s.
-  ///
-  /// In fr, this message translates to:
-  /// **'Réveil du serveur, patientez… (jusqu\'à une minute)'**
-  String get reportWakingServer;
-
-  /// Bouton d'envoi après une erreur réseau, de délai ou du serveur.
-  ///
-  /// In fr, this message translates to:
-  /// **'Réessayer'**
-  String get reportRetry;
-
-  /// No description provided for @reportThanks.
-  ///
-  /// In fr, this message translates to:
-  /// **'Merci, votre signalement aidera à améliorer la détection.'**
-  String get reportThanks;
-
-  /// No description provided for @reportErrorOffline.
-  ///
-  /// In fr, this message translates to:
-  /// **'Impossible de joindre le serveur. Vérifiez votre connexion Internet, puis réessayez.'**
-  String get reportErrorOffline;
-
-  /// No description provided for @reportErrorTimeout.
-  ///
-  /// In fr, this message translates to:
-  /// **'Le serveur ne répond pas, même après une minute. Réessayez dans un moment.'**
-  String get reportErrorTimeout;
-
-  /// No description provided for @reportErrorTooMany.
-  ///
-  /// In fr, this message translates to:
-  /// **'Trop de signalements pour le moment (5 par heure au plus). Réessayez plus tard.'**
-  String get reportErrorTooMany;
-
-  /// No description provided for @reportErrorRejected.
-  ///
-  /// In fr, this message translates to:
-  /// **'Le serveur a refusé ce signalement. Vérifiez le texte, puis réessayez.'**
-  String get reportErrorRejected;
-
-  /// No description provided for @reportErrorServer.
-  ///
-  /// In fr, this message translates to:
-  /// **'Erreur du serveur. Réessayez plus tard.'**
-  String get reportErrorServer;
-
-  /// No description provided for @messagesProbability.
-  ///
-  /// In fr, this message translates to:
-  /// **'Probabilité d\'arnaque : {percent} %'**
-  String messagesProbability(String percent);
-
-  /// No description provided for @alertDefaultReason.
-  ///
-  /// In fr, this message translates to:
-  /// **'Ce message ressemble aux arnaques connues. Ne cliquez sur aucun lien.'**
-  String get alertDefaultReason;
-
-  /// No description provided for @alertTitleSms.
-  ///
-  /// In fr, this message translates to:
-  /// **'Arnaque probable dans un SMS'**
-  String get alertTitleSms;
-
-  /// No description provided for @alertTitleMessage.
-  ///
-  /// In fr, this message translates to:
-  /// **'Arnaque probable dans un message'**
-  String get alertTitleMessage;
-
-  /// app = WhatsApp, Telegram…
-  ///
-  /// In fr, this message translates to:
-  /// **'Arnaque probable sur {app}'**
-  String alertTitleApp(String app);
-
-  /// No description provided for @autoProtectionTitle.
-  ///
-  /// In fr, this message translates to:
-  /// **'Protection automatique'**
-  String get autoProtectionTitle;
-
-  /// No description provided for @autoProtectionOn.
-  ///
-  /// In fr, this message translates to:
-  /// **'Analyse les messages reçus et vous prévient en cas d\'arnaque.'**
-  String get autoProtectionOn;
-
-  /// No description provided for @autoProtectionNotificationsBlocked.
-  ///
-  /// In fr, this message translates to:
-  /// **'Notifications de Sentinel bloquées : vous ne serez pas prévenu en cas d\'arnaque.'**
-  String get autoProtectionNotificationsBlocked;
-
-  /// No description provided for @autoProtectionAllowNotifications.
-  ///
-  /// In fr, this message translates to:
-  /// **'Autoriser les notifications de Sentinel'**
-  String get autoProtectionAllowNotifications;
-
-  /// No description provided for @autoProtectionRemoveAccess.
-  ///
-  /// In fr, this message translates to:
-  /// **'Retirer aussi l\'accès dans les réglages Android'**
-  String get autoProtectionRemoveAccess;
-
-  /// APK GitHub (variante standard) : remplace l'interrupteur de la protection automatique.
-  ///
-  /// In fr, this message translates to:
-  /// **'Disponible dans la version Google Play de Sentinel. Ici, analysez un message en le partageant vers Sentinel ou en le collant ci-dessous.'**
-  String get autoProtectionPlayOnly;
-
-  /// No description provided for @autoProtectionDoesTitle.
-  ///
-  /// In fr, this message translates to:
-  /// **'Ce que fait Sentinel'**
-  String get autoProtectionDoesTitle;
-
-  /// No description provided for @autoProtectionDoes1.
-  ///
-  /// In fr, this message translates to:
-  /// **'Lit le texte des notifications de vos applications de messagerie.'**
-  String get autoProtectionDoes1;
-
-  /// No description provided for @autoProtectionDoes2.
-  ///
-  /// In fr, this message translates to:
-  /// **'L\'analyse sur votre téléphone.'**
-  String get autoProtectionDoes2;
-
-  /// No description provided for @autoProtectionDoes3.
-  ///
-  /// In fr, this message translates to:
-  /// **'Vous prévient si c\'est une arnaque.'**
-  String get autoProtectionDoes3;
-
-  /// No description provided for @autoProtectionNeverTitle.
-  ///
-  /// In fr, this message translates to:
-  /// **'Ce que Sentinel ne fait jamais'**
-  String get autoProtectionNeverTitle;
-
-  /// No description provided for @autoProtectionNever1.
-  ///
-  /// In fr, this message translates to:
-  /// **'Envoyer vos messages sur Internet.'**
-  String get autoProtectionNever1;
-
-  /// No description provided for @autoProtectionNever2.
-  ///
-  /// In fr, this message translates to:
-  /// **'Les enregistrer.'**
-  String get autoProtectionNever2;
-
-  /// No description provided for @autoProtectionNever3.
-  ///
-  /// In fr, this message translates to:
-  /// **'Lire les notifications des autres applications.'**
-  String get autoProtectionNever3;
 
   /// No description provided for @wifiLevelDanger.
   ///
@@ -4616,7 +4238,7 @@ abstract class AppLocalizations {
   /// No description provided for @qrActionBlocked.
   ///
   /// In fr, this message translates to:
-  /// **'Bloqué par Sentinel : arnaque probable.'**
+  /// **'Bloqué par Sentinel : lien dangereux.'**
   String get qrActionBlocked;
 
   /// No description provided for @qrActionFailed.
@@ -4712,24 +4334,6 @@ abstract class AppLocalizations {
   /// Titre de section du bilan
   ///
   /// In fr, this message translates to:
-  /// **'Messages'**
-  String get weeklyMessages;
-
-  /// Nombre de messages analysés (à la main ou automatiquement)
-  ///
-  /// In fr, this message translates to:
-  /// **'Messages analysés'**
-  String get weeklyMessagesAnalyzed;
-
-  /// Nombre de messages jugés « Arnaque probable »
-  ///
-  /// In fr, this message translates to:
-  /// **'Alertes d\'arnaque'**
-  String get weeklyScamAlerts;
-
-  /// Titre de section du bilan
-  ///
-  /// In fr, this message translates to:
   /// **'Applications'**
   String get weeklyApps;
 
@@ -4772,7 +4376,7 @@ abstract class AppLocalizations {
   /// Note de confidentialité en bas du bilan
   ///
   /// In fr, this message translates to:
-  /// **'Seulement des compteurs, gardés sur ce téléphone pendant 8 semaines puis effacés. Aucun site, aucun message ni aucun nom de Wi-Fi n\'est enregistré.'**
+  /// **'Seulement des compteurs, gardés sur ce téléphone pendant 8 semaines puis effacés. Aucun site, aucun lien ni aucun nom de Wi-Fi n\'est enregistré.'**
   String get weeklyPrivacyNote;
 
   /// Bilan indisponible (Windows, web)
@@ -4798,6 +4402,162 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Notifications refusées : autorisez-les dans les réglages d\'Android.'**
   String get settingsWeeklyNotificationDenied;
+
+  /// Onglet du vérificateur de liens
+  ///
+  /// In fr, this message translates to:
+  /// **'Liens'**
+  String get navLinks;
+
+  /// Phrase sous le titre de l'onglet Liens
+  ///
+  /// In fr, this message translates to:
+  /// **'Vérifiez un lien avant de l\'ouvrir : où il mène vraiment, et s\'il est connu comme dangereux.'**
+  String get linksIntro;
+
+  /// Texte grisé du champ
+  ///
+  /// In fr, this message translates to:
+  /// **'Collez un lien, ou un message qui en contient un'**
+  String get linksHint;
+
+  /// Bouton : coller le presse-papiers
+  ///
+  /// In fr, this message translates to:
+  /// **'Coller'**
+  String get linksPaste;
+
+  /// Bouton : vider le champ
+  ///
+  /// In fr, this message translates to:
+  /// **'Effacer'**
+  String get linksClear;
+
+  /// Bouton : vérifier le lien
+  ///
+  /// In fr, this message translates to:
+  /// **'Vérifier'**
+  String get linksCheck;
+
+  /// Pendant la vérification
+  ///
+  /// In fr, this message translates to:
+  /// **'Vérification…'**
+  String get linksChecking;
+
+  /// Texte partagé ou collé sans lien
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun lien trouvé dans ce texte.'**
+  String get linksNoLink;
+
+  /// Erreur de vérification (lien ou QR code)
+  ///
+  /// In fr, this message translates to:
+  /// **'La vérification a échoué. Réessayez.'**
+  String get linksFailed;
+
+  /// Rappel en bas de l'onglet Liens
+  ///
+  /// In fr, this message translates to:
+  /// **'La vérification se fait sur votre téléphone. Rien n\'est envoyé, rien n\'est enregistré.'**
+  String get linksLocalNote;
+
+  /// Sous le verdict ; domaine neutralisé (site[.]xyz)
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce lien mène en réalité à {domain}'**
+  String linksRealDestination(String domain);
+
+  /// Explication pour un lien raccourci (aucune requête réseau)
+  ///
+  /// In fr, this message translates to:
+  /// **'Sentinel n\'ouvre pas un lien raccourci pour découvrir sa destination : ce serait déjà vous connecter au site. Ne l\'ouvrez que si vous connaissez l\'expéditeur.'**
+  String get linksShortenerHelp;
+
+  /// Sous le bouton « Ouvrir quand même » désactivé
+  ///
+  /// In fr, this message translates to:
+  /// **'Ouverture désactivée : ce lien est dangereux.'**
+  String get linksOpenBlocked;
+
+  /// Ligne de l'état du pare-feu dans l'onglet Liens
+  ///
+  /// In fr, this message translates to:
+  /// **'Protection automatique quand vous cliquez'**
+  String get linksAutoTitle;
+
+  /// Pare-feu actif
+  ///
+  /// In fr, this message translates to:
+  /// **'Activée : le pare-feu bloque les sites dangereux connus, même ouverts depuis un SMS ou WhatsApp.'**
+  String get linksAutoOn;
+
+  /// Pare-feu arrêté
+  ///
+  /// In fr, this message translates to:
+  /// **'Désactivée : activez le pare-feu pour bloquer les sites dangereux connus, même sans passer par Sentinel.'**
+  String get linksAutoOff;
+
+  /// Bouton : démarrer le pare-feu
+  ///
+  /// In fr, this message translates to:
+  /// **'Activer'**
+  String get linksAutoEnable;
+
+  /// Raison : domaine de la liste Malware du pare-feu
+  ///
+  /// In fr, this message translates to:
+  /// **'« {host} » est dans la liste des sites dangereux (hameçonnage, logiciels malveillants)'**
+  String linkReasonListed(String host);
+
+  /// Raison : domaine de la liste blanche
+  ///
+  /// In fr, this message translates to:
+  /// **'Vous avez autorisé « {host} » dans le pare-feu (liste blanche) : Sentinel ne le vérifie pas.'**
+  String linkReasonAllowed(String host);
+
+  /// Raison quand rien de suspect
+  ///
+  /// In fr, this message translates to:
+  /// **'Absent des listes de sites dangereux de Sentinel'**
+  String get linkReasonNotListed;
+
+  /// Verdict le plus grave
+  ///
+  /// In fr, this message translates to:
+  /// **'Dangereux'**
+  String get verdictDangerous;
+
+  /// Verdict sans signal
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun problème connu'**
+  String get verdictNothingKnown;
+
+  /// Conseil : lien dangereux
+  ///
+  /// In fr, this message translates to:
+  /// **'N\'ouvrez pas ce lien et ne saisissez aucun code ni mot de passe. Supprimez le message qui le contient.'**
+  String get adviceDangerous;
+
+  /// Conseil : aucun problème connu
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune vérification n\'est parfaite : après avoir ouvert un lien reçu, ne donnez jamais vos codes ni vos mots de passe.'**
+  String get adviceNothingKnown;
+
+  /// Titre de section du bilan
+  ///
+  /// In fr, this message translates to:
+  /// **'Liens'**
+  String get weeklyLinks;
+
+  /// Ligne du bilan
+  ///
+  /// In fr, this message translates to:
+  /// **'Liens vérifiés'**
+  String get weeklyLinksChecked;
 }
 
 class _AppLocalizationsDelegate

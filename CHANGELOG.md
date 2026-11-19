@@ -6,6 +6,34 @@ Le format suit [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/) et le pr
 
 ## [Non publié]
 
+## [1.1.0] - 2026-11-19
+
+La fonctionnalité « Messages » est retirée de toute l'application et remplacée par un **vérificateur de liens**. Une seule variante Android : l'APK n'est plus bloqué par Google Play Protect.
+
+### Ajouté
+- Onglet **Liens** (fr/ar/en), sans permission sensible, 100 % sur le téléphone : coller un lien, bouton « Coller », partage d'un lien depuis une autre app (premier lien du texte, sinon « Aucun lien trouvé »), sélection de texte (« Vérifier le lien avec Sentinel »), scanner de QR code (déplacé ici).
+- Verdict **Dangereux / Suspect / Aucun problème connu**, « Ce lien mène en réalité à … » (domaine neutralisé, `site[.]xyz`), raisons et conseil. Règles : usurpation de marque, adresse IP, punycode, `@`, raccourcisseur (expliqué sans aucune requête réseau), extension suspecte, sous-domaines, `http`.
+- Listes du pare-feu consultées par le vérificateur, même VPN arrêté (méthode Kotlin `checkDomain` du canal `firewall`) ; la liste blanche de l'utilisateur est respectée.
+- Jamais d'ouverture automatique ; « Ouvrir quand même » désactivé si le lien est dangereux. Rien n'est envoyé, rien n'est enregistré.
+- Ligne « Protection automatique quand vous cliquez » : état du pare-feu DNS, activable en un appui.
+- Bilan de la semaine : compteur « Liens vérifiés ».
+- Test Gradle : `testDebugUnitTest` dépend de `checkPlayProtectDebug`, qui fait échouer le build si le manifeste fusionné déclare un lecteur de notifications, un service d'accessibilité ou une permission SMS.
+
+### Retiré
+- Onglet Messages, analyse de texte des messages et modèle `phishing_model.json` embarqué (le modèle n'avait pas de vraies données tunisiennes).
+- Protection automatique : lecteur de notifications (`SentinelNotificationListener`), moteur Flutter d'arrière-plan (`BackgroundAnalyzer`), alertes « Arnaque probable » (`ScamAlertNotifier`, `AlertRelayActivity`), réglages `ProtectionSettings`, canal `background_analysis`.
+- « Signaler ce message » : écran, client, limite d'envoi et anonymisation côté app. L'app ne contacte plus aucun serveur de Sentinel.
+- Variantes `standard` / `complete` : une seule variante, `com.iheb.sentinel`.
+- Compteurs « Messages analysés » et « Alertes d'arnaque » du bilan.
+
+### Modifié
+- Présentation, politique de confidentialité et Réglages : trois échanges réseau facultatifs (fuites de mots de passe, pare-feu DNS, mise à jour des listes), plus aucun envoi de message.
+- `tools/release/build_release.ps1` : plus de `-Flavor` ni de `-ApiUrl` ; APK `build/sentinel-<version>.apk`.
+- `ml/` et `backend/` restent dans le dépôt, non utilisés par l'app ; le modèle s'exporte dans `ml/export/`.
+
+### Note
+- La 1.1.0 (`com.iheb.sentinel`) met à jour la 1.0.0 normalement. Elle ne remplace pas la 1.0.1 (`com.iheb.sentinel.standard`) : exporter une sauvegarde du coffre, la restaurer dans la 1.1.0, puis désinstaller la 1.0.1.
+
 ## [1.0.1] - 2026-11-18
 
 L'APK 1.0.0 téléchargé depuis GitHub était bloqué par Google Play Protect (« Appli bloquée pour protéger votre appareil », sans bouton pour passer outre). La 1.0.1 corrige ce blocage.
@@ -72,6 +100,7 @@ Première version publique. L'app tourne entièrement sur le téléphone, sans c
 - Sauvegarde Android désactivée pour les données de l'app.
 - CI : tests, couverture minimale de 85 %, Gitleaks, Dependabot, et pour le serveur : pytest, ruff, bandit, pip-audit et image Docker non-root.
 
-[Non publié]: https://github.com/Ihebnsir/sentinel/compare/v1.0.1...HEAD
+[Non publié]: https://github.com/Ihebnsir/sentinel/compare/v1.1.0...HEAD
+[1.1.0]: https://github.com/Ihebnsir/sentinel/compare/v1.0.1...v1.1.0
 [1.0.1]: https://github.com/Ihebnsir/sentinel/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/Ihebnsir/sentinel/releases/tag/v1.0.0

@@ -1,6 +1,7 @@
 package com.iheb.sentinel
 
 import android.Manifest
+import android.app.NotificationManager
 import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -41,8 +42,8 @@ class MainActivity : FlutterActivity() {
     // Lancement par la tuile du pare-feu, en attente que Dart le demande.
     private var initialOpenFirewall = false
 
-    // Même nom que dans lib/services/protection_service.dart.
-    private val protectionChannelName = "com.iheb.sentinel/protection"
+    // Même nom que dans lib/services/notification_permission.dart.
+    private val notificationsChannelName = "com.iheb.sentinel/notifications"
     // Langue choisie dans Réglages (lib/services/language_store.dart).
     private val languageChannelName = "com.iheb.sentinel/language"
 
@@ -59,7 +60,7 @@ class MainActivity : FlutterActivity() {
     // Pare-feu DNS (VpnService).
     private var firewall: FirewallChannel? = null
 
-    // Scanner de QR code (onglet Messages).
+    // Scanner de QR code (onglet Liens).
     private var qrScanner: QrScanner? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -138,26 +139,11 @@ class MainActivity : FlutterActivity() {
                 }
             }
 
-        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, protectionChannelName)
+        // Notifications du pare-feu et du bilan de la semaine.
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, notificationsChannelName)
             .setMethodCallHandler { call, result ->
                 when (call.method) {
-                    "getStatus" -> result.success(ProtectionSettings.status(this))
-                    "setEnabled" -> {
-                        ProtectionSettings.setEnabled(this, call.argument<Boolean>("enabled") == true)
-                        result.success(null)
-                    }
-                    "openListenerSettings" -> {
-                        openListenerSettings()
-                        result.success(null)
-                    }
-                    "openNotificationSettings" -> {
-                        openOrFallback(
-                            Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS)
-                                .putExtra(Settings.EXTRA_APP_PACKAGE, packageName),
-                        )
-                        result.success(null)
-                    }
-                    "requestNotificationPermission" -> requestNotificationPermission(result)
+                    "requestPermission" -> requestNotificationPermission(result)
                     else -> result.notImplemented()
                 }
             }
@@ -237,17 +223,14 @@ class MainActivity : FlutterActivity() {
         super.onDestroy()
     }
 
-    // Texte partagé (SEND), sélectionné (PROCESS_TEXT) ou venant d'une
-    // alerte Sentinel (OPEN_ALERT, via AlertRelayActivity), sinon null.
-    // MainActivity est exportée : le texte d'une alerte ne vient jamais de
-    // l'Intent, seulement de alertInbox (SEN-06).
+    // Texte partagé (SEND) ou sélectionné (PROCESS_TEXT), sinon null.
+    // L'onglet Liens y cherche le premier lien.
     private fun sharedTextFrom(intent: Intent?): String? {
         if (intent == null) return null
         return incomingText(
             action = intent.action,
             sendText = intent.getCharSequenceExtra(Intent.EXTRA_TEXT),
             processText = intent.getCharSequenceExtra(Intent.EXTRA_PROCESS_TEXT),
-            inbox = alertInbox,
         )
     }
 
@@ -266,7 +249,7 @@ class MainActivity : FlutterActivity() {
             checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) ==
             PackageManager.PERMISSION_GRANTED
         ) {
-            result.success(ProtectionSettings.notificationsAllowed(this))
+            result.success(notificationsAllowed())
             return
         }
         pendingPermissionResult?.success(false) // demande précédente sans réponse
@@ -283,29 +266,13 @@ class MainActivity : FlutterActivity() {
         if (qrScanner?.onRequestPermissionsResult(requestCode, grantResults) == true) return
         if (vaultProtection?.onRequestPermissionsResult(requestCode, grantResults) == true) return
         if (requestCode != REQUEST_NOTIFICATIONS) return
-        pendingPermissionResult?.success(ProtectionSettings.notificationsAllowed(this))
+        pendingPermissionResult?.success(notificationsAllowed())
         pendingPermissionResult = null
     }
 
-    // Android 11+ : ouvre directement l'interrupteur de Sentinel ;
-    // sinon (ou si le fabricant ne le gère pas) la liste des apps.
-    private fun openListenerSettings() {
-        if (!ProtectionSettings.isAvailable) return // variante standard
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            try {
-                startActivity(
-                    Intent(Settings.ACTION_NOTIFICATION_LISTENER_DETAIL_SETTINGS).putExtra(
-                        Settings.EXTRA_NOTIFICATION_LISTENER_COMPONENT_NAME,
-                        ProtectionSettings.listenerComponent(this).flattenToString(),
-                    ),
-                )
-                return
-            } catch (e: ActivityNotFoundException) {
-                // On essaie la liste ci-dessous.
-            }
-        }
-        openOrFallback(Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS))
-    }
+    // Sentinel peut-il afficher des notifications ?
+    private fun notificationsAllowed(): Boolean =
+        getSystemService(NotificationManager::class.java).areNotificationsEnabled()
 
     // Le travail tourne sur un autre thread pour ne pas figer l'écran ;
     // la réponse est renvoyée sur le thread principal, comme l'exige Flutter.

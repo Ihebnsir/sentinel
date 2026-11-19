@@ -1,30 +1,6 @@
 package com.iheb.sentinel
 
 /**
- * Texte d'une alerte Sentinel, en attente que MainActivity le lise (SEN-06).
- * Seule AlertRelayActivity (non exportée) le remplit : une autre app ne peut
- * donc rien y mettre. Mémoire du processus uniquement, lu une seule fois.
- */
-class AlertInbox {
-    @Volatile
-    private var pending: String? = null
-
-    fun put(text: String?) {
-        pending = text
-    }
-
-    /** Rend le texte en attente et l'efface. */
-    @Synchronized
-    fun take(): String? = pending.also { pending = null }
-}
-
-/** La boîte unique de l'app. */
-val alertInbox = AlertInbox()
-
-/** Action interne : « ouvre l'onglet Messages avec l'alerte en attente ». Sans texte. */
-const val ACTION_OPEN_ALERT = "com.iheb.sentinel.action.OPEN_ALERT"
-
-/**
  * Action interne : « ouvre l'écran du pare-feu » (tuile des Paramètres
  * rapides). Sans données : une autre app qui l'envoie ouvre seulement cet écran.
  */
@@ -33,21 +9,31 @@ const val ACTION_OPEN_FIREWALL = "com.iheb.sentinel.action.OPEN_FIREWALL"
 const val ACTION_SEND = "android.intent.action.SEND"
 const val ACTION_PROCESS_TEXT = "android.intent.action.PROCESS_TEXT"
 
+// Assez pour un message qui contient un lien ; au-delà, coupé.
+const val MAX_SHARED_LENGTH = 5000
+
 /**
- * Texte à analyser selon l'Intent reçu par MainActivity (exportée).
+ * Texte reçu par MainActivity (exportée), où l'onglet Liens cherchera un lien.
  * - Partage (SEND) et sélection de texte (PROCESS_TEXT) : texte de l'Intent.
- * - OPEN_ALERT : uniquement le texte confié par AlertRelayActivity ; un
- *   éventuel texte joint à l'Intent est ignoré.
- * - Toute autre action (dont l'ancienne CHECK_ALERT) : rien.
+ * - Toute autre action (dont les anciennes CHECK_ALERT et OPEN_ALERT) : rien.
  */
-fun incomingText(
-    action: String?,
-    sendText: CharSequence?,
-    processText: CharSequence?,
-    inbox: AlertInbox,
-): String? = when (action) {
-    ACTION_SEND -> cleanMessageText(sendText)
-    ACTION_PROCESS_TEXT -> cleanMessageText(processText)
-    ACTION_OPEN_ALERT -> inbox.take()
-    else -> null
+fun incomingText(action: String?, sendText: CharSequence?, processText: CharSequence?): String? =
+    when (action) {
+        ACTION_SEND -> cleanSharedText(sendText)
+        ACTION_PROCESS_TEXT -> cleanSharedText(processText)
+        else -> null
+    }
+
+/** Sans espaces autour, vide → null, coupé si trop long. */
+fun cleanSharedText(raw: CharSequence?): String? {
+    val text = raw?.toString()?.trim()
+    if (text.isNullOrEmpty()) return null
+    if (text.length <= MAX_SHARED_LENGTH) return text
+    // Coupe sans casser un emoji (fait de deux caractères).
+    val end = if (Character.isHighSurrogate(text[MAX_SHARED_LENGTH - 1])) {
+        MAX_SHARED_LENGTH - 1
+    } else {
+        MAX_SHARED_LENGTH
+    }
+    return text.substring(0, end)
 }

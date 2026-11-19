@@ -1,12 +1,15 @@
+import 'dart:async';
+
 import 'package:material_ui/material_ui.dart';
 
 import '../l10n/l10n.dart';
+import '../services/firewall_service.dart';
+import '../services/links/link_checker.dart';
 import '../services/phishing/known_brands.dart';
-import '../services/phishing/message_analyzer.dart';
-import '../services/phishing/phishing_model.dart';
 import '../services/qr/qr_content.dart';
 import '../services/qr/qr_safety.dart';
 import '../services/qr/qr_scanner_service.dart';
+import '../services/weekly_report_service.dart';
 import '../services/wifi_risk.dart';
 import '../theme/app_colors.dart';
 import '../widgets/loading_bar.dart';
@@ -14,9 +17,8 @@ import '../widgets/verdict_section.dart';
 import '../widgets/wifi_section.dart';
 import '../utils/bidi.dart';
 
-/// Charge l'IA anti-arnaque et renvoie sa fonction de prédiction.
-typedef PredictorLoader =
-    Future<PhishingPrediction Function(String)> Function();
+/// Demande aux listes du pare-feu ce qu'elles savent d'un domaine.
+typedef DomainChecker = Future<DomainCheck?> Function(String host);
 
 /// Résultat d'un QR code : contenu brut, détails, verdict, et une action
 /// proposée (jamais lancée sans confirmation de l'utilisateur).
@@ -24,12 +26,12 @@ class QrResultScreen extends StatefulWidget {
   const QrResultScreen({
     super.key,
     required this.raw,
-    this.loadPredictor,
+    this.checkDomain,
     this.service,
   });
 
   final String raw; // texte lu dans le QR code
-  final PredictorLoader? loadPredictor; // remplacé dans les tests
+  final DomainChecker? checkDomain; // remplacé dans les tests
   final QrScannerService? service;
 
   @override
@@ -40,7 +42,7 @@ class _QrResultScreenState extends State<QrResultScreen> {
   late final QrContent _content = parseQr(widget.raw);
   late final QrScannerService _service = widget.service ?? QrScannerService();
   QrAssessment? _assessment;
-  bool _failed = false; // l'IA n'a pas pu être chargée
+  bool _failed = false; // les marques connues n'ont pas pu être lues
 
   @override
   void initState() {
@@ -51,24 +53,20 @@ class _QrResultScreenState extends State<QrResultScreen> {
   // Tout se passe sur le téléphone : rien n'est envoyé sur Internet.
   Future<void> _assess() async {
     try {
-      // L'IA n'est chargée que s'il y a un lien ou un texte à analyser.
-      final predict = textToAnalyze(_content) == null
-          ? _noText
-          : await (widget.loadPredictor ?? _loadModel)();
-      final assessment = assessQr(_content, predict);
+      await loadKnownBrands();
+      final host = hostToCheck(_content);
+      final lists = host == null
+          ? null
+          : await (widget.checkDomain ?? FirewallService().checkDomain)(host);
+      final assessment = assessQr(_content, lists: lists);
+      // Bilan de la semaine : un compteur, jamais le lien.
+      if (assessment.link != null) {
+        unawaited(const WeeklyReportService().count(WeeklyCounter.linksChecked));
+      }
       if (mounted) setState(() => _assessment = assessment);
     } catch (_) {
       if (mounted) setState(() => _failed = true);
     }
-  }
-
-  static PhishingPrediction _noText(String _) =>
-      throw StateError('Aucun texte à analyser');
-
-  static Future<PhishingPrediction Function(String)> _loadModel() async {
-    final model = await loadPhishingModel();
-    await loadKnownBrands();
-    return model.predict;
   }
 
   // Confirmation, puis action. Rien ne s'ouvre sans « Continuer ».
@@ -152,7 +150,7 @@ class _QrResultScreenState extends State<QrResultScreen> {
               Padding(
                 padding: const EdgeInsets.only(top: 24),
                 child: Text(
-                  l.messagesFailed,
+                  l.linksFailed,
                   style: TextStyle(fontSize: 15, color: muted),
                 ),
               ),
@@ -164,12 +162,12 @@ class _QrResultScreenState extends State<QrResultScreen> {
   }
 
   List<Widget> _result(AppLocalizations l, QrAssessment assessment) {
-    final analysis = assessment.analysis;
+    final link = assessment.link;
     final verdict = assessment.verdict;
     final wifi = assessment.wifiStatus;
     final reasons = [
       for (final w in assessment.warnings) w.reason(l),
-      ...?analysis?.reasons(l),
+      ...?link?.reasons(l),
     ];
     final action = assessment.action;
     return [
@@ -177,11 +175,11 @@ class _QrResultScreenState extends State<QrResultScreen> {
       if (verdict != null)
         VerdictSection(
           verdict: verdict,
-          subtitle: analysis == null
+          subtitle: link == null
               ? null
-              : l.messagesProbability('${analysis.percent}'),
+              : l.linksRealDestination(link.realDestination),
           reasons: reasons,
-          advice: adviceFor(l, verdict),
+          advice: verdict.advice(l),
         )
       else
         // Pas de verdict (Wi-Fi, paiement…) : avertissements seuls.
@@ -202,7 +200,7 @@ class _QrResultScreenState extends State<QrResultScreen> {
           width: double.infinity,
           child: FilledButton(
             style: FilledButton.styleFrom(backgroundColor: context.colors.bleu),
-            // null : désactivé (arnaque probable).
+            // null : désactivé (lien dangereux).
             onPressed: assessment.actionAllowed
                 ? () => _onAction(assessment)
                 : null,

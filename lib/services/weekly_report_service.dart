@@ -6,8 +6,7 @@ import '../utils/debug_log.dart';
 /// Compteurs qui s'additionnent pendant la semaine (liste fermée, mêmes
 /// clés que WeeklyLedger.kt). Le pare-feu compte ses blocages côté Kotlin.
 enum WeeklyCounter {
-  messages('messages'),
-  scamAlerts('scam_alerts');
+  linksChecked('links_checked');
 
   const WeeklyCounter(this.key);
 
@@ -35,13 +34,12 @@ const weeklyFirewallCategories = [
 ];
 
 /// Les compteurs d'une semaine. Que des nombres : jamais de domaine,
-/// de texte de message ni de nom de réseau.
+/// de lien ni de nom de réseau.
 class WeekSummary {
   const WeekSummary({
     required this.start,
     this.blocked = const {},
-    this.messages = 0,
-    this.scamAlerts = 0,
+    this.linksChecked = 0,
     this.scoreStart,
     this.scoreEnd,
     this.gauges = const {},
@@ -57,8 +55,7 @@ class WeekSummary {
         for (final id in weeklyFirewallCategories)
           if ((counters['blocked_$id'] ?? 0) > 0) id: counters['blocked_$id']!,
       },
-      messages: counters[WeeklyCounter.messages.key] ?? 0,
-      scamAlerts: counters[WeeklyCounter.scamAlerts.key] ?? 0,
+      linksChecked: counters[WeeklyCounter.linksChecked.key] ?? 0,
       scoreStart: _score(map['scoreStart']),
       scoreEnd: _score(map['scoreEnd']),
       gauges: {
@@ -74,8 +71,9 @@ class WeekSummary {
 
   /// Requêtes bloquées par catégorie du pare-feu (absente = 0).
   final Map<String, int> blocked;
-  final int messages;
-  final int scamAlerts;
+
+  /// Liens vérifiés dans l'onglet Liens ou par un QR code.
+  final int linksChecked;
   final int? scoreStart;
   final int? scoreEnd;
 

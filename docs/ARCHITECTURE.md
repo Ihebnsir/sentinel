@@ -2,9 +2,9 @@
 
 [← Back to README](../README.md) · [Security design](SECURITY_DESIGN.md)
 
-Sentinel is a Flutter app with Android as its only target. Dart contains the UI and all the decision logic (risk rules, ML inference, cryptography). Kotlin reads Android state and talks to the system services that Flutter cannot reach directly. The two sides communicate through named `MethodChannel`s.
+Sentinel is a Flutter app with Android as its only target. Dart contains the UI and most of the decision logic (risk rules, link rules, cryptography). Kotlin reads Android state and talks to the system services that Flutter cannot reach directly. The two sides communicate through named `MethodChannel`s.
 
-Most of the logic is written as **pure functions** (`calculateSecurityScore`, `calculateAppRisk`, `assessWifi`, `analyzeMessage`, `analyzePasswordHealth`…). They take plain data and return a report without calling Android, which makes them easy to unit-test.
+Most of the logic is written as **pure functions** (`calculateSecurityScore`, `calculateAppRisk`, `assessWifi`, `checkText`, `assessQr`, `analyzePasswordHealth`…). They take plain data and return a report without calling Android, which makes them easy to unit-test.
 
 ## Code layout
 
@@ -12,18 +12,17 @@ Most of the logic is written as **pure functions** (`calculateSecurityScore`, `c
 flowchart LR
   subgraph Dart["lib/ (Dart)"]
     main["main.dart"]
-    screens["screens/<br/>main_shell, home, apps,<br/>app_detail, messages, vault/…<br/>firewall, app_analysis, app_report"]
-    widgets["widgets/<br/>score_arch, wifi_section,<br/>auto_protection_section…"]
+    screens["screens/<br/>main_shell, home, apps,<br/>app_detail, links, qr_result, vault/…<br/>firewall, app_analysis, app_report"]
+    widgets["widgets/<br/>score_arch, wifi_section,<br/>verdict_section…"]
     models["models/<br/>device_security_status,<br/>installed_app, wifi_status"]
     subgraph services["services/"]
       calc["security_score_calculator<br/>app_risk_calculator<br/>wifi_risk"]
-      phishing["phishing/<br/>phishing_model, message_analyzer,<br/>url_analyzer, known_brands<br/>(reads assets/data/known_brands.json)"]
+      phishing["links/ + phishing/<br/>link_checker, hidden_characters,<br/>url_analyzer, known_brands<br/>(reads assets/data/known_brands.json)"]
       vault["vault/<br/>vault_crypto, vault_file,<br/>vault_session, vault_storage,<br/>vault_biometrics, vault_platform…"]
       breach["breach/<br/>pwned_passwords,<br/>breach_checker, breach_consent"]
       appsdb["apps/<br/>known_apps, stalkerware_ioc"]
-      bridges["device_security_service<br/>apps_scanner_service<br/>wifi_service, share_service<br/>protection_service, firewall_service<br/>app_analysis (report model)"]
+      bridges["device_security_service<br/>apps_scanner_service<br/>wifi_service, share_service<br/>notification_permission, firewall_service<br/>app_analysis (report model)"]
     end
-    background["background/<br/>background_analyzer.dart"]
   end
 
   subgraph Kotlin["android/…/com/iheb/sentinel (Kotlin)"]
@@ -33,25 +32,19 @@ flowchart LR
     wifi["WifiSecurityChecker"]
     vp["VaultProtection"]
     bio["VaultBiometric"]
-    listener["SentinelNotificationListener"]
-    bg["BackgroundAnalyzer"]
-    notif["ScamAlertNotifier"]
-    prefs["ProtectionSettings"]
-    fw["firewall/<br/>FirewallChannel, SentinelVpnService, FirewallEngine,<br/>DnsFilter, DnsPacket, IpPacket,<br/>BlockPolicy, CategoryList, DomainSet,<br/>ListParser, BlocklistUpdater, FirewallAlertNotifier,<br/>BrandRules, AppAnalysis, AppReportStore,<br/>ReportCleanupReceiver"]
+    fw["firewall/<br/>FirewallChannel, SentinelVpnService, FirewallEngine,<br/>DnsFilter, DnsPacket, IpPacket,<br/>BlockPolicy, CategoryList, DomainSet, LinkLookup,<br/>ListParser, BlocklistUpdater, FirewallAlertNotifier,<br/>BrandRules, AppAnalysis, AppReportStore,<br/>ReportCleanupReceiver"]
   end
 
   main --> screens --> widgets
   screens --> services
   bridges <-->|MethodChannel| activity
   vault <-->|MethodChannel| vp
-  activity --> dev & apps & wifi & vp & prefs & fw
+  activity --> dev & apps & wifi & vp & fw
   vp --> bio
-  listener --> bg --> notif
-  bg <-->|MethodChannel| background
-  background --> phishing
+  phishing <-->|"checkDomain (firewall channel)"| fw
 ```
 
-The app has four tabs (`main_shell.dart`): **Accueil** (device audit, Wi-Fi and the DNS firewall), **Applications**, **Messages** (message check and the automatic protection switch) and **Coffre** (vault).
+The app has four tabs (`main_shell.dart`): **Accueil** (device audit, Wi-Fi and the DNS firewall), **Applications**, **Liens** (link checker, QR code scanner and the firewall's "automatic protection when you tap" row) and **Coffre** (vault).
 
 ## Method channels
 
@@ -59,12 +52,11 @@ The app has four tabs (`main_shell.dart`): **Accueil** (device audit, Wi-Fi and 
 |---|---|---|---|
 | `com.iheb.sentinel/device_security` | `MainActivity` → `DeviceSecurityChecker` | `getSecurityStatus`, `openSettings` | — |
 | `com.iheb.sentinel/apps` | `MainActivity` → `InstalledAppsScanner` (background executor) | `scanApps`, `openAppSettings`, `uninstallApp`, `openWebPage` | — |
-| `com.iheb.sentinel/share` | `MainActivity` | `getInitialSharedText` | `onSharedText` |
-| `com.iheb.sentinel/protection` | `MainActivity` → `ProtectionSettings` | `getStatus`, `setEnabled`, `openListenerSettings`, `openNotificationSettings`, `requestNotificationPermission` | — |
+| `com.iheb.sentinel/share` | `MainActivity` | `getInitialSharedText`, `getInitialOpenFirewall` | `onSharedText`, `onOpenFirewall` |
+| `com.iheb.sentinel/notifications` | `MainActivity` | `requestPermission` | — |
 | `com.iheb.sentinel/wifi` | `WifiSecurityChecker` | `getWifiStatus`, `startListening`, `stopListening`, `openPrivateDnsSettings` | `onWifiChanged` (debounced 400 ms) |
 | `com.iheb.sentinel/vault` | `VaultProtection` → `VaultBiometric`, `VaultDocuments` | `setSecure`, `copySensitive`, `clearClipboard`, `biometricAvailable`, `biometricEncrypt`, `biometricDecrypt`, `biometricDeleteKey`, `saveDocument`, `openDocument` | `onScreenOff` |
-| `com.iheb.sentinel/firewall` | `FirewallChannel` → `SentinelVpnService`, `FirewallEngine` | `prepare`, `start`, `stop`, `status`, `config`, `setCategoryEnabled`, `addAllowed`, `removeAllowed`, `setAutoUpdate`, `updateNow`, `startAnalysis`, `stopAnalysis`, `reports`, `deleteReport`, `openApp` | — |
-| `com.iheb.sentinel/background_analysis` | `BackgroundAnalyzer` (headless engine) | `ready` | `analyze` |
+| `com.iheb.sentinel/firewall` | `FirewallChannel` → `SentinelVpnService`, `FirewallEngine` | `prepare`, `start`, `stop`, `status`, `config`, `setCategoryEnabled`, `addAllowed`, `removeAllowed`, `setAutoUpdate`, `updateNow`, `startAnalysis`, `stopAnalysis`, `reports`, `deleteReport`, `openApp`, `checkDomain` | — |
 
 ```mermaid
 sequenceDiagram
@@ -81,38 +73,24 @@ sequenceDiagram
   UI->>UI: VaultSession.lock()
 ```
 
-## Headless engine for background analysis
+## Link checker
 
-When automatic protection is on, `SentinelNotificationListener` gets message notifications. Kotlin does not re-implement the model. Instead, `BackgroundAnalyzer` starts a **headless `FlutterEngine`** (no UI) on the first message and runs the Dart entry point `backgroundAnalyzerMain` (marked `@pragma('vm:entry-point')` and re-exported from `main.dart` so release builds keep it). The engine stays in `FlutterEngineCache` for later messages and is destroyed when protection is turned off or the listener disconnects.
+The "Liens" tab (`links_screen.dart`) checks a link without any permission and without any network request. Since 1.1.0 there is no background analysis and no notification listener.
 
 ```mermaid
 sequenceDiagram
-  participant N as Messaging app notification
-  participant L as SentinelNotificationListener
-  participant B as BackgroundAnalyzer (Kotlin)
-  participant E as Headless FlutterEngine
-  participant D as backgroundAnalyzerMain (Dart)
-  participant A as ScamAlertNotifier
-
-  N->>L: onNotificationPosted
-  L->>L: enabled? SMS / chat app? not ongoing / group summary?<br/>extract last message, skip own replies,<br/>dedupe by hashCode (last 50)
-  L->>B: analyze(text, packageName, isSms)
-  alt engine not started
-    B->>B: queue request in RAM (max 10)
-    B->>E: new FlutterEngine + executeDartEntrypoint
-    E->>D: backgroundAnalyzerMain()
-    D-->>B: "ready"
-  end
-  B->>D: "analyze"
-  D->>D: loadPhishingModel() → predict() → analyzeMessage()
-  D-->>B: verdict, percent, mainReason (domains defanged), alertTitle
-  alt verdict == "arnaque"
-    B->>A: show(title, reason, text)
-    A->>A: private notification + neutral public version,<br/>no system "open link" actions
-  end
+  participant S as Share sheet / PROCESS_TEXT / paste / QR
+  participant D as Dart (link_checker.dart)
+  participant K as FirewallEngine.checkDomain (Kotlin)
+  S->>D: text (Kotlin trims it, max 5,000 chars)
+  D->>D: normalizeText() (hidden characters, RLO)<br/>extractFirstLink() → none: "Aucun lien trouvé"
+  D->>K: checkDomain(host) on the firewall channel
+  K->>K: allowlist (with parents), then the malware list<br/>(already loaded if the VPN runs, otherwise read once<br/>and freed 3 min after the last check)
+  K-->>D: allowed, dangerous, listsAvailable
+  D->>D: LinkCheck.verdict: allowlist → no known problem;<br/>listed, brand impersonation or IP → dangerous;<br/>any other rule or hidden characters → suspicious
 ```
 
-Only scams trigger an alert. "Suspect" never does, to avoid alert fatigue. Tapping the alert opens the Messages tab with the text, through the same `EXTRA_TEXT` path as the Android share sheet.
+The screen shows the verdict, "Ce lien mène en réalité à …" (the registrable domain, defanged with `[.]`), the reasons and the advice. Nothing opens without a confirmation dialog, and "Ouvrir quand même" is disabled for a dangerous link (`QrScannerService.openLink`, re-checked in Kotlin by `QrActions.isWebLink`). A shortened link is explained, never followed. Only a counter (`links_checked`) goes to the weekly summary; the link itself is never stored. QR codes use the same path (`assessQr` → `checkText`).
 
 ## DNS firewall
 
@@ -207,7 +185,7 @@ Each category succeeds or fails on its own. New data files get a new name, and t
 
 ### Brand impersonation
 
-`assets/data/known_brands.json` is the **single source** of brands often imitated by scammers (La Poste, banks, operators, CNSS/CNAM, payment services) and of their official domains. Dart reads it with `rootBundle` (`known_brands.dart`; `loadKnownBrands()` is awaited before `analyzeMessage`), Kotlin reads it from `flutter_assets/` (`FirewallEngine.brands`). The rule is implemented twice, `impersonatedBrand()` in `url_analyzer.dart` and `BrandRules.impersonatedBrand()` in Kotlin:
+`assets/data/known_brands.json` is the **single source** of brands often imitated by scammers (La Poste, banks, operators, CNSS/CNAM, payment services) and of their official domains. Dart reads it with `rootBundle` (`known_brands.dart`; `loadKnownBrands()` is awaited before a link check), Kotlin reads it from `flutter_assets/` (`FirewallEngine.brands`). The rule is implemented twice, `impersonatedBrand()` in `url_analyzer.dart` and `BrandRules.impersonatedBrand()` in Kotlin:
 
 1. Split the host on `.` and `-`; also build a "compact" host without `-` (`la-poste` → `laposte`).
 2. A brand is *mentioned* if a keyword is one of the parts, or, for keywords of 5 letters or more, starts or ends a part or a label without its hyphens (`laposte2`, `monlaposte`, `la-poste-tn` → `lapostetn`). A long keyword in the middle of another word does not count (`imposter.com`).
@@ -250,23 +228,21 @@ sequenceDiagram
 - **End time.** The end is measured with `SystemClock.elapsedRealtime()` (it keeps counting while the phone sleeps), checked every 10 s and on each recorded query. A single `Handler.postDelayed(N min)` was tried first: it counts uptime only, and on the emulator a 2-minute analysis lasted 83 minutes of wall-clock time after a suspend. The 10 s check alone has the same weakness (it does not run while the CPU sleeps), so the end is also an `AlarmManager` alarm of type `ELAPSED_REALTIME_WAKEUP` at `AnalysisSession.endsAtElapsed`, which wakes the phone even in Doze. It is exact (`setExactAndAllowWhileIdle`) when Android allows it (`SCHEDULE_EXACT_ALARM`: granted by default on Android 12-13, user setting on 14+), otherwise inexact (`setAndAllowWhileIdle`, may fire late). The choice is `AnalysisAlarm.mode()`, tested with JUnit. The alarm is cancelled on manual stop and when the firewall stops.
 - **Limits.** The analysis is lost (no report) if Android kills the service process. Queries the app repeats within a cached answer's lifetime are not seen again, so query counts are approximate. Apps with their own DNS (DoH) show few or no domains.
 
-## Scam detection flow
+## Link rules
 
 ```mermaid
 flowchart TD
-  input["Message text<br/>(typed, shared, PROCESS_TEXT, alert tap,<br/>or notification in background)"]
-  input --> model["PhishingModel.predict()<br/>lowercase → split on Python isspace() set →<br/>char_wb n-grams 2..5 (code points) →<br/>sublinear TF × IDF → L2 norm → logistic"]
-  input --> links["analyzeLinks()<br/>brand impersonation · IP · punycode · '@' ·<br/>shortener · suspicious TLD · &gt;3 subdomains · http"]
-  model --> p["probability p<br/>+ top suspicious n-grams / words"]
-  links --> f["link findings"]
-  p --> decide{"analyzeMessage()"}
-  f --> decide
-  decide -->|"p ≥ 0.8 or brand impersonation or IP link"| scam["Arnaque probable"]
-  decide -->|"p ≥ 0.5 or any other link finding"| suspect["Suspect"]
-  decide -->|otherwise| ok["Rien de suspect"]
+  input["Text (pasted, shared, PROCESS_TEXT, QR code)"] --> first["extractFirstLink()<br/>visible text, punctuation (Arabic too) trimmed"]
+  first --> rules["analyzeLinks() rules<br/>brand impersonation · IP · punycode · '@' ·<br/>shortener · suspicious TLD · &gt;3 subdomains · http"]
+  first --> lists["checkDomain() in Kotlin<br/>allowlist · malware list"]
+  rules & lists --> decide{"LinkCheck.verdict"}
+  decide -->|"allowlisted"| ok["Aucun problème connu"]
+  decide -->|"listed, brand impersonation or IP"| bad["Dangereux"]
+  decide -->|"any other finding or hidden characters"| suspect["Suspect"]
+  decide -->|otherwise| ok
 ```
 
-The model is trained offline in Python (`ml/train.py`) and shipped as `assets/models/phishing_model.json` (8,000-entry vocabulary, IDF, coefficients, intercept, metrics). The Dart implementation follows the specification in [`ml/README.md`](../ml/README.md). `test/phishing_parity_test.dart` checks it against scikit-learn's output on 30 fixtures with a tolerance of 1e-9.
+The on-device scam message model of 1.0.x (`ml/`) is no longer shipped: the `ml/` folder stays in the repository, unused by the app, and exports to `ml/export/`.
 
 ## Vault key hierarchy
 
@@ -315,7 +291,6 @@ Key points:
 |---|---|---|
 | Vault | `vault.json` in the application support directory | Encrypted (see above) |
 | Breach-check consent | `breach_consent.json` in the same directory | `{"accepted": true/false}` |
-| Automatic protection switch | `SharedPreferences` `sentinel_protection` | One boolean |
 | DNS firewall counters | Memory of `SentinelVpnService` / `FirewallEngine` only | Total, blocked, blocked per category; reset at each start |
 | DNS firewall settings | `SharedPreferences` `sentinel_firewall` | Category switches, allowlist (domains the user typed), auto-update switch, dates of the last update and attempt |
 | Updated blocklists | `filesDir/blocklists/` | Public lists and their manifest, nothing about the user |
@@ -324,4 +299,4 @@ Key points:
 | App analysis reports | `filesDir/app_reports/` (private, not in backups) | Package and name of the app, start/end time, duration, domains with counts, category, blocked flag, imitated brand. Deleted after 24 h at most, or by "Supprimer ce rapport"; never sent anywhere |
 | Fingerprint key | Android Keystore, alias `sentinel_vault_bio` | Non-exportable AES key |
 
-Message text, breach results and scan results are never written to disk. None of the data above is included in Android backups or device-to-device transfers (`allowBackup="false"` and `res/xml/data_extraction_rules.xml`).
+Checked links, breach results and scan results are never written to disk. None of the data above is included in Android backups or device-to-device transfers (`allowBackup="false"` and `res/xml/data_extraction_rules.xml`).

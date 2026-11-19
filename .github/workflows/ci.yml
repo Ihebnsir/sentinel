@@ -61,12 +61,10 @@ jobs:
       - name: Coverage (logic, min 85 %)
         run: dart run tools/coverage/coverage_summary.dart --min=85
 
-      # Deux variantes (docs/RELEASE.md). Le build standard échoue si son
-      # manifeste fusionné déclare un accès bloqué par Play Protect.
-      - name: Build debug APKs (standard, complete)
-        run: |
-          flutter build apk --debug --flavor standard
-          flutter build apk --debug --flavor complete
+      # Le build échoue si le manifeste fusionné déclare un accès bloqué
+      # par Play Protect (tâche checkPlayProtectDebug, docs/RELEASE.md).
+      - name: Build debug APK
+        run: flutter build apk --debug
 
       # Après le build : Flutter a créé android/gradlew et local.properties.
       - name: Android unit tests

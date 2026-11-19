@@ -35,7 +35,7 @@ class LinkFinding {
   };
 }
 
-/// Un lien trouvé dans le message et ce qu'on en pense.
+/// Un lien trouvé dans le texte et ce qu'on en pense.
 class AnalyzedLink {
   const AnalyzedLink({
     required this.text,
@@ -43,11 +43,15 @@ class AnalyzedLink {
     required this.findings,
   });
 
-  final String text; // le lien tel qu'écrit dans le message
+  final String text; // le lien tel qu'écrit dans le texte
   final String host; // le nom de domaine (ou l'adresse IP), en minuscules
   final List<LinkFinding> findings; // vide si rien de suspect
 
   bool has(LinkSignal signal) => findings.any((f) => f.signal == signal);
+
+  /// Adresse à donner au navigateur : « https:// » ajouté s'il manque.
+  String get openableUrl =>
+      _scheme.hasMatch(text) ? text : 'https://$text';
 }
 
 /// Services qui cachent la vraie adresse derrière un lien court.
@@ -59,6 +63,13 @@ const urlShorteners = [
   't.co',
   'rb.gy',
   'shorturl.at',
+  'goo.gl',
+  'ow.ly',
+  't.ly',
+  'tiny.cc',
+  'rebrand.ly',
+  'bit.do',
+  's.id',
 ];
 
 /// Extensions bon marché, très utilisées par les arnaques.
@@ -73,20 +84,21 @@ const _knownTlds = {
   'tn', 'com', 'net', 'org', 'info', 'fr', 'io', 'co', 'me', 'ly', 'gy', //
   'at', 'gd', 'biz', 'online', 'site', 'shop', 'app', 'link', 'store', //
   'club', 'vip', 'pro', 'cc', 'ws', 'tk', 'ml', 'ga', 'cf', 'gq', 'dz', //
+  'gl', 'id', 'do', 'ma', 'eu', 'de', 'be', 'ch', 'us', 'uk', 'ca', //
 };
 
 // Deuxièmes niveaux du type « com.tn » : le domaine compte alors 3 parties.
 const _secondLevels = {'com', 'org', 'net', 'gov', 'edu', 'ens', 'nat', 'co'};
 
-// Ponctuation de la phrase à retirer autour d'un lien.
-final _edges = RegExp(r'''^["'«»(\[<{]+|["'«»)\]>},;:!?.]+$''');
+// Ponctuation de la phrase à retirer autour d'un lien (arabe comprise).
+final _edges = RegExp(r'''^["'«»“”(\[<{]+|["'«»“”)\]>},;:!?.،؛؟…]+$''');
 final _scheme = RegExp(r'^(https?)://', caseSensitive: false);
 final _port = RegExp(r':\d+$');
 final _hostPattern = RegExp(r'^[a-z0-9-]+(\.[a-z0-9-]+)+$');
 final _ipPattern = RegExp(r'^\d{1,3}(\.\d{1,3}){3}$');
 final _hasLetter = RegExp(r'[a-z]');
 
-/// Trouve les liens d'un message et vérifie chacun avec les règles.
+/// Trouve les liens d'un texte et vérifie chacun avec les règles.
 List<AnalyzedLink> analyzeLinks(String text) => [
       // « ? » : on n'ajoute que les mots qui sont des liens (pas les null).
       for (final word in text.split(RegExp(r'\s+'))) ?_parseLink(word),
@@ -194,6 +206,21 @@ String? registrableName(String host) {
       ? labels[labels.length - domainParts]
       : null;
 }
+
+/// Domaine enregistrable, celui qui décide où mène le lien :
+/// « secure-login.xyz » pour « www.biat.com.tn.secure-login.xyz ».
+/// Une adresse IP est rendue telle quelle.
+String registrableDomain(String host) {
+  if (_ipPattern.hasMatch(host)) return host;
+  final labels = host.split('.');
+  final parts = _domainParts(labels);
+  return labels.length > parts
+      ? labels.sublist(labels.length - parts).join('.')
+      : host;
+}
+
+/// « site.xyz » → « site[.]xyz » : affiché, jamais cliquable (comme Kotlin).
+String defang(String host) => host.replaceAll('.', '[.]');
 
 /// La marque que ce domaine imite, ou null.
 /// Le domaine officiel et ses sous-domaines ne sont jamais signalés, ni

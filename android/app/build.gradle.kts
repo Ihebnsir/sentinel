@@ -51,7 +51,7 @@ android {
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
+        // Une seule variante depuis la 1.1.0 (GitHub et, plus tard, Google Play).
         applicationId = "com.iheb.sentinel"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
@@ -63,29 +63,6 @@ android {
         // flag during build.
         versionCode = flutter.versionCode
         versionName = flutter.versionName
-    }
-
-    buildFeatures {
-        buildConfig = true
-    }
-
-    // Deux variantes, même code et même clé de signature (docs/RELEASE.md) :
-    // - standard : APK GitHub. Sans la protection automatique (lecteur de
-    //   notifications), que Google Play Protect bloque hors du Play Store.
-    //   applicationId distinct : s'installe à côté de la version Google Play,
-    //   sans conflit de signature (Play App Signing) ni désinstallation.
-    // - complete : future version Google Play, avec la protection automatique.
-    flavorDimensions += "distribution"
-    productFlavors {
-        create("standard") {
-            dimension = "distribution"
-            applicationIdSuffix = ".standard"
-            buildConfigField("boolean", "AUTO_PROTECTION", "false")
-        }
-        create("complete") {
-            dimension = "distribution"
-            buildConfigField("boolean", "AUTO_PROTECTION", "true")
-        }
     }
 
     signingConfigs {
@@ -122,9 +99,9 @@ tasks.matching { it.name == "preReleaseBuild" }.configureEach {
 
 // Play Protect (« protection renforcée contre la fraude ») bloque les APK
 // installés hors Play Store qui déclarent ces accès. Le manifeste FUSIONNÉ
-// (bibliothèques comprises) de la variante standard ne doit en contenir
-// aucun : sinon assembleStandardDebug / assembleStandardRelease échouent.
-abstract class CheckStandardManifest : DefaultTask() {
+// (bibliothèques comprises) ne doit en contenir aucun : sinon assemble*,
+// bundle* et les tests unitaires (testDebugUnitTest) échouent.
+abstract class CheckPlayProtectManifest : DefaultTask() {
     @get:InputFile
     @get:PathSensitive(PathSensitivity.NONE)
     abstract val mergedManifest: RegularFileProperty
@@ -163,7 +140,7 @@ abstract class CheckStandardManifest : DefaultTask() {
             .distinct()
         if (found.isNotEmpty()) {
             throw GradleException(
-                "Variante standard : accès bloqués par Play Protect dans le manifeste fusionné :\n" +
+                "Accès bloqués par Play Protect dans le manifeste fusionné :\n" +
                     found.joinToString("\n") { "  - $it" },
             )
         }
@@ -172,9 +149,9 @@ abstract class CheckStandardManifest : DefaultTask() {
 }
 
 androidComponents {
-    onVariants(selector().withFlavor("distribution" to "standard")) { variant ->
+    onVariants { variant ->
         val suffix = variant.name.replaceFirstChar { it.uppercase() }
-        val checkTask = tasks.register<CheckStandardManifest>("checkPlayProtect${suffix}") {
+        val checkTask = tasks.register<CheckPlayProtectManifest>("checkPlayProtect${suffix}") {
             group = "verification"
             description = "Vérifie que le manifeste fusionné de ${variant.name} passe Play Protect."
             mergedManifest.set(variant.artifacts.get(SingleArtifact.MERGED_MANIFEST))
@@ -182,16 +159,17 @@ androidComponents {
         }
         tasks.matching { it.name == "assemble$suffix" || it.name == "bundle$suffix" }
             .configureEach { dependsOn(checkTask) }
+        // Les tests unitaires lisent son rapport (ManifestTest) : Flutter
+        // déplace le dossier build, le chemin leur est donc transmis.
+        tasks.withType<Test>().matching { it.name == "test${suffix}UnitTest" }.configureEach {
+            dependsOn(checkTask)
+            systemProperty(
+                "sentinel.playProtectReport",
+                layout.buildDirectory.file("reports/playProtect/${variant.name}.txt").get().asFile.path,
+            )
+        }
         tasks.matching { it.name == "check" }.configureEach { dependsOn(checkTask) }
     }
-}
-
-// Avec les variantes, AGP ne crée plus testDebugUnitTest pour :app : ce
-// raccourci (CI, docs) lance les tests JVM des deux variantes.
-tasks.register("testDebugUnitTest") {
-    group = "verification"
-    description = "Tests unitaires JVM des variantes standard et complete (debug)."
-    dependsOn("testStandardDebugUnitTest", "testCompleteDebugUnitTest")
 }
 
 dependencies {
@@ -222,7 +200,7 @@ dependencies {
     // FileProvider (photo d'un document du coffre) ; version fixée plus haut.
     implementation("androidx.core:core:1.18.0")
 
-    // Lecture des QR codes (Messages > Scanner un QR code). Apache 2.0.
+    // Lecture des QR codes (Liens > Scanner un QR code). Apache 2.0.
     // Décodage ZXing sur le téléphone : ni réseau, ni modèle téléchargé.
     // ZXing core 3.5.3 (dernière version) au lieu du 3.4.1 tiré par défaut.
     implementation("com.journeyapps:zxing-android-embedded:4.3.0")

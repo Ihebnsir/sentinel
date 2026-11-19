@@ -12,19 +12,13 @@ import java.io.File
  */
 class KotlinLogsTest {
 
-    private val allowed = listOf(
-        // Exception au démarrage du moteur Flutter : aucune donnée reçue.
-        "BackgroundAnalyzer.kt: Log.w(TAG, \"Moteur Flutter impossible à démarrer\", e)",
-        // Code d'erreur fixe envoyé par Dart (ANALYSIS_FAILED), jamais le texte.
-        "BackgroundAnalyzer.kt: Log.w(TAG, \"Analyse impossible (\$code)\")",
-    )
+    // Aucun log depuis la 1.1.0 (moteur d'analyse des messages retiré).
+    private val allowed = emptyList<String>()
 
     @Test
     fun `seuls les logs relus existent`() {
         val logCall = Regex("""\b(Log\.[a-z]+\(|println\(|printStackTrace\()""")
-        // Toutes les variantes : main, standard, complete.
-        val found = listOf("main", "standard", "complete")
-            .flatMap { File("src/$it/kotlin").walkTopDown() }
+        val found = File("src/main/kotlin").walkTopDown()
             .filter { it.isFile && it.extension == "kt" }
             .flatMap { file ->
                 file.readLines()

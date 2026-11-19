@@ -8,6 +8,8 @@
 | Auditeur | audit mené pour le propriétaire de l'application, sur son propre code |
 | Rapports détaillés | [P1 statique](P1_statique.md) · [P2 dynamique](P2_dynamique.md) · [P3a corrections](P3a_corrections.md) · [P3b corrections](P3b_corrections.md) · [P3c corrections](P3c_corrections.md) |
 
+> **Mise à jour 1.1.0 (19/11/2026).** La fonctionnalité « Messages » (analyse des messages, protection automatique, alertes « Arnaque probable », signalement) a été retirée de l'application. **SEN-06** et **SEN-12** concernent du code retiré en 1.1.0 : l'action `OPEN_ALERT` et `AlertRelayActivity` n'existent plus (SEN-06), et l'analyse de texte des messages non plus (SEN-12). La lecture du texte « tel qu'il s'affiche » (caractères cachés retirés, texte inversé remis à l'endroit) est gardée pour extraire les liens dans l'onglet Liens (`lib/services/links/hidden_characters.dart`, `test/hidden_characters_test.dart`). SEN-07 (modèle lisible) est sans objet : le modèle n'est plus embarqué. Le reste du rapport décrit la version 1.0.0 auditée.
+
 ## 1. Résumé (non technique)
 
 Sentinel protège le téléphone de son utilisateur : coffre de mots de passe, détection des SMS d'arnaque, analyse des applications, pare-feu DNS. L'audit a cherché si l'application elle-même pouvait **trahir** cet utilisateur : fuite de mots de passe, envoi de données à son insu, porte d'entrée pour une autre app, ou protection qui ne protège pas.
@@ -80,13 +82,13 @@ Sévérité selon l'impact pour l'utilisateur et la facilité d'exploitation (d�
 | SEN-03 | Presse-papiers lisible par toutes les apps (Android ≤ 9) | CODE-1 | Moyenne | **Corrigé** | [P3a](P3a_corrections.md#sen-03--presse-papiers-lisible-par-toutes-les-apps-android--9--corrigé) |
 | SEN-04 | Code Dart non obfusqué | RESILIENCE-3 | Faible | **Corrigé** | [P3b](P3b_corrections.md#sen-04--obfuscation) |
 | SEN-05 | `debugPrint` conservés en release | STORAGE-2 | Faible | **Corrigé** | [P3a](P3a_corrections.md#sen-05--logs-en-release--corrigé) |
-| SEN-06 | Action interne `CHECK_ALERT` accessible aux autres apps | PLATFORM-1 | Faible | **Corrigé** | [P3a](P3a_corrections.md#sen-06--action-interne-check_alert-accessible-aux-autres-apps--corrigé) |
-| SEN-07 | Modèle anti-arnaque lisible en clair | RESILIENCE-3 | Info | **Accepté** | [P3a](P3a_corrections.md#sen-07--modèle-anti-arnaque-lisible--accepté) |
+| SEN-06 | Action interne `CHECK_ALERT` accessible aux autres apps | PLATFORM-1 | Faible | **Corrigé** ; code retiré en 1.1.0 | [P3a](P3a_corrections.md#sen-06--action-interne-check_alert-accessible-aux-autres-apps--corrigé) |
+| SEN-07 | Modèle anti-arnaque lisible en clair | RESILIENCE-3 | Info | **Accepté** ; sans objet en 1.1.0 (modèle retiré) | [P3a](P3a_corrections.md#sen-07--modèle-anti-arnaque-lisible--accepté) |
 | SEN-08 | Bibliothèques AndroidX / coroutines anciennes | CODE-3 | Info | **Corrigé** | [P3b](P3b_corrections.md#sen-08--dépendances) |
 | SEN-09 | Code de debug oublié | CODE-4 | Info | **Accepté** (conforme, rien à corriger) | [P1](P1_statique.md#sen-09--code-de-debug-oublié) |
 | SEN-10 | DNS envoyé en clair à Quad9, sans information | NETWORK-1, PRIVACY-3 | Moyenne | **Corrigé** | [P3b](P3b_corrections.md#sen-10--dns-amont-chiffré) |
 | SEN-11 | Pare-feu + DNS privé strict : plus aucun site | NETWORK-1 | Moyenne | **Corrigé** | [P3b](P3b_corrections.md#sen-11--dns-privé-strict) |
-| SEN-12 | Analyse contournée par des caractères d'inversion / invisibles | CODE-4 | Faible | **Corrigé** | [P3a](P3a_corrections.md#sen-12--caractères-invisibles-et-inversion-de-texte--corrigé) |
+| SEN-12 | Analyse contournée par des caractères d'inversion / invisibles | CODE-4 | Faible | **Corrigé** ; analyse des messages retirée en 1.1.0 (normalisation gardée pour les liens) | [P3a](P3a_corrections.md#sen-12--caractères-invisibles-et-inversion-de-texte--corrigé) |
 | SEN-13 | Clé de récupération lisible par l'accessibilité | PLATFORM-3 | Faible | **Corrigé** (Android 14+) | [P3a](P3a_corrections.md#sen-13--clé-de-récupération-lisible-par-laccessibilité--corrigé-android-14) |
 | SEN-14 | Rapports d'analyse en clair, suppression en retard | STORAGE-1 | Info | **Corrigé** | [P3a](P3a_corrections.md#sen-14--rapports-danalyse-en-clair-suppression-en-retard--corrigé) |
 | SEN-15 | Pas d'épinglage de certificat | NETWORK-2 | Info | **Accepté** | [P3a](P3a_corrections.md#sen-15--pas-dépinglage-de-certificat--accepté) |
@@ -109,7 +111,7 @@ Bilan : **15 corrigés et vérifiés, 3 acceptés, 0 restant** (18 constats). SE
 | DNS-over-HTTPS indisponible avant Android 10 | ALPN `h2` requis par Quad9 | DNS-over-TLS reste disponible ; jamais de clair sans accord |
 | Applications avec leur propre DNS chiffré | elles contournent le DNS du système | documenté (SECURITY_DESIGN, limite 23) |
 | Rapport expiré sur le disque jusqu'à environ 1 h (Android 14+) | alarme exacte refusée par défaut | fichier chiffré, jamais relu ni affiché après 24 h |
-| Contournement du modèle anti-arnaque | modèle public, détection statistique | règles indépendantes (liens, marques imitées, caractères cachés) |
+| Lien d'arnaque inconnu des listes (1.1.0) | listes et règles ne connaissent pas les sites tout neufs | verdict « Aucun problème connu » (jamais « sûr »), conseil de prudence, pare-feu DNS |
 | Perte de la clé de publication | dépend du propriétaire | procédure de sauvegarde et Play App Signing ([RELEASE](../RELEASE.md)) |
 
 ## 7. Recommandations
@@ -120,11 +122,11 @@ Bilan : **15 corrigés et vérifiés, 3 acceptés, 0 restant** (18 constats). SE
 
 **Dans la CI**
 3. Garder le scan Gitleaks bloquant (il est de nouveau propre) et ajouter `osv-scanner` sur `pubspec.lock` et sur le classpath Gradle.
-4. Ajouter `test/no_release_logs_test.dart`, `ManifestTest` et `KotlinLogsTest` à la liste des tests obligatoires : ils empêchent le retour de SEN-05 et SEN-06.
+4. Ajouter `test/no_release_logs_test.dart`, `ManifestTest` et `KotlinLogsTest` à la liste des tests obligatoires : ils empêchent le retour de SEN-05 et d'un composant exporté sans protection (SEN-06).
 
 **À moyen terme**
 5. Envisager `minSdk` 29 (Android 10) quand la part d'Android 9 et antérieurs sera négligeable : presse-papiers privé et DoH disponibles partout.
 6. Signer `manifest.json` des listes de blocage avec une clé de l'auteur (protection même contre une autorité de certification compromise, sans épinglage).
-7. Réentraîner le modèle anti-arnaque avec de vrais messages, régulièrement (`ml/`).
+7. ~~Réentraîner le modèle anti-arnaque avec de vrais messages~~ : sans objet depuis la 1.1.0 (modèle retiré de l'app, `ml/` gardé dans le dépôt).
 8. Compléter les tests impossibles dans cet environnement : appareil Android 9 réel (SEN-03), et service d'accessibilité non reconnu comme outil (SEN-13, drapeau `FLAG_NOT_ACCESSIBILITY_TOOL`).
 9. Refaire un audit statique et dynamique (P1 + P2) à chaque version majeure, ou après tout changement du pare-feu, du coffre ou des permissions.

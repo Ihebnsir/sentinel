@@ -39,9 +39,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get commonOff => 'غير مفعّل';
 
   @override
-  String get commonOffFeminine => 'غير مفعّلة';
-
-  @override
   String get commonUnknown => 'غير معروف';
 
   @override
@@ -87,9 +84,6 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get navApps => 'التطبيقات';
-
-  @override
-  String get navMessages => 'الرسائل';
 
   @override
   String get navVault => 'الخزنة';
@@ -256,7 +250,8 @@ class AppLocalizationsAr extends AppLocalizations {
       'التطبيقات المشبوهة: تطبيقات مزيّفة وبرامج تجسس.';
 
   @override
-  String get onboarding1Line3 => 'رسائل الاحتيال، تُحلَّل على الهاتف نفسه.';
+  String get onboarding1Line3 =>
+      'مدقّق روابط: إلى أين يؤدي الرابط فعلًا، قبل فتحه.';
 
   @override
   String get onboarding1Line4 => 'خزنة مشفّرة لكلمات المرور.';
@@ -270,11 +265,11 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get onboarding2Line1 =>
-      'لا حساب ولا إعلانات ولا إحصاءات. رسائلك وكلمات مرورك وقائمة تطبيقاتك لا تغادر الهاتف، إلا رسالة تختار الإبلاغ عنها.';
+      'لا حساب ولا إعلانات ولا إحصاءات. الروابط التي تتحقق منها وكلمات مرورك وقائمة تطبيقاتك لا تغادر الهاتف.';
 
   @override
   String get onboarding2Line2 =>
-      'هناك أربعة اتصالات بالشبكة فقط، كلها اختيارية، ولا تحدث إلا إذا فعّلتها:';
+      'هناك ثلاثة اتصالات بالشبكة فقط، كلها اختيارية، ولا تحدث إلا إذا فعّلتها:';
 
   @override
   String get onboarding2Line3 =>
@@ -288,10 +283,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get onboarding2Line5 => '• تحديث قوائم الحظر: تنزيل بسيط من ⁦GitHub⁩.';
 
   @override
-  String get onboarding2Line6 =>
-      '• الإبلاغ عن رسالة: النص بعد إخفاء البيانات الشخصية، تراجعه بنفسك، ولا يُرسَل إلا عندما تلمس «إرسال».';
-
-  @override
   String get onboarding3Title => 'الأذونات في الوقت المناسب';
 
   @override
@@ -299,7 +290,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get onboarding3Line2 =>
-      'يُطلب كل إذن (الإشعارات، الوصول إلى الإشعارات، ⁦VPN⁩، البصمة) فقط عندما تفعّل الميزة التي تحتاجه، مع شرح.';
+      'يُطلب كل إذن (الإشعارات، ⁦VPN⁩، الكاميرا، البصمة) فقط عندما تفعّل الميزة التي تحتاجه، مع شرح.';
 
   @override
   String get onboarding3Line3 => 'يمكنك إيقاف كل شيء في أي وقت.';
@@ -309,11 +300,11 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get privacyBrief1 =>
-      'لا يملك ⁦Sentinel⁩ أي حساب ولا إعلانات ولا إحصاءات استخدام ولا تقارير أعطال. تتم جميع التحليلات على الهاتف. لا يتلقى الخادم إلا الرسائل التي تختار الإبلاغ عنها، واحدة تلو الأخرى.';
+      'لا يملك ⁦Sentinel⁩ أي حساب ولا إعلانات ولا إحصاءات استخدام ولا تقارير أعطال. تتم جميع عمليات التحقق على الهاتف: لا تُرسَل أي رسالة ولا أي رابط إلى خادم.';
 
   @override
   String get privacyBrief2 =>
-      'لا يتصل ⁦Sentinel⁩ بالإنترنت إلا من أجل الميزات الاختيارية الأربع المذكورة أدناه، وبعد موافقتك فقط.';
+      'لا يتصل ⁦Sentinel⁩ بالإنترنت إلا من أجل الميزات الاختيارية الثلاث المذكورة أدناه، وبعد موافقتك فقط.';
 
   @override
   String get privacyNetworkTitle => 'الاتصالات الوحيدة بالشبكة (اختيارية)';
@@ -335,10 +326,6 @@ class AppLocalizationsAr extends AppLocalizations {
       'تُفتح روابط «فتح الموقع» (النصائح، المصادر، تقرير التدقيق) في متصفّحك، فقط عندما تلمسها.';
 
   @override
-  String get privacyNetwork5 =>
-      '4. الإبلاغ عن رسالة (تبويب الرسائل، عندما تكون الخدمة متاحة). لا يُرسَل أي شيء تلقائيًا: تلمس «الإبلاغ عن هذه الرسالة»، وتراجع النص بعد إخفاء بياناته الشخصية على الهاتف (الأرقام، البريد الإلكتروني، ⁦IBAN⁩، البطاقات، الرموز؛ ولا يُحتفظ من الروابط إلا بالنطاق)، ويمكنك تعديله، ثم تلمس «إرسال». يُرسَل: هذا النص، ورأيك، وحكم ⁦Sentinel⁩ واحتماله، واللغة، وإصدار التطبيق؛ لا رقم ولا معرّف للهاتف. يُخفي الخادم البيانات الشخصية مرة أخرى، ولا يحتفظ بعنوان ⁦IP⁩ ولا بالساعة (اليوم فقط)، ويراجع شخصٌ كل بلاغ قبل استخدامه لتحسين الكشف.';
-
-  @override
   String get privacyLocalTitle => 'ما يبقى على الهاتف';
 
   @override
@@ -347,7 +334,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get privacyLocal2 =>
-      'اختياراتك: الموافقة على التحقق من التسريبات، إعدادات جدار الحماية وقائمة المواقع المسموح بها، تفعيل الحماية التلقائية أو عدمه، مشاهدة التعريف بالتطبيق، اللغة، المظهر.';
+      'اختياراتك: الموافقة على التحقق من التسريبات، إعدادات جدار الحماية وقائمة المواقع المسموح بها، مشاهدة التعريف بالتطبيق، اللغة، المظهر.';
 
   @override
   String get privacyLocal3 => 'قوائم الحظر وتحديثاتها.';
@@ -361,15 +348,11 @@ class AppLocalizationsAr extends AppLocalizations {
       'النسخ الاحتياطي في أندرويد معطَّل: لا يُرسَل أي شيء إلى السحابة. لا تُنشأ نسخة احتياطية من الخزنة (ملف ⁦.sentinel⁩ مشفّر) إلا إذا طلبتها، وفي المكان الذي تختاره.';
 
   @override
-  String get privacyLocal6 =>
-      'أوقات بلاغاتك خلال الساعة الأخيرة، من أجل حدّ 5 بلاغات في الساعة (دون محتواها أبدًا).';
-
-  @override
   String get privacyNeverTitle => 'ما لا يسجّله ⁦Sentinel⁩ أبدًا';
 
   @override
   String get privacyNever1 =>
-      'نص الرسائل ورموز ⁦QR⁩ التي يتم تحليلها (الملصوقة أو المشارَكة أو الممسوحة أو المقروءة من الإشعارات): يُحلَّل في الذاكرة ثم يُنسى. لا تُحفظ صورة الكاميرا أبدًا. لا تُرسَل إلا الرسائل التي تبلّغ عنها بنفسك (البند 4)، دون الاحتفاظ بنسخة منها على الهاتف.';
+      'الروابط والنصوص ورموز ⁦QR⁩ التي تتحقق منها (الملصوقة أو المشارَكة أو المحدّدة أو الممسوحة): يُتحقَّق منها في الذاكرة ثم تُنسى، ولا تُرسَل أبدًا. لا تُحفظ صورة الكاميرا أبدًا.';
 
   @override
   String get privacyNever2 =>
@@ -388,11 +371,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get privacyPermissions2 =>
-      'الإشعارات: يُطلب هذا الإذن عند تفعيل الحماية التلقائية أو جدار الحماية، لعرض التنبيهات.';
-
-  @override
-  String get privacyPermissions3 =>
-      'الوصول إلى الإشعارات: إعداد في أندرويد تفتحه بنفسك من أجل الحماية التلقائية، ويقرأ ⁦Sentinel⁩ الرسائل الواردة للبحث فيها عن عمليات احتيال.';
+      'الإشعارات: يُطلب هذا الإذن عند تفعيل جدار الحماية أو إشعار حصيلة الأسبوع، لعرض التنبيهات.';
 
   @override
   String get privacyPermissions4 =>
@@ -411,7 +390,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get privacyErase1 =>
-      'إلغاء تثبيت ⁦Sentinel⁩ يمحو كل ما سجّله على الهاتف. لا يوجد في مكان آخر إلا البلاغات التي أرسلتها، وهي غير مرتبطة بك ولا بهاتفك.';
+      'إلغاء تثبيت ⁦Sentinel⁩ يمحو كل ما سجّله على الهاتف. لا توجد أي نسخة في مكان آخر: لا يرسل ⁦Sentinel⁩ بياناتك إلى أي خادم.';
 
   @override
   String get auditFrameTitle => 'إطار التدقيق';
@@ -450,39 +429,15 @@ class AppLocalizationsAr extends AppLocalizations {
   String get auditReadFull => 'قراءة التقرير الكامل على ⁦GitHub⁩';
 
   @override
-  String get verdictScam => 'احتيال محتمل';
-
-  @override
   String get verdictSuspect => 'مشبوه';
 
   @override
-  String get verdictNothing => 'لا شيء مشبوه';
-
-  @override
-  String get adviceScam =>
-      'لا تضغط على الرابط ولا تشارك أي رمز. لن يطلب منك البنك أو البريد أبدًا الدفع عبر رسالة ⁦SMS⁩. احذف هذه الرسالة.';
-
-  @override
   String get adviceSuspect =>
-      'كن حذرًا: لا تفتح الرابط ولا تقدّم أي معلومة. إذا ساورك الشك، فاتصل بالجهة المعنية على الرقم المذكور في موقعها الرسمي.';
-
-  @override
-  String get adviceNothing =>
-      'لم يُعثر على أي علامة احتيال. ابقَ يقظًا مع ذلك: لا تشارك رموزك أو كلمات مرورك أبدًا.';
+      'كن حذرًا: لا تفتح هذا الرابط إلا إذا كنت تعرف المرسِل وكنت تنتظر هذه الرسالة. إذا ساورك الشك، فاكتب بنفسك عنوان الموقع الرسمي.';
 
   @override
   String get reasonHiddenCharacters =>
       'أحرف غير مرئية أو تعكس اتجاه النص (أسلوب احتيال)';
-
-  @override
-  String reasonScamWords(String words) {
-    return 'كلمات معتادة في رسائل الاحتيال: $words';
-  }
-
-  @override
-  String reasonQuotedWord(String word) {
-    return '«⁨$word⁩»';
-  }
 
   @override
   String get listSeparator => '، ';
@@ -524,181 +479,6 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get reasonLinkHttp => 'الرابط غير آمن (⁦http⁩ بدلًا من ⁦https⁩)';
-
-  @override
-  String get messagesHint => 'الصق رسالة ⁦SMS⁩ أو رسالة واتساب أو رابطًا';
-
-  @override
-  String get messagesPaste => 'لصق';
-
-  @override
-  String get messagesClear => 'مسح';
-
-  @override
-  String get messagesAnalyze => 'تحليل';
-
-  @override
-  String get messagesFailed => 'فشل التحليل. حاول مرة أخرى.';
-
-  @override
-  String get messagesLocalNote =>
-      'يتم التحليل على هاتفك، ولا تُرسَل الرسالة إلى أي مكان.';
-
-  @override
-  String get messagesLocalNoteReport =>
-      'يتم التحليل على هاتفك، ولا تُرسَل الرسالة إلى أي مكان، إلا إذا اخترت الإبلاغ عنها.';
-
-  @override
-  String get reportButton => 'الإبلاغ عن هذه الرسالة';
-
-  @override
-  String get reportTitle => 'الإبلاغ عن هذه الرسالة';
-
-  @override
-  String get reportIntro =>
-      'ساعد ⁦Sentinel⁩ على التعرّف على الاحتيال بشكل أفضل: راجع هذه الرسالة، ثم أرسلها. لا يُرسَل أي شيء دون موافقتك.';
-
-  @override
-  String get reportPreviewLabel => 'النص المُرسَل (بعد إخفاء البيانات الشخصية)';
-
-  @override
-  String get reportReminder =>
-      'تأكّد من أنه لم يبقَ أي اسم أو عنوان أو معلومة شخصية. يمكنك تعديل النص.';
-
-  @override
-  String get reportQuestion => 'رأيك';
-
-  @override
-  String get reportFeedbackScam => 'إنها عملية احتيال';
-
-  @override
-  String get reportFeedbackNotScam => 'ليست عملية احتيال';
-
-  @override
-  String get reportFeedbackUnsure => 'لا أعرف';
-
-  @override
-  String get reportSentTitle => 'ما يُرسَل';
-
-  @override
-  String get reportSentText =>
-      'النص أعلاه، ورأيك، وحكم ⁦Sentinel⁩ واحتماله، ولغة الرسالة، وإصدار التطبيق.';
-
-  @override
-  String get reportWhereTitle => 'إلى أين ولماذا';
-
-  @override
-  String reportWhereText(String host) {
-    return 'إلى خادم ⁦Sentinel⁩ (⁨$host⁩)، لتحسين كشف الاحتيال. يراجع شخصٌ كل بلاغ قبل استخدامه في تدريب النموذج.';
-  }
-
-  @override
-  String get reportNotSentTitle => 'ما لا يُرسَل';
-
-  @override
-  String get reportNotSentText =>
-      'لا رقمك، ولا رقم المرسِل، ولا أي معرّف للهاتف، ولا موقعك، ولا أي حساب. لا يحتفظ الخادم بعنوان ⁦IP⁩ الخاص بك ولا يسجّل إلا يوم الإرسال.';
-
-  @override
-  String get reportSend => 'إرسال';
-
-  @override
-  String get reportSending => 'جارٍ الإرسال…';
-
-  @override
-  String get reportWakingServer =>
-      'جارٍ إيقاظ الخادم، يُرجى الانتظار… (حتى دقيقة واحدة)';
-
-  @override
-  String get reportRetry => 'إعادة المحاولة';
-
-  @override
-  String get reportThanks => 'شكرًا، سيساعد بلاغك على تحسين الكشف.';
-
-  @override
-  String get reportErrorOffline =>
-      'تعذّر الاتصال بالخادم. تحقّق من اتصالك بالإنترنت، ثم أعد المحاولة.';
-
-  @override
-  String get reportErrorTimeout =>
-      'لم يستجب الخادم حتى بعد دقيقة. أعد المحاولة بعد قليل.';
-
-  @override
-  String get reportErrorTooMany =>
-      'بلاغات كثيرة جدًا حاليًا (5 في الساعة على الأكثر). أعد المحاولة لاحقًا.';
-
-  @override
-  String get reportErrorRejected =>
-      'رفض الخادم هذا البلاغ. تحقّق من النص، ثم أعد المحاولة.';
-
-  @override
-  String get reportErrorServer => 'خطأ في الخادم. أعد المحاولة لاحقًا.';
-
-  @override
-  String messagesProbability(String percent) {
-    return 'احتمال الاحتيال: ‎$percent%';
-  }
-
-  @override
-  String get alertDefaultReason =>
-      'تشبه هذه الرسالة عمليات الاحتيال المعروفة. لا تضغط على أي رابط.';
-
-  @override
-  String get alertTitleSms => 'احتيال محتمل في رسالة ⁦SMS⁩';
-
-  @override
-  String get alertTitleMessage => 'احتيال محتمل في رسالة';
-
-  @override
-  String alertTitleApp(String app) {
-    return 'احتيال محتمل على ⁨$app⁩';
-  }
-
-  @override
-  String get autoProtectionTitle => 'الحماية التلقائية';
-
-  @override
-  String get autoProtectionOn =>
-      'يحلّل الرسائل الواردة وينبّهك في حال وجود احتيال.';
-
-  @override
-  String get autoProtectionNotificationsBlocked =>
-      'إشعارات ⁦Sentinel⁩ محظورة: لن يتم تنبيهك في حال وجود احتيال.';
-
-  @override
-  String get autoProtectionAllowNotifications => 'السماح بإشعارات ⁦Sentinel⁩';
-
-  @override
-  String get autoProtectionRemoveAccess =>
-      'إزالة الوصول أيضًا من إعدادات أندرويد';
-
-  @override
-  String get autoProtectionPlayOnly =>
-      'متوفرة في نسخة ⁦Sentinel⁩ على ⁦Google Play⁩. هنا، افحص الرسالة بمشاركتها مع ⁦Sentinel⁩ أو بلصقها في الأسفل.';
-
-  @override
-  String get autoProtectionDoesTitle => 'ما يفعله ⁦Sentinel⁩';
-
-  @override
-  String get autoProtectionDoes1 => 'يقرأ نص إشعارات تطبيقات المراسلة لديك.';
-
-  @override
-  String get autoProtectionDoes2 => 'يحلّله على هاتفك.';
-
-  @override
-  String get autoProtectionDoes3 => 'ينبّهك إذا كان احتيالًا.';
-
-  @override
-  String get autoProtectionNeverTitle => 'ما لا يفعله ⁦Sentinel⁩ أبدًا';
-
-  @override
-  String get autoProtectionNever1 => 'إرسال رسائلك عبر الإنترنت.';
-
-  @override
-  String get autoProtectionNever2 => 'حفظها.';
-
-  @override
-  String get autoProtectionNever3 => 'قراءة إشعارات التطبيقات الأخرى.';
 
   @override
   String get wifiLevelDanger => 'خطر';
@@ -2798,7 +2578,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get qrActionPayment => 'الفتح في تطبيق دفع';
 
   @override
-  String get qrActionBlocked => 'حظره ⁦Sentinel⁩: احتيال محتمل.';
+  String get qrActionBlocked => 'حظره ⁦Sentinel⁩: رابط خطير.';
 
   @override
   String get qrActionFailed =>
@@ -2862,15 +2642,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get weeklyBlockedTotal => 'المجموع';
 
   @override
-  String get weeklyMessages => 'الرسائل';
-
-  @override
-  String get weeklyMessagesAnalyzed => 'رسائل تم فحصها';
-
-  @override
-  String get weeklyScamAlerts => 'تنبيهات احتيال';
-
-  @override
   String get weeklyApps => 'التطبيقات';
 
   @override
@@ -2893,7 +2664,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get weeklyPrivacyNote =>
-      'عدّادات فقط، تُحفظ على هذا الهاتف لمدة 8 أسابيع ثم تُحذف. لا يُحفظ أي موقع ولا رسالة ولا اسم شبكة ⁦Wi-Fi⁩.';
+      'عدّادات فقط، تُحفظ على هذا الهاتف لمدة 8 أسابيع ثم تُحذف. لا يُحفظ أي موقع ولا رابط ولا اسم شبكة ⁦Wi-Fi⁩.';
 
   @override
   String get weeklyAndroidOnly => 'حصيلة الأسبوع متاحة على أندرويد.';
@@ -2907,4 +2678,96 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get settingsWeeklyNotificationDenied =>
       'الإشعارات مرفوضة: فعّلها من إعدادات أندرويد.';
+
+  @override
+  String get navLinks => 'الروابط';
+
+  @override
+  String get linksIntro =>
+      'تحقّق من الرابط قبل فتحه: إلى أين يؤدي فعلًا، وهل هو معروف بأنه خطير.';
+
+  @override
+  String get linksHint => 'الصق رابطًا، أو رسالة تحتوي على رابط';
+
+  @override
+  String get linksPaste => 'لصق';
+
+  @override
+  String get linksClear => 'مسح';
+
+  @override
+  String get linksCheck => 'تحقّق';
+
+  @override
+  String get linksChecking => 'جارٍ التحقق…';
+
+  @override
+  String get linksNoLink => 'لم يُعثر على أي رابط في هذا النص.';
+
+  @override
+  String get linksFailed => 'فشل التحقق. أعد المحاولة.';
+
+  @override
+  String get linksLocalNote =>
+      'يتم التحقق على هاتفك. لا يُرسَل أي شيء ولا يُحفظ أي شيء.';
+
+  @override
+  String linksRealDestination(String domain) {
+    return 'هذا الرابط يؤدي في الحقيقة إلى ⁨$domain⁩';
+  }
+
+  @override
+  String get linksShortenerHelp =>
+      'لا يفتح ⁦Sentinel⁩ الرابط المختصر لمعرفة وجهته، فذلك يعني الاتصال بالموقع فعلًا. لا تفتحه إلا إذا كنت تعرف المرسِل.';
+
+  @override
+  String get linksOpenBlocked => 'الفتح معطّل: هذا الرابط خطير.';
+
+  @override
+  String get linksAutoTitle => 'حماية تلقائية عند النقر على رابط';
+
+  @override
+  String get linksAutoOn =>
+      'مفعّلة: يحظر جدار الحماية المواقع الخطيرة المعروفة، حتى عند فتحها من رسالة ⁦SMS⁩ أو ⁦WhatsApp⁩.';
+
+  @override
+  String get linksAutoOff =>
+      'غير مفعّلة: فعّل جدار الحماية لحظر المواقع الخطيرة المعروفة، حتى دون المرور عبر ⁦Sentinel⁩.';
+
+  @override
+  String get linksAutoEnable => 'تفعيل';
+
+  @override
+  String linkReasonListed(String host) {
+    return '«⁨$host⁩» موجود في قائمة المواقع الخطيرة (تصيّد، برمجيات خبيثة)';
+  }
+
+  @override
+  String linkReasonAllowed(String host) {
+    return 'لقد سمحت بـ«⁨$host⁩» في جدار الحماية (القائمة البيضاء): لا يتحقق منه ⁦Sentinel⁩.';
+  }
+
+  @override
+  String get linkReasonNotListed =>
+      'غير موجود في قوائم المواقع الخطيرة لدى ⁦Sentinel⁩';
+
+  @override
+  String get verdictDangerous => 'خطير';
+
+  @override
+  String get verdictNothingKnown => 'لا مشكلة معروفة';
+
+  @override
+  String get adviceDangerous =>
+      'لا تفتح هذا الرابط ولا تُدخل أي رمز أو كلمة مرور. احذف الرسالة التي تحتوي عليه.';
+
+  @override
+  String get adviceNothingKnown =>
+      'لا يوجد تحقق مثالي: بعد فتح رابط وصلك، لا تقدّم أبدًا رموزك ولا كلمات مرورك.';
+
+  @override
+  String get weeklyLinks => 'الروابط';
+
+  @override
+  String get weeklyLinksChecked => 'روابط تم التحقق منها';
 }

@@ -57,6 +57,12 @@ object FirewallEngine {
     private var protectedCache: Set<String>? = null
     private var brandsCache: List<KnownBrand>? = null
 
+    // Liste « Malware » lue pour l'onglet Liens quand le VPN est arrêté,
+    // libérée quelques minutes après la dernière vérification.
+    private var checkList: CategoryList? = null
+    private var releaseCheckList: ScheduledFuture<*>? = null
+    private const val CHECK_LIST_MINUTES = 3L
+
     /** Le VPN démarre : remise à zéro et chargement en arrière-plan. */
     fun onVpnStarted(context: Context) {
         blockedByCategory.values.forEach { it.set(0) }
@@ -120,6 +126,45 @@ object FirewallEngine {
             allowlist = DomainSet.of(settings.allowlist()),
             testDomain = if (isDebug(context)) TEST_DOMAIN else null,
             brands = brands(context),
+        )
+    }
+
+    /**
+     * Onglet Liens : le domaine est-il autorisé (liste blanche) ou connu
+     * comme dangereux (liste Malware) ? Marche aussi VPN arrêté. Rien n'est
+     * enregistré. [onDone] est appelé sur le thread des listes, avec null
+     * si le domaine est invalide ou si la lecture a échoué.
+     */
+    fun checkDomain(context: Context, domain: String, onDone: (Map<String, Any>?) -> Unit) {
+        val app = context.applicationContext
+        worker.execute {
+            val result = try {
+                lookup(app, domain)
+            } catch (e: Exception) {
+                null
+            }
+            onDone(result)
+        }
+    }
+
+    private fun lookup(context: Context, domain: String): Map<String, Any>? {
+        // Liste déjà en mémoire si le pare-feu tourne, sinon lue une fois.
+        val malware = loaded[BlockCategory.MALWARE]
+            ?: checkList
+            ?: loadCategory(context, BlockCategory.MALWARE).also { checkList = it }
+        releaseCheckList?.cancel(false)
+        releaseCheckList = worker.schedule({ checkList = null }, CHECK_LIST_MINUTES, TimeUnit.MINUTES)
+        val check = LinkLookup.check(
+            domain,
+            DomainSet.of(FirewallSettings(context).allowlist()),
+            malware,
+            testDomain = if (isDebug(context)) TEST_DOMAIN else null,
+        ) ?: return null
+        return mapOf(
+            "domain" to check.domain,
+            "allowed" to check.allowed,
+            "dangerous" to check.dangerous,
+            "listsAvailable" to (malware.size > 0),
         )
     }
 

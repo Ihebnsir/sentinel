@@ -133,10 +133,13 @@ class _WeeklyReportScreenState extends State<WeeklyReportScreen> {
           ],
         ),
         _Section(
-          title: l.weeklyMessages,
+          title: l.weeklyLinks,
           rows: [
-            _Line(l.weeklyMessagesAnalyzed, week.messages, previous?.messages),
-            _Line(l.weeklyScamAlerts, week.scamAlerts, previous?.scamAlerts),
+            _Line(
+              l.weeklyLinksChecked,
+              week.linksChecked,
+              previous?.linksChecked,
+            ),
           ],
         ),
         _Section(

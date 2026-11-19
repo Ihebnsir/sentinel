@@ -31,19 +31,19 @@ class WeeklyLedgerTest {
     @Test
     fun `les compteurs s'additionnent dans la bonne semaine`() {
         var weeks = WeeklyLedger.add(emptyList(), monday, mapOf("blocked_trackers" to 5L))
-        weeks = WeeklyLedger.add(weeks, monday, mapOf("blocked_trackers" to 3L, "messages" to 1L))
-        weeks = WeeklyLedger.add(weeks, monday - 7, mapOf("messages" to 2L))
+        weeks = WeeklyLedger.add(weeks, monday, mapOf("blocked_trackers" to 3L, "links_checked" to 1L))
+        weeks = WeeklyLedger.add(weeks, monday - 7, mapOf("links_checked" to 2L))
         val current = weeks.single { it.week == monday }
         assertEquals(8L, current.counters["blocked_trackers"])
-        assertEquals(1L, current.counters["messages"])
-        assertEquals(2L, weeks.single { it.week == monday - 7 }.counters["messages"])
+        assertEquals(1L, current.counters["links_checked"])
+        assertEquals(2L, weeks.single { it.week == monday - 7 }.counters["links_checked"])
     }
 
     @Test
     fun `cles inconnues et valeurs absurdes refusees`() {
         val weeks = WeeklyLedger.add(
             emptyList(), monday,
-            mapOf("exemple.com" to 1L, "wifi_Maison" to 1L, "messages" to -4L, "scam_alerts" to 0L),
+            mapOf("exemple.com" to 1L, "wifi_Maison" to 1L, "links_checked" to -4L, "blocked_ads" to 0L),
         )
         assertTrue(weeks.isEmpty())
         assertTrue(WeeklyLedger.setGauge(emptyList(), monday, "nom_reseau", 3).isEmpty())
@@ -72,7 +72,7 @@ class WeeklyLedgerTest {
     @Test
     fun `effacement apres 8 semaines`() {
         var weeks = emptyList<WeekStats>()
-        for (i in 0..11) weeks = WeeklyLedger.add(weeks, monday - i * 7L, mapOf("messages" to 1L))
+        for (i in 0..11) weeks = WeeklyLedger.add(weeks, monday - i * 7L, mapOf("links_checked" to 1L))
         val kept = WeeklyLedger.prune(weeks, monday)
         assertEquals(8, kept.size)
         assertEquals(monday - 49, kept.first().week) // 7 semaines avant
@@ -86,9 +86,9 @@ class WeeklyLedgerTest {
     @Test
     fun `semaines du futur et semaines vides effacees`() {
         val weeks = listOf(
-            WeekStats(monday + 7, counters = mapOf("messages" to 1L)), // horloge avancée
+            WeekStats(monday + 7, counters = mapOf("links_checked" to 1L)), // horloge avancée
             WeekStats(monday),
-            WeekStats(monday - 7, counters = mapOf("messages" to 1L)),
+            WeekStats(monday - 7, counters = mapOf("links_checked" to 1L)),
         )
         assertEquals(listOf(monday - 7), WeeklyLedger.prune(weeks, monday).map { it.week })
     }
@@ -100,9 +100,9 @@ class WeeklyLedgerTest {
         weeks = WeeklyLedger.recordScore(weeks, monday, 66)
         assertEquals(weeks, WeeklyLedger.fromJson(WeeklyLedger.toJson(weeks)))
 
-        val forged = """[{"w":$monday,"c":{"messages":2,"site.com":9},"g":{"ssid":1}}]"""
+        val forged = """[{"w":$monday,"c":{"links_checked":2,"site.com":9},"g":{"ssid":1}}]"""
         val read = WeeklyLedger.fromJson(forged).single()
-        assertEquals(mapOf("messages" to 2L), read.counters)
+        assertEquals(mapOf("links_checked" to 2L), read.counters)
         assertTrue(read.gauges.isEmpty())
         assertTrue(WeeklyLedger.fromJson("pas du json").isEmpty())
         assertTrue(WeeklyLedger.fromJson(null).isEmpty())
@@ -110,16 +110,16 @@ class WeeklyLedgerTest {
 
     @Test
     fun `instantane semaine en cours et precedente`() {
-        val weeks = WeeklyLedger.add(emptyList(), monday - 7, mapOf("messages" to 4L))
+        val weeks = WeeklyLedger.add(emptyList(), monday - 7, mapOf("links_checked" to 4L))
         val snapshot = WeeklyLedger.snapshot(weeks, monday)
         assertEquals(monday, (snapshot["current"] as Map<*, *>)["week"])
-        assertEquals(mapOf("messages" to 4L), (snapshot["previous"] as Map<*, *>)["counters"])
+        assertEquals(mapOf("links_checked" to 4L), (snapshot["previous"] as Map<*, *>)["counters"])
         assertNull(WeeklyLedger.snapshot(emptyList(), monday)["previous"])
     }
 
     @Test
     fun `notification une fois par semaine, le lundi des 9 h`() {
-        val previous = WeekStats(monday - 7, counters = mapOf("messages" to 1L))
+        val previous = WeekStats(monday - 7, counters = mapOf("links_checked" to 1L))
         assertTrue(WeeklyLedger.shouldNotify(true, monday, monday - 7, 9, previous))
         assertFalse(WeeklyLedger.shouldNotify(true, monday, monday - 7, 8, previous)) // trop tôt
         assertFalse(WeeklyLedger.shouldNotify(true, monday, monday, 10, previous)) // déjà envoyée

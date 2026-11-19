@@ -13,7 +13,7 @@ import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 
 /**
- * Scanner de QR code (onglet Messages), avec ZXing (zxing-android-embedded) :
+ * Scanner de QR code (onglet Liens), avec ZXing (zxing-android-embedded) :
  * tout est décodé sur le téléphone, sans réseau. La caméra n'est demandée
  * qu'au moment du scan, après l'explication affichée par Dart.
  * Le contenu scanné n'est jamais journalisé ni ouvert automatiquement.

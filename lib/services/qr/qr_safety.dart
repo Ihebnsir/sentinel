@@ -1,17 +1,16 @@
 import '../../l10n/l10n.dart';
 import '../../models/wifi_status.dart';
-import '../phishing/message_analyzer.dart';
-import '../phishing/phishing_model.dart';
+import '../links/link_checker.dart';
 import 'qr_content.dart';
 
 /// Gravité d'un avertissement propre aux QR codes.
 enum QrSeverity {
-  danger, // « Arnaque probable », action interdite
+  danger, // « Dangereux », action interdite
   prudence, // au moins « Suspect »
   info, // à lire, ne change pas le verdict
 }
 
-/// Avertissements propres aux QR codes (en plus de l'analyse du texte).
+/// Avertissements propres aux QR codes (en plus de la vérification du lien).
 enum QrWarning {
   lienDangereux(QrSeverity.danger), // javascript:, intent:, file:…
   codeUssd(QrSeverity.danger), // * ou # dans un numéro à appeler
@@ -41,7 +40,7 @@ enum QrAction { ouvrirLien, appeler, envoyerSms, ouvrirPaiement }
 class QrAssessment {
   const QrAssessment({
     required this.content,
-    this.analysis,
+    this.link,
     this.warnings = const [],
     this.verdict,
     this.action,
@@ -49,11 +48,11 @@ class QrAssessment {
   });
 
   final QrContent content;
-  final MessageAnalysis? analysis; // analyse du lien ou du texte, sinon null
+  final LinkCheck? link; // vérification du lien trouvé, sinon null
   final List<QrWarning> warnings;
   final Verdict? verdict; // null : rien à juger (numéro, Wi-Fi…)
   final QrAction? action; // null : aucune action proposée
-  final bool actionAllowed; // false : bouton désactivé (arnaque probable)
+  final bool actionAllowed; // false : bouton désactivé (lien dangereux)
 
   /// Statut Wi-Fi équivalent, pour réutiliser assessWifi (wifi_risk.dart).
   WifiStatus? get wifiStatus => switch (content) {
@@ -62,23 +61,26 @@ class QrAssessment {
   };
 }
 
-/// Le texte à analyser comme un message (lien ou texte), sinon null.
-String? textToAnalyze(QrContent content) => switch (content) {
+/// Le texte où chercher un lien (lien, texte ou SMS), sinon null.
+String? textToCheck(QrContent content) => switch (content) {
   QrLink(:final url) => url,
   QrText(:final raw) when raw.trim().isNotEmpty => raw,
   QrSms(:final body) when body.isNotEmpty => body,
   _ => null,
 };
 
-/// Décide du verdict et de l'action. Fonction pure : [predict] est l'IA
-/// anti-arnaque (remplacée par un faux modèle dans les tests).
+/// Domaine du lien à demander aux listes du pare-feu, sinon null.
+String? hostToCheck(QrContent content) {
+  final text = textToCheck(content);
+  return text == null ? null : extractFirstLink(text)?.host;
+}
+
+/// Décide du verdict et de l'action. Fonction pure : [lists] est la
+/// réponse du pare-feu pour [hostToCheck] (null si non consulté).
 /// Jamais d'ouverture automatique : l'action est seulement proposée.
-QrAssessment assessQr(
-  QrContent content,
-  PhishingPrediction Function(String text) predict,
-) {
-  final text = textToAnalyze(content);
-  final analysis = text == null ? null : analyzeMessage(text, predict(text));
+QrAssessment assessQr(QrContent content, {DomainCheck? lists}) {
+  final text = textToCheck(content);
+  final link = text == null ? null : checkText(text, lists: lists);
 
   final warnings = <QrWarning>[
     ...switch (content) {
@@ -96,10 +98,10 @@ QrAssessment assessQr(
   ];
 
   final verdict = _worst([
-    analysis?.verdict,
+    link?.verdict,
     for (final w in warnings)
       switch (w.severity) {
-        QrSeverity.danger => Verdict.arnaque,
+        QrSeverity.danger => Verdict.dangereux,
         QrSeverity.prudence => Verdict.suspect,
         QrSeverity.info => null,
       },
@@ -115,12 +117,12 @@ QrAssessment assessQr(
 
   return QrAssessment(
     content: content,
-    analysis: analysis,
+    link: link,
     warnings: warnings,
     verdict: verdict,
     action: action,
-    // « Arnaque probable » : le bouton reste visible mais désactivé.
-    actionAllowed: action != null && verdict != Verdict.arnaque,
+    // « Dangereux » : le bouton reste visible mais désactivé.
+    actionAllowed: action != null && verdict != Verdict.dangereux,
   );
 }
 

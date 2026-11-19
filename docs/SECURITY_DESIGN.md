@@ -12,7 +12,7 @@ Sentinel is a personal project. It has **not** had an independent security audit
 |---|---|
 | Vault contents (passwords, secure notes) | Direct access to the user's accounts |
 | Vault keys: master password, DEK, recovery key | Whoever has one of them can read the vault |
-| Message content read by automatic protection | Private conversations, verification codes |
+| Links the user checks | Can reveal what the user receives or visits |
 | Device and app inventory | Shows what is installed and how the phone is configured |
 | The user's money and accounts | The final target of scams (phishing SMS, fake bank or postal links) |
 | DNS queries (domain names asked by apps) | Amount to the user's browsing history |
@@ -20,9 +20,10 @@ Sentinel is a personal project. It has **not** had an independent security audit
 
 ## 2. Principles
 
-- **Local first.** No account, no analytics. Every analysis runs on the device. The only Sentinel server receives scam reports, and only the messages the user chooses to report, one by one (see 3.10).
-- **Least data.** Message text is never logged or stored. Wi-Fi checks never read the SSID/BSSID and never ask for the location permission. The DNS firewall keeps two counters, never a domain name.
-- **Explicit consent** for the network features (breach check; DNS firewall, which forwards DNS queries to Quad9) and for the notification listener.
+- **Local first.** No account, no analytics, no Sentinel server. Every check runs on the device. Since 1.1.0 the app sends no message and no link anywhere (the "Messages" tab, automatic protection and scam reports were removed).
+- **Least data.** Checked links are never logged or stored (only a weekly counter). Wi-Fi checks never read the SSID/BSSID and never ask for the location permission. The DNS firewall keeps two counters, never a domain name.
+- **Explicit consent** for the network features (breach check; DNS firewall, which forwards DNS queries to Quad9; blocklist updates).
+- **No access that Play Protect blocks.** No notification listener, accessibility service or SMS permission: a Gradle task (`checkPlayProtect*`) fails the build and the Kotlin tests if the merged manifest declares one.
 - **Fail closed.** Wrong key, modified header or modified ciphertext all lead to an authentication error, never to partially decrypted data.
 - **Explainability.** Every risk score and verdict lists its reasons, so users can judge for themselves.
 
@@ -41,7 +42,7 @@ Sentinel is a personal project. It has **not** had an independent security audit
 | Fingerprint unlock needs `BIOMETRIC_STRONG` on every use, and the key is invalidated when a new fingerprint is enrolled (so a thief can't add their own) | `VaultBiometric.kt` |
 | Master password required again after 7 days, or if the stored date is more than a day in the future (clock tampering) | `VaultFile.needsPassword` |
 | `FLAG_SECURE` on the vault tab: the vault is hidden in the recent-apps preview | `VaultProtection.setSecure` |
-| Scam alerts show a neutral public version on the lock screen | `ScamAlertNotifier.kt` |
+| Firewall alerts are private on the lock screen | `FirewallAlertNotifier.kt` |
 
 ### 3.2 Malicious app on the same phone
 
@@ -54,8 +55,7 @@ Sentinel is a personal project. It has **not** had an independent security audit
 | Copied secrets are marked `EXTRA_IS_SENSITIVE` (Android 13+) and cleared after 30 s, but only if the clipboard still holds the same value (retried on resume, because Android blocks background clipboard reads) | `vault_platform.dart` (`ClipboardGuard`) |
 | Vault file stored in the app's private directory | `vault_storage.dart` |
 | Screen-off receiver registered with `RECEIVER_NOT_EXPORTED` (Android 13+) | `VaultProtection.kt` |
-| Notification listener bound with `BIND_NOTIFICATION_LISTENER_SERVICE`, so only the system can connect to it | `AndroidManifest.xml` |
-| Alert `PendingIntent` is `FLAG_IMMUTABLE`, so another app can't change it | `ScamAlertNotifier.kt` |
+| Exported components are protected by a system permission (VPN, tile, job) or are public by design (launcher activity, `BOOT_COMPLETED`); `MainActivity` only accepts `MAIN`, `SEND` and `PROCESS_TEXT`, and shared text is only used to look for a link | `AndroidManifest.xml`, `ManifestTest.kt`, `IncomingText.kt` |
 
 ### 3.3 Hostile Wi-Fi network
 
@@ -105,12 +105,14 @@ The only way the vault leaves the phone is an explicit export ("Exporter une sau
 
 | Measure | Where |
 |---|---|
-| On-device classifier trained on French, Arabic, Tunisian Derja and English messages | `phishing_model.dart`, `ml/` |
+| Link checker ("Liens" tab): paste, share or select a link, or scan a QR code; the first link of the text is checked, as it is displayed (hidden and direction characters handled, SEN-12) | `links_screen.dart`, `link_checker.dart`, `hidden_characters.dart` |
 | Link rules: impersonation of 22 Tunisian brands (banks, La Poste, operators, CNSS/CNAM, payment services), raw IP, punycode, `@` trick, shorteners, cheap TLDs, deep subdomains, plain `http` | `url_analyzer.dart`, `known_brands.dart` |
-| Brand impersonation or an IP link means "Arnaque probable" (likely scam) whatever the model says | `message_analyzer.dart` |
-| Optional background protection: the user doesn't need to think of checking | `SentinelNotificationListener.kt` |
-| Domains in alerts are defanged (`site[.]xyz`), and system "smart actions" are disabled so the alert never offers to open the scam link | `background_analyzer.dart`, `ScamAlertNotifier.kt` |
-| Clear advice for each verdict (don't click, never share codes, call the official number) | `message_analyzer.dart` |
+| The firewall's malware list and the user's allowlist are checked by Kotlin, even when the VPN is off (`checkDomain`); a listed domain, a brand imitation or an IP link means "Dangereux" | `LinkLookup.kt`, `FirewallEngine.checkDomain`, `LinkCheck.verdict` |
+| "Ce lien mène en réalité à …" shows the registrable domain, defanged (`site[.]xyz`) | `registrableDomain`, `defang` |
+| Nothing opens automatically; "Ouvrir quand même" is disabled for a dangerous link; Kotlin accepts only `http(s)` links | `links_screen.dart`, `QrActions.isWebLink` |
+| No network request: a shortened link is explained, never followed | `link_checker.dart` |
+| "Automatic protection when you tap": the DNS firewall blocks known dangerous sites even when the link is opened from another app; it can be turned on in one tap from the Links tab | `AutoProtectionRow` |
+| Clear advice for each verdict (don't open, never share codes, type the official address yourself) | `Verdict.advice` |
 
 ### 3.6 Privacy toward third parties (HIBP, network observers)
 
@@ -185,7 +187,7 @@ Android's resolver answers many queries from a cache shared by all apps, so the 
 | Lists bundled in the APK are generated from **pinned commits** and reviewed in the Git diff before release; the manifest stores the SHA-256 of every file, checked at each load (corrupted or modified file → fallback to the asset) | `update_lists.py`, `CategoryList.read`, `FirewallEngine.kt` |
 | Updates are **off by default** and need an explicit consent sheet. Download URLs come from the manifest **inside the signed APK**, never from a downloaded file; HTTPS only (Java never follows an HTTPS → HTTP redirect); no cookie, no parameter, generic User-Agent | `BlocklistUpdater.kt`, `HttpsFetcher` |
 | Size cap (32 MiB per source, 2 million entries per category); format check (at most 10 % invalid lines, so an HTML error page is rejected); consistency with the bundled version (at least half, at most 5× the reference count, so an emptied, truncated or inflated list is rejected) | `BlocklistUpdater.isConsistent`, `LimitedInputStream` |
-| **Protected domains**: entries that would block one of the 103 names in `protected.txt` (connectivity checks, Firebase Cloud Messaging, Google, Apple, Microsoft, Meta, GitHub, Quad9, shared-hosting apexes such as `github.io`, shared infrastructure such as the AMP cache) are removed at generation and at every update. Found on the first run: `docs.google.com` and `sites.google.com` in Phishing.Database, `fcm.googleapis.com` in ShadowWhisperer Ads. Second run, after a real analysis of Chrome: `cdn.ampproject.org`, `firebasestorage.googleapis.com`, `storage.cloud.google.com`, `l.instagram.com`, `bit.ly` and `*.amplifyapp.com` in Phishing.Database. A line protects one name, not its subdomains: the 348 specific phishing sites on `amplifyapp.com` stay blocked. Trade-off: a phishing page behind a path on a protected name (`bit.ly/xyz`, a file on Firebase Storage) is no longer blocked by DNS, which cannot see paths anyway; the SMS analyzer still flags shortened links | `protected.txt`, `CategoryBuilder` |
+| **Protected domains**: entries that would block one of the 103 names in `protected.txt` (connectivity checks, Firebase Cloud Messaging, Google, Apple, Microsoft, Meta, GitHub, Quad9, shared-hosting apexes such as `github.io`, shared infrastructure such as the AMP cache) are removed at generation and at every update. Found on the first run: `docs.google.com` and `sites.google.com` in Phishing.Database, `fcm.googleapis.com` in ShadowWhisperer Ads. Second run, after a real analysis of Chrome: `cdn.ampproject.org`, `firebasestorage.googleapis.com`, `storage.cloud.google.com`, `l.instagram.com`, `bit.ly` and `*.amplifyapp.com` in Phishing.Database. A line protects one name, not its subdomains: the 348 specific phishing sites on `amplifyapp.com` stay blocked. Trade-off: a phishing page behind a path on a protected name (`bit.ly/xyz`, a file on Firebase Storage) is no longer blocked by DNS, which cannot see paths anyway; the link checker still flags shortened links | `protected.txt`, `CategoryBuilder` |
 | Strict validation of every entry (labels, length, punycode); manifest file names limited to `[a-z0-9-]+.txt`, so a manifest cannot point outside the lists folder | `DomainNames.kt`, `BlocklistManifest.kt` |
 | Atomic writes (temporary file, `fsync`, rename; manifest last). Any failure keeps the previous version, category by category | `BlocklistUpdater.writeAtomically` |
 | Exact vs subdomain semantics follow each upstream list, so an exact hosts entry such as `faux-site.github.io` never blocks all of `github.io` | `ListParser.kt` |
@@ -194,20 +196,9 @@ Android's resolver answers many queries from a cache shared by all apps, so the 
 
 **What this does not protect against.** Updates are not signed by Sentinel: a compromise of an upstream repository, of GitHub, or of the TLS chain can still push a list that passes the checks (e.g. a few hundred well-chosen extra entries, or the removal of a few). The consistency checks and the protected list limit the damage, they do not prove authenticity. Possible next step: publish reviewed lists from Sentinel's own repository with a detached signature verified against a key embedded in the APK.
 
-### 3.10 Scam reports (opt-in, one message at a time)
+### 3.10 Scam reports (removed in 1.1.0)
 
-A new network call, made only when the user taps "Report this message", reviews the text and taps "Send". Nothing is sent in the background, nothing is queued, nothing is retried automatically. The server side (anonymization again, no IP, day only, human review, rate limit) is described in [BACKEND_THREAT_MODEL.md](BACKEND_THREAT_MODEL.md).
-
-| Threat | Measure | Where |
-|---|---|---|
-| Personal data of the user or of people named in the message leaves the phone | Anonymized **on the phone** before the preview, with the same rules and version as the server (phones, emails, IBAN/RIB, cards, codes near a keyword, IPs, mentions, link paths). Parity test: identical output on the 96 shared cases | `lib/services/report/anonymizer.dart`, `test/report_anonymizer_parity_test.dart` |
-| A name or an address the rules miss | The preview is editable, with a reminder to remove names, addresses and personal details. The edited text is anonymized once more just before sending | `report_screen.dart`, `Report.clean` |
-| The report identifies the phone | Fixed list of fields: text, user opinion, verdict, probability, language, app version, `source: inconnue`. No phone number, no device ID, no account, no location | `Report.toJson`, `test/report_client_test.dart` |
-| Sending by mistake | Separate screen; "Send" stays disabled until an opinion is chosen; "Cancel" sends nothing | `report_screen.dart` |
-| Network observer | HTTPS required (`parseServerUrl`). Plain HTTP only in **debug** builds, only to `10.0.2.2` (the emulator's host, for the local backend), allowed by a network security config that exists only in `android/app/src/debug/`. Release builds have no exception: Android's default for API 28+ refuses cleartext, and the Dart client refuses `http://` too | `report_client.dart`, `android/app/src/debug/res/xml/network_security_config.xml` |
-| Wrong or missing server address | `SENTINEL_API_URL` comes from `--dart-define`. The release script passes `-ApiUrl` (default: the deployed Render server) and refuses anything but a clean `https://` URL before building. Empty or refused means the button is hidden and no call is possible | `ReportClient.fromEnvironment`, `tools/release/build_release.ps1` |
-| Flooding the server from the app | 5 reports per sliding hour on the phone; only send times are stored (never the content). The server enforces its own limit (429) | `report_limiter.dart` |
-| Hanging request | 60 s timeout (the free Render server takes up to about a minute to wake up), a "server is waking up" notice after 4 s; clear messages for offline, timeout, 429, rejected (413/422) and server errors | `report_client.dart` |
+Until 1.0.1, the user could report a message to the Sentinel server. This feature (screen, client, rate limiter, on-phone anonymizer) was removed with the "Messages" tab: the app makes no call to a Sentinel server. The server code stays in `backend/` (threat model: [BACKEND_THREAT_MODEL.md](BACKEND_THREAT_MODEL.md)), unused by the app.
 
 ## 4. Known limitations
 
@@ -215,17 +206,17 @@ These are real gaps. Some can't be fixed in this setup; others are on the roadma
 
 1. **Dart memory can't be reliably wiped.** `wipe()` zeroes the `Uint8List` keys, but the master password, item passwords and decrypted JSON go through immutable Dart `String`s. Copies can also stay behind from the garbage collector or from isolate messages (the Argon2id isolate gets the password). Wiping shortens how long a key lives in memory; it does not guarantee erasure.
 2. **The failure counter only lives in memory.** The 1 s → 30 s backoff resets when the app is killed and restarted. It slows down guessing on the device only. An attacker with a copy of the file is limited by the cost of Argon2id alone.
-3. **The ML model is trained on synthetic data.** 400 hand-written messages, with optimistic metrics (F1 0.976 on 80 test messages). Every synthetic scam link uses `.xyz`/`.top`/`bit.ly`, so real scams on other domains may be missed by the model and caught only by the link rules, or not at all.
+3. **No message analysis.** Since 1.1.0 Sentinel no longer reads message text (the on-device model, trained on synthetic data, was removed). A scam without a link, or with a link on a brand-new domain that breaks no rule, gets "Aucun problème connu" at best, never "safe".
 4. **Limited Wi-Fi analysis.** The encryption type can only be read on **Android 12+** without the location permission; older versions show "unknown". Sentinel does not detect evil-twin access points, ARP/DNS spoofing or TLS interception. It only reports what Android exposes (encryption type, captive portal, Private DNS).
 5. **No protection on a rooted or compromised phone.** Root detection is a simple heuristic (`su` binary paths, `test-keys`), easy to hide (e.g. Magisk), and it only lowers the score. With root or a compromised OS, an attacker can read process memory, hook the app, log keystrokes or bypass `FLAG_SECURE`.
 6. **Accessibility malware can still read the screen.** `FLAG_SECURE` stops screenshots, not accessibility services. Sentinel can only flag those apps.
 7. **Clipboard.** The "sensitive" flag is only honored by the system on Android 13+. Before that, keyboards and clipboard managers may keep a copy. Clearing after 30 s is best-effort: if the process is killed, the timer is gone.
-8. **Message text in the alert.** For tap-to-check, the message text is kept in the alert's `PendingIntent` extras until the user taps or dismisses it. It is never logged or written by Sentinel.
+8. **Shared text in memory.** Text shared to Sentinel (up to 5,000 characters) stays in memory, in the Links field, until it is cleared or the app is closed. It is never logged or written by Sentinel.
 9. **Keystore strength depends on the device.** The biometric key doesn't require StrongBox. On some devices the Keystore is TEE-backed or weaker. The 7-day rule is an app policy based on the device clock, not a cryptographic barrier.
-10. **Moving the vault to a new phone is manual.** Android backup is still disabled on purpose (see 3.4). **Solution:** the user exports an encrypted `.sentinel` file and restores it on the new phone (see 3.4.1). Remaining limits: the export is a snapshot (later changes are not in it), the breach-check consent and the protection switch are not part of it, and the file is only as strong as its export password against an offline attack (Argon2id slows guessing, it cannot save a weak password). A restored vault gets a new recovery key; the old phone's key does not open it. During a restore, the decrypted items stay in memory between the backup password step and the new master password step.
+10. **Moving the vault to a new phone is manual.** Android backup is still disabled on purpose (see 3.4). **Solution:** the user exports an encrypted `.sentinel` file and restores it on the new phone (see 3.4.1). Remaining limits: the export is a snapshot (later changes are not in it), the breach-check consent and the firewall settings are not part of it, and the file is only as strong as its export password against an offline attack (Argon2id slows guessing, it cannot save a weak password). A restored vault gets a new recovery key; the old phone's key does not open it. During a restore, the decrypted items stay in memory between the backup password step and the new master password step.
 11. **Recovery key = full access.** Anyone who has it can reset the master password. It is shown once. Keeping it safe is up to the user.
 12. **Simple strength estimator.** `password_strength.dart` is an entropy heuristic with a small list of common words. It is not a dictionary- or pattern-based estimator such as zxcvbn.
-13. **Lexical link analysis only.** Links are not resolved or checked against an online reputation list (by design, to stay offline). Shortened links are flagged but not expanded.
+13. **Lexical link analysis and offline lists only.** Links are not resolved or checked against an online reputation service (by design, to stay offline). Shortened links are flagged but not expanded. The malware list dates from the last update.
 14. **Brand list not yet verified.** The official domains in `assets/data/known_brands.json` still have to be checked by hand (`todo` field in the file). A missing official domain causes false alarms and, since the DNS firewall now blocks imitations, an actual block of that site; a wrong one hides real scams.
 15. **No certificate pinning.** The HIBP call trusts the system CA store.
 16. **Release signing needs the owner's key.** The release build reads `android/key.properties` (ignored by git, keystore outside the repository) and fails without it: no fallback to the debug key (SEN-01, see `docs/RELEASE.md`).
@@ -248,4 +239,4 @@ These are real gaps. Some can't be fixed in this setup; others are on the roadma
 33. **No firewall for other apps during an app analysis.** For 2 to 15 minutes, only the analyzed app is filtered (see 3.8.1). A malicious link opened in another app during that window is not blocked.
 34. **App analysis reports are plain files.** They are private to the app and kept 24 h at most, but not encrypted: root access, or someone who opens Sentinel on the unlocked phone, can read which domains the analyzed app contacted. If Android kills the service during an analysis, that analysis and its report are lost. Query counts are approximate (cached answers are not seen again).
 35. **Brand rule false positives in the firewall.** See 3.9: a real site that contains a brand keyword but is not in the official list is blocked until allowlisted.
-36. **Report anonymization is rule-based.** Names, postal addresses and ID card numbers are not removed automatically; the user is asked to check the editable preview. The language sent with a report is a simple guess. Report traffic uses the system CA store (no pinning), like the HIBP call.
+36. ~~Report anonymization is rule-based.~~ No longer applies: scam reports were removed from the app in 1.1.0 (the `backend/` folder stays in the repository, unused).

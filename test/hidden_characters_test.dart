@@ -1,10 +1,7 @@
-import 'dart:convert';
-import 'dart:io';
-
 import 'package:flutter_test/flutter_test.dart';
+import 'package:sentinel/services/links/hidden_characters.dart';
+import 'package:sentinel/services/links/link_checker.dart';
 import 'package:sentinel/services/phishing/known_brands.dart';
-import 'package:sentinel/services/phishing/message_analyzer.dart';
-import 'package:sentinel/services/phishing/phishing_model.dart';
 import 'support/l10n.dart';
 
 // SEN-12 : caractères invisibles et inversion de texte.
@@ -14,47 +11,41 @@ const pdf = '\u202C'; // ferme l'ouverture
 
 String reverse(String s) => String.fromCharCodes(s.runes.toList().reversed);
 
-PhishingPrediction fakePrediction(double p) => PhishingPrediction(
-  probability: p,
-  suspiciousNgrams: const [],
-  suspiciousWords: const [],
-);
-
 void main() {
   // Les marques viennent de assets/data/known_brands.json.
   TestWidgetsFlutterBinding.ensureInitialized();
   setUpAll(loadKnownBrands);
 
-  group('normalizeMessage', () {
+  group('normalizeText', () {
     test('retire les caractères invisibles', () {
       expect(
-        normalizeMessage('pay\u00ADpal se\u200Bcu\u2060rité \uFEFFok'),
+        normalizeText('pay\u00ADpal se\u200Bcu\u2060rité \uFEFFok'),
         'paypal securité ok',
       );
     });
 
     test('remet à l\'endroit le texte forcé de droite à gauche', () {
       expect(
-        normalizeMessage('https://${rlo}zyx.etsop$pdf fin'),
+        normalizeText('https://${rlo}zyx.etsop$pdf fin'),
         'https://poste.xyz fin',
       );
     });
 
     test('un emoji (2 unités UTF-16) reste entier quand il est inversé', () {
-      expect(normalizeMessage('$rlo\u{1F600}ab$pdf'), 'ba\u{1F600}');
+      expect(normalizeText('$rlo\u{1F600}ab$pdf'), 'ba\u{1F600}');
     });
 
     test('la fin de paragraphe ferme le forçage', () {
-      expect(normalizeMessage('${rlo}abc\ndef'), 'cba\ndef');
+      expect(normalizeText('${rlo}abc\ndef'), 'cba\ndef');
     });
 
     test('PDF sans ouverture : simplement retiré', () {
-      expect(normalizeMessage('a${pdf}b'), 'ab');
+      expect(normalizeText('a${pdf}b'), 'ab');
     });
 
     test('texte normal : inchangé', () {
       const text = 'Rendez-vous demain à 9h, merci ! مرحبا 😀';
-      expect(normalizeMessage(text), text);
+      expect(normalizeText(text), text);
     });
   });
 
@@ -76,59 +67,33 @@ void main() {
     });
   });
 
-  group('analyzeMessage', () {
-    test(
-      'caractère trompeur : raison affichée en premier, au moins Suspect',
-      () {
-        final a = analyzeMessage('Bon\u200Bjour', fakePrediction(0.1));
-        expect(a.verdict, Verdict.suspect);
-        expect(a.reasons(fr).first, fr.reasonHiddenCharacters);
-      },
-    );
+  group('checkText', () {
+    test('caractère trompeur : raison affichée en premier, au moins Suspect', () {
+      final c = checkText('Voir https://www.exem\u200Bple.tn')!;
+      expect(c.link.host, 'www.exemple.tn'); // lu comme il s'affiche
+      expect(c.verdict, Verdict.suspect);
+      expect(c.reasons(fr).first, fr.reasonHiddenCharacters);
+    });
 
     test('sans caractère trompeur : verdict inchangé', () {
-      final a = analyzeMessage('Bonjour', fakePrediction(0.1));
-      expect(a.verdict, Verdict.rien);
-      expect(a.reasons(fr), isNot(contains(fr.reasonHiddenCharacters)));
+      final c = checkText('Voir https://www.exemple.tn')!;
+      expect(c.verdict, Verdict.rien);
+      expect(c.reasons(fr), isNot(contains(fr.reasonHiddenCharacters)));
     });
 
     test('ne baisse jamais un verdict plus grave', () {
-      final a = analyzeMessage('Bon\u200Bjour', fakePrediction(0.9));
-      expect(a.verdict, Verdict.arnaque);
+      final c = checkText('Bon\u200Bjour https://poste-tn.com')!;
+      expect(c.verdict, Verdict.dangereux);
     });
 
-    test('le lien caché est analysé comme il s\'affiche', () {
-      final a = analyzeMessage(
-        'Payez ici https://${rlo}zyx.ssap-etsopal$pdf',
-        fakePrediction(0.1),
-      );
-      expect(a.links.map((l) => l.host), contains('laposte-pass.xyz'));
-    });
-  });
-
-  group('Exemple de P2 rejoué (modèle réel)', () {
-    final model = PhishingModel.fromJson(
-      jsonDecode(File('assets/models/phishing_model.json').readAsStringSync())
-          as Map<String, dynamic>,
-    );
-    const domain = 'laposte-colis-suivi.example-arnaque.xyz';
-    const clean = 'Payez ici https://$domain sinon blocage';
-    final hidden = 'Payez ici https://$rlo${reverse(domain)}$pdf sinon blocage';
-
-    test('même probabilité que le texte propre (P2 : 96 % → 74 %)', () {
-      final pClean = model.predict(clean).probability;
-      final pHidden = model.predict(hidden).probability;
-      expect(pHidden, pClean);
-      expect((pClean * 100).round(), 96);
-    });
-
-    test('même verdict, mêmes raisons, plus la raison « caractères »', () {
-      final aClean = analyzeMessage(clean, model.predict(clean));
-      final aHidden = analyzeMessage(hidden, model.predict(hidden));
-      expect(aHidden.verdict, aClean.verdict);
-      expect(aHidden.verdict, Verdict.arnaque);
-      expect(aHidden.percent, aClean.percent);
-      expect(aHidden.reasons(fr), [fr.reasonHiddenCharacters, ...aClean.reasons(fr)]);
+    test('le lien inversé (P2) est vérifié comme il s\'affiche', () {
+      const domain = 'laposte-colis-suivi.example-arnaque.xyz';
+      final hidden = 'Payez ici https://$rlo${reverse(domain)}$pdf sinon blocage';
+      final c = checkText(hidden)!;
+      expect(c.link.host, domain);
+      expect(c.verdict, Verdict.dangereux); // imite La Poste
+      expect(c.reasons(fr).first, fr.reasonHiddenCharacters);
+      expect(c.realDestination, 'example-arnaque[.]xyz');
     });
   });
 }

@@ -14,8 +14,9 @@ import io.flutter.plugin.common.MethodChannel
 
 /**
  * Pilote le pare-feu DNS depuis Dart : prepare, start, stop, status, les
- * réglages des listes (catégories, liste blanche, mises à jour) et
- * l'analyse d'une application (rapports).
+ * réglages des listes (catégories, liste blanche, mises à jour),
+ * l'analyse d'une application (rapports) et la vérification d'un domaine
+ * pour l'onglet Liens.
  */
 class FirewallChannel(private val activity: Activity, messenger: BinaryMessenger) {
 
@@ -133,6 +134,10 @@ class FirewallChannel(private val activity: Activity, messenger: BinaryMessenger
             // thread principal, comme l'exige Flutter.
             "updateNow" -> FirewallEngine.updateNow(activity) { ok ->
                 mainHandler.post { result.success(ok) }
+            }
+            // Onglet Liens : listes et liste blanche, même VPN arrêté.
+            "checkDomain" -> FirewallEngine.checkDomain(activity, call.argument<String>("domain").orEmpty()) {
+                mainHandler.post { result.success(it) }
             }
             else -> result.notImplemented()
         }

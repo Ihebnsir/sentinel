@@ -1,12 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Arabe. À RELIRE PAR UN HUMAIN : traduction produite sans relecture. -->
-    <string name="process_text_label">التحقق عبر Sentinel</string>
-    <string name="listener_label">Sentinel – الحماية من الاحتيال</string>
-    <string name="scam_channel_name">تنبيهات الاحتيال</string>
-    <string name="scam_channel_description">ينبّهك عندما تبدو رسالة واردة كأنها عملية احتيال.</string>
-    <string name="scam_public_text">تم رصد احتيال محتمل</string>
-    <string name="scam_default_title">احتيال محتمل</string>
+    <string name="process_text_label">التحقق من الرابط عبر Sentinel</string>
     <string name="firewall_channel_name">تنبيهات جدار الحماية</string>
     <string name="firewall_channel_description">ينبّهك عندما يحظر جدار الحماية موقعًا خطيرًا.</string>
     <string name="firewall_alert_title">تم حظر موقع خطير</string>

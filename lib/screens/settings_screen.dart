@@ -4,7 +4,7 @@ import '../app_info.dart';
 import '../l10n/l10n.dart';
 import '../services/apps_scanner_service.dart';
 import '../services/language_store.dart';
-import '../services/protection_service.dart';
+import '../services/notification_permission.dart';
 import '../services/theme_store.dart';
 import '../services/weekly_report_service.dart';
 import '../theme/app_colors.dart';
@@ -213,7 +213,7 @@ class SettingsScreen extends StatelessWidget {
               service: weekly,
               requestNotifications:
                   requestNotifications ??
-                  ProtectionService().requestNotificationPermission,
+                  const NotificationPermission().request,
             ),
           ],
         ),

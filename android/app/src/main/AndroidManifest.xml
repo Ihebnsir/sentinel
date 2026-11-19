@@ -19,8 +19,8 @@
     <!-- Permission « normale » : ouvrir l'écran de désinstallation d'une app.
          C'est toujours l'utilisateur qui confirme. -->
     <uses-permission android:name="android.permission.REQUEST_DELETE_PACKAGES" />
-    <!-- Android 13+ : afficher les alertes « Arnaque probable ».
-         Demandée seulement quand l'utilisateur active la protection. -->
+    <!-- Android 13+ : afficher les alertes du pare-feu et le rappel du
+         bilan de la semaine. Demandée seulement quand on active l'un des deux. -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <!-- Permission « normale » : lire l'état du réseau (Wi-Fi, portail captif,
          DNS privé). Aucune localisation : on ne lit jamais le nom du Wi-Fi. -->
@@ -42,7 +42,7 @@
          suppression des rapports d'analyse à 24 h (BootReceiver), et garder
          la tâche quotidienne du bilan de la semaine (setPersisted). -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
-    <!-- Caméra : pour « Scanner un QR code » (onglet Messages) et la photo
+    <!-- Caméra : pour « Scanner un QR code » (onglet Liens) et la photo
          d'un document du coffre, demandée au moment de l'utiliser. L'image
          du QR n'est ni enregistrée ni envoyée ; la photo est chiffrée.
          Déjà ajoutée par zxing-android-embedded ; écrite ici pour être vue.
@@ -81,32 +81,22 @@
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
-            <!-- Bouton « Partager » des autres apps (SMS, WhatsApp…) :
-                 Sentinel apparaît dans la liste quand on partage du texte. -->
+            <!-- Bouton « Partager » des autres apps (navigateur, SMS…) :
+                 Sentinel apparaît quand on partage un lien ou du texte.
+                 L'onglet Liens y cherche le premier lien. -->
             <intent-filter>
                 <action android:name="android.intent.action.SEND"/>
                 <category android:name="android.intent.category.DEFAULT"/>
                 <data android:mimeType="text/plain"/>
             </intent-filter>
-            <!-- Menu de sélection de texte (Copier, Coller…) de toutes les apps.
-                 Le label est le texte affiché dans ce menu. -->
+            <!-- Menu de sélection de texte (Copier, Coller…) de toutes les apps :
+                 vérifier le lien sélectionné. Le label est le texte du menu. -->
             <intent-filter android:label="@string/process_text_label">
                 <action android:name="android.intent.action.PROCESS_TEXT"/>
                 <category android:name="android.intent.category.DEFAULT"/>
                 <data android:mimeType="text/plain"/>
             </intent-filter>
         </activity>
-        <!-- Tap sur une alerte « Arnaque probable » (SEN-06).
-             exported="false" : seule la notification de Sentinel peut l'ouvrir.
-             Elle transmet le texte à MainActivity par la mémoire, puis se ferme
-             sans rien afficher (Theme.NoDisplay). -->
-        <activity
-            android:name=".AlertRelayActivity"
-            android:exported="false"
-            android:excludeFromRecents="true"
-            android:noHistory="true"
-            android:taskAffinity=""
-            android:theme="@android:style/Theme.NoDisplay" />
         <!-- Écran de scan de QR code (zxing-android-embedded). Non exporté :
              seul Sentinel l'ouvre. Suit le sens du téléphone (paysage par
              défaut dans la bibliothèque). -->
@@ -115,9 +105,8 @@
             android:exported="false"
             android:screenOrientation="fullSensor"
             tools:replace="android:screenOrientation" />
-        <!-- Protection automatique (lecteur de notifications) : déclarée
-             seulement dans src/complete/AndroidManifest.xml (version Google
-             Play). La variante standard (GitHub) ne l'a pas : voir docs/RELEASE.md. -->
+        <!-- Aucun lecteur de notifications, service d'accessibilité ni accès
+             aux SMS (vérifié par checkPlayProtect*, build.gradle.kts). -->
         <!-- Pare-feu DNS local. BIND_VPN_SERVICE : seul Android peut s'y
              connecter. exported="true" est obligatoire pour un VpnService
              (le système le démarre, ex : VPN permanent). -->

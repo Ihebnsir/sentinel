@@ -39,8 +39,9 @@ DATA_FILES = [
     ROOT / "ml" / "data" / "messages_seed.csv",
     ROOT / "ml" / "data" / "messages_perso.csv",
 ]
-MODEL_OUT = ROOT / "assets" / "models" / "phishing_model.json"
-PARITY_OUT = ROOT / "test" / "fixtures" / "phishing_parity.json"
+# Depuis la 1.1.0, l'app n'embarque plus le modèle : export dans ml/export.
+MODEL_OUT = ROOT / "ml" / "export" / "phishing_model.json"
+PARITY_OUT = ROOT / "ml" / "export" / "phishing_parity.json"
 
 # --- Paramètres ----------------------------------------------------------------
 RANDOM_STATE = 42

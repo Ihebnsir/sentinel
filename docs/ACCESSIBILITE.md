@@ -19,7 +19,7 @@ Le test charge la vraie police (Readex Pro). La police de test de Flutter a des 
 
 **19 écrans vérifiés** :
 
-- **Onglets et écrans de l'app** : accueil (arche du score, actions, Wi-Fi), applications, messages, résultat d'un QR code, détail d'une app à risque, conseils en cas de logiciel espion, pare-feu, choix de l'app à analyser, rapport d'analyse, Réglages, politique de confidentialité, présentation du premier lancement.
+- **Onglets et écrans de l'app** : accueil (arche du score, actions, Wi-Fi), applications, liens, résultat d'un QR code, détail d'une app à risque, conseils en cas de logiciel espion, pare-feu, choix de l'app à analyser, rapport d'analyse, Réglages, politique de confidentialité, présentation du premier lancement.
 - **Coffre** : création, déverrouillage, clé de récupération, liste des éléments, mot de passe (générateur et force), santé des mots de passe, réglages du coffre.
 
 Annonces TalkBack vérifiées une par une (même fichier, groupe « annonces TalkBack ») :
@@ -29,7 +29,7 @@ Annonces TalkBack vérifiées une par une (même fichier, groupe « annonces Tal
 - l'arche vide annonce « Analyse en cours… » ;
 - une barre de chargement a un nom et s'annonce d'elle-même ;
 - un interrupteur se lit avec son texte et son état (activé ou désactivé), et l'état suit l'appui ;
-- le verdict d'un message (« Arnaque probable », avec la probabilité) s'annonce dès qu'il s'affiche et compte comme un titre ;
+- le verdict d'un lien (« Dangereux », avec la vraie destination) s'annonce dès qu'il s'affiche et compte comme un titre ;
 - la case « J'ai compris » de la création du coffre se lit avec sa phrase ;
 - le bouton Réglages de l'accueil a un nom et fait 48 dp.
 
@@ -40,8 +40,8 @@ Annonces TalkBack vérifiées une par une (même fichier, groupe « annonces Tal
 - **Arche du score** : une seule phrase, « Score de sécurité : 80 sur 100 » (traduite en anglais et en arabe). Le score final est lu tout de suite, sans attendre la fin de l'animation. Pendant l'analyse, « Analyse en cours… » est annoncé sans qu'on ait à toucher l'arche (*live region*).
 - **Interrupteurs** : 8 interrupteurs étaient lus « Interrupteur, désactivé » sans dire lequel. Leur texte est maintenant lu avec eux (`MergeSemantics`) : pare-feu, protection automatique, listes de blocage, DNS non chiffré, apps système, générateur de mot de passe, empreinte, vérification des fuites.
 - **Case « J'ai compris »** du coffre : elle était lue sans nom. Elle est maintenant lue avec sa phrase.
-- **Chargements** : les barres et le cercle de chargement disent « Chargement en cours », ou « Analyse en cours… » pour un message ou un QR code. Ils s'annoncent dès qu'ils apparaissent. Nouveau widget `LoadingBar` (`lib/widgets/loading_bar.dart`), utilisé partout où il y avait une barre de chargement.
-- **Résultats d'analyse** : le verdict d'un message ou d'un QR code (titre et probabilité ensemble) s'annonce dès qu'il apparaît et sert de titre pour la navigation de TalkBack. Le message « analyse impossible » s'annonce aussi.
+- **Chargements** : les barres et le cercle de chargement disent « Chargement en cours », ou « Vérification… » pour un lien, « Analyse en cours… » pour un QR code. Ils s'annoncent dès qu'ils apparaissent. Nouveau widget `LoadingBar` (`lib/widgets/loading_bar.dart`), utilisé partout où il y avait une barre de chargement.
+- **Résultats d'analyse** : le verdict d'un lien ou d'un QR code (titre et sous-titre ensemble) s'annonce dès qu'il apparaît et sert de titre pour la navigation de TalkBack. Le message « analyse impossible » s'annonce aussi.
 - **Barre de force du mot de passe** : elle est muette pour TalkBack. La phrase juste en dessous (« Force : moyen ») dit déjà la même chose, sans pourcentage incompréhensible.
 - **Icônes d'apps** (images) : ignorées par TalkBack, car le nom de l'app est toujours écrit à côté. Avant, chaque icône ajoutait une « image » sans nom.
 - **Titre « Coffre »** marqué comme titre (navigation par titres).
@@ -69,7 +69,7 @@ Effet visible : l'ocre du thème clair est un ambre plus foncé, partout (textes
 
 ### Police à 200 %
 
-- **Rangées « Annuler … Valider »** : à 200 %, les deux boutons ne tenaient plus sur une ligne (débordement de 16 dp sur la création du coffre). Nouveau widget `ActionsRow` (`lib/widgets/actions_row.dart`) : un bouton à chaque bout, et si les textes ne tiennent pas, les boutons passent l'un sous l'autre, alignés du côté de la fin. 10 rangées concernées : création du coffre, déverrouillage par la clé, restauration, offre de clé de récupération, copier / générer, Messages (Coller / Effacer / Analyser), explications du pare-feu et de la protection, mise à jour des listes, choix de la durée d'analyse.
+- **Rangées « Annuler … Valider »** : à 200 %, les deux boutons ne tenaient plus sur une ligne (débordement de 16 dp sur la création du coffre). Nouveau widget `ActionsRow` (`lib/widgets/actions_row.dart`) : un bouton à chaque bout, et si les textes ne tiennent pas, les boutons passent l'un sous l'autre, alignés du côté de la fin. 10 rangées concernées : création du coffre, déverrouillage par la clé, restauration, offre de clé de récupération, copier / générer, Liens (Coller / Effacer / Vérifier), explications du pare-feu et de la protection, mise à jour des listes, choix de la durée d'analyse.
 - **En-tête du coffre** (« Coffre », roue dentée, « Verrouiller ») : les boutons passent sous le titre s'ils ne tiennent pas.
 
 ### Ordre de lecture

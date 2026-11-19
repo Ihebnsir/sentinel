@@ -10,7 +10,7 @@ import 'package:sentinel/screens/app_report_screen.dart';
 import 'package:sentinel/screens/apps_screen.dart';
 import 'package:sentinel/screens/firewall_screen.dart';
 import 'package:sentinel/screens/home_screen.dart';
-import 'package:sentinel/screens/messages_screen.dart';
+import 'package:sentinel/screens/links_screen.dart';
 import 'package:sentinel/screens/onboarding_screen.dart';
 import 'package:sentinel/screens/privacy_policy_screen.dart';
 import 'package:sentinel/screens/qr_result_screen.dart';
@@ -28,7 +28,7 @@ import 'package:sentinel/services/app_risk_calculator.dart';
 import 'package:sentinel/services/breach/breach_checker.dart';
 import 'package:sentinel/services/breach/breach_consent.dart';
 import 'package:sentinel/services/phishing/known_brands.dart';
-import 'package:sentinel/services/phishing/phishing_model.dart';
+import 'package:sentinel/services/links/link_checker.dart';
 import 'package:sentinel/services/vault/vault_crypto.dart';
 import 'package:sentinel/services/vault/vault_item.dart';
 import 'package:sentinel/services/vault/vault_platform.dart';
@@ -182,11 +182,14 @@ void _audit(String name, Future<Widget> Function(WidgetTester) build) {
   });
 }
 
+// Fausses listes du pare-feu : domaine inconnu.
+Future<DomainCheck?> _lists(String host) async =>
+    const DomainCheck(allowed: false, dangerous: false);
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   setUpAll(() async {
     await _loadFont();
-    await loadPhishingModel();
     await loadKnownBrands();
   });
   setUp(_fakeAndroid);
@@ -194,7 +197,10 @@ void main() {
   group('écrans principaux', () {
     _audit('accueil', (_) async => const HomeScreen());
     _audit('applications', (_) async => const Scaffold(body: AppsScreen()));
-    _audit('messages', (_) async => const Scaffold(body: MessagesScreen()));
+    _audit(
+      'liens',
+      (_) async => const Scaffold(body: LinksScreen(checkDomain: _lists)),
+    );
     _audit(
       'QR code',
       (_) async => const QrResultScreen(raw: 'WIFI:T:nopass;S:Gare;;'),
@@ -427,23 +433,23 @@ void main() {
       handle.dispose();
     });
 
-    testWidgets('verdict d\'un message annoncé dès qu\'il s\'affiche', (
+    testWidgets('verdict d\'un lien annoncé dès qu\'il s\'affiche', (
       tester,
     ) async {
       final handle = tester.ensureSemantics();
-      await _show(tester, const Scaffold(body: MessagesScreen()));
+      await _show(
+        tester,
+        const Scaffold(body: LinksScreen(checkDomain: _lists)),
+      );
       await tester.enterText(
         find.byType(TextField),
         'Votre colis est bloqué, payez ici : poste-tn-livraison.xyz/p',
       );
       await tester.pump();
-      await tester.tap(find.byType(FilledButton));
-      await tester.runAsync(
-        () => Future<void>.delayed(const Duration(milliseconds: 50)),
-      );
+      await tester.tap(find.text(fr.linksCheck));
       await tester.pumpAndSettle();
       expect(
-        tester.getSemantics(find.text(fr.verdictScam)),
+        tester.getSemantics(find.text(fr.verdictDangerous)),
         isSemantics(isLiveRegion: true, isHeader: true),
       );
       handle.dispose();
