@@ -74,10 +74,13 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       widget.onDone();
       return;
     }
-    _controller.nextPage(
-      duration: const Duration(milliseconds: 250),
-      curve: Curves.easeOut,
-    );
+    // Animations supprimées dans Android : page suivante sans glissement.
+    final duration = AppMotion.of(context, AppMotion.moyen);
+    if (duration == Duration.zero) {
+      _controller.jumpToPage(_controller.page!.round() + 1);
+      return;
+    }
+    _controller.nextPage(duration: duration, curve: AppMotion.entree);
   }
 
   @override
