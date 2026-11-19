@@ -9,6 +9,7 @@ import '../services/firewall_service.dart';
 import '../theme/app_colors.dart';
 import '../widgets/actions_row.dart';
 import '../widgets/app_icon.dart';
+import '../widgets/ui.dart';
 
 // Couleur : celle du thème (dividerTheme, ligne fine).
 const _divider = Divider(height: 1, thickness: 1);
@@ -84,7 +85,7 @@ class _AppAnalysisScreenState extends State<AppAnalysisScreen> {
   Widget build(BuildContext context) {
     final l = context.l10n;
     final apps = _apps;
-    final muted = TextStyle(fontSize: 15, color: context.colors.secondaire);
+    final muted = TextStyle(fontSize: AppText.corps, color: context.colors.secondaire);
     return Scaffold(
       appBar: AppBar(
         backgroundColor: context.colors.chaux,
@@ -96,31 +97,31 @@ class _AppAnalysisScreenState extends State<AppAnalysisScreen> {
       body: SafeArea(
         top: false,
         child: ListView(
-          padding: const EdgeInsets.fromLTRB(28, 8, 28, 24),
+          padding: const EdgeInsets.fromLTRB(AppSpace.page, AppSpace.sm, AppSpace.page, AppSpace.xl),
           children: [
             Text(
               l.analysisSectionTitle,
               style: TextStyle(
-                fontSize: 24,
+                fontSize: AppText.titreSecondaire,
                 fontWeight: FontWeight.w600,
                 color: context.colors.encre,
               ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: AppSpace.md),
             Text(
               l.analysisScreenIntro,
-              style: TextStyle(fontSize: 15, color: context.colors.encre),
+              style: TextStyle(fontSize: AppText.corps, color: context.colors.encre),
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: AppSpace.xl),
             _divider,
             if (_failed)
               Padding(
-                padding: const EdgeInsets.symmetric(vertical: 24),
+                padding: const EdgeInsets.symmetric(vertical: AppSpace.xl),
                 child: Text(l.analysisListFailed, style: muted),
               )
             else if (apps == null || _starting)
               Padding(
-                padding: const EdgeInsets.symmetric(vertical: 48),
+                padding: const EdgeInsets.symmetric(vertical: AppSpace.xxxl),
                 child: Center(
                   child: CircularProgressIndicator(
                     semanticsLabel: l.commonLoading,
@@ -129,7 +130,7 @@ class _AppAnalysisScreenState extends State<AppAnalysisScreen> {
               )
             else if (apps.isEmpty)
               Padding(
-                padding: const EdgeInsets.symmetric(vertical: 24),
+                padding: const EdgeInsets.symmetric(vertical: AppSpace.xl),
                 child: Text(l.analysisNoApps, style: muted),
               )
             else
@@ -137,18 +138,18 @@ class _AppAnalysisScreenState extends State<AppAnalysisScreen> {
                 InkWell(
                   onTap: () => _choose(app),
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    padding: const EdgeInsets.symmetric(vertical: AppSpace.lg),
                     child: Row(
                       children: [
-                        AppIcon(app: app, size: 40),
-                        const SizedBox(width: 16),
+                        AppIcon(app: app, size: AppSize.appIcon),
+                        const SizedBox(width: AppSpace.lg),
                         Expanded(
                           child: Text(
                             app.label,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
-                              fontSize: 16,
+                              fontSize: AppText.intitule,
                               fontWeight: FontWeight.w500,
                               color: context.colors.encre,
                             ),
@@ -194,20 +195,20 @@ class _AnalysisSheetState extends State<_AnalysisSheet> {
     ];
     return SafeArea(
       child: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(28, 0, 28, 16),
+        padding: const EdgeInsets.fromLTRB(AppSpace.page, 0, AppSpace.page, AppSpace.lg),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
             Row(
               children: [
-                AppIcon(app: widget.app, size: 32),
-                const SizedBox(width: 12),
+                AppIcon(app: widget.app, size: AppSize.appIconSmall),
+                const SizedBox(width: AppSpace.md),
                 Expanded(
                   child: Text(
                     l.analysisSheetTitle(name),
                     style: TextStyle(
-                      fontSize: 22,
+                      fontSize: AppText.titreSecondaire,
                       fontWeight: FontWeight.w600,
                       color: context.colors.encre,
                     ),
@@ -215,7 +216,7 @@ class _AnalysisSheetState extends State<_AnalysisSheet> {
                 ),
               ],
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: AppSpace.lg),
             SizedBox(
               width: double.infinity,
               child: SegmentedButton<int>(
@@ -232,15 +233,15 @@ class _AnalysisSheetState extends State<_AnalysisSheet> {
                     setState(() => _minutes = value.first),
               ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: AppSpace.md),
             for (final (index, line) in lines.indexed) ...[
               _divider,
               Padding(
-                padding: const EdgeInsets.symmetric(vertical: 10),
+                padding: const EdgeInsets.symmetric(vertical: AppSpace.md),
                 child: Text(
                   line,
                   style: TextStyle(
-                    fontSize: 15,
+                    fontSize: AppText.corps,
                     // La fenêtre sans protection est mise en avant.
                     color: index == 1
                         ? context.colors.ocre
@@ -249,20 +250,15 @@ class _AnalysisSheetState extends State<_AnalysisSheet> {
                 ),
               ),
             ],
-            const SizedBox(height: 24),
+            const SizedBox(height: AppSpace.xl),
             ActionsRow(
               children: [
                 TextButton(
-                  style: TextButton.styleFrom(
-                    foregroundColor: context.colors.secondaire,
-                  ),
+                  style: mutedButtonStyle(context),
                   onPressed: () => Navigator.of(context).pop(),
                   child: Text(l.commonCancel),
                 ),
                 FilledButton(
-                  style: FilledButton.styleFrom(
-                    backgroundColor: context.colors.bleu,
-                  ),
                   onPressed: () => Navigator.of(context).pop(_minutes),
                   child: Text(l.appsStartScan),
                 ),

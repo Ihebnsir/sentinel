@@ -12,6 +12,7 @@ import '../widgets/arch_icon.dart';
 import 'audit_summary_screen.dart';
 import 'onboarding_screen.dart';
 import 'privacy_policy_screen.dart';
+import '../widgets/ui.dart';
 
 /// Réglages / À propos, ouvert par l'icône discrète de l'accueil.
 /// [openUrl] : remplaçable dans les tests (par défaut, le navigateur).
@@ -42,8 +43,8 @@ class SettingsScreen extends StatelessWidget {
       applicationName: 'Sentinel',
       applicationVersion: appVersion,
       applicationIcon: Padding(
-        padding: EdgeInsets.all(12),
-        child: ArchIcon(filled: true, size: 48, color: context.colors.bleu),
+        padding: EdgeInsets.all(AppSpace.md),
+        child: ArchIcon(filled: true, size: AppSize.iconHero, color: context.colors.bleu),
       ),
       applicationLegalese: l.settingsLicenseLegalese,
     );
@@ -66,10 +67,10 @@ class SettingsScreen extends StatelessWidget {
           children: [
             for (final code in [null, ...languageNames.keys])
               ListTile(
-                contentPadding: const EdgeInsets.symmetric(horizontal: 28),
+                contentPadding: const EdgeInsets.symmetric(horizontal: AppSpace.page),
                 title: Text(
                   code == null ? l.settingsLanguageSystem : languageNames[code]!,
-                  style: TextStyle(fontSize: 15, color: context.colors.encre),
+                  style: TextStyle(fontSize: AppText.corps, color: context.colors.encre),
                 ),
                 trailing: code == current
                     ? Icon(Icons.check, color: context.colors.bleu)
@@ -96,10 +97,10 @@ class SettingsScreen extends StatelessWidget {
           children: [
             for (final mode in themeModes)
               ListTile(
-                contentPadding: const EdgeInsets.symmetric(horizontal: 28),
+                contentPadding: const EdgeInsets.symmetric(horizontal: AppSpace.page),
                 title: Text(
                   themeModeLabel(l, mode),
-                  style: TextStyle(fontSize: 15, color: context.colors.encre),
+                  style: TextStyle(fontSize: AppText.corps, color: context.colors.encre),
                 ),
                 trailing: mode == theme.value
                     ? Icon(Icons.check, color: context.colors.bleu)
@@ -181,31 +182,31 @@ class SettingsScreen extends StatelessWidget {
       body: SafeArea(
         top: false,
         child: ListView(
-          padding: const EdgeInsets.fromLTRB(28, 8, 28, 24),
+          padding: const EdgeInsets.fromLTRB(AppSpace.page, AppSpace.sm, AppSpace.page, AppSpace.xl),
           children: [
             Text(
               l.settingsTitle,
               style: TextStyle(
-                fontSize: 24,
+                fontSize: AppText.titreSecondaire,
                 fontWeight: FontWeight.w600,
                 color: context.colors.encre,
               ),
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: AppSpace.xl),
             Row(
               children: [
-                ArchIcon(filled: true, size: 32, color: context.colors.bleu),
-                const SizedBox(width: 16),
+                ArchIcon(filled: true, size: AppSize.appIconSmall, color: context.colors.bleu),
+                const SizedBox(width: AppSpace.lg),
                 Text(
                   l.settingsAppVersion(appVersion),
-                  style: TextStyle(fontSize: 16, color: context.colors.encre),
+                  style: TextStyle(fontSize: AppText.intitule, color: context.colors.encre),
                 ),
               ],
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: AppSpace.lg),
             // Une ligne fine entre deux réglages, comme sur l'accueil.
             for (final row in rows) ...[
-              Divider(height: 1, thickness: 1, color: context.colors.ligne),
+              const AppDivider(),
               row,
             ],
             // Masquée hors Android (rien n'écoute le canal).
@@ -288,7 +289,7 @@ class _WeeklyNotificationRowState extends State<_WeeklyNotificationRow> {
     final l = context.l10n;
     return Column(
       children: [
-        Divider(height: 1, thickness: 1, color: context.colors.ligne),
+        const AppDivider(),
         SwitchListTile(
           contentPadding: EdgeInsets.zero,
           secondary: Icon(
@@ -298,11 +299,11 @@ class _WeeklyNotificationRowState extends State<_WeeklyNotificationRow> {
 
           title: Text(
             l.settingsWeeklyNotification,
-            style: TextStyle(fontSize: 15, color: context.colors.encre),
+            style: TextStyle(fontSize: AppText.corps, color: context.colors.encre),
           ),
           subtitle: Text(
             l.settingsWeeklyNotificationDetail,
-            style: TextStyle(fontSize: 13, color: context.colors.discret),
+            style: TextStyle(fontSize: AppText.detail, color: context.colors.discret),
           ),
           value: enabled,
           onChanged: _toggle,
@@ -329,23 +330,13 @@ class _Row extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListTile(
-      contentPadding: EdgeInsets.zero,
-      leading: Icon(icon, color: context.colors.secondaire),
-      title: Text(
-        title,
-        style: TextStyle(fontSize: 15, color: context.colors.encre),
-      ),
-      subtitle: subtitle == null
-          ? null
-          : Text(
-              subtitle!,
-              style: TextStyle(
-                fontSize: 13,
-                color: context.colors.discret,
-              ),
-            ),
+    return ListRow(
+      icon: icon,
+      iconColor: context.colors.secondaire,
+      title: title,
+      subtitle: subtitle,
       onTap: onTap,
+      chevron: true,
     );
   }
 }

@@ -2,6 +2,7 @@ import 'package:material_ui/material_ui.dart';
 
 import '../l10n/l10n.dart';
 import '../theme/app_colors.dart';
+import 'ui.dart';
 
 /// Demande l'accord avant d'utiliser Have I Been Pwned.
 /// Renvoie true seulement si l'utilisateur appuie sur « Vérifier ».
@@ -26,44 +27,41 @@ class _ConsentSheet extends StatelessWidget {
     final muted = context.colors.secondaire;
     return SafeArea(
       child: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(28, 0, 28, 16),
+        padding: const EdgeInsets.fromLTRB(AppSpace.page, 0, AppSpace.page, AppSpace.lg),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               l.breachConsentTitle,
               style: TextStyle(
-                fontSize: 22,
+                fontSize: AppText.titreSecondaire,
                 fontWeight: FontWeight.w600,
                 color: context.colors.encre,
               ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: AppSpace.md),
             Text(
               l.breachConsentText,
-              style: TextStyle(fontSize: 15, color: context.colors.encre),
+              style: TextStyle(fontSize: AppText.corps, color: context.colors.encre),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: AppSpace.md),
             Text(
               l.breachConsentDetail,
-              style: TextStyle(fontSize: 13, color: muted),
+              style: TextStyle(fontSize: AppText.detail, color: muted),
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: AppSpace.xl),
             SizedBox(
               width: double.infinity,
               child: FilledButton(
-                style: FilledButton.styleFrom(
-                  backgroundColor: context.colors.bleu,
-                ),
                 onPressed: () => Navigator.of(context).pop(true),
                 child: Text(l.breachConsentCheck),
               ),
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: AppSpace.xs),
             SizedBox(
               width: double.infinity,
               child: TextButton(
-                style: TextButton.styleFrom(foregroundColor: muted),
+                style: mutedButtonStyle(context),
                 onPressed: () => Navigator.of(context).pop(false),
                 child: Text(l.commonCancel),
               ),

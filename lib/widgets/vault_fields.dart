@@ -3,6 +3,7 @@ import 'package:material_ui/material_ui.dart';
 import '../l10n/l10n.dart';
 import '../services/vault/password_strength.dart';
 import '../theme/app_colors.dart';
+import 'ui.dart';
 
 /// Champ de saisie du coffre : bordure fine, bleue quand on écrit.
 /// Avec [secret], le texte est masqué et un œil permet de l'afficher.
@@ -51,7 +52,7 @@ class _VaultTextFieldState extends State<VaultTextField> {
   }
 
   static OutlineInputBorder _border(Color color) => OutlineInputBorder(
-    borderRadius: BorderRadius.circular(8),
+    borderRadius: AppRadius.field,
     borderSide: BorderSide(color: color),
   );
 
@@ -75,13 +76,13 @@ class _VaultTextFieldState extends State<VaultTextField> {
           : widget.keyboardType,
       onChanged: widget.onChanged,
       onSubmitted: widget.onSubmitted,
-      style: TextStyle(fontSize: 15, color: context.colors.encre),
+      style: TextStyle(fontSize: AppText.corps, color: context.colors.encre),
       decoration: InputDecoration(
         labelText: widget.label,
-        labelStyle: TextStyle(fontSize: 15, color: muted),
+        labelStyle: TextStyle(fontSize: AppText.corps, color: muted),
         floatingLabelStyle: TextStyle(color: context.colors.bleu),
         errorText: widget.errorText,
-        contentPadding: const EdgeInsets.all(14),
+        contentPadding: const EdgeInsets.all(AppSpace.lg),
         enabledBorder: _border(context.colors.ligne),
         disabledBorder: _border(context.colors.ligne),
         focusedBorder: _border(context.colors.bleu),
@@ -132,12 +133,12 @@ class PasswordStrengthLine extends StatelessWidget {
         ExcludeSemantics(
           child: LinearProgressIndicator(
             value: (strength.index + 1) / PasswordStrength.values.length,
-            minHeight: 2,
+            minHeight: AppSize.progress,
             color: _color(context.colors, strength),
             backgroundColor: context.colors.ligne,
           ),
         ),
-        const SizedBox(height: 6),
+        const SizedBox(height: AppSpace.sm),
         Text(
           tooShort
               ? l.strengthLineTooShort(
@@ -147,7 +148,7 @@ class PasswordStrengthLine extends StatelessWidget {
                 )
               : l.strengthLine(strength.label(l)),
           style: TextStyle(
-            fontSize: 13,
+            fontSize: AppText.detail,
             color: _color(context.colors, strength),
           ),
         ),

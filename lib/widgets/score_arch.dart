@@ -2,6 +2,7 @@ import 'package:material_ui/material_ui.dart';
 
 import '../l10n/l10n.dart';
 import '../theme/app_colors.dart';
+import 'ui.dart';
 
 /// L'arche du score : elle se remplit de bas en haut selon le score (0 à 100).
 class ScoreArch extends StatelessWidget {
@@ -86,7 +87,7 @@ class ScoreArch extends StatelessWidget {
                     Text(
                       '${value.round()}',
                       style: TextStyle(
-                        fontSize: 72,
+                        fontSize: AppText.score,
                         fontWeight: FontWeight.w300,
                         color: textColor,
                       ),

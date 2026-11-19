@@ -21,6 +21,7 @@ import '../widgets/loading_bar.dart';
 import '../widgets/verdict_section.dart';
 import 'firewall_screen.dart';
 import 'qr_result_screen.dart';
+import '../widgets/ui.dart';
 
 /// Onglet « Liens » : l'utilisateur colle, partage ou scanne un lien ;
 /// Sentinel dit où il mène vraiment et s'il est dangereux. Tout se passe
@@ -150,20 +151,15 @@ class _LinksScreenState extends State<LinksScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: context.colors.chaux,
-        surfaceTintColor: Colors.transparent,
         title: Text(_openLabel(l, result)),
         content: Text(l.qrConfirmLink(url)),
         actions: [
           TextButton(
-            style: TextButton.styleFrom(
-              foregroundColor: context.colors.secondaire,
-            ),
+            style: mutedButtonStyle(context),
             onPressed: () => Navigator.of(context).pop(false),
             child: Text(l.commonCancel),
           ),
           FilledButton(
-            style: FilledButton.styleFrom(backgroundColor: context.colors.bleu),
             onPressed: () => Navigator.of(context).pop(true),
             child: Text(l.commonContinue),
           ),
@@ -208,20 +204,15 @@ class _LinksScreenState extends State<LinksScreen> {
     final accepted = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: context.colors.chaux,
-        surfaceTintColor: Colors.transparent,
         title: Text(l.qrCameraTitle),
         content: Text(l.qrCameraText),
         actions: [
           TextButton(
-            style: TextButton.styleFrom(
-              foregroundColor: context.colors.secondaire,
-            ),
+            style: mutedButtonStyle(context),
             onPressed: () => Navigator.of(context).pop(false),
             child: Text(l.commonCancel),
           ),
           FilledButton(
-            style: FilledButton.styleFrom(backgroundColor: context.colors.bleu),
             onPressed: () => Navigator.of(context).pop(true),
             child: Text(l.commonContinue),
           ),
@@ -259,43 +250,43 @@ class _LinksScreenState extends State<LinksScreen> {
         children: [
           Expanded(
             child: ListView(
-              padding: const EdgeInsets.fromLTRB(28, 24, 28, 16),
+              padding: const EdgeInsets.fromLTRB(AppSpace.page, AppSpace.xl, AppSpace.page, AppSpace.lg),
               children: [
                 Text(
                   l.navLinks,
                   style: TextStyle(
-                    fontSize: 28,
+                    fontSize: AppText.titre,
                     fontWeight: FontWeight.w600,
                     color: context.colors.encre,
                   ),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: AppSpace.xs),
                 Text(
                   l.linksIntro,
-                  style: TextStyle(fontSize: 15, color: muted),
+                  style: TextStyle(fontSize: AppText.corps, color: muted),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: AppSpace.lg),
                 _LinkField(controller: _controller, onChanged: _onTextChanged),
-                const SizedBox(height: 8),
+                const SizedBox(height: AppSpace.sm),
                 _actions(l),
                 if (_checking)
                   Padding(
-                    padding: const EdgeInsets.only(top: 24),
+                    padding: const EdgeInsets.only(top: AppSpace.xl),
                     child: LoadingBar(label: l.linksChecking),
                   ),
                 if (_noLink || _failed)
                   Padding(
-                    padding: const EdgeInsets.only(top: 24),
+                    padding: const EdgeInsets.only(top: AppSpace.xl),
                     child: Semantics(
                       liveRegion: true,
                       child: Text(
                         _noLink ? l.linksNoLink : l.linksFailed,
-                        style: TextStyle(fontSize: 15, color: muted),
+                        style: TextStyle(fontSize: AppText.corps, color: muted),
                       ),
                     ),
                   ),
                 if (result != null && !_checking) ..._resultWidgets(l, result),
-                const SizedBox(height: 28),
+                const SizedBox(height: AppSpace.xl),
                 _QrScanRow(onTap: _scanning ? null : _scanQr),
                 AutoProtectionRow(firewall: _firewall),
               ],
@@ -303,10 +294,10 @@ class _LinksScreenState extends State<LinksScreen> {
           ),
           // Rappel discret, toujours visible.
           Padding(
-            padding: const EdgeInsets.fromLTRB(28, 0, 28, 16),
+            padding: const EdgeInsets.fromLTRB(AppSpace.page, 0, AppSpace.page, AppSpace.lg),
             child: Text(
               l.linksLocalNote,
-              style: TextStyle(fontSize: 13, color: context.colors.secondaire),
+              style: TextStyle(fontSize: AppText.detail, color: context.colors.secondaire),
             ),
           ),
         ],
@@ -328,22 +319,18 @@ class _LinksScreenState extends State<LinksScreen> {
         ],
         advice: verdict.advice(l),
       ),
-      const SizedBox(height: 20),
+      const SizedBox(height: AppSpace.xl),
       // Le lien tel qu'il sera ouvert, de gauche à droite même en arabe.
       Text(
         result.link.openableUrl,
         textDirection: TextDirection.ltr,
         textAlign: pageStart(context),
-        style: TextStyle(fontSize: 13, color: context.colors.secondaire),
+        style: TextStyle(fontSize: AppText.detail, color: context.colors.secondaire),
       ),
-      const SizedBox(height: 12),
+      const SizedBox(height: AppSpace.md),
       Align(
         alignment: AlignmentDirectional.centerStart,
         child: OutlinedButton(
-          style: OutlinedButton.styleFrom(
-            foregroundColor: context.colors.bleu,
-            side: BorderSide(color: context.colors.ligne),
-          ),
           // null : désactivé (lien dangereux).
           onPressed: blocked ? null : () => _open(result),
           child: Text(_openLabel(l, result)),
@@ -351,10 +338,10 @@ class _LinksScreenState extends State<LinksScreen> {
       ),
       if (blocked)
         Padding(
-          padding: const EdgeInsets.only(top: 8),
+          padding: const EdgeInsets.only(top: AppSpace.sm),
           child: Text(
             l.linksOpenBlocked,
-            style: TextStyle(fontSize: 13, color: context.colors.secondaire),
+            style: TextStyle(fontSize: AppText.detail, color: context.colors.secondaire),
           ),
         ),
     ];
@@ -365,7 +352,6 @@ class _LinksScreenState extends State<LinksScreen> {
     return ActionsRow(
       children: [
         TextButton(
-          style: TextButton.styleFrom(foregroundColor: context.colors.bleu),
           onPressed: _paste,
           child: Text(l.linksPaste),
         ),
@@ -374,18 +360,12 @@ class _LinksScreenState extends State<LinksScreen> {
           children: [
             if (_controller.text.isNotEmpty)
               TextButton(
-                style: TextButton.styleFrom(
-                  foregroundColor: context.colors.secondaire,
-                ),
+                style: mutedButtonStyle(context),
                 onPressed: _clear,
                 child: Text(l.linksClear),
               ),
-            const SizedBox(width: 8),
+            const SizedBox(width: AppSpace.sm),
             FilledButton(
-              style: FilledButton.styleFrom(
-                backgroundColor: context.colors.bleu,
-                foregroundColor: context.colors.surCouleur,
-              ),
               // null = bouton désactivé (champ vide ou vérification en cours).
               onPressed: _hasText && !_checking ? _check : null,
               child: Text(l.linksCheck),
@@ -409,7 +389,7 @@ class _LinkField extends StatelessWidget {
   final ValueChanged<String> onChanged;
 
   static OutlineInputBorder _border(Color color) => OutlineInputBorder(
-    borderRadius: BorderRadius.circular(8),
+    borderRadius: AppRadius.field,
     borderSide: BorderSide(color: color),
   );
 
@@ -422,11 +402,11 @@ class _LinkField extends StatelessWidget {
       maxLines: 4,
       keyboardType: TextInputType.url,
       autocorrect: false,
-      style: TextStyle(fontSize: 15, color: context.colors.encre),
+      style: TextStyle(fontSize: AppText.corps, color: context.colors.encre),
       decoration: InputDecoration(
         hintText: context.l10n.linksHint,
-        hintStyle: TextStyle(fontSize: 15, color: context.colors.discret),
-        contentPadding: const EdgeInsets.all(14),
+        hintStyle: TextStyle(fontSize: AppText.corps, color: context.colors.discret),
+        contentPadding: const EdgeInsets.all(AppSpace.lg),
         enabledBorder: _border(context.colors.ligne),
         focusedBorder: _border(context.colors.bleu),
       ),
@@ -445,15 +425,15 @@ class _QrScanRow extends StatelessWidget {
     final l = context.l10n;
     return Column(
       children: [
-        Divider(height: 1, thickness: 1, color: context.colors.ligne),
+        const AppDivider(),
         InkWell(
           onTap: onTap,
           child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 14),
+            padding: const EdgeInsets.symmetric(vertical: AppSpace.lg),
             child: Row(
               children: [
                 Icon(Icons.qr_code_scanner, color: context.colors.bleu),
-                const SizedBox(width: 16),
+                const SizedBox(width: AppSpace.lg),
                 Expanded(
                   child: _TwoLines(
                     title: l.qrScanButton,
@@ -465,7 +445,7 @@ class _QrScanRow extends StatelessWidget {
             ),
           ),
         ),
-        Divider(height: 1, thickness: 1, color: context.colors.ligne),
+        const AppDivider(),
       ],
     );
   }
@@ -539,7 +519,7 @@ class _AutoProtectionRowState extends State<AutoProtectionRow> {
         InkWell(
           onTap: active ? _openFirewall : null,
           child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 14),
+            padding: const EdgeInsets.symmetric(vertical: AppSpace.lg),
             child: Row(
               children: [
                 Icon(
@@ -548,25 +528,18 @@ class _AutoProtectionRowState extends State<AutoProtectionRow> {
                       ? context.colors.zitouna
                       : context.colors.discret,
                 ),
-                const SizedBox(width: 16),
+                const SizedBox(width: AppSpace.lg),
                 Expanded(
                   child: _TwoLines(
                     title: l.linksAutoTitle,
                     subtitle: active ? l.linksAutoOn : l.linksAutoOff,
                   ),
                 ),
-                const SizedBox(width: 12),
+                const SizedBox(width: AppSpace.md),
                 if (active)
                   Icon(Icons.chevron_right, color: context.colors.discret)
                 else
                   TextButton(
-                    style: TextButton.styleFrom(
-                      foregroundColor: context.colors.bleu,
-                      textStyle: const TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
                     onPressed: _busy ? null : _enable,
                     child: Text(l.linksAutoEnable),
                   ),
@@ -574,7 +547,7 @@ class _AutoProtectionRowState extends State<AutoProtectionRow> {
             ),
           ),
         ),
-        Divider(height: 1, thickness: 1, color: context.colors.ligne),
+        const AppDivider(),
       ],
     );
   }
@@ -600,15 +573,15 @@ class _TwoLines extends StatelessWidget {
         Text(
           title,
           style: TextStyle(
-            fontSize: 16,
+            fontSize: AppText.intitule,
             fontWeight: FontWeight.w500,
             color: titleColor ?? context.colors.encre,
           ),
         ),
-        const SizedBox(height: 2),
+        const SizedBox(height: AppSpace.xs),
         Text(
           subtitle,
-          style: TextStyle(fontSize: 13, color: context.colors.secondaire),
+          style: TextStyle(fontSize: AppText.detail, color: context.colors.secondaire),
         ),
       ],
     );

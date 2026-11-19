@@ -12,6 +12,7 @@ import '../../services/vault/vault_platform.dart';
 import '../../services/vault/vault_session.dart';
 import '../../theme/app_colors.dart';
 import '../../widgets/vault_fields.dart';
+import '../../widgets/ui.dart';
 
 /// Taille lisible : « 340 Ko », « 2,4 Mo ».
 String documentSizeLabel(AppLocalizations l, int bytes) {
@@ -203,20 +204,16 @@ class _VaultDocumentScreenState extends State<VaultDocumentScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: context.colors.chaux,
-        surfaceTintColor: Colors.transparent,
         title: Text(l.vaultDocShareTitle),
         content: Text(l.vaultDocShareWarning),
         actions: [
           TextButton(
-            style: TextButton.styleFrom(
-              foregroundColor: context.colors.secondaire,
-            ),
+            style: mutedButtonStyle(context),
             onPressed: () => Navigator.of(context).pop(false),
             child: Text(l.commonCancel),
           ),
           TextButton(
-            style: TextButton.styleFrom(foregroundColor: context.colors.rommen),
+            style: dangerButtonStyle(context),
             onPressed: () => Navigator.of(context).pop(true),
             child: Text(l.vaultDocShareAnyway),
           ),
@@ -240,20 +237,16 @@ class _VaultDocumentScreenState extends State<VaultDocumentScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: context.colors.chaux,
-        surfaceTintColor: Colors.transparent,
         title: Text(l.vaultDeleteItemTitle(widget.item!.titre)),
         content: Text(l.vaultDeleteItemText),
         actions: [
           TextButton(
-            style: TextButton.styleFrom(
-              foregroundColor: context.colors.secondaire,
-            ),
+            style: mutedButtonStyle(context),
             onPressed: () => Navigator.of(context).pop(false),
             child: Text(l.commonCancel),
           ),
           TextButton(
-            style: TextButton.styleFrom(foregroundColor: context.colors.rommen),
+            style: dangerButtonStyle(context),
             onPressed: () => Navigator.of(context).pop(true),
             child: Text(l.vaultDelete),
           ),
@@ -333,32 +326,32 @@ class _VaultDocumentScreenState extends State<VaultDocumentScreen> {
           children: [
             Expanded(
               child: ListView(
-                padding: const EdgeInsets.fromLTRB(28, 8, 28, 24),
+                padding: const EdgeInsets.fromLTRB(AppSpace.page, AppSpace.sm, AppSpace.page, AppSpace.xl),
                 children: [
                   Text(
                     item == null ? l.vaultNewDocument : l.vaultTypeDocument,
                     style: TextStyle(
-                      fontSize: 24,
+                      fontSize: AppText.titreSecondaire,
                       fontWeight: FontWeight.w600,
                       color: context.colors.encre,
                     ),
                   ),
                   if (_bytes case final bytes?) ...[
-                    const SizedBox(height: 4),
+                    const SizedBox(height: AppSpace.xs),
                     Text(
                       '${documentKindLabel(l, _mime)} · '
                       '${documentSizeLabel(l, bytes.length)}',
                       style: TextStyle(
-                        fontSize: 13,
+                        fontSize: AppText.detail,
                         color: context.colors.secondaire,
                       ),
                     ),
                   ],
-                  const SizedBox(height: 16),
+                  const SizedBox(height: AppSpace.lg),
                   ..._preview(l),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: AppSpace.xl),
                   VaultTextField(controller: _titre, label: l.vaultFieldTitle),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: AppSpace.lg),
                   VaultTextField(
                     controller: _note,
                     label: l.vaultFieldNote,
@@ -370,13 +363,10 @@ class _VaultDocumentScreenState extends State<VaultDocumentScreen> {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.fromLTRB(28, 0, 28, 16),
+              padding: const EdgeInsets.fromLTRB(AppSpace.page, 0, AppSpace.page, AppSpace.lg),
               child: SizedBox(
                 width: double.infinity,
                 child: FilledButton(
-                  style: FilledButton.styleFrom(
-                    backgroundColor: context.colors.bleu,
-                  ),
                   onPressed: _saving || _bytes == null && item == null
                       ? null
                       : _save,
@@ -391,12 +381,12 @@ class _VaultDocumentScreenState extends State<VaultDocumentScreen> {
   }
 
   List<Widget> _preview(AppLocalizations l) {
-    final muted = TextStyle(fontSize: 15, color: context.colors.secondaire);
+    final muted = TextStyle(fontSize: AppText.corps, color: context.colors.secondaire);
     if (_unreadable) {
       return [
         Text(
           l.vaultDocUnreadable,
-          style: TextStyle(fontSize: 15, color: context.colors.rommen),
+          style: TextStyle(fontSize: AppText.corps, color: context.colors.rommen),
         ),
       ];
     }
@@ -424,7 +414,7 @@ class _VaultDocumentScreenState extends State<VaultDocumentScreen> {
             .round();
     return [
       for (var i = 0; i < count; i++) ...[
-        if (i > 0) const SizedBox(height: 8),
+        if (i > 0) const SizedBox(height: AppSpace.sm),
         FutureBuilder<Uint8List?>(
           future: _page(i, width),
           builder: (context, snapshot) {

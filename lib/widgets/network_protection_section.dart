@@ -4,6 +4,7 @@ import '../l10n/l10n.dart';
 import '../screens/firewall_screen.dart';
 import '../services/firewall_service.dart';
 import '../theme/app_colors.dart';
+import 'ui.dart';
 
 /// Section « Protection réseau » de l'accueil : une ligne vers le
 /// pare-feu DNS. N'affiche rien hors Android.
@@ -62,20 +63,20 @@ class _NetworkProtectionSectionState extends State<NetworkProtectionSection> {
         Text(
           l.networkProtectionTitle,
           style: TextStyle(
-            fontSize: 18,
+            fontSize: AppText.section,
             fontWeight: FontWeight.w600,
             color: context.colors.encre,
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: AppSpace.sm),
         InkWell(
           onTap: _open,
           child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 16),
+            padding: const EdgeInsets.symmetric(vertical: AppSpace.lg),
             child: Row(
               children: [
                 Icon(Icons.shield_outlined, color: color),
-                const SizedBox(width: 16),
+                const SizedBox(width: AppSpace.lg),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -83,23 +84,23 @@ class _NetworkProtectionSectionState extends State<NetworkProtectionSection> {
                       Text(
                         l.firewallTitle,
                         style: TextStyle(
-                          fontSize: 16,
+                          fontSize: AppText.intitule,
                           fontWeight: FontWeight.w500,
                           color: context.colors.encre,
                         ),
                       ),
-                      const SizedBox(height: 2),
+                      const SizedBox(height: AppSpace.xs),
                       Text(
                         status.summary(l),
                         style: TextStyle(
-                          fontSize: 13,
+                          fontSize: AppText.detail,
                           color: context.colors.secondaire,
                         ),
                       ),
                     ],
                   ),
                 ),
-                const SizedBox(width: 12),
+                const SizedBox(width: AppSpace.md),
                 Icon(Icons.chevron_right, color: context.colors.discret),
               ],
             ),

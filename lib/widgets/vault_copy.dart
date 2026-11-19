@@ -2,7 +2,6 @@ import 'package:material_ui/material_ui.dart';
 
 import '../l10n/l10n.dart';
 import '../services/vault/vault_platform.dart';
-import '../theme/app_colors.dart';
 
 /// Copie depuis le coffre. Sur Android 9 et avant, demande d'abord une
 /// confirmation (une fois par ouverture de l'app).
@@ -26,7 +25,6 @@ Future<Duration?> copyFromVault(
             child: Text(context.l10n.commonCancel),
           ),
           FilledButton(
-            style: FilledButton.styleFrom(backgroundColor: context.colors.bleu),
             onPressed: () => Navigator.pop(context, true),
             child: Text(context.l10n.clipboardCopyAnyway),
           ),

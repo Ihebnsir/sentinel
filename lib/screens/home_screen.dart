@@ -20,6 +20,7 @@ import '../widgets/wifi_alert.dart';
 import '../widgets/wifi_section.dart';
 import 'settings_screen.dart';
 import 'weekly_report_screen.dart';
+import '../widgets/ui.dart';
 
 /// L'écran d'accueil : salutation, score et actions conseillées.
 /// StatefulWidget car il garde le résultat de l'audit en mémoire.
@@ -199,7 +200,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           // AlwaysScrollable : on peut tirer même si l'écran ne déborde pas.
           child: SingleChildScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
-            padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 24),
+            padding: const EdgeInsets.symmetric(horizontal: AppSpace.page, vertical: AppSpace.xl),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -210,7 +211,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                       child: Text(
                         l.homeGreeting,
                         style: TextStyle(
-                          fontSize: 16,
+                          fontSize: AppText.intitule,
                           color: context.colors.secondaire,
                         ),
                       ),
@@ -218,7 +219,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                     IconButton(
                       tooltip: l.settingsTitle,
                       color: context.colors.secondaire,
-                      icon: const Icon(Icons.settings_outlined, size: 22),
+                      icon: const Icon(Icons.settings_outlined),
                       onPressed: () => Navigator.of(context).push(
                         MaterialPageRoute<void>(
                           builder: (_) => const SettingsScreen(),
@@ -227,29 +228,29 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                     ),
                   ],
                 ),
-                const SizedBox(height: 6),
+                const SizedBox(height: AppSpace.sm),
                 Text(
                   _title(l, report),
                   style: TextStyle(
-                    fontSize: 28,
+                    fontSize: AppText.titre,
                     fontWeight: FontWeight.w600,
                     color: context.colors.encre,
                   ),
                 ),
-                const SizedBox(height: 40),
+                const SizedBox(height: AppSpace.xxl),
                 ..._content(l, status, report),
                 // Hors Android (Windows) : section masquée.
                 if (WifiService.isSupported && _wifiLoaded && !_loading) ...[
-                  const SizedBox(height: 32),
+                  const SizedBox(height: AppSpace.xxl),
                   WifiSection(report: wifiReport, onTap: _showWifiDetails),
                 ],
                 if (FirewallService.isSupported && !_loading) ...[
-                  const SizedBox(height: 32),
+                  const SizedBox(height: AppSpace.xxl),
                   const NetworkProtectionSection(),
                 ],
                 if (WeeklyReportService.isSupported && !_loading) ...[
-                  const SizedBox(height: 24),
-                  Divider(height: 1, thickness: 1, color: context.colors.ligne),
+                  const SizedBox(height: AppSpace.xl),
+                  const AppDivider(),
                   _WeeklyEntry(
                     onTap: () => Navigator.of(context).push(
                       MaterialPageRoute<void>(
@@ -285,36 +286,36 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     final actions = report.actions;
     return [
       Center(child: ScoreArch(score: report.score)),
-      const SizedBox(height: 12),
+      const SizedBox(height: AppSpace.md),
       Center(
         child: Text(
           _versionLine(l, status),
-          style: TextStyle(fontSize: 13, color: context.colors.discret),
+          style: TextStyle(fontSize: AppText.detail, color: context.colors.discret),
         ),
       ),
-      const SizedBox(height: 40),
+      const SizedBox(height: AppSpace.xxl),
       Text(
         l.homeToGainPoints,
         style: TextStyle(
-          fontSize: 18,
+          fontSize: AppText.section,
           fontWeight: FontWeight.w600,
           color: context.colors.encre,
         ),
       ),
-      const SizedBox(height: 8),
+      const SizedBox(height: AppSpace.sm),
       if (actions.isEmpty)
         Padding(
-          padding: const EdgeInsets.symmetric(vertical: 16),
+          padding: const EdgeInsets.symmetric(vertical: AppSpace.lg),
           child: Text(
             l.homeNothingToFix,
-            style: TextStyle(fontSize: 15, color: context.colors.secondaire),
+            style: TextStyle(fontSize: AppText.corps, color: context.colors.secondaire),
           ),
         ),
       // Boucle for dans la liste : on crée une ligne par action,
       // avec un séparateur fin entre deux lignes (pas avant la première).
       for (var i = 0; i < actions.length; i++) ...[
         if (i > 0)
-          Divider(height: 1, thickness: 1, color: context.colors.ligne),
+          const AppDivider(),
         ActionTile(action: actions[i], onTap: _onTapFor(actions[i])),
       ],
     ];
@@ -338,20 +339,12 @@ class _WeeklyEntry extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l = context.l10n;
-    return ListTile(
-      contentPadding: EdgeInsets.zero,
-      leading: Icon(Icons.insights_outlined, color: context.colors.secondaire),
-      title: Text(
-        l.weeklyTitle,
-        style: TextStyle(fontSize: 15, color: context.colors.encre),
-      ),
-      subtitle: Text(
-        l.weeklyHomeEntryDetail,
-        style: TextStyle(fontSize: 13, color: context.colors.discret),
-      ),
-      trailing: Icon(Icons.chevron_right, color: context.colors.discret),
-
+    return ListRow(
+      icon: Icons.insights_outlined,
+      title: l.weeklyTitle,
+      subtitle: l.weeklyHomeEntryDetail,
       onTap: onTap,
+      chevron: true,
     );
   }
 }
@@ -366,12 +359,12 @@ class _InfoMessage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 48),
+      padding: const EdgeInsets.symmetric(vertical: AppSpace.xxxl),
       child: Center(
         child: Text(
           text,
           textAlign: TextAlign.center,
-          style: TextStyle(fontSize: 16, color: context.colors.secondaire),
+          style: TextStyle(fontSize: AppText.intitule, color: context.colors.secondaire),
         ),
       ),
     );

@@ -5,6 +5,7 @@ import '../services/app_analysis.dart';
 import '../services/weekly_report_service.dart';
 import '../theme/app_colors.dart';
 import '../widgets/score_arch.dart';
+import '../widgets/ui.dart';
 
 /// « Bilan de la semaine » : semaine en cours et précédente, en chiffres.
 /// [service] : remplaçable dans les tests.
@@ -59,27 +60,27 @@ class _WeeklyReportScreenState extends State<WeeklyReportScreen> {
     final title = Text(
       l.weeklyTitle,
       style: TextStyle(
-        fontSize: 24,
+        fontSize: AppText.titreSecondaire,
         fontWeight: FontWeight.w600,
         color: context.colors.encre,
       ),
     );
     if (_loading) {
       return Padding(
-        padding: const EdgeInsets.fromLTRB(28, 8, 28, 24),
+        padding: const EdgeInsets.fromLTRB(AppSpace.page, AppSpace.sm, AppSpace.page, AppSpace.xl),
         child: title,
       );
     }
     if (report == null) {
       return ListView(
-        padding: const EdgeInsets.fromLTRB(28, 8, 28, 24),
+        padding: const EdgeInsets.fromLTRB(AppSpace.page, AppSpace.sm, AppSpace.page, AppSpace.xl),
         children: [
           title,
-          const SizedBox(height: 48),
+          const SizedBox(height: AppSpace.xxxl),
           Text(
             l.weeklyAndroidOnly,
             textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 16, color: context.colors.secondaire),
+            style: TextStyle(fontSize: AppText.intitule, color: context.colors.secondaire),
           ),
         ],
       );
@@ -92,21 +93,21 @@ class _WeeklyReportScreenState extends State<WeeklyReportScreen> {
     final previousScore = previous?.scoreEnd;
 
     return ListView(
-      padding: const EdgeInsets.fromLTRB(28, 8, 28, 24),
+      padding: const EdgeInsets.fromLTRB(AppSpace.page, AppSpace.sm, AppSpace.page, AppSpace.xl),
       children: [
         title,
-        const SizedBox(height: 4),
+        const SizedBox(height: AppSpace.xs),
         Text(
           l.weeklyPeriod(l.date(week.start), l.date(week.end)),
-          style: TextStyle(fontSize: 13, color: context.colors.discret),
+          style: TextStyle(fontSize: AppText.detail, color: context.colors.discret),
         ),
-        const SizedBox(height: 32),
+        const SizedBox(height: AppSpace.xxl),
         Center(
           child: scoreEnd == null
               ? ScoreArch.empty(message: l.weeklyNoScore)
               : ScoreArch(score: scoreEnd),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: AppSpace.md),
         if (scoreStart != null && scoreEnd != null)
           _centered(
             context,
@@ -114,7 +115,7 @@ class _WeeklyReportScreenState extends State<WeeklyReportScreen> {
           ),
         if (previousScore != null)
           _centered(context, l.weeklyLastWeekScore(l.number(previousScore))),
-        const SizedBox(height: 32),
+        const SizedBox(height: AppSpace.xxl),
         _ColumnsHeader(),
         _Section(
           title: l.weeklyFirewall,
@@ -176,21 +177,21 @@ class _WeeklyReportScreenState extends State<WeeklyReportScreen> {
             ),
           ],
         ),
-        const SizedBox(height: 24),
+        const SizedBox(height: AppSpace.xl),
         Text(
           l.weeklyPrivacyNote,
-          style: TextStyle(fontSize: 13, color: context.colors.discret),
+          style: TextStyle(fontSize: AppText.detail, color: context.colors.discret),
         ),
       ],
     );
   }
 
   Widget _centered(BuildContext context, String text) => Padding(
-    padding: const EdgeInsets.only(top: 4),
+    padding: const EdgeInsets.only(top: AppSpace.xs),
     child: Text(
       text,
       textAlign: TextAlign.center,
-      style: TextStyle(fontSize: 13, color: context.colors.secondaire),
+      style: TextStyle(fontSize: AppText.detail, color: context.colors.secondaire),
     ),
   );
 
@@ -226,7 +227,7 @@ class _ColumnsHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l = context.l10n;
-    final style = TextStyle(fontSize: 12, color: context.colors.discret);
+    final style = TextStyle(fontSize: AppText.legende, color: context.colors.discret);
     return ExcludeSemantics(
       child: Row(
         children: [
@@ -266,11 +267,11 @@ class _Section extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.only(top: 20, bottom: 4),
+          padding: const EdgeInsets.only(top: AppSpace.xl, bottom: AppSpace.xs),
           child: Text(
             title,
             style: TextStyle(
-              fontSize: 16,
+              fontSize: AppText.intitule,
               fontWeight: FontWeight.w600,
               color: context.colors.encre,
             ),
@@ -278,7 +279,7 @@ class _Section extends StatelessWidget {
         ),
         for (var i = 0; i < rows.length; i++) ...[
           if (i > 0)
-            Divider(height: 1, thickness: 1, color: context.colors.ligne),
+            const AppDivider(),
           _LineRow(rows[i]),
         ],
       ],
@@ -304,13 +305,13 @@ class _LineRow extends StatelessWidget {
           '${l.weeklyLastWeek} : ${say(line.previous)}.',
       excludeSemantics: true,
       child: ConstrainedBox(
-        constraints: const BoxConstraints(minHeight: 48),
+        constraints: const BoxConstraints(minHeight: AppSize.tap),
         child: Row(
           children: [
             Expanded(
               child: Text(
                 line.label,
-                style: TextStyle(fontSize: 15, color: context.colors.encre),
+                style: TextStyle(fontSize: AppText.corps, color: context.colors.encre),
               ),
             ),
             SizedBox(
@@ -319,7 +320,7 @@ class _LineRow extends StatelessWidget {
                 show(line.current),
                 textAlign: TextAlign.end,
                 style: TextStyle(
-                  fontSize: 15,
+                  fontSize: AppText.corps,
                   fontWeight: FontWeight.w600,
                   color: context.colors.encre,
                 ),
@@ -331,7 +332,7 @@ class _LineRow extends StatelessWidget {
                 show(line.previous),
                 textAlign: TextAlign.end,
                 style: TextStyle(
-                  fontSize: 15,
+                  fontSize: AppText.corps,
                   color: context.colors.secondaire,
                 ),
               ),

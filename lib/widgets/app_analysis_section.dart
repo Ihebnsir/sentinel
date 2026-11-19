@@ -4,12 +4,13 @@ import '../l10n/l10n.dart';
 import '../services/app_analysis.dart';
 import '../theme/app_colors.dart';
 import 'blocklist_sections.dart';
+import 'ui.dart';
 
 // Couleur : celle du thème (dividerTheme, ligne fine).
 const _divider = Divider(height: 1, thickness: 1);
 
 TextStyle _muted(BuildContext context) =>
-    TextStyle(fontSize: 13, color: context.colors.secondaire);
+    TextStyle(fontSize: AppText.detail, color: context.colors.secondaire);
 
 /// « Analyser une application » sur l'écran du pare-feu : lancement,
 /// analyse en cours et rapports des dernières 24 heures.
@@ -41,27 +42,27 @@ class AppAnalysisSection extends StatelessWidget {
         BlocklistSectionTitle(l.analysisSectionTitle),
         if (running != null) ...[
           Padding(
-            padding: const EdgeInsets.symmetric(vertical: 12),
+            padding: const EdgeInsets.symmetric(vertical: AppSpace.md),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   l.analysisRunning(running.appLabel),
                   style: TextStyle(
-                    fontSize: 16,
+                    fontSize: AppText.intitule,
                     fontWeight: FontWeight.w500,
                     color: context.colors.encre,
                   ),
                 ),
-                const SizedBox(height: 2),
+                const SizedBox(height: AppSpace.xs),
                 Text(
                   running.progressAt(l, DateTime.now()),
                   style: _muted(context),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: AppSpace.xs),
                 Text(
                   l.analysisUnprotectedWarning,
-                  style: TextStyle(fontSize: 13, color: context.colors.ocre),
+                  style: TextStyle(fontSize: AppText.detail, color: context.colors.ocre),
                 ),
               ],
             ),
@@ -69,10 +70,7 @@ class AppAnalysisSection extends StatelessWidget {
           Align(
             alignment: Alignment.centerLeft,
             child: TextButton(
-              style: TextButton.styleFrom(
-                foregroundColor: context.colors.rommen,
-                padding: EdgeInsets.zero,
-              ),
+              style: inlineButtonStyle(context, danger: true),
               onPressed: onStop,
               child: Text(l.analysisStop),
             ),
@@ -86,25 +84,22 @@ class AppAnalysisSection extends StatelessWidget {
             Align(
               alignment: Alignment.centerLeft,
               child: TextButton(
-                style: TextButton.styleFrom(
-                  foregroundColor: context.colors.bleu,
-                  padding: EdgeInsets.zero,
-                ),
+                style: inlineButtonStyle(context),
                 onPressed: onChoose,
                 child: Text(l.analysisChooseApp),
               ),
             ),
         ],
         if (reports.isNotEmpty) ...[
-          const SizedBox(height: 8),
+          const SizedBox(height: AppSpace.sm),
           Text(l.analysisRecentReports, style: _muted(context)),
-          const SizedBox(height: 4),
+          const SizedBox(height: AppSpace.xs),
           _divider,
           for (final report in reports) ...[
             InkWell(
               onTap: () => onOpenReport(report),
               child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 12),
+                padding: const EdgeInsets.symmetric(vertical: AppSpace.md),
                 child: Row(
                   children: [
                     Expanded(
@@ -114,12 +109,12 @@ class AppAnalysisSection extends StatelessWidget {
                           Text(
                             report.appLabel,
                             style: TextStyle(
-                              fontSize: 16,
+                              fontSize: AppText.intitule,
                               fontWeight: FontWeight.w500,
                               color: context.colors.encre,
                             ),
                           ),
-                          const SizedBox(height: 2),
+                          const SizedBox(height: AppSpace.xs),
                           Text(
                             '${_domains(l, report.domains.length)} · '
                             '${l.dateTime(report.endedAt)}',

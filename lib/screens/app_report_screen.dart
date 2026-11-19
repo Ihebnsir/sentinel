@@ -14,12 +14,13 @@ import '../widgets/app_icon.dart';
 import '../widgets/blocklist_sections.dart';
 import 'app_detail_screen.dart';
 import '../utils/bidi.dart';
+import '../widgets/ui.dart';
 
 // Couleur : celle du thème (dividerTheme, ligne fine).
 const _divider = Divider(height: 1, thickness: 1);
 
 TextStyle _muted(BuildContext context) =>
-    TextStyle(fontSize: 13, color: context.colors.secondaire);
+    TextStyle(fontSize: AppText.detail, color: context.colors.secondaire);
 
 /// Rapport d'une analyse : résumé, compteurs, domaines par catégorie.
 /// Renvoie true (Navigator.pop) si le rapport a été supprimé ou a expiré.
@@ -124,19 +125,19 @@ class _AppReportScreenState extends State<AppReportScreen> {
       body: SafeArea(
         top: false,
         child: ListView(
-          padding: const EdgeInsets.fromLTRB(28, 8, 28, 24),
+          padding: const EdgeInsets.fromLTRB(AppSpace.page, AppSpace.sm, AppSpace.page, AppSpace.xl),
           children: [
             Row(
               children: [
                 if (app != null) ...[
-                  AppIcon(app: app, size: 48),
-                  const SizedBox(width: 16),
+                  AppIcon(app: app, size: AppSize.iconHero),
+                  const SizedBox(width: AppSpace.lg),
                 ],
                 Expanded(
                   child: Text(
                     report.appLabel,
                     style: TextStyle(
-                      fontSize: 24,
+                      fontSize: AppText.titreSecondaire,
                       fontWeight: FontWeight.w600,
                       color: context.colors.encre,
                     ),
@@ -144,7 +145,7 @@ class _AppReportScreenState extends State<AppReportScreen> {
                 ),
               ],
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: AppSpace.xs),
             Text(
               l.reportDateLine(
                 l.dateTime(report.startedAt),
@@ -152,12 +153,12 @@ class _AppReportScreenState extends State<AppReportScreen> {
               ),
               style: _muted(context),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: AppSpace.lg),
             Text(
               report.summary(l),
-              style: TextStyle(fontSize: 17, color: context.colors.encre),
+              style: TextStyle(fontSize: AppText.section, color: context.colors.encre),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: AppSpace.lg),
             _divider,
             _CountRow(l.reportDomainsContacted, report.domains.length),
             _divider,
@@ -176,7 +177,7 @@ class _AppReportScreenState extends State<AppReportScreen> {
             _divider,
             if (report.truncated)
               Padding(
-                padding: const EdgeInsets.only(top: 8),
+                padding: const EdgeInsets.only(top: AppSpace.sm),
                 child: Text(l.reportTruncated, style: _muted(context)),
               ),
             for (final group in report.groups) ...[
@@ -188,15 +189,12 @@ class _AppReportScreenState extends State<AppReportScreen> {
                 _divider,
               ],
             ],
-            const SizedBox(height: 24),
+            const SizedBox(height: AppSpace.xl),
             if (app != null)
               Align(
                 alignment: Alignment.centerLeft,
                 child: TextButton(
-                  style: TextButton.styleFrom(
-                    foregroundColor: context.colors.bleu,
-                    padding: EdgeInsets.zero,
-                  ),
+                  style: inlineButtonStyle(context),
                   onPressed: _openDetail,
                   child: Text(l.reportSeeApp),
                 ),
@@ -204,20 +202,17 @@ class _AppReportScreenState extends State<AppReportScreen> {
             Align(
               alignment: Alignment.centerLeft,
               child: TextButton(
-                style: TextButton.styleFrom(
-                  foregroundColor: context.colors.rommen,
-                  padding: EdgeInsets.zero,
-                ),
+                style: inlineButtonStyle(context, danger: true),
                 onPressed: _delete,
                 child: Text(l.reportDelete),
               ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: AppSpace.sm),
             Text(
               l.reportLocalOnly(l.dateTime(report.expiresAt)),
               style: _muted(context),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: AppSpace.sm),
             Text(l.reportApproximate, style: _muted(context)),
           ],
         ),
@@ -237,19 +232,19 @@ class _CountRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 14),
+      padding: const EdgeInsets.symmetric(vertical: AppSpace.lg),
       child: Row(
         children: [
           Expanded(
             child: Text(
               label,
-              style: TextStyle(fontSize: 15, color: context.colors.secondaire),
+              style: TextStyle(fontSize: AppText.corps, color: context.colors.secondaire),
             ),
           ),
           Text(
             context.l10n.number(value),
             style: TextStyle(
-              fontSize: 15,
+              fontSize: AppText.corps,
               fontWeight: FontWeight.w500,
               color: color ?? context.colors.encre,
             ),
@@ -272,7 +267,7 @@ class _DomainRow extends StatelessWidget {
     final count = l.reportRequests(domain.count, l.number(domain.count));
     final brand = domain.brand;
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 10),
+      padding: const EdgeInsets.symmetric(vertical: AppSpace.md),
       child: Row(
         children: [
           Expanded(
@@ -283,20 +278,20 @@ class _DomainRow extends StatelessWidget {
                   domain.name,
                   textDirection: TextDirection.ltr,
                   textAlign: pageStart(context),
-                  style: TextStyle(fontSize: 15, color: context.colors.encre),
+                  style: TextStyle(fontSize: AppText.corps, color: context.colors.encre),
                 ),
                 if (brand != null)
                   Text(
                     l.reportImitates(brand),
                     style: TextStyle(
-                      fontSize: 13,
+                      fontSize: AppText.detail,
                       color: context.colors.rommen,
                     ),
                   ),
               ],
             ),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: AppSpace.md),
           Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
@@ -304,7 +299,7 @@ class _DomainRow extends StatelessWidget {
               if (domain.blocked)
                 Text(
                   l.reportBlocked,
-                  style: TextStyle(fontSize: 13, color: context.colors.zitouna),
+                  style: TextStyle(fontSize: AppText.detail, color: context.colors.zitouna),
                 ),
             ],
           ),

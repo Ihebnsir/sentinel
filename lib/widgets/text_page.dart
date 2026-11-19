@@ -1,6 +1,7 @@
 import 'package:material_ui/material_ui.dart';
 
 import '../theme/app_colors.dart';
+import 'ui.dart';
 
 /// Une section de texte : intertitre et paragraphes.
 class TextSection {
@@ -29,9 +30,9 @@ class TextPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final body = TextStyle(
-      fontSize: 15,
-      height: 1.45,
-      color: context.colors.encre.withValues(alpha: 0.8),
+      fontSize: AppText.corps,
+      height: AppText.interligne,
+      color: context.colors.secondaire,
     );
     return Scaffold(
       appBar: AppBar(
@@ -44,40 +45,40 @@ class TextPage extends StatelessWidget {
       body: SafeArea(
         top: false,
         child: ListView(
-          padding: const EdgeInsets.fromLTRB(28, 8, 28, 32),
+          padding: const EdgeInsets.fromLTRB(AppSpace.page, AppSpace.sm, AppSpace.page, AppSpace.xxl),
           children: [
             Text(
               title,
               style: TextStyle(
-                fontSize: 24,
+                fontSize: AppText.titreSecondaire,
                 fontWeight: FontWeight.w600,
                 color: context.colors.encre,
               ),
             ),
             if (intro != null) ...[
-              const SizedBox(height: 16),
+              const SizedBox(height: AppSpace.lg),
               Text(intro!, style: body),
             ],
             for (final section in sections) ...[
-              const SizedBox(height: 20),
-              Divider(height: 1, thickness: 1, color: context.colors.ligne),
-              const SizedBox(height: 20),
+              const SizedBox(height: AppSpace.xl),
+              const AppDivider(),
+              const SizedBox(height: AppSpace.xl),
               Text(
                 section.title,
                 style: TextStyle(
-                  fontSize: 17,
+                  fontSize: AppText.section,
                   fontWeight: FontWeight.w600,
                   color: context.colors.encre,
                 ),
               ),
-              const SizedBox(height: 10),
+              const SizedBox(height: AppSpace.md),
               for (final paragraph in section.paragraphs)
                 Padding(
-                  padding: const EdgeInsets.only(bottom: 10),
+                  padding: const EdgeInsets.only(bottom: AppSpace.md),
                   child: Text(paragraph, style: body),
                 ),
             ],
-            if (footer != null) ...[const SizedBox(height: 16), footer!],
+            if (footer != null) ...[const SizedBox(height: AppSpace.lg), footer!],
           ],
         ),
       ),

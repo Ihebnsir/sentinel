@@ -8,6 +8,7 @@ import '../../theme/app_colors.dart';
 import '../../widgets/actions_row.dart';
 import '../../widgets/loading_bar.dart';
 import '../../widgets/vault_fields.dart';
+import '../../widgets/ui.dart';
 
 /// Création du coffre : mot de passe maître, confirmation, avertissement.
 class CreateVaultView extends StatefulWidget {
@@ -73,31 +74,31 @@ class _CreateVaultViewState extends State<CreateVaultView> {
     final muted = context.colors.secondaire;
     final showMismatch = _confirmation.text.isNotEmpty && !_matches;
     return ListView(
-      padding: const EdgeInsets.only(top: 16, bottom: 24),
+      padding: const EdgeInsets.only(top: AppSpace.lg, bottom: AppSpace.xl),
       children: [
         Text(
           l.vaultCreate,
           style: TextStyle(
-            fontSize: 20,
+            fontSize: AppText.accroche,
             fontWeight: FontWeight.w600,
             color: context.colors.encre,
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: AppSpace.sm),
         Text(
           l.vaultCreateIntro,
-          style: TextStyle(fontSize: 15, color: muted),
+          style: TextStyle(fontSize: AppText.corps, color: muted),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: AppSpace.sm),
         Text(
           l.vaultCreateWarning,
           style: TextStyle(
-            fontSize: 15,
+            fontSize: AppText.corps,
             fontWeight: FontWeight.w500,
             color: context.colors.encre,
           ),
         ),
-        const SizedBox(height: 24),
+        const SizedBox(height: AppSpace.xl),
         VaultTextField(
           controller: _password,
           label: l.vaultMasterPassword,
@@ -106,10 +107,10 @@ class _CreateVaultViewState extends State<CreateVaultView> {
           onChanged: (_) => setState(() {}),
         ),
         if (_password.text.isNotEmpty) ...[
-          const SizedBox(height: 8),
+          const SizedBox(height: AppSpace.sm),
           PasswordStrengthLine(password: _password.text),
         ],
-        const SizedBox(height: 16),
+        const SizedBox(height: AppSpace.lg),
         VaultTextField(
           controller: _confirmation,
           label: l.vaultConfirmation,
@@ -118,8 +119,8 @@ class _CreateVaultViewState extends State<CreateVaultView> {
           errorText: showMismatch ? l.vaultPasswordsDiffer : null,
           onChanged: (_) => setState(() {}),
         ),
-        const SizedBox(height: 16),
-        Divider(height: 1, thickness: 1, color: context.colors.ligne),
+        const SizedBox(height: AppSpace.lg),
+        const AppDivider(),
         // Toute la ligne est cliquable, pas seulement la case.
         // MergeSemantics : TalkBack lit la case et son texte ensemble.
         MergeSemantics(
@@ -128,7 +129,7 @@ class _CreateVaultViewState extends State<CreateVaultView> {
                 ? null
                 : () => setState(() => _understood = !_understood),
             child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8),
+              padding: const EdgeInsets.symmetric(vertical: AppSpace.sm),
               child: Row(
                 children: [
                   Checkbox(
@@ -138,11 +139,11 @@ class _CreateVaultViewState extends State<CreateVaultView> {
                         ? null
                         : (value) => setState(() => _understood = value == true),
                   ),
-                  const SizedBox(width: 4),
+                  const SizedBox(width: AppSpace.xs),
                   Expanded(
                     child: Text(
                       l.vaultUnderstood,
-                      style: TextStyle(fontSize: 15, color: context.colors.encre),
+                      style: TextStyle(fontSize: AppText.corps, color: context.colors.encre),
                     ),
                   ),
                 ],
@@ -150,24 +151,21 @@ class _CreateVaultViewState extends State<CreateVaultView> {
             ),
           ),
         ),
-        Divider(height: 1, thickness: 1, color: context.colors.ligne),
+        const AppDivider(),
         if (_creating)
           const Padding(
-            padding: EdgeInsets.only(top: 16),
+            padding: EdgeInsets.only(top: AppSpace.lg),
             child: LoadingBar(),
           ),
-        const SizedBox(height: 16),
+        const SizedBox(height: AppSpace.lg),
         ActionsRow(
           children: [
             TextButton(
-              style: TextButton.styleFrom(foregroundColor: muted),
+              style: mutedButtonStyle(context),
               onPressed: _creating ? null : widget.onCancel,
               child: Text(l.commonCancel),
             ),
             FilledButton(
-              style: FilledButton.styleFrom(
-                backgroundColor: context.colors.bleu,
-              ),
               onPressed: _canCreate ? _create : null,
               child: Text(_creating ? l.vaultCreating : l.vaultCreate),
             ),
@@ -175,13 +173,12 @@ class _CreateVaultViewState extends State<CreateVaultView> {
         ),
         // Nouveau téléphone : reprendre un coffre exporté.
         if (widget.onRestore != null && VaultPlatform.supportsDocuments) ...[
-          const SizedBox(height: 24),
-          Divider(height: 1, thickness: 1, color: context.colors.ligne),
-          const SizedBox(height: 8),
+          const SizedBox(height: AppSpace.xl),
+          const AppDivider(),
+          const SizedBox(height: AppSpace.sm),
           TextButton.icon(
-            style: TextButton.styleFrom(foregroundColor: context.colors.bleu),
             onPressed: _creating ? null : widget.onRestore,
-            icon: const Icon(Icons.restore, size: 18),
+            icon: const Icon(Icons.restore, size: AppSize.iconSmall),
             label: Text(l.vaultRestoreBackup),
           ),
         ],

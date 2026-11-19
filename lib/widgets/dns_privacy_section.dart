@@ -3,6 +3,7 @@ import 'package:material_ui/material_ui.dart';
 import '../l10n/l10n.dart';
 import '../services/firewall_service.dart';
 import '../theme/app_colors.dart';
+import 'ui.dart';
 
 // Couleur : celle du thème (dividerTheme, ligne fine).
 const _divider = Divider(height: 1, thickness: 1);
@@ -39,13 +40,13 @@ class UpstreamSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.symmetric(vertical: 12),
+          padding: const EdgeInsets.symmetric(vertical: AppSpace.md),
           child: Row(
             children: [
               Expanded(
                 child: Text(
                   l.upstreamLabel,
-                  style: TextStyle(fontSize: 15, color: context.colors.encre),
+                  style: TextStyle(fontSize: AppText.corps, color: context.colors.encre),
                 ),
               ),
               Flexible(
@@ -53,7 +54,7 @@ class UpstreamSection extends StatelessWidget {
                   upstreamLabel(l, mode),
                   textAlign: TextAlign.end,
                   style: TextStyle(
-                    fontSize: 14,
+                    fontSize: AppText.corps,
                     fontWeight: FontWeight.w500,
                     color: warning ? context.colors.rommen : muted,
                   ),
@@ -65,15 +66,15 @@ class UpstreamSection extends StatelessWidget {
         if (mode == UpstreamMode.failing || plainAllowed) ...[
           if (mode == UpstreamMode.failing)
             Padding(
-              padding: const EdgeInsets.only(bottom: 8),
+              padding: const EdgeInsets.only(bottom: AppSpace.sm),
               child: Text(
                 l.upstreamFailingHelp,
-                style: TextStyle(fontSize: 13, color: muted),
+                style: TextStyle(fontSize: AppText.detail, color: muted),
               ),
             ),
           _divider,
           Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8),
+            padding: const EdgeInsets.symmetric(vertical: AppSpace.sm),
             // MergeSemantics : TalkBack lit le texte avec l'interrupteur.
             child: MergeSemantics(
               child: Row(
@@ -82,12 +83,12 @@ class UpstreamSection extends StatelessWidget {
                     child: Text(
                       l.upstreamAllowPlain,
                       style: TextStyle(
-                        fontSize: 15,
+                        fontSize: AppText.corps,
                         color: context.colors.encre,
                       ),
                     ),
                   ),
-                  const SizedBox(width: 12),
+                  const SizedBox(width: AppSpace.md),
                   Switch(value: plainAllowed, onChanged: onPlainChanged),
                 ],
               ),
@@ -114,28 +115,25 @@ class StrictPrivateDnsWarning extends StatelessWidget {
   Widget build(BuildContext context) {
     final l = context.l10n;
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 12),
+      padding: const EdgeInsets.symmetric(vertical: AppSpace.md),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             l.dnsStrictTitle,
             style: TextStyle(
-              fontSize: 16,
+              fontSize: AppText.intitule,
               fontWeight: FontWeight.w500,
               color: context.colors.rommen,
             ),
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: AppSpace.xs),
           Text(
             l.dnsStrictMessage(server),
-            style: TextStyle(fontSize: 14, color: context.colors.encre),
+            style: TextStyle(fontSize: AppText.corps, color: context.colors.encre),
           ),
           TextButton(
-            style: TextButton.styleFrom(
-              foregroundColor: context.colors.bleu,
-              padding: EdgeInsets.zero,
-            ),
+            style: inlineButtonStyle(context),
             onPressed: onOpenSettings,
             child: Text(l.dnsStrictOpenSettings),
           ),

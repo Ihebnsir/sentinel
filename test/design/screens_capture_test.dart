@@ -63,17 +63,17 @@ final _shotKey = GlobalKey();
 /// Polices réelles : Readex Pro et les icônes Material.
 Future<void> _loadFonts() async {
   final readex = File('assets/fonts/ReadexPro-Regular.ttf').readAsBytesSync();
-  await (FontLoader(AppTheme.fontFamily)
-        ..addFont(Future.value(ByteData.sublistView(readex))))
-      .load();
+  await (FontLoader(
+    AppTheme.fontFamily,
+  )..addFont(Future.value(ByteData.sublistView(readex)))).load();
   // flutter_tester est dans bin/cache/artifacts/engine/<plateforme>/.
   final artifacts = File(Platform.resolvedExecutable).parent.parent.parent;
   final icons = File(
     '${artifacts.path}/material_fonts/materialicons-regular.otf',
   ).readAsBytesSync();
-  await (FontLoader('MaterialIcons')
-        ..addFont(Future.value(ByteData.sublistView(icons))))
-      .load();
+  await (FontLoader(
+    'MaterialIcons',
+  )..addFont(Future.value(ByteData.sublistView(icons)))).load();
 }
 
 /// Une app fictive envoyée par le faux Android.
@@ -147,8 +147,10 @@ void _fakeAndroid(Directory dir, {bool firewallActive = true}) {
     (call) async => dir.path,
   );
   void on(String channel, Future<Object?> Function(MethodCall) handler) =>
-      m.setMockMethodCallHandler(MethodChannel('com.iheb.sentinel/$channel'),
-          handler);
+      m.setMockMethodCallHandler(
+        MethodChannel('com.iheb.sentinel/$channel'),
+        handler,
+      );
   on(
     'device_security',
     (call) async => call.method == 'getSecurityStatus'
@@ -284,10 +286,7 @@ class _StatusBar extends StatelessWidget {
     return SizedBox(
       height: _statusBar,
       // Material : style de texte de base (pas de soulignement jaune).
-      child: Material(
-        type: MaterialType.transparency,
-        child: _row(color),
-      ),
+      child: Material(type: MaterialType.transparency, child: _row(color)),
     );
   }
 
@@ -382,8 +381,7 @@ class _Scene {
 
   final String name;
   final Future<Widget> Function(WidgetTester tester, Directory dir) build;
-  final Future<void> Function(WidgetTester tester, AppLocalizations l)?
-  prepare;
+  final Future<void> Function(WidgetTester tester, AppLocalizations l)? prepare;
 }
 
 /// Coffre ouvert rempli d'exemples fictifs (aucun vrai mot de passe).
@@ -449,19 +447,15 @@ Future<VaultSession> _sampleVault(WidgetTester tester, Directory dir) async {
   return session;
 }
 
-BreachChecker _breaches(Directory dir) => BreachChecker(
-  consentStore: BreachConsentStore(directory: () async => dir),
-);
+BreachChecker _breaches(Directory dir) =>
+    BreachChecker(consentStore: BreachConsentStore(directory: () async => dir));
 
 InstalledApp _risky() => InstalledApp.fromMap(_apps.first);
 
 final _scenes = <_Scene>[
   _Scene('presentation', (_, _) async => OnboardingScreen(onDone: () {})),
   _Scene('accueil', (_, _) async => const MainShell()),
-  _Scene(
-    'applications-vide',
-    (_, _) async => const MainShell(initialIndex: 1),
-  ),
+  _Scene('applications-vide', (_, _) async => const MainShell(initialIndex: 1)),
   _Scene(
     'applications',
     (_, _) async => const MainShell(initialIndex: 1),
@@ -518,23 +512,20 @@ final _scenes = <_Scene>[
     'qr-wifi',
     (_, _) async => const QrResultScreen(raw: 'WIFI:T:nopass;S:Gare;;'),
   ),
-  _Scene(
-    'coffre-vide',
-    (tester, dir) async {
-      final session = VaultSession(
-        storage: VaultStorage(directory: () async => dir),
-        biometrics: FakeBiometrics(),
-      );
-      return MainShell(
-        initialIndex: 3,
-        vaultBuilder: (visible) => VaultScreen(
-          visible: visible,
-          session: session,
-          breaches: _breaches(dir),
-        ),
-      );
-    },
-  ),
+  _Scene('coffre-vide', (tester, dir) async {
+    final session = VaultSession(
+      storage: VaultStorage(directory: () async => dir),
+      biometrics: FakeBiometrics(),
+    );
+    return MainShell(
+      initialIndex: 3,
+      vaultBuilder: (visible) => VaultScreen(
+        visible: visible,
+        session: session,
+        breaches: _breaches(dir),
+      ),
+    );
+  }),
   _Scene('coffre', (tester, dir) async {
     final session = await _sampleVault(tester, dir);
     return MainShell(

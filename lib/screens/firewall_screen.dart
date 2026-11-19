@@ -14,6 +14,7 @@ import '../widgets/blocklist_sections.dart';
 import '../widgets/dns_privacy_section.dart';
 import 'app_analysis_screen.dart';
 import 'app_report_screen.dart';
+import '../widgets/ui.dart';
 
 /// Écran du pare-feu DNS : interrupteur, compteurs, analyse d'une app,
 /// listes de blocage, mises à jour, liste blanche et sources.
@@ -181,7 +182,6 @@ class _FirewallScreenState extends State<FirewallScreen> {
             child: Text(context.l10n.commonCancel),
           ),
           FilledButton(
-            style: FilledButton.styleFrom(backgroundColor: context.colors.bleu),
             onPressed: () => Navigator.pop(context, true),
             child: Text(context.l10n.commonOpenSettings),
           ),
@@ -250,25 +250,25 @@ class _FirewallScreenState extends State<FirewallScreen> {
       body: SafeArea(
         top: false,
         child: ListView(
-          padding: const EdgeInsets.fromLTRB(28, 8, 28, 24),
+          padding: const EdgeInsets.fromLTRB(AppSpace.page, AppSpace.sm, AppSpace.page, AppSpace.xl),
           children: [
             Text(
               l.firewallTitle,
               style: TextStyle(
-                fontSize: 24,
+                fontSize: AppText.titreSecondaire,
                 fontWeight: FontWeight.w600,
                 color: context.colors.encre,
               ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: AppSpace.md),
             Text(
               l.firewallIntro,
-              style: TextStyle(fontSize: 15, color: context.colors.encre),
+              style: TextStyle(fontSize: AppText.corps, color: context.colors.encre),
             ),
-            const SizedBox(height: 24),
-            Divider(height: 1, thickness: 1, color: context.colors.ligne),
+            const SizedBox(height: AppSpace.xl),
+            const AppDivider(),
             Padding(
-              padding: const EdgeInsets.symmetric(vertical: 12),
+              padding: const EdgeInsets.symmetric(vertical: AppSpace.md),
               // MergeSemantics : TalkBack lit le texte avec l'interrupteur.
               child: MergeSemantics(
                 child: Row(
@@ -280,22 +280,22 @@ class _FirewallScreenState extends State<FirewallScreen> {
                           Text(
                             l.firewallTitle,
                             style: TextStyle(
-                              fontSize: 16,
+                              fontSize: AppText.intitule,
                               fontWeight: FontWeight.w500,
                               color: context.colors.encre,
                             ),
                           ),
-                          const SizedBox(height: 2),
+                          const SizedBox(height: AppSpace.xs),
                           Text(
                             status == null
                                 ? l.commonAndroidOnly
                                 : (active ? l.commonOn : l.commonOff),
-                            style: TextStyle(fontSize: 13, color: muted),
+                            style: TextStyle(fontSize: AppText.detail, color: muted),
                           ),
                         ],
                       ),
                     ),
-                    const SizedBox(width: 12),
+                    const SizedBox(width: AppSpace.md),
                     Switch(
                       value: active,
                       onChanged: status == null || _busy ? null : _onSwitch,
@@ -304,13 +304,13 @@ class _FirewallScreenState extends State<FirewallScreen> {
                 ),
               ),
             ),
-            Divider(height: 1, thickness: 1, color: context.colors.ligne),
+            const AppDivider(),
             if (status?.strictPrivateDns case final server?) ...[
               StrictPrivateDnsWarning(
                 server: server,
                 onOpenSettings: _wifiService.openPrivateDnsSettings,
               ),
-              Divider(height: 1, thickness: 1, color: context.colors.ligne),
+              const AppDivider(),
             ],
             if (active && status != null) ...[
               UpstreamSection(
@@ -318,22 +318,22 @@ class _FirewallScreenState extends State<FirewallScreen> {
                 plainAllowed: status.plainDnsAllowed,
                 onPlainChanged: _busy ? null : _onPlainDnsChanged,
               ),
-              Divider(height: 1, thickness: 1, color: context.colors.ligne),
-              const SizedBox(height: 24),
+              const AppDivider(),
+              const SizedBox(height: AppSpace.xl),
               Text(
                 l.firewallSinceActivation,
                 style: TextStyle(
-                  fontSize: 18,
+                  fontSize: AppText.section,
                   fontWeight: FontWeight.w600,
                   color: context.colors.encre,
                 ),
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: AppSpace.xs),
               _CountRow(
                 label: l.firewallQueriesAnalyzed,
                 value: status.totalQueries,
               ),
-              Divider(height: 1, thickness: 1, color: context.colors.ligne),
+              const AppDivider(),
               _CountRow(
                 label: l.firewallQueriesBlocked,
                 value: status.blockedQueries,
@@ -343,7 +343,7 @@ class _FirewallScreenState extends State<FirewallScreen> {
                   in config?.categories ?? const <BlocklistCategory>[])
                 if (category.enabled ||
                     (status.blockedByCategory[category.id] ?? 0) > 0) ...[
-                  Divider(height: 1, thickness: 1, color: context.colors.ligne),
+                  const AppDivider(),
                   _CountRow(
                     label: category.displayName(l),
                     value: status.blockedByCategory[category.id] ?? 0,
@@ -351,10 +351,10 @@ class _FirewallScreenState extends State<FirewallScreen> {
                 ],
               if (status.listsLoading)
                 Padding(
-                  padding: const EdgeInsets.only(top: 8),
+                  padding: const EdgeInsets.only(top: AppSpace.sm),
                   child: Text(
                     l.firewallListsLoading,
-                    style: TextStyle(fontSize: 13, color: muted),
+                    style: TextStyle(fontSize: AppText.detail, color: muted),
                   ),
                 ),
             ],
@@ -386,10 +386,10 @@ class _FirewallScreenState extends State<FirewallScreen> {
                 onRemove: _onRemoveAllowed,
               ),
             ],
-            const SizedBox(height: 24),
+            const SizedBox(height: AppSpace.xl),
             Text(
               l.firewallOneVpn,
-              style: TextStyle(fontSize: 13, color: muted),
+              style: TextStyle(fontSize: AppText.detail, color: muted),
             ),
             if (config != null && config.sources.isNotEmpty)
               BlocklistSourcesSection(sources: config.sources),
@@ -410,19 +410,19 @@ class _CountRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 14),
+      padding: const EdgeInsets.symmetric(vertical: AppSpace.lg),
       child: Row(
         children: [
           Expanded(
             child: Text(
               label,
-              style: TextStyle(fontSize: 15, color: context.colors.secondaire),
+              style: TextStyle(fontSize: AppText.corps, color: context.colors.secondaire),
             ),
           ),
           Text(
             context.l10n.number(value),
             style: TextStyle(
-              fontSize: 15,
+              fontSize: AppText.corps,
               fontWeight: FontWeight.w500,
               color: context.colors.encre,
             ),
@@ -450,7 +450,7 @@ class _ExplanationSheet extends StatelessWidget {
     ];
     return SafeArea(
       child: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(28, 0, 28, 16),
+        padding: const EdgeInsets.fromLTRB(AppSpace.page, 0, AppSpace.page, AppSpace.lg),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
@@ -458,36 +458,31 @@ class _ExplanationSheet extends StatelessWidget {
             Text(
               l.firewallTitle,
               style: TextStyle(
-                fontSize: 22,
+                fontSize: AppText.titreSecondaire,
                 fontWeight: FontWeight.w600,
                 color: context.colors.encre,
               ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: AppSpace.md),
             for (final line in lines) ...[
-              Divider(height: 1, thickness: 1, color: context.colors.ligne),
+              const AppDivider(),
               Padding(
-                padding: const EdgeInsets.symmetric(vertical: 10),
+                padding: const EdgeInsets.symmetric(vertical: AppSpace.md),
                 child: Text(
                   line,
-                  style: TextStyle(fontSize: 15, color: context.colors.encre),
+                  style: TextStyle(fontSize: AppText.corps, color: context.colors.encre),
                 ),
               ),
             ],
-            const SizedBox(height: 24),
+            const SizedBox(height: AppSpace.xl),
             ActionsRow(
               children: [
                 TextButton(
-                  style: TextButton.styleFrom(
-                    foregroundColor: context.colors.secondaire,
-                  ),
+                  style: mutedButtonStyle(context),
                   onPressed: () => Navigator.of(context).pop(false),
                   child: Text(l.commonLater),
                 ),
                 FilledButton(
-                  style: FilledButton.styleFrom(
-                    backgroundColor: context.colors.bleu,
-                  ),
                   onPressed: () => Navigator.of(context).pop(true),
                   child: Text(l.commonContinue),
                 ),
@@ -510,7 +505,7 @@ class _UpdateConsentSheet extends StatelessWidget {
     final lines = [l.firewallConsent1, l.firewallConsent2, l.firewallConsent3];
     return SafeArea(
       child: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(28, 0, 28, 16),
+        padding: const EdgeInsets.fromLTRB(AppSpace.page, 0, AppSpace.page, AppSpace.lg),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
@@ -518,36 +513,31 @@ class _UpdateConsentSheet extends StatelessWidget {
             Text(
               l.firewallUpdateTitle,
               style: TextStyle(
-                fontSize: 22,
+                fontSize: AppText.titreSecondaire,
                 fontWeight: FontWeight.w600,
                 color: context.colors.encre,
               ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: AppSpace.md),
             for (final line in lines) ...[
-              Divider(height: 1, thickness: 1, color: context.colors.ligne),
+              const AppDivider(),
               Padding(
-                padding: const EdgeInsets.symmetric(vertical: 10),
+                padding: const EdgeInsets.symmetric(vertical: AppSpace.md),
                 child: Text(
                   line,
-                  style: TextStyle(fontSize: 15, color: context.colors.encre),
+                  style: TextStyle(fontSize: AppText.corps, color: context.colors.encre),
                 ),
               ),
             ],
-            const SizedBox(height: 24),
+            const SizedBox(height: AppSpace.xl),
             ActionsRow(
               children: [
                 TextButton(
-                  style: TextButton.styleFrom(
-                    foregroundColor: context.colors.secondaire,
-                  ),
+                  style: mutedButtonStyle(context),
                   onPressed: () => Navigator.of(context).pop(false),
                   child: Text(l.commonLater),
                 ),
                 FilledButton(
-                  style: FilledButton.styleFrom(
-                    backgroundColor: context.colors.bleu,
-                  ),
                   onPressed: () => Navigator.of(context).pop(true),
                   child: Text(l.commonAccept),
                 ),

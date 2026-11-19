@@ -7,6 +7,7 @@ import '../../theme/app_colors.dart';
 import '../../widgets/actions_row.dart';
 import '../../widgets/loading_bar.dart';
 import '../../widgets/vault_fields.dart';
+import '../../widgets/ui.dart';
 
 /// « Mot de passe oublié ? » : clé de récupération, puis nouveau mot de
 /// passe maître. Ensuite, une NOUVELLE clé est affichée.
@@ -85,22 +86,22 @@ class _RecoverViewState extends State<RecoverView> {
     final l = context.l10n;
     final muted = context.colors.secondaire;
     return ListView(
-      padding: const EdgeInsets.only(top: 16, bottom: 24),
+      padding: const EdgeInsets.only(top: AppSpace.lg, bottom: AppSpace.xl),
       children: [
         Text(
           l.vaultForgotTitle,
           style: TextStyle(
-            fontSize: 20,
+            fontSize: AppText.accroche,
             fontWeight: FontWeight.w600,
             color: context.colors.encre,
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: AppSpace.sm),
         Text(
           _keyChecked ? l.vaultKeyAccepted : l.vaultEnterRecoveryKey,
-          style: TextStyle(fontSize: 15, color: muted),
+          style: TextStyle(fontSize: AppText.corps, color: muted),
         ),
-        const SizedBox(height: 24),
+        const SizedBox(height: AppSpace.xl),
         if (!_keyChecked) ...[
           VaultTextField(
             controller: _recoveryKey,
@@ -122,10 +123,10 @@ class _RecoverViewState extends State<RecoverView> {
             onChanged: (_) => setState(() {}),
           ),
           if (_password.text.isNotEmpty) ...[
-            const SizedBox(height: 8),
+            const SizedBox(height: AppSpace.sm),
             PasswordStrengthLine(password: _password.text),
           ],
-          const SizedBox(height: 16),
+          const SizedBox(height: AppSpace.lg),
           VaultTextField(
             controller: _confirmation,
             label: l.vaultConfirmation,
@@ -136,30 +137,27 @@ class _RecoverViewState extends State<RecoverView> {
                 : null,
             onChanged: (_) => setState(() {}),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: AppSpace.md),
           Text(
             l.vaultNewKeyWillBeCreated,
-            style: TextStyle(fontSize: 13, color: muted),
+            style: TextStyle(fontSize: AppText.detail, color: muted),
           ),
         ],
         if (_busy)
           const Padding(
-            padding: EdgeInsets.only(top: 16),
+            padding: EdgeInsets.only(top: AppSpace.lg),
             child: LoadingBar(),
           ),
-        const SizedBox(height: 16),
+        const SizedBox(height: AppSpace.lg),
         ActionsRow(
           children: [
             TextButton(
-              style: TextButton.styleFrom(foregroundColor: muted),
+              style: mutedButtonStyle(context),
               onPressed: _busy ? null : widget.onCancel,
               child: Text(l.commonCancel),
             ),
             if (!_keyChecked)
               FilledButton(
-                style: FilledButton.styleFrom(
-                  backgroundColor: context.colors.bleu,
-                ),
                 onPressed: !_busy && _recoveryKey.text.trim().isNotEmpty
                     ? _checkKey
                     : null,
@@ -167,9 +165,6 @@ class _RecoverViewState extends State<RecoverView> {
               )
             else
               FilledButton(
-                style: FilledButton.styleFrom(
-                  backgroundColor: context.colors.bleu,
-                ),
                 onPressed: _canSave ? _save : null,
                 child: Text(_busy ? l.vaultSaving : l.vaultSave),
               ),

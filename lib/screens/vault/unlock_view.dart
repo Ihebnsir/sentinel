@@ -7,6 +7,7 @@ import '../../services/vault/vault_session.dart';
 import '../../theme/app_colors.dart';
 import '../../widgets/loading_bar.dart';
 import '../../widgets/vault_fields.dart';
+import '../../widgets/ui.dart';
 
 /// Déverrouillage : empreinte si elle est activée (Android), sinon mot
 /// de passe maître, puis Argon2 (≈ 1 s). Après un échec, un délai
@@ -138,54 +139,51 @@ class _UnlockViewState extends State<UnlockView> {
             ? l.vaultWeeklyPassword
             : null);
     return ListView(
-      padding: const EdgeInsets.only(top: 16, bottom: 24),
+      padding: const EdgeInsets.only(top: AppSpace.lg, bottom: AppSpace.xl),
       children: [
-        Icon(Icons.lock_outline, size: 48, color: context.colors.bleu),
-        const SizedBox(height: 16),
+        Icon(Icons.lock_outline, size: AppSize.iconHero, color: context.colors.bleu),
+        const SizedBox(height: AppSpace.lg),
         Text(
           l.vaultLockedTitle,
           style: TextStyle(
-            fontSize: 20,
+            fontSize: AppText.accroche,
             fontWeight: FontWeight.w600,
             color: context.colors.encre,
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: AppSpace.sm),
         Text(
           biometric
               ? l.vaultUseFingerprintOrPassword
               : l.vaultEnterMasterPassword,
-          style: TextStyle(fontSize: 15, color: muted),
+          style: TextStyle(fontSize: AppText.corps, color: muted),
         ),
         if (info != null)
           Padding(
-            padding: const EdgeInsets.only(top: 12),
+            padding: const EdgeInsets.only(top: AppSpace.md),
             child: Text(
               info,
-              style: TextStyle(fontSize: 15, color: context.colors.encre),
+              style: TextStyle(fontSize: AppText.corps, color: context.colors.encre),
             ),
           ),
         if (biometric) ...[
-          const SizedBox(height: 24),
+          const SizedBox(height: AppSpace.xl),
           SizedBox(
             width: double.infinity,
             child: FilledButton.icon(
-              style: FilledButton.styleFrom(
-                backgroundColor: context.colors.bleu,
-              ),
               onPressed: _opening ? null : _openWithBiometrics,
               icon: const Icon(Icons.fingerprint),
               label: Text(l.vaultOpenWithFingerprint),
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: AppSpace.lg),
           Text(
             l.vaultOrWithPassword,
-            style: TextStyle(fontSize: 13, color: muted),
+            style: TextStyle(fontSize: AppText.detail, color: muted),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: AppSpace.sm),
         ] else
-          const SizedBox(height: 24),
+          const SizedBox(height: AppSpace.xl),
         VaultTextField(
           controller: _password,
           label: l.vaultMasterPassword,
@@ -196,22 +194,21 @@ class _UnlockViewState extends State<UnlockView> {
         ),
         if (_wrong || waitSeconds > 0)
           Padding(
-            padding: const EdgeInsets.only(top: 12),
+            padding: const EdgeInsets.only(top: AppSpace.md),
             child: Text(
               [
                 if (_wrong) l.vaultWrongPassword,
                 if (waitSeconds > 0) l.vaultRetryIn('$waitSeconds'),
               ].join(' '),
-              style: TextStyle(fontSize: 15, color: context.colors.rommen),
+              style: TextStyle(fontSize: AppText.corps, color: context.colors.rommen),
             ),
           ),
         if (_opening)
-          const Padding(padding: EdgeInsets.only(top: 16), child: LoadingBar()),
-        const SizedBox(height: 16),
+          const Padding(padding: EdgeInsets.only(top: AppSpace.lg), child: LoadingBar()),
+        const SizedBox(height: AppSpace.lg),
         Align(
           alignment: Alignment.centerRight,
           child: FilledButton(
-            style: FilledButton.styleFrom(backgroundColor: context.colors.bleu),
             onPressed:
                 !_opening && waitSeconds == 0 && _password.text.isNotEmpty
                 ? _open
@@ -221,12 +218,11 @@ class _UnlockViewState extends State<UnlockView> {
         ),
         // Les vieux coffres migrés n'ont pas toujours de clé.
         if (session.hasRecoveryKey) ...[
-          const SizedBox(height: 8),
-          Divider(height: 1, thickness: 1, color: context.colors.ligne),
+          const SizedBox(height: AppSpace.sm),
+          const AppDivider(),
           Align(
             alignment: Alignment.centerLeft,
             child: TextButton(
-              style: TextButton.styleFrom(foregroundColor: context.colors.bleu),
               onPressed: _opening ? null : widget.onForgotPassword,
               child: Text(l.vaultForgotPassword),
             ),

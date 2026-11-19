@@ -10,6 +10,7 @@ import '../utils/permission_labels.dart';
 import '../widgets/app_icon.dart';
 import '../widgets/risk_level_text.dart';
 import 'spyware_advice_screen.dart';
+import '../widgets/ui.dart';
 
 /// Détail d'une app : origine, raisons du niveau de risque et autorisations.
 class AppDetailScreen extends StatelessWidget {
@@ -95,7 +96,7 @@ class AppDetailScreen extends StatelessWidget {
     if (report.spywareSuspected) {
       return [
         FilledButton(
-          style: FilledButton.styleFrom(backgroundColor: context.colors.rommen),
+          style: dangerFilledStyle(context),
           onPressed: () => _openAdvice(context),
           child: Text(l.detailWhatToDo),
         ),
@@ -103,14 +104,13 @@ class AppDetailScreen extends StatelessWidget {
     }
     return [
       FilledButton(
-        style: FilledButton.styleFrom(backgroundColor: context.colors.bleu),
         onPressed: () => AppsScannerService().openAppSettings(app.packageName),
         child: Text(l.detailManagePermissions),
       ),
       // Une app système ne peut pas être désinstallée.
       if (!app.isSystemApp)
         TextButton(
-          style: TextButton.styleFrom(foregroundColor: context.colors.rommen),
+          style: dangerButtonStyle(context),
           onPressed: () => _uninstall(context),
           child: Text(l.detailUninstall),
         ),
@@ -152,35 +152,35 @@ class AppDetailScreen extends StatelessWidget {
           children: [
             Expanded(
               child: ListView(
-                padding: const EdgeInsets.fromLTRB(28, 8, 28, 24),
+                padding: const EdgeInsets.fromLTRB(AppSpace.page, AppSpace.sm, AppSpace.page, AppSpace.xl),
                 children: [
                   // Align : sinon la ListView étire l'icône sur toute la
                   // largeur, et l'image agrandie devient floue.
                   Align(
                     alignment: Alignment.centerLeft,
-                    child: AppIcon(app: app, size: 64),
+                    child: AppIcon(app: app, size: AppSize.appIconLarge),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: AppSpace.lg),
                   Text(
                     app.label,
                     style: TextStyle(
-                      fontSize: 24,
+                      fontSize: AppText.titreSecondaire,
                       fontWeight: FontWeight.w600,
                       color: context.colors.encre,
                     ),
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: AppSpace.xs),
                   Text(
                     app.packageName,
                     style: TextStyle(
-                      fontSize: 13,
+                      fontSize: AppText.detail,
                       color: context.colors.secondaire,
                     ),
                   ),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: AppSpace.xl),
                   _InfoRow(
                     label: l.detailRiskLevel,
-                    trailing: RiskLevelText(level: report.level, fontSize: 15),
+                    trailing: RiskLevelText(level: report.level, fontSize: AppText.corps),
                   ),
                   const _Separator(),
                   _InfoRow(
@@ -225,7 +225,7 @@ class AppDetailScreen extends StatelessWidget {
             ),
             // Les actions, toujours visibles en bas de l'écran.
             Padding(
-              padding: const EdgeInsets.fromLTRB(28, 8, 28, 16),
+              padding: const EdgeInsets.fromLTRB(AppSpace.page, AppSpace.sm, AppSpace.page, AppSpace.lg),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: _actions(context),
@@ -253,7 +253,7 @@ class _Separator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Divider(height: 1, thickness: 1, color: context.colors.ligne);
+    return const AppDivider();
   }
 }
 
@@ -265,11 +265,11 @@ class _SectionTitle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(top: 32, bottom: 4),
+      padding: const EdgeInsets.only(top: AppSpace.xxl, bottom: AppSpace.xs),
       child: Text(
         text,
         style: TextStyle(
-          fontSize: 18,
+          fontSize: AppText.section,
           fontWeight: FontWeight.w600,
           color: context.colors.encre,
         ),
@@ -289,19 +289,19 @@ class _InfoRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 14),
+      padding: const EdgeInsets.symmetric(vertical: AppSpace.lg),
       child: Row(
         children: [
           Expanded(
             child: Text(
               label,
-              style: TextStyle(fontSize: 15, color: context.colors.secondaire),
+              style: TextStyle(fontSize: AppText.corps, color: context.colors.secondaire),
             ),
           ),
           trailing ??
               Text(
                 value ?? '',
-                style: TextStyle(fontSize: 15, color: context.colors.encre),
+                style: TextStyle(fontSize: AppText.corps, color: context.colors.encre),
               ),
         ],
       ),
@@ -319,18 +319,18 @@ class _StackedRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 14),
+      padding: const EdgeInsets.symmetric(vertical: AppSpace.lg),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             label,
-            style: TextStyle(fontSize: 13, color: context.colors.secondaire),
+            style: TextStyle(fontSize: AppText.detail, color: context.colors.secondaire),
           ),
-          const SizedBox(height: 2),
+          const SizedBox(height: AppSpace.xs),
           SelectableText(
             value,
-            style: TextStyle(fontSize: 15, color: context.colors.encre),
+            style: TextStyle(fontSize: AppText.corps, color: context.colors.encre),
           ),
         ],
       ),
@@ -349,11 +349,11 @@ class _TextRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 14),
+      padding: const EdgeInsets.symmetric(vertical: AppSpace.lg),
       child: Text(
         text,
         style: TextStyle(
-          fontSize: 15,
+          fontSize: AppText.corps,
           color:
               color ??
               (muted ? context.colors.secondaire : context.colors.encre),

@@ -10,6 +10,7 @@ import '../../theme/app_colors.dart';
 import '../../widgets/breach_consent_sheet.dart';
 import 'vault_item_screen.dart';
 import '../../utils/bidi.dart';
+import '../../widgets/ui.dart';
 
 // Couleur : celle du thème (dividerTheme, ligne fine).
 const _divider = Divider(height: 1, thickness: 1);
@@ -114,24 +115,24 @@ class _PasswordHealthScreenState extends State<PasswordHealthScreen> {
     );
     final muted = context.colors.secondaire;
     return ListView(
-      padding: const EdgeInsets.fromLTRB(28, 8, 28, 24),
+      padding: const EdgeInsets.fromLTRB(AppSpace.page, AppSpace.sm, AppSpace.page, AppSpace.xl),
       children: [
         Text(
           l.vaultHealthTitle,
           style: TextStyle(
-            fontSize: 24,
+            fontSize: AppText.titreSecondaire,
             fontWeight: FontWeight.w600,
             color: context.colors.encre,
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: AppSpace.sm),
         Text(
           report.toFix == 0
               ? l.homeNothingToFix
               : l.healthToFix(l.number(report.toFix)),
-          style: TextStyle(fontSize: 15, color: muted),
+          style: TextStyle(fontSize: AppText.corps, color: muted),
         ),
-        const SizedBox(height: 24),
+        const SizedBox(height: AppSpace.xl),
         _Section(
           title: l.healthBreached,
           header: _breachStatus(l, muted),
@@ -176,13 +177,10 @@ class _PasswordHealthScreenState extends State<PasswordHealthScreen> {
         children: [
           Text(
             l.healthCheckIntro,
-            style: TextStyle(fontSize: 13, color: muted),
+            style: TextStyle(fontSize: AppText.detail, color: muted),
           ),
           TextButton(
-            style: TextButton.styleFrom(
-              foregroundColor: context.colors.bleu,
-              padding: EdgeInsets.zero,
-            ),
+            style: inlineButtonStyle(context),
             onPressed: _askAndCheck,
             child: Text(l.healthCheckButton),
           ),
@@ -192,17 +190,17 @@ class _PasswordHealthScreenState extends State<PasswordHealthScreen> {
     if (breaches.checking) {
       final (done, total) = breaches.progress;
       return Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8),
+        padding: const EdgeInsets.symmetric(vertical: AppSpace.sm),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               l.healthChecking('$done', '$total'),
-              style: TextStyle(fontSize: 13, color: muted),
+              style: TextStyle(fontSize: AppText.detail, color: muted),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: AppSpace.sm),
             LinearProgressIndicator(
-              minHeight: 2,
+              minHeight: AppSize.progress,
               value: total == 0 ? null : done / total,
               color: context.colors.bleu,
               backgroundColor: context.colors.ligne,
@@ -218,13 +216,10 @@ class _PasswordHealthScreenState extends State<PasswordHealthScreen> {
         children: [
           Text(
             error.message(l),
-            style: TextStyle(fontSize: 13, color: context.colors.rommen),
+            style: TextStyle(fontSize: AppText.detail, color: context.colors.rommen),
           ),
           TextButton(
-            style: TextButton.styleFrom(
-              foregroundColor: context.colors.bleu,
-              padding: EdgeInsets.zero,
-            ),
+            style: inlineButtonStyle(context),
             onPressed: () => breaches.check(widget.session.items),
             child: Text(l.healthRetry),
           ),
@@ -261,7 +256,7 @@ class _Section extends StatelessWidget {
     final header = this.header;
     final emptyText = this.emptyText;
     return Padding(
-      padding: const EdgeInsets.only(bottom: 28),
+      padding: const EdgeInsets.only(bottom: AppSpace.xl),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -271,7 +266,7 @@ class _Section extends StatelessWidget {
                 child: Text(
                   title,
                   style: TextStyle(
-                    fontSize: 18,
+                    fontSize: AppText.section,
                     fontWeight: FontWeight.w600,
                     color: context.colors.encre,
                   ),
@@ -284,26 +279,26 @@ class _Section extends StatelessWidget {
                 ),
             ],
           ),
-          if (header != null) ...[const SizedBox(height: 4), header],
+          if (header != null) ...[const SizedBox(height: AppSpace.xs), header],
           if (items.isEmpty && emptyText != null)
             Padding(
-              padding: const EdgeInsets.only(top: 8),
+              padding: const EdgeInsets.only(top: AppSpace.sm),
               child: Text(
                 emptyText,
-                style: TextStyle(fontSize: 14, color: muted),
+                style: TextStyle(fontSize: AppText.corps, color: muted),
               ),
             ),
-          if (items.isNotEmpty) const SizedBox(height: 8),
+          if (items.isNotEmpty) const SizedBox(height: AppSpace.sm),
           for (final item in items) ...[
             _divider,
             InkWell(
               onTap: () => onTap(item),
               child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 14),
+                padding: const EdgeInsets.symmetric(vertical: AppSpace.lg),
                 child: Row(
                   children: [
                     Icon(Icons.key_outlined, color: color),
-                    const SizedBox(width: 16),
+                    const SizedBox(width: AppSpace.lg),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -313,7 +308,7 @@ class _Section extends StatelessWidget {
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
-                              fontSize: 15,
+                              fontSize: AppText.corps,
                               fontWeight: FontWeight.w500,
                               color: context.colors.encre,
                             ),
@@ -322,7 +317,7 @@ class _Section extends StatelessWidget {
                             subtitle(item),
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
-                            style: TextStyle(fontSize: 13, color: muted),
+                            style: TextStyle(fontSize: AppText.detail, color: muted),
                           ),
                         ],
                       ),

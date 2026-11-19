@@ -2,6 +2,7 @@ import 'package:material_ui/material_ui.dart';
 
 import '../l10n/l10n.dart';
 import '../theme/app_colors.dart';
+import 'ui.dart';
 
 /// Fine barre de chargement bleue. TalkBack l'annonce dès qu'elle
 /// apparaît (« Chargement en cours », ou [label]).
@@ -15,7 +16,7 @@ class LoadingBar extends StatelessWidget {
     return Semantics(
       liveRegion: true,
       child: LinearProgressIndicator(
-        minHeight: 2,
+        minHeight: AppSize.progress,
         color: context.colors.bleu,
         backgroundColor: context.colors.ligne,
         semanticsLabel: label ?? context.l10n.commonLoading,

@@ -12,6 +12,7 @@ import '../utils/debug_log.dart';
 import '../widgets/app_icon.dart';
 import '../widgets/loading_bar.dart';
 import 'app_detail_screen.dart';
+import '../widgets/ui.dart';
 
 /// Ce que l'écran affiche.
 enum _Step { checking, intro, loading, loaded, failed, unavailable }
@@ -118,17 +119,17 @@ class _SensitiveAccessScreenState extends State<SensitiveAccessScreen>
           onRefresh: _check,
           child: ListView(
             physics: const AlwaysScrollableScrollPhysics(),
-            padding: const EdgeInsets.fromLTRB(28, 8, 28, 24),
+            padding: const EdgeInsets.fromLTRB(AppSpace.page, AppSpace.sm, AppSpace.page, AppSpace.xl),
             children: [
               Text(
                 l.accessEntryTitle,
                 style: TextStyle(
-                  fontSize: 28,
+                  fontSize: AppText.titre,
                   fontWeight: FontWeight.w600,
                   color: context.colors.encre,
                 ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: AppSpace.lg),
               ..._body(l),
             ],
           ),
@@ -148,7 +149,7 @@ class _SensitiveAccessScreenState extends State<SensitiveAccessScreen>
       case _Step.loading:
         return [
           const LoadingBar(),
-          const SizedBox(height: 16),
+          const SizedBox(height: AppSpace.lg),
           _Paragraph(l.accessLoading),
         ];
       case _Step.failed:
@@ -164,27 +165,26 @@ class _SensitiveAccessScreenState extends State<SensitiveAccessScreen>
       Text(
         l.accessIntroTitle,
         style: TextStyle(
-          fontSize: 18,
+          fontSize: AppText.section,
           fontWeight: FontWeight.w600,
           color: context.colors.encre,
         ),
       ),
-      const SizedBox(height: 12),
+      const SizedBox(height: AppSpace.md),
       _Paragraph(l.accessIntroWhat),
       _Paragraph(l.accessIntroPermission),
       _Paragraph(l.accessIntroPrivacy),
       _Paragraph(l.accessLimit, muted: true),
       if (_askedOnce)
         Padding(
-          padding: const EdgeInsets.only(top: 4, bottom: 8),
+          padding: const EdgeInsets.only(top: AppSpace.xs, bottom: AppSpace.sm),
           child: Text(
             l.accessNotYetGranted,
-            style: TextStyle(fontSize: 14, color: context.colors.ocre),
+            style: TextStyle(fontSize: AppText.corps, color: context.colors.ocre),
           ),
         ),
-      const SizedBox(height: 16),
+      const SizedBox(height: AppSpace.lg),
       FilledButton(
-        style: FilledButton.styleFrom(backgroundColor: context.colors.bleu),
         onPressed: _openSettings,
         child: Text(l.accessOpenSettings),
       ),
@@ -205,7 +205,7 @@ class _SensitiveAccessScreenState extends State<SensitiveAccessScreen>
             Expanded(
               child: Text(
                 l.appsShowSystem,
-                style: TextStyle(fontSize: 15, color: context.colors.encre),
+                style: TextStyle(fontSize: AppText.corps, color: context.colors.encre),
               ),
             ),
             Switch(
@@ -217,21 +217,21 @@ class _SensitiveAccessScreenState extends State<SensitiveAccessScreen>
       ),
       if (visible.isEmpty)
         Padding(
-          padding: const EdgeInsets.symmetric(vertical: 24),
+          padding: const EdgeInsets.symmetric(vertical: AppSpace.xl),
           child: _Paragraph(l.accessNothing),
         ),
       if (unusual.isNotEmpty) ..._section(l.accessToReview, unusual),
       if (others.isNotEmpty)
         ..._section(unusual.isEmpty ? null : l.accessOtherApps, others),
-      const SizedBox(height: 24),
+      const SizedBox(height: AppSpace.xl),
       _Paragraph(l.accessRetention, muted: true),
-      Divider(height: 1, thickness: 1, color: context.colors.ligne),
+      const AppDivider(),
       _LinkRow(
         title: l.accessPrivacyDashboard,
         subtitle: l.accessPrivacyDashboardHint,
         onTap: _service.openPrivacyDashboard,
       ),
-      Divider(height: 1, thickness: 1, color: context.colors.ligne),
+      const AppDivider(),
       _LinkRow(title: l.accessRevoke, onTap: _service.openUsageAccessSettings),
     ];
   }
@@ -240,11 +240,11 @@ class _SensitiveAccessScreenState extends State<SensitiveAccessScreen>
     return [
       if (title != null)
         Padding(
-          padding: const EdgeInsets.only(top: 16, bottom: 4),
+          padding: const EdgeInsets.only(top: AppSpace.lg, bottom: AppSpace.xs),
           child: Text(
             title,
             style: TextStyle(
-              fontSize: 18,
+              fontSize: AppText.section,
               fontWeight: FontWeight.w600,
               color: context.colors.encre,
             ),
@@ -252,7 +252,7 @@ class _SensitiveAccessScreenState extends State<SensitiveAccessScreen>
         ),
       for (var i = 0; i < items.length; i++) ...[
         if (i > 0)
-          Divider(height: 1, thickness: 1, color: context.colors.ligne),
+          const AppDivider(),
         _AccessTile(summary: items[i], onTap: () => _openDetail(items[i])),
       ],
     ];
@@ -288,7 +288,7 @@ class _AccessTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final l = context.l10n;
     final c = context.colors;
-    final small = TextStyle(fontSize: 13, color: c.secondaire);
+    final small = TextStyle(fontSize: AppText.detail, color: c.secondaire);
     final flags = [
       if (summary.nightCount > 0) l.accessNight,
       if (summary.backgroundCount > 0) l.accessBackground,
@@ -297,12 +297,12 @@ class _AccessTile extends StatelessWidget {
     return InkWell(
       onTap: onTap,
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 14),
+        padding: const EdgeInsets.symmetric(vertical: AppSpace.lg),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            AppIcon.bytes(summary.app.icon, size: 40),
-            const SizedBox(width: 16),
+            AppIcon.bytes(summary.app.icon, size: AppSize.appIcon),
+            const SizedBox(width: AppSpace.lg),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -312,15 +312,15 @@ class _AccessTile extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
-                      fontSize: 16,
+                      fontSize: AppText.intitule,
                       fontWeight: FontWeight.w500,
                       color: c.encre,
                     ),
                   ),
-                  const SizedBox(height: 2),
+                  const SizedBox(height: AppSpace.xs),
                   Text(
                     sensorNames(l, summary.app.sensors),
-                    style: TextStyle(fontSize: 13, color: c.encre),
+                    style: TextStyle(fontSize: AppText.detail, color: c.encre),
                   ),
                   Text(_lastActivity(l, summary), style: small),
                   if (summary.count7d > 0)
@@ -341,7 +341,7 @@ class _AccessTile extends StatelessWidget {
                     Text(
                       flags.join(' · '),
                       style: TextStyle(
-                        fontSize: 13,
+                        fontSize: AppText.detail,
                         fontWeight: FontWeight.w500,
                         color: summary.unusual ? c.ocre : c.secondaire,
                       ),
@@ -399,7 +399,7 @@ class SensitiveAccessDetailScreen extends StatelessWidget {
     final l = context.l10n;
     final c = context.colors;
     final app = summary.app;
-    Widget line() => Divider(height: 1, thickness: 1, color: c.ligne);
+    Widget line() => const AppDivider();
     return Scaffold(
       appBar: AppBar(
         backgroundColor: c.chaux,
@@ -414,27 +414,27 @@ class SensitiveAccessDetailScreen extends StatelessWidget {
           children: [
             Expanded(
               child: ListView(
-                padding: const EdgeInsets.fromLTRB(28, 8, 28, 24),
+                padding: const EdgeInsets.fromLTRB(AppSpace.page, AppSpace.sm, AppSpace.page, AppSpace.xl),
                 children: [
                   Align(
                     alignment: AlignmentDirectional.centerStart,
-                    child: AppIcon.bytes(app.icon, size: 64),
+                    child: AppIcon.bytes(app.icon, size: AppSize.appIconLarge),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: AppSpace.lg),
                   Text(
                     app.label,
                     style: TextStyle(
-                      fontSize: 24,
+                      fontSize: AppText.titreSecondaire,
                       fontWeight: FontWeight.w600,
                       color: c.encre,
                     ),
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: AppSpace.xs),
                   Text(
                     app.packageName,
-                    style: TextStyle(fontSize: 13, color: c.secondaire),
+                    style: TextStyle(fontSize: AppText.detail, color: c.secondaire),
                   ),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: AppSpace.xl),
                   _InfoRow(l.accessDetailAllowed, sensorNames(l, app.sensors)),
                   line(),
                   _InfoRow(
@@ -447,7 +447,7 @@ class SensitiveAccessDetailScreen extends StatelessWidget {
                     l.accessTimes(summary.count7d, l.number(summary.count7d)),
                   ),
                   if (summary.reasons.isNotEmpty || app.backgroundLocation) ...[
-                    const SizedBox(height: 16),
+                    const SizedBox(height: AppSpace.lg),
                     if (summary.reasons.contains(UnusualReason.night))
                       _Paragraph(l.accessReasonNight, color: c.ocre),
                     if (summary.reasons.contains(
@@ -458,11 +458,11 @@ class SensitiveAccessDetailScreen extends StatelessWidget {
                       _Paragraph(l.accessLocationAlways),
                   ],
                   Padding(
-                    padding: const EdgeInsets.only(top: 24, bottom: 4),
+                    padding: const EdgeInsets.only(top: AppSpace.xl, bottom: AppSpace.xs),
                     child: Text(
                       l.accessDetailMoments,
                       style: TextStyle(
-                        fontSize: 18,
+                        fontSize: AppText.section,
                         fontWeight: FontWeight.w600,
                         color: c.encre,
                       ),
@@ -474,18 +474,17 @@ class SensitiveAccessDetailScreen extends StatelessWidget {
                     if (i > 0) line(),
                     _MomentRow(summary.sessions[i]),
                   ],
-                  const SizedBox(height: 16),
+                  const SizedBox(height: AppSpace.lg),
                   _Paragraph(l.accessLimit, muted: true),
                 ],
               ),
             ),
             Padding(
-              padding: const EdgeInsets.fromLTRB(28, 8, 28, 16),
+              padding: const EdgeInsets.fromLTRB(AppSpace.page, AppSpace.sm, AppSpace.page, AppSpace.lg),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   FilledButton(
-                    style: FilledButton.styleFrom(backgroundColor: c.bleu),
                     onPressed: () =>
                         AppsScannerService().openAppSettings(app.packageName),
                     child: Text(l.detailManagePermissions),
@@ -519,20 +518,20 @@ class _MomentRow extends StatelessWidget {
         : l.accessMomentForeground;
     final highlight = session.atNight || session.kind == SessionKind.background;
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 12),
+      padding: const EdgeInsets.symmetric(vertical: AppSpace.md),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             '${l.date(session.start)} · '
             '${l.accessMomentRange(l.time(session.start), l.time(session.end))}',
-            style: TextStyle(fontSize: 15, color: c.encre),
+            style: TextStyle(fontSize: AppText.corps, color: c.encre),
           ),
-          const SizedBox(height: 2),
+          const SizedBox(height: AppSpace.xs),
           Text(
             session.atNight ? '$kind · ${l.accessNight}' : kind,
             style: TextStyle(
-              fontSize: 13,
+              fontSize: AppText.detail,
               color: highlight ? c.ocre : c.secondaire,
             ),
           ),
@@ -551,21 +550,21 @@ class _InfoRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 14),
+      padding: const EdgeInsets.symmetric(vertical: AppSpace.lg),
       child: Row(
         children: [
           Expanded(
             child: Text(
               label,
-              style: TextStyle(fontSize: 15, color: context.colors.secondaire),
+              style: TextStyle(fontSize: AppText.corps, color: context.colors.secondaire),
             ),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: AppSpace.md),
           Flexible(
             child: Text(
               value,
               textAlign: TextAlign.end,
-              style: TextStyle(fontSize: 15, color: context.colors.encre),
+              style: TextStyle(fontSize: AppText.corps, color: context.colors.encre),
             ),
           ),
         ],
@@ -587,19 +586,19 @@ class _LinkRow extends StatelessWidget {
     return InkWell(
       onTap: onTap,
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 14),
+        padding: const EdgeInsets.symmetric(vertical: AppSpace.lg),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               title,
-              style: TextStyle(fontSize: 15, color: context.colors.bleu),
+              style: TextStyle(fontSize: AppText.corps, color: context.colors.bleu),
             ),
             if (sub != null)
               Text(
                 sub,
                 style: TextStyle(
-                  fontSize: 13,
+                  fontSize: AppText.detail,
                   color: context.colors.secondaire,
                 ),
               ),
@@ -621,7 +620,7 @@ class _Paragraph extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = context.colors;
     return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.only(bottom: AppSpace.md),
       child: Text(
         text,
         style: TextStyle(

@@ -7,6 +7,7 @@ import '../services/app_risk_calculator.dart';
 import '../services/apps_scanner_service.dart';
 import '../theme/app_colors.dart';
 import '../widgets/app_icon.dart';
+import '../widgets/ui.dart';
 
 /// Site de la Coalition Against Stalkerware (conseils aux victimes).
 const stopStalkerwareUrl = 'https://stopstalkerware.org';
@@ -55,21 +56,21 @@ class SpywareAdviceScreen extends StatelessWidget {
           children: [
             Expanded(
               child: ListView(
-                padding: const EdgeInsets.fromLTRB(28, 8, 28, 24),
+                padding: const EdgeInsets.fromLTRB(AppSpace.page, AppSpace.sm, AppSpace.page, AppSpace.xl),
                 children: [
                   Text(
                     l.spywareTitle,
                     style: TextStyle(
-                      fontSize: 24,
+                      fontSize: AppText.titreSecondaire,
                       fontWeight: FontWeight.w600,
                       color: context.colors.encre,
                     ),
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: AppSpace.xl),
                   Row(
                     children: [
-                      AppIcon(app: app, size: 40),
-                      const SizedBox(width: 16),
+                      AppIcon(app: app, size: AppSize.appIcon),
+                      const SizedBox(width: AppSpace.lg),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -77,18 +78,18 @@ class SpywareAdviceScreen extends StatelessWidget {
                             Text(
                               app.label,
                               style: TextStyle(
-                                fontSize: 16,
+                                fontSize: AppText.intitule,
                                 fontWeight: FontWeight.w500,
                                 color: context.colors.encre,
                               ),
                             ),
-                            const SizedBox(height: 2),
+                            const SizedBox(height: AppSpace.xs),
                             Text(
                               name != null
                                   ? l.detailKnownSpyware(name)
                                   : l.riskSpyProfile,
                               style: TextStyle(
-                                fontSize: 13,
+                                fontSize: AppText.detail,
                                 color: context.colors.rommen,
                               ),
                             ),
@@ -97,19 +98,19 @@ class SpywareAdviceScreen extends StatelessWidget {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 20),
-                  Divider(height: 1, thickness: 1, color: context.colors.ligne),
+                  const SizedBox(height: AppSpace.xl),
+                  const AppDivider(),
                   _Paragraph(l.spywareParagraph1, strong: true),
-                  Divider(height: 1, thickness: 1, color: context.colors.ligne),
+                  const AppDivider(),
                   _Paragraph(l.spywareParagraph2),
-                  Divider(height: 1, thickness: 1, color: context.colors.ligne),
+                  const AppDivider(),
                   _Paragraph(l.spywareParagraph3),
                   Padding(
-                    padding: const EdgeInsets.only(top: 28, bottom: 4),
+                    padding: const EdgeInsets.only(top: AppSpace.xl, bottom: AppSpace.xs),
                     child: Text(
                       l.spywareGetHelp,
                       style: TextStyle(
-                        fontSize: 18,
+                        fontSize: AppText.section,
                         fontWeight: FontWeight.w600,
                         color: context.colors.encre,
                       ),
@@ -122,51 +123,46 @@ class SpywareAdviceScreen extends StatelessWidget {
                   _Paragraph(l.spywareCoalition),
                   // 48 dp de haut : zone tactile minimale (appui long).
                   ConstrainedBox(
-                    constraints: const BoxConstraints(minHeight: 48),
+                    constraints: const BoxConstraints(minHeight: AppSize.tap),
                     child: SelectableText(
                       stopStalkerwareUrl,
                       style: TextStyle(
-                        fontSize: 15,
+                        fontSize: AppText.corps,
                         color: context.colors.bleu,
                       ),
                     ),
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: AppSpace.sm),
                   Text(
                     l.spywareBrowserNote,
                     style: TextStyle(
-                      fontSize: 13,
+                      fontSize: AppText.detail,
                       color: context.colors.secondaire,
                     ),
                   ),
-                  Row(
+                  // Wrap : à 200 %, le second bouton passe à la ligne.
+                  Wrap(
+                    spacing: AppSpace.xl,
                     children: [
                       TextButton(
-                        style: TextButton.styleFrom(
-                          foregroundColor: context.colors.bleu,
-                          padding: EdgeInsets.zero,
-                        ),
+                        style: inlineButtonStyle(context),
                         onPressed: () => AppsScannerService().openWebPage(
                           stopStalkerwareUrl,
                         ),
                         child: Text(l.spywareOpenSite),
                       ),
-                      const SizedBox(width: 24),
                       TextButton(
-                        style: TextButton.styleFrom(
-                          foregroundColor: context.colors.bleu,
-                          padding: EdgeInsets.zero,
-                        ),
+                        style: inlineButtonStyle(context),
                         onPressed: () => _copyLink(context),
                         child: Text(l.spywareCopyAddress),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: AppSpace.xl),
                   Text(
                     l.spywareIocCredit,
                     style: TextStyle(
-                      fontSize: 12,
+                      fontSize: AppText.legende,
                       color: context.colors.discret,
                     ),
                   ),
@@ -174,14 +170,11 @@ class SpywareAdviceScreen extends StatelessWidget {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.fromLTRB(28, 8, 28, 16),
+              padding: const EdgeInsets.fromLTRB(AppSpace.page, AppSpace.sm, AppSpace.page, AppSpace.lg),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   FilledButton(
-                    style: FilledButton.styleFrom(
-                      backgroundColor: context.colors.bleu,
-                    ),
                     onPressed: () =>
                         AppsScannerService().openAppSettings(app.packageName),
                     child: Text(l.detailManagePermissions),
@@ -189,9 +182,7 @@ class SpywareAdviceScreen extends StatelessWidget {
                   // Une app système ne peut pas être désinstallée.
                   if (!app.isSystemApp)
                     TextButton(
-                      style: TextButton.styleFrom(
-                        foregroundColor: context.colors.rommen,
-                      ),
+                      style: dangerButtonStyle(context),
                       onPressed: () => _uninstall(context),
                       child: Text(l.detailUninstall),
                     ),
@@ -215,12 +206,12 @@ class _Paragraph extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 14),
+      padding: const EdgeInsets.symmetric(vertical: AppSpace.lg),
       child: Text(
         text,
         style: TextStyle(
-          fontSize: 15,
-          height: 1.4,
+          fontSize: AppText.corps,
+          height: AppText.interligne,
           fontWeight: strong ? FontWeight.w500 : FontWeight.normal,
           color: context.colors.encre,
         ),

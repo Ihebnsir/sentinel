@@ -7,6 +7,7 @@ import '../../theme/app_colors.dart';
 import '../../widgets/actions_row.dart';
 import '../../widgets/vault_copy.dart';
 import '../../widgets/vault_fields.dart';
+import '../../widgets/ui.dart';
 
 /// « Votre clé de récupération » : affichée UNE seule fois. Pour
 /// continuer, il faut retaper ses 4 derniers caractères.
@@ -59,36 +60,36 @@ class _RecoveryKeyViewState extends State<RecoveryKeyView> {
     final muted = context.colors.secondaire;
     final groups = widget.recoveryKey.split('-');
     return ListView(
-      padding: const EdgeInsets.only(top: 16, bottom: 24),
+      padding: const EdgeInsets.only(top: AppSpace.lg, bottom: AppSpace.xl),
       children: [
-        Icon(Icons.key_outlined, size: 48, color: context.colors.bleu),
-        const SizedBox(height: 16),
+        Icon(Icons.key_outlined, size: AppSize.iconHero, color: context.colors.bleu),
+        const SizedBox(height: AppSpace.lg),
         Text(
           l.vaultYourRecoveryKey,
           style: TextStyle(
-            fontSize: 20,
+            fontSize: AppText.accroche,
             fontWeight: FontWeight.w600,
             color: context.colors.encre,
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: AppSpace.sm),
         Text(
           l.vaultWriteKeyDown,
           style: TextStyle(
-            fontSize: 15,
+            fontSize: AppText.corps,
             fontWeight: FontWeight.w500,
             color: context.colors.encre,
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: AppSpace.sm),
         Text(
           l.vaultKeyShownOnce,
-          style: TextStyle(fontSize: 15, color: muted),
+          style: TextStyle(fontSize: AppText.corps, color: muted),
         ),
-        const SizedBox(height: 16),
-        Divider(height: 1, thickness: 1, color: context.colors.ligne),
+        const SizedBox(height: AppSpace.lg),
+        const AppDivider(),
         Padding(
-          padding: const EdgeInsets.symmetric(vertical: 16),
+          padding: const EdgeInsets.symmetric(vertical: AppSpace.lg),
           // Groupes de 4 qui passent à la ligne sur les petits écrans.
           child: Wrap(
             spacing: 14,
@@ -98,7 +99,7 @@ class _RecoveryKeyViewState extends State<RecoveryKeyView> {
                 Text(
                   group,
                   style: TextStyle(
-                    fontSize: 22,
+                    fontSize: AppText.titreSecondaire,
                     fontWeight: FontWeight.w600,
                     letterSpacing: 2,
                     color: context.colors.encre,
@@ -109,22 +110,21 @@ class _RecoveryKeyViewState extends State<RecoveryKeyView> {
             ],
           ),
         ),
-        Divider(height: 1, thickness: 1, color: context.colors.ligne),
+        const AppDivider(),
         Align(
           alignment: Alignment.centerLeft,
           child: TextButton.icon(
-            style: TextButton.styleFrom(foregroundColor: context.colors.bleu),
             onPressed: _copy,
-            icon: const Icon(Icons.copy, size: 18),
+            icon: const Icon(Icons.copy, size: AppSize.iconSmall),
             label: Text(l.vaultCopy),
           ),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: AppSpace.lg),
         Text(
           l.vaultRetypeLast4,
-          style: TextStyle(fontSize: 15, color: muted),
+          style: TextStyle(fontSize: AppText.corps, color: muted),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: AppSpace.md),
         VaultTextField(
           controller: _lastChars,
           label: l.vaultLast4Label,
@@ -133,11 +133,10 @@ class _RecoveryKeyViewState extends State<RecoveryKeyView> {
           revealed: true,
           onChanged: (_) => setState(() {}),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: AppSpace.lg),
         Align(
           alignment: Alignment.centerRight,
           child: FilledButton(
-            style: FilledButton.styleFrom(backgroundColor: context.colors.bleu),
             onPressed: _confirmed ? widget.onDone : null,
             child: Text(l.vaultKeyNoted),
           ),
@@ -183,35 +182,32 @@ class _RecoveryKeyOfferViewState extends State<RecoveryKeyOfferView> {
     final l = context.l10n;
     final muted = context.colors.secondaire;
     return ListView(
-      padding: const EdgeInsets.only(top: 16, bottom: 24),
+      padding: const EdgeInsets.only(top: AppSpace.lg, bottom: AppSpace.xl),
       children: [
-        Icon(Icons.key_outlined, size: 48, color: context.colors.bleu),
-        const SizedBox(height: 16),
+        Icon(Icons.key_outlined, size: AppSize.iconHero, color: context.colors.bleu),
+        const SizedBox(height: AppSpace.lg),
         Text(
           l.vaultKeyOfferTitle,
           style: TextStyle(
-            fontSize: 20,
+            fontSize: AppText.accroche,
             fontWeight: FontWeight.w600,
             color: context.colors.encre,
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: AppSpace.sm),
         Text(
           l.vaultKeyOfferText,
-          style: TextStyle(fontSize: 15, color: muted),
+          style: TextStyle(fontSize: AppText.corps, color: muted),
         ),
-        const SizedBox(height: 24),
+        const SizedBox(height: AppSpace.xl),
         ActionsRow(
           children: [
             TextButton(
-              style: TextButton.styleFrom(foregroundColor: muted),
+              style: mutedButtonStyle(context),
               onPressed: _creating ? null : widget.onLater,
               child: Text(l.commonLater),
             ),
             FilledButton(
-              style: FilledButton.styleFrom(
-                backgroundColor: context.colors.bleu,
-              ),
               onPressed: _creating ? null : _create,
               child: Text(_creating ? l.vaultCreating : l.vaultCreateKey),
             ),

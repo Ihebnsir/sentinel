@@ -13,6 +13,7 @@ import '../../theme/app_colors.dart';
 import '../../widgets/actions_row.dart';
 import '../../widgets/vault_copy.dart';
 import '../../widgets/vault_fields.dart';
+import '../../widgets/ui.dart';
 
 /// Détail et modification d'un élément ([item] null : nouvel élément).
 /// Se ferme tout seul si le coffre se verrouille.
@@ -156,20 +157,16 @@ class _VaultItemScreenState extends State<VaultItemScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: context.colors.chaux,
-        surfaceTintColor: Colors.transparent,
         title: Text(context.l10n.vaultDeleteItemTitle(widget.item!.titre)),
         content: Text(context.l10n.vaultDeleteItemText),
         actions: [
           TextButton(
-            style: TextButton.styleFrom(
-              foregroundColor: context.colors.secondaire,
-            ),
+            style: mutedButtonStyle(context),
             onPressed: () => Navigator.of(context).pop(false),
             child: Text(context.l10n.commonCancel),
           ),
           TextButton(
-            style: TextButton.styleFrom(foregroundColor: context.colors.rommen),
+            style: dangerButtonStyle(context),
             onPressed: () => Navigator.of(context).pop(true),
             child: Text(context.l10n.vaultDelete),
           ),
@@ -230,22 +227,22 @@ class _VaultItemScreenState extends State<VaultItemScreen> {
           children: [
             Expanded(
               child: ListView(
-                padding: const EdgeInsets.fromLTRB(28, 8, 28, 24),
+                padding: const EdgeInsets.fromLTRB(AppSpace.page, AppSpace.sm, AppSpace.page, AppSpace.xl),
                 children: [
                   Text(
                     widget.item == null
                         ? (_isPassword ? l.vaultNewPassword : l.vaultNewNote)
                         : widget.type.label(l),
                     style: TextStyle(
-                      fontSize: 24,
+                      fontSize: AppText.titreSecondaire,
                       fontWeight: FontWeight.w600,
                       color: context.colors.encre,
                     ),
                   ),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: AppSpace.xl),
                   VaultTextField(controller: _titre, label: l.vaultFieldTitle),
                   if (_isPassword) ..._passwordFields(l, muted),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: AppSpace.lg),
                   VaultTextField(
                     controller: _note,
                     label: _isPassword ? l.vaultFieldNote : l.vaultTypeNote,
@@ -257,13 +254,10 @@ class _VaultItemScreenState extends State<VaultItemScreen> {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.fromLTRB(28, 0, 28, 16),
+              padding: const EdgeInsets.fromLTRB(AppSpace.page, 0, AppSpace.page, AppSpace.lg),
               child: SizedBox(
                 width: double.infinity,
                 child: FilledButton(
-                  style: FilledButton.styleFrom(
-                    backgroundColor: context.colors.bleu,
-                  ),
                   onPressed: _saving ? null : _save,
                   child: Text(_saving ? l.vaultSaving : l.vaultSave),
                 ),
@@ -276,13 +270,13 @@ class _VaultItemScreenState extends State<VaultItemScreen> {
   }
 
   List<Widget> _passwordFields(AppLocalizations l, Color muted) => [
-    const SizedBox(height: 16),
+    const SizedBox(height: AppSpace.lg),
     VaultTextField(
       controller: _identifiant,
       label: l.vaultFieldUsername,
       keyboardType: TextInputType.emailAddress,
     ),
-    const SizedBox(height: 16),
+    const SizedBox(height: AppSpace.lg),
     VaultTextField(
       controller: _motDePasse,
       label: l.vaultTypePassword,
@@ -297,11 +291,11 @@ class _VaultItemScreenState extends State<VaultItemScreen> {
           final count = breaches.countFor(_motDePasse.text) ?? 0;
           if (count == 0) return const SizedBox.shrink();
           return Padding(
-            padding: const EdgeInsets.only(top: 8),
+            padding: const EdgeInsets.only(top: AppSpace.sm),
             child: Text(
               breachMessage(l, count),
               style: TextStyle(
-                fontSize: 14,
+                fontSize: AppText.corps,
                 fontWeight: FontWeight.w500,
                 color: context.colors.rommen,
               ),
@@ -312,18 +306,16 @@ class _VaultItemScreenState extends State<VaultItemScreen> {
     ActionsRow(
       children: [
         TextButton.icon(
-          style: TextButton.styleFrom(foregroundColor: context.colors.bleu),
           onPressed: _copyPassword,
-          icon: const Icon(Icons.copy, size: 18),
+          icon: const Icon(Icons.copy, size: AppSize.iconSmall),
           label: Text(l.vaultCopy),
         ),
         TextButton.icon(
-          style: TextButton.styleFrom(foregroundColor: context.colors.bleu),
           onPressed: () {
             setState(() => _showGenerator = !_showGenerator);
             if (_showGenerator) _generate();
           },
-          icon: const Icon(Icons.autorenew, size: 18),
+          icon: const Icon(Icons.autorenew, size: AppSize.iconSmall),
           label: Text(_showGenerator ? l.vaultHideGenerator : l.vaultGenerate),
         ),
       ],
@@ -334,7 +326,7 @@ class _VaultItemScreenState extends State<VaultItemScreen> {
         onChanged: _changeOptions,
         onRegenerate: _generate,
       ),
-    const SizedBox(height: 16),
+    const SizedBox(height: AppSpace.lg),
     VaultTextField(
       controller: _siteWeb,
       label: l.vaultFieldWebsite,
@@ -372,7 +364,7 @@ class _GeneratorPanel extends StatelessWidget {
           Expanded(
             child: Text(
               label,
-              style: TextStyle(fontSize: 15, color: context.colors.encre),
+              style: TextStyle(fontSize: AppText.corps, color: context.colors.encre),
             ),
           ),
           Switch(
@@ -393,10 +385,10 @@ class _GeneratorPanel extends StatelessWidget {
       children: [
         _divider,
         Padding(
-          padding: const EdgeInsets.only(top: 12),
+          padding: const EdgeInsets.only(top: AppSpace.md),
           child: Text(
             l.generatorLength(options.length, l.number(options.length)),
-            style: TextStyle(fontSize: 15, color: context.colors.encre),
+            style: TextStyle(fontSize: AppText.corps, color: context.colors.encre),
           ),
         ),
         Slider(
@@ -435,7 +427,6 @@ class _GeneratorPanel extends StatelessWidget {
         Align(
           alignment: Alignment.centerRight,
           child: TextButton(
-            style: TextButton.styleFrom(foregroundColor: context.colors.bleu),
             onPressed: onRegenerate,
             child: Text(l.generatorNewPassword),
           ),

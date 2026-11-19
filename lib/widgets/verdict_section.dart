@@ -3,6 +3,7 @@ import 'package:material_ui/material_ui.dart';
 import '../l10n/l10n.dart';
 import '../services/links/link_checker.dart';
 import '../theme/app_colors.dart';
+import 'ui.dart';
 
 /// Couleur d'un verdict : rouge, ocre ou vert.
 Color verdictColor(AppColors c, Verdict verdict) => switch (verdict) {
@@ -34,7 +35,7 @@ class VerdictSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SizedBox(height: 28),
+        const SizedBox(height: AppSpace.xl),
         // liveRegion : TalkBack annonce le verdict dès qu'il s'affiche,
         // titre et sous-titre ensemble.
         MergeSemantics(
@@ -47,37 +48,37 @@ class VerdictSection extends StatelessWidget {
                 Text(
                   verdict.label(l),
                   style: TextStyle(
-                    fontSize: 28,
+                    fontSize: AppText.titre,
                     fontWeight: FontWeight.w600,
                     color: verdictColor(context.colors, verdict),
                   ),
                 ),
                 if (subtitle != null) ...[
-                  const SizedBox(height: 4),
-                  Text(subtitle!, style: TextStyle(fontSize: 15, color: muted)),
+                  const SizedBox(height: AppSpace.xs),
+                  Text(subtitle!, style: TextStyle(fontSize: AppText.corps, color: muted)),
                 ],
               ],
             ),
           ),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: AppSpace.md),
         for (final reason in reasons) ...[
-          Divider(height: 1, thickness: 1, color: context.colors.ligne),
+          const AppDivider(),
           Padding(
-            padding: const EdgeInsets.symmetric(vertical: 14),
+            padding: const EdgeInsets.symmetric(vertical: AppSpace.lg),
             child: Text(
               reason,
-              style: TextStyle(fontSize: 15, color: context.colors.encre),
+              style: TextStyle(fontSize: AppText.corps, color: context.colors.encre),
             ),
           ),
         ],
-        Divider(height: 1, thickness: 1, color: context.colors.ligne),
+        const AppDivider(),
         Padding(
-          padding: const EdgeInsets.only(top: 16),
+          padding: const EdgeInsets.only(top: AppSpace.lg),
           child: Text(
             advice,
             style: TextStyle(
-              fontSize: 15,
+              fontSize: AppText.corps,
               fontWeight: FontWeight.w500,
               color: context.colors.encre,
             ),

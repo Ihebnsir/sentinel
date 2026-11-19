@@ -8,7 +8,7 @@ import '../services/vault/vault_document_platform.dart';
 import '../services/vault/vault_platform.dart';
 import '../services/vault/vault_session.dart';
 import '../theme/app_colors.dart';
-import '../widgets/empty_state.dart';
+
 import 'vault/create_vault_view.dart';
 import 'vault/recover_view.dart';
 import 'vault/recovery_key_view.dart';
@@ -16,6 +16,7 @@ import 'vault/restore_backup_view.dart';
 import 'vault/unlock_view.dart';
 import 'vault/vault_list_view.dart';
 import 'vault/vault_settings_screen.dart';
+import '../widgets/ui.dart';
 
 /// Onglet « Coffre » : mots de passe et notes chiffrés sur le téléphone.
 class VaultScreen extends StatefulWidget {
@@ -138,7 +139,7 @@ class _VaultScreenState extends State<VaultScreen> {
     final opened = _session.status == VaultStatus.ouvert;
     return SafeArea(
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(28, 24, 28, 0),
+        padding: const EdgeInsets.fromLTRB(AppSpace.page, AppSpace.xl, AppSpace.page, 0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -153,7 +154,7 @@ class _VaultScreenState extends State<VaultScreen> {
                   child: Text(
                     l.navVault,
                     style: TextStyle(
-                      fontSize: 28,
+                      fontSize: AppText.titre,
                       fontWeight: FontWeight.w600,
                       color: context.colors.encre,
                     ),
@@ -170,11 +171,8 @@ class _VaultScreenState extends State<VaultScreen> {
                         onPressed: _openSettings,
                       ),
                       TextButton.icon(
-                        style: TextButton.styleFrom(
-                          foregroundColor: context.colors.bleu,
-                        ),
                         onPressed: _session.lock,
-                        icon: const Icon(Icons.lock_outline, size: 18),
+                        icon: const Icon(Icons.lock_outline, size: AppSize.iconSmall),
                         label: Text(l.vaultLock),
                       ),
                     ],
@@ -207,7 +205,7 @@ class _VaultScreenState extends State<VaultScreen> {
           );
         }
         return EmptyState(
-          icon: Icons.lock_outline,
+          motif: SidiBouMotif.porte,
           title: l.vaultEmptyTitle,
           message: l.vaultEmptyMessage,
           buttonLabel: l.vaultCreate,
@@ -249,7 +247,8 @@ class _VaultScreenState extends State<VaultScreen> {
         );
       case VaultStatus.illisible:
         return EmptyState(
-          icon: Icons.error_outline,
+          motif: SidiBouMotif.porte,
+
           title: l.vaultUnreadableTitle,
           message: l.vaultUnreadableMessage,
         );

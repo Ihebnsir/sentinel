@@ -11,6 +11,7 @@ import '../../theme/app_colors.dart';
 import '../../widgets/actions_row.dart';
 import '../../widgets/loading_bar.dart';
 import '../../widgets/vault_fields.dart';
+import '../../widgets/ui.dart';
 
 /// Message clair pour un fichier qui n'est pas une sauvegarde lisible.
 String backupProblemText(AppLocalizations l, BackupProblem problem) =>
@@ -164,19 +165,19 @@ class _RestoreBackupViewState extends State<RestoreBackupView> {
     final l = context.l10n;
     final muted = context.colors.secondaire;
     return ListView(
-      padding: const EdgeInsets.only(top: 16, bottom: 24),
+      padding: const EdgeInsets.only(top: AppSpace.lg, bottom: AppSpace.xl),
       children: [
         Text(
           l.vaultRestoreBackup,
           style: TextStyle(
-            fontSize: 20,
+            fontSize: AppText.accroche,
             fontWeight: FontWeight.w600,
             color: context.colors.encre,
           ),
         ),
-        const SizedBox(height: 8),
-        Text(_intro(l), style: TextStyle(fontSize: 15, color: muted)),
-        const SizedBox(height: 24),
+        const SizedBox(height: AppSpace.sm),
+        Text(_intro(l), style: TextStyle(fontSize: AppText.corps, color: muted)),
+        const SizedBox(height: AppSpace.xl),
         if (_step == _Step.motDePasse)
           VaultTextField(
             controller: _backupPassword,
@@ -195,10 +196,10 @@ class _RestoreBackupViewState extends State<RestoreBackupView> {
             onChanged: (_) => setState(() {}),
           ),
           if (_password.text.isNotEmpty) ...[
-            const SizedBox(height: 8),
+            const SizedBox(height: AppSpace.sm),
             PasswordStrengthLine(password: _password.text),
           ],
-          const SizedBox(height: 16),
+          const SizedBox(height: AppSpace.lg),
           VaultTextField(
             controller: _confirmation,
             label: l.vaultConfirmation,
@@ -209,36 +210,33 @@ class _RestoreBackupViewState extends State<RestoreBackupView> {
                 : null,
             onChanged: (_) => setState(() {}),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: AppSpace.md),
           Text(
             l.backupNewKeyNote,
-            style: TextStyle(fontSize: 13, color: muted),
+            style: TextStyle(fontSize: AppText.detail, color: muted),
           ),
         ],
         if (_error != null) ...[
-          const SizedBox(height: 12),
+          const SizedBox(height: AppSpace.md),
           Text(
             _error!,
-            style: TextStyle(fontSize: 14, color: context.colors.rommen),
+            style: TextStyle(fontSize: AppText.corps, color: context.colors.rommen),
           ),
         ],
         if (_busy)
           const Padding(
-            padding: EdgeInsets.only(top: 16),
+            padding: EdgeInsets.only(top: AppSpace.lg),
             child: LoadingBar(),
           ),
-        const SizedBox(height: 16),
+        const SizedBox(height: AppSpace.lg),
         ActionsRow(
           children: [
             TextButton(
-              style: TextButton.styleFrom(foregroundColor: muted),
+              style: mutedButtonStyle(context),
               onPressed: _busy ? null : widget.onCancel,
               child: Text(l.commonCancel),
             ),
             FilledButton(
-              style: FilledButton.styleFrom(
-                backgroundColor: context.colors.bleu,
-              ),
               onPressed: switch (_step) {
                 _Step.fichier => _busy ? null : _pickFile,
                 _Step.motDePasse =>

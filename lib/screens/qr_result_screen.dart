@@ -16,6 +16,7 @@ import '../widgets/loading_bar.dart';
 import '../widgets/verdict_section.dart';
 import '../widgets/wifi_section.dart';
 import '../utils/bidi.dart';
+import '../widgets/ui.dart';
 
 /// Demande aux listes du pare-feu ce qu'elles savent d'un domaine.
 typedef DomainChecker = Future<DomainCheck?> Function(String host);
@@ -75,20 +76,15 @@ class _QrResultScreenState extends State<QrResultScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: context.colors.chaux,
-        surfaceTintColor: Colors.transparent,
         title: Text(_actionTitle(l, assessment)),
         content: Text(_confirmText(l, assessment.content)),
         actions: [
           TextButton(
-            style: TextButton.styleFrom(
-              foregroundColor: context.colors.secondaire,
-            ),
+            style: mutedButtonStyle(context),
             onPressed: () => Navigator.of(context).pop(false),
             child: Text(l.commonCancel),
           ),
           FilledButton(
-            style: FilledButton.styleFrom(backgroundColor: context.colors.bleu),
             onPressed: () => Navigator.of(context).pop(true),
             child: Text(l.commonContinue),
           ),
@@ -119,39 +115,39 @@ class _QrResultScreenState extends State<QrResultScreen> {
       body: SafeArea(
         top: false,
         child: ListView(
-          padding: const EdgeInsets.fromLTRB(28, 8, 28, 32),
+          padding: const EdgeInsets.fromLTRB(AppSpace.page, AppSpace.sm, AppSpace.page, AppSpace.xxl),
           children: [
             Text(
               l.qrResultTitle,
               style: TextStyle(
-                fontSize: 24,
+                fontSize: AppText.titreSecondaire,
                 fontWeight: FontWeight.w600,
                 color: context.colors.encre,
               ),
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: AppSpace.xs),
             Text(
               qrKindLabel(l, _content),
-              style: TextStyle(fontSize: 15, color: muted),
+              style: TextStyle(fontSize: AppText.corps, color: muted),
             ),
-            const SizedBox(height: 20),
-            Text(l.qrRawContent, style: TextStyle(fontSize: 13, color: muted)),
-            const SizedBox(height: 8),
+            const SizedBox(height: AppSpace.xl),
+            Text(l.qrRawContent, style: TextStyle(fontSize: AppText.detail, color: muted)),
+            const SizedBox(height: AppSpace.sm),
             _RawContent(raw: widget.raw),
-            const SizedBox(height: 12),
+            const SizedBox(height: AppSpace.md),
             for (final (label, value) in qrDetails(l, _content))
               _InfoRow(label: label, value: value),
             if (assessment == null && !_failed)
               Padding(
-                padding: const EdgeInsets.only(top: 24),
+                padding: const EdgeInsets.only(top: AppSpace.xl),
                 child: LoadingBar(label: context.l10n.homeAnalyzing),
               ),
             if (_failed)
               Padding(
-                padding: const EdgeInsets.only(top: 24),
+                padding: const EdgeInsets.only(top: AppSpace.xl),
                 child: Text(
                   l.linksFailed,
-                  style: TextStyle(fontSize: 15, color: muted),
+                  style: TextStyle(fontSize: AppText.corps, color: muted),
                 ),
               ),
             if (assessment != null) ..._result(l, assessment),
@@ -184,22 +180,21 @@ class _QrResultScreenState extends State<QrResultScreen> {
       else
         // Pas de verdict (Wi-Fi, paiement…) : avertissements seuls.
         for (final reason in reasons) ...[
-          const SizedBox(height: 12),
+          const SizedBox(height: AppSpace.md),
           Text(
             reason,
             style: TextStyle(
-              fontSize: 15,
+              fontSize: AppText.corps,
               fontWeight: FontWeight.w500,
               color: context.colors.encre,
             ),
           ),
         ],
       if (action != null) ...[
-        const SizedBox(height: 28),
+        const SizedBox(height: AppSpace.xl),
         SizedBox(
           width: double.infinity,
           child: FilledButton(
-            style: FilledButton.styleFrom(backgroundColor: context.colors.bleu),
             // null : désactivé (lien dangereux).
             onPressed: assessment.actionAllowed
                 ? () => _onAction(assessment)
@@ -209,10 +204,10 @@ class _QrResultScreenState extends State<QrResultScreen> {
         ),
         if (!assessment.actionAllowed)
           Padding(
-            padding: const EdgeInsets.only(top: 8),
+            padding: const EdgeInsets.only(top: AppSpace.sm),
             child: Text(
               l.qrActionBlocked,
-              style: TextStyle(fontSize: 13, color: context.colors.secondaire),
+              style: TextStyle(fontSize: AppText.detail, color: context.colors.secondaire),
             ),
           ),
       ],
@@ -288,10 +283,10 @@ class _RawContent extends StatelessWidget {
     final empty = raw.trim().isEmpty;
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(14),
+      padding: const EdgeInsets.all(AppSpace.lg),
       decoration: BoxDecoration(
         border: Border.all(color: context.colors.ligne),
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: AppRadius.field,
       ),
       // Sens du contenu (un lien reste de gauche à droite en arabe),
       // sans caractère caché : la copie reste fidèle.
@@ -300,7 +295,7 @@ class _RawContent extends StatelessWidget {
         textDirection: empty ? null : directionOf(raw),
         textAlign: pageStart(context),
         style: TextStyle(
-          fontSize: 14,
+          fontSize: AppText.corps,
           color: empty ? context.colors.discret : context.colors.encre,
         ),
       ),
@@ -319,9 +314,9 @@ class _InfoRow extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Divider(height: 1, thickness: 1, color: context.colors.ligne),
+        const AppDivider(),
         Padding(
-          padding: const EdgeInsets.symmetric(vertical: 12),
+          padding: const EdgeInsets.symmetric(vertical: AppSpace.md),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -329,12 +324,12 @@ class _InfoRow extends StatelessWidget {
                 child: Text(
                   label,
                   style: TextStyle(
-                    fontSize: 15,
+                    fontSize: AppText.corps,
                     color: context.colors.secondaire,
                   ),
                 ),
               ),
-              const SizedBox(width: 16),
+              const SizedBox(width: AppSpace.lg),
               Expanded(
                 flex: 2,
                 child: Text(
@@ -342,7 +337,7 @@ class _InfoRow extends StatelessWidget {
                   // Sens du contenu : « +216… » garde son « + » à gauche.
                   textDirection: directionOf(value),
                   textAlign: pageStart(context),
-                  style: TextStyle(fontSize: 15, color: context.colors.encre),
+                  style: TextStyle(fontSize: AppText.corps, color: context.colors.encre),
                 ),
               ),
             ],
@@ -363,36 +358,36 @@ class _WifiBlock extends StatelessWidget {
   Widget build(BuildContext context) {
     final l = context.l10n;
     final body = TextStyle(
-      fontSize: 15,
-      height: 1.45,
-      color: context.colors.encre.withValues(alpha: 0.8),
+      fontSize: AppText.corps,
+      height: AppText.interligne,
+      color: context.colors.secondaire,
     );
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Divider(height: 1, thickness: 1, color: context.colors.ligne),
-        const SizedBox(height: 20),
+        const AppDivider(),
+        const SizedBox(height: AppSpace.xl),
         Text(
           report.level.label(l),
           style: TextStyle(
-            fontSize: 28,
+            fontSize: AppText.titre,
             fontWeight: FontWeight.w600,
             color: wifiLevelColor(context.colors, report.level),
           ),
         ),
-        const SizedBox(height: 4),
+        const SizedBox(height: AppSpace.xs),
         Text(
           report.title,
           style: TextStyle(
-            fontSize: 16,
+            fontSize: AppText.intitule,
             fontWeight: FontWeight.w500,
             color: context.colors.encre,
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: AppSpace.sm),
         Text(report.explanation, style: body),
         for (final advice in report.advice) ...[
-          const SizedBox(height: 6),
+          const SizedBox(height: AppSpace.sm),
           Text('· $advice', style: body),
         ],
       ],

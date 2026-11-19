@@ -3,6 +3,7 @@ import 'package:material_ui/material_ui.dart';
 import '../l10n/l10n.dart';
 import '../theme/app_colors.dart';
 import '../widgets/arch_icon.dart';
+import '../widgets/ui.dart';
 
 /// Une page de la présentation : titre et paragraphes courts.
 class OnboardingPage {
@@ -98,13 +99,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             ),
             _Dots(count: pages.length, current: _page),
             Padding(
-              padding: const EdgeInsets.fromLTRB(28, 24, 28, 24),
+              padding: const EdgeInsets.fromLTRB(AppSpace.page, AppSpace.xl, AppSpace.page, AppSpace.xl),
               child: SizedBox(
                 width: double.infinity,
                 child: FilledButton(
-                  style: FilledButton.styleFrom(
-                    backgroundColor: context.colors.bleu,
-                  ),
                   onPressed: _next,
                   child: Text(_isLast ? l.onboardingStart : l.onboardingNext),
                 ),
@@ -125,30 +123,30 @@ class _PageContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView(
-      padding: const EdgeInsets.fromLTRB(28, 48, 28, 24),
+      padding: const EdgeInsets.fromLTRB(AppSpace.page, AppSpace.xxxl, AppSpace.page, AppSpace.xl),
       children: [
         Center(
-          child: ArchIcon(filled: true, size: 72, color: context.colors.bleu),
+          child: ArchIcon(filled: true, size: AppSize.archHero, color: context.colors.bleu),
         ),
-        const SizedBox(height: 32),
+        const SizedBox(height: AppSpace.xxl),
         Text(
           page.title,
           style: TextStyle(
-            fontSize: 24,
+            fontSize: AppText.titreSecondaire,
             fontWeight: FontWeight.w600,
             color: context.colors.encre,
           ),
         ),
-        const SizedBox(height: 20),
+        const SizedBox(height: AppSpace.xl),
         for (final line in page.lines)
           Padding(
-            padding: const EdgeInsets.only(bottom: 12),
+            padding: const EdgeInsets.only(bottom: AppSpace.md),
             child: Text(
               line,
               style: TextStyle(
-                fontSize: 15,
-                height: 1.4,
-                color: context.colors.encre.withValues(alpha: 0.8),
+                fontSize: AppText.corps,
+                height: AppText.interligne,
+                color: context.colors.secondaire,
               ),
             ),
           ),
@@ -173,7 +171,7 @@ class _Dots extends StatelessWidget {
           Container(
             width: 8,
             height: 8,
-            margin: const EdgeInsets.symmetric(horizontal: 4),
+            margin: const EdgeInsets.symmetric(horizontal: AppSpace.xs),
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: i == current ? context.colors.bleu : context.colors.ligne,

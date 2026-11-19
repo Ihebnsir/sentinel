@@ -5,12 +5,13 @@ import '../services/apps_scanner_service.dart';
 import '../services/firewall_service.dart';
 import '../theme/app_colors.dart';
 import '../utils/bidi.dart';
+import 'ui.dart';
 
 // Couleur : celle du thème (dividerTheme, ligne fine).
 const _divider = Divider(height: 1, thickness: 1);
 
 TextStyle _muted(BuildContext context) =>
-    TextStyle(fontSize: 13, color: context.colors.secondaire);
+    TextStyle(fontSize: AppText.detail, color: context.colors.secondaire);
 
 /// Phrase discrète sous les catégories et la liste blanche.
 class _CacheNote extends StatelessWidget {
@@ -19,7 +20,7 @@ class _CacheNote extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(top: 8),
+      padding: const EdgeInsets.only(top: AppSpace.sm),
       child: Text(context.l10n.blocklistCacheNote, style: _muted(context)),
     );
   }
@@ -34,11 +35,11 @@ class BlocklistSectionTitle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(top: 32, bottom: 4),
+      padding: const EdgeInsets.only(top: AppSpace.xxl, bottom: AppSpace.xs),
       child: Text(
         text,
         style: TextStyle(
-          fontSize: 18,
+          fontSize: AppText.section,
           fontWeight: FontWeight.w600,
           color: context.colors.encre,
         ),
@@ -66,7 +67,7 @@ class _SwitchRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 12),
+      padding: const EdgeInsets.symmetric(vertical: AppSpace.md),
       // MergeSemantics : TalkBack lit le texte avec l'interrupteur.
       child: MergeSemantics(
         child: Row(
@@ -78,19 +79,19 @@ class _SwitchRow extends StatelessWidget {
                   Text(
                     title,
                     style: TextStyle(
-                      fontSize: 16,
+                      fontSize: AppText.intitule,
                       fontWeight: FontWeight.w500,
                       color: context.colors.encre,
                     ),
                   ),
-                  const SizedBox(height: 2),
+                  const SizedBox(height: AppSpace.xs),
                   Text(subtitle, style: _muted(context)),
                   if (warning != null) ...[
-                    const SizedBox(height: 2),
+                    const SizedBox(height: AppSpace.xs),
                     Text(
                       warning!,
                       style: TextStyle(
-                        fontSize: 13,
+                        fontSize: AppText.detail,
                         color: context.colors.ocre,
                       ),
                     ),
@@ -98,7 +99,7 @@ class _SwitchRow extends StatelessWidget {
                 ],
               ),
             ),
-            const SizedBox(width: 12),
+            const SizedBox(width: AppSpace.md),
             Switch(value: value, onChanged: onChanged),
           ],
         ),
@@ -176,15 +177,12 @@ class AutoUpdateSection extends StatelessWidget {
           onChanged: onAutoUpdateChanged,
         ),
         _divider,
-        const SizedBox(height: 8),
+        const SizedBox(height: AppSpace.sm),
         Text(l.blocklistUpdateNote, style: _muted(context)),
         Align(
           alignment: Alignment.centerLeft,
           child: TextButton(
-            style: TextButton.styleFrom(
-              foregroundColor: context.colors.bleu,
-              padding: EdgeInsets.zero,
-            ),
+            style: inlineButtonStyle(context),
             onPressed: busy ? null : onUpdateNow,
             child: Text(busy ? l.blocklistUpdating : l.blocklistUpdateNow),
           ),
@@ -212,7 +210,7 @@ class AllowlistSection extends StatelessWidget {
   final ValueChanged<String> onRemove;
 
   static OutlineInputBorder _border(Color color) => OutlineInputBorder(
-    borderRadius: BorderRadius.circular(8),
+    borderRadius: AppRadius.field,
     borderSide: BorderSide(color: color),
   );
 
@@ -224,7 +222,7 @@ class AllowlistSection extends StatelessWidget {
       children: [
         BlocklistSectionTitle(l.allowlistTitle),
         Text(l.allowlistIntro, style: _muted(context)),
-        const SizedBox(height: 12),
+        const SizedBox(height: AppSpace.md),
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -235,16 +233,16 @@ class AllowlistSection extends StatelessWidget {
                 autocorrect: false,
                 textInputAction: TextInputAction.done,
                 onSubmitted: (_) => onAdd(),
-                style: TextStyle(fontSize: 15, color: context.colors.encre),
+                style: TextStyle(fontSize: AppText.corps, color: context.colors.encre),
                 decoration: InputDecoration(
                   hintText: l.allowlistHint,
                   hintStyle: TextStyle(
-                    fontSize: 15,
+                    fontSize: AppText.corps,
                     color: context.colors.discret,
                   ),
                   errorText: error,
                   isDense: true,
-                  contentPadding: const EdgeInsets.all(12),
+                  contentPadding: const EdgeInsets.all(AppSpace.md),
                   enabledBorder: _border(context.colors.ligne),
                   focusedBorder: _border(context.colors.bleu),
                   errorBorder: _border(context.colors.rommen),
@@ -252,23 +250,20 @@ class AllowlistSection extends StatelessWidget {
                 ),
               ),
             ),
-            const SizedBox(width: 8),
+            const SizedBox(width: AppSpace.sm),
             Padding(
-              padding: const EdgeInsets.only(top: 2),
+              padding: const EdgeInsets.only(top: AppSpace.xs),
               child: TextButton(
-                style: TextButton.styleFrom(
-                  foregroundColor: context.colors.bleu,
-                ),
                 onPressed: onAdd,
                 child: Text(l.allowlistAdd),
               ),
             ),
           ],
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: AppSpace.sm),
         if (domains.isEmpty)
           Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8),
+            padding: const EdgeInsets.symmetric(vertical: AppSpace.sm),
             child: Text(l.allowlistEmpty, style: _muted(context)),
           ),
         for (final domain in domains) ...[
@@ -279,13 +274,13 @@ class AllowlistSection extends StatelessWidget {
                   domain,
                   textDirection: TextDirection.ltr,
                   textAlign: pageStart(context),
-                  style: TextStyle(fontSize: 15, color: context.colors.encre),
+                  style: TextStyle(fontSize: AppText.corps, color: context.colors.encre),
                 ),
               ),
               IconButton(
                 tooltip: l.allowlistRemove(domain),
                 color: context.colors.secondaire,
-                icon: const Icon(Icons.close, size: 20),
+                icon: const Icon(Icons.close, size: AppSize.iconSmall),
                 onPressed: () => onRemove(domain),
               ),
             ],
@@ -313,28 +308,25 @@ class BlocklistSourcesSection extends StatelessWidget {
         BlocklistSectionTitle(l.sourcesTitle),
         for (final source in sources) ...[
           Padding(
-            padding: const EdgeInsets.only(top: 12),
+            padding: const EdgeInsets.only(top: AppSpace.md),
             child: Text(
               '${source.name} · ${source.license}',
               textDirection: TextDirection.ltr,
               textAlign: pageStart(context),
               style: TextStyle(
-                fontSize: 15,
+                fontSize: AppText.corps,
                 fontWeight: FontWeight.w500,
                 color: context.colors.encre,
               ),
             ),
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: AppSpace.xs),
           Text(source.attribution, style: _muted(context)),
           if (source.homepage.startsWith('https://'))
             Align(
               alignment: Alignment.centerLeft,
               child: TextButton(
-                style: TextButton.styleFrom(
-                  foregroundColor: context.colors.bleu,
-                  padding: EdgeInsets.zero,
-                ),
+                style: inlineButtonStyle(context),
                 onPressed: () =>
                     AppsScannerService().openWebPage(source.homepage),
                 child: Text(l.sourcesSeeSource),

@@ -17,6 +17,7 @@ import '../../theme/app_colors.dart';
 import 'password_health_screen.dart';
 import 'vault_document_screen.dart';
 import 'vault_item_screen.dart';
+import '../../widgets/ui.dart';
 
 /// Coffre ouvert : recherche, bouton « Ajouter », liste triée par titre.
 class VaultListView extends StatefulWidget {
@@ -181,24 +182,21 @@ class _VaultListViewState extends State<VaultListView> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const SizedBox(height: 16),
+        const SizedBox(height: AppSpace.lg),
         Row(
           children: [
             Expanded(
               child: _SearchField(controller: _search, onChanged: _refresh),
             ),
-            const SizedBox(width: 12),
+            const SizedBox(width: AppSpace.md),
             FilledButton.icon(
-              style: FilledButton.styleFrom(
-                backgroundColor: context.colors.bleu,
-              ),
               onPressed: _add,
               icon: const Icon(Icons.add),
               label: Text(l.vaultAdd),
             ),
           ],
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: AppSpace.sm),
         if (!empty)
           ListenableBuilder(
             listenable: widget.breaches,
@@ -210,34 +208,26 @@ class _VaultListViewState extends State<VaultListView> {
               onTap: _openHealth,
             ),
           ),
-        const SizedBox(height: 8),
+        const SizedBox(height: AppSpace.sm),
         Expanded(
           child: items.isEmpty
               ? Padding(
-                  padding: const EdgeInsets.only(top: 16),
+                  padding: const EdgeInsets.only(top: AppSpace.lg),
                   child: Text(
                     empty ? l.vaultEmptyList : l.vaultNoResults,
-                    style: TextStyle(fontSize: 15, color: muted),
+                    style: TextStyle(fontSize: AppText.corps, color: muted),
                   ),
                 )
               : ListView(
                   children: [
                     for (final item in items) ...[
-                      Divider(
-                        height: 1,
-                        thickness: 1,
-                        color: context.colors.ligne,
-                      ),
+                      const AppDivider(),
                       _ItemRow(
                         item: item,
                         onTap: () => _open(item: item),
                       ),
                     ],
-                    Divider(
-                      height: 1,
-                      thickness: 1,
-                      color: context.colors.ligne,
-                    ),
+                    const AppDivider(),
                   ],
                 ),
         ),
@@ -259,37 +249,21 @@ class _HealthRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final l = context.l10n;
     final toFix = report.toFix;
-    final color = report.breached.isNotEmpty
-        ? context.colors.rommen
+    final level = report.breached.isNotEmpty
+        ? StatusLevel.danger
         : toFix > 0
-        ? context.colors.ocre
-        : context.colors.zitouna;
-    return InkWell(
-      onTap: onTap,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 12),
-        child: Row(
-          children: [
-            Icon(Icons.health_and_safety_outlined, color: color),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Text(
-                l.vaultHealthTitle,
-                style: TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w500,
-                  color: context.colors.encre,
-                ),
-              ),
-            ),
-            Text(
-              toFix == 0 ? l.vaultAllGood : l.vaultToFix(l.number(toFix)),
-              style: TextStyle(fontWeight: FontWeight.w600, color: color),
-            ),
-            Icon(Icons.chevron_right, color: context.colors.discret),
-          ],
-        ),
+        ? StatusLevel.warning
+        : StatusLevel.ok;
+    return ListRow(
+      icon: Icons.health_and_safety_outlined,
+      iconColor: level.color(context.colors),
+      title: l.vaultHealthTitle,
+      trailing: StatusBadge(
+        level: level,
+        label: toFix == 0 ? l.vaultAllGood : l.vaultToFix(l.number(toFix)),
       ),
+      onTap: onTap,
+      chevron: true,
     );
   }
 }
@@ -302,7 +276,7 @@ class _SearchField extends StatelessWidget {
   final ValueChanged<String> onChanged;
 
   static OutlineInputBorder _border(Color color) => OutlineInputBorder(
-    borderRadius: BorderRadius.circular(8),
+    borderRadius: AppRadius.field,
     borderSide: BorderSide(color: color),
   );
 
@@ -312,13 +286,13 @@ class _SearchField extends StatelessWidget {
     return TextField(
       controller: controller,
       onChanged: onChanged,
-      style: TextStyle(fontSize: 15, color: context.colors.encre),
+      style: TextStyle(fontSize: AppText.corps, color: context.colors.encre),
       decoration: InputDecoration(
         isDense: true,
         hintText: context.l10n.vaultSearch,
-        hintStyle: TextStyle(fontSize: 15, color: muted),
+        hintStyle: TextStyle(fontSize: AppText.corps, color: muted),
         prefixIcon: Icon(Icons.search, color: muted),
-        contentPadding: const EdgeInsets.symmetric(vertical: 12),
+        contentPadding: const EdgeInsets.symmetric(vertical: AppSpace.md),
         enabledBorder: _border(context.colors.ligne),
         focusedBorder: _border(context.colors.bleu),
       ),
@@ -343,51 +317,17 @@ class _ItemRow extends StatelessWidget {
             '${documentSizeLabel(l, item.taille)}',
       VaultItemType.motDePasse => item.identifiant,
     };
-    return InkWell(
+    return ListRow(
+      icon:
+          item.type == VaultItemType.document && item.mime.startsWith('image/')
+          ? Icons.image_outlined
+          : iconFor(item.type),
+      title: item.titre,
+      titleMaxLines: 1,
+      subtitle: subtitle.isEmpty ? null : subtitle,
+      subtitleMaxLines: 1,
       onTap: onTap,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 14),
-        child: Row(
-          children: [
-            Icon(
-              item.type == VaultItemType.document &&
-                      item.mime.startsWith('image/')
-                  ? Icons.image_outlined
-                  : iconFor(item.type),
-              color: context.colors.bleu,
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    item.titre,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w500,
-                      color: context.colors.encre,
-                    ),
-                  ),
-                  if (subtitle.isNotEmpty)
-                    Text(
-                      subtitle,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: context.colors.secondaire,
-                      ),
-                    ),
-                ],
-              ),
-            ),
-            Icon(Icons.chevron_right, color: context.colors.discret),
-          ],
-        ),
-      ),
+      chevron: true,
     );
   }
 }
@@ -407,7 +347,7 @@ class _TypeChooser extends StatelessWidget {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(28, 0, 28, 16),
+        padding: const EdgeInsets.fromLTRB(AppSpace.page, 0, AppSpace.page, AppSpace.lg),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -415,29 +355,29 @@ class _TypeChooser extends StatelessWidget {
             Text(
               context.l10n.vaultAdd,
               style: TextStyle(
-                fontSize: 22,
+                fontSize: AppText.titreSecondaire,
                 fontWeight: FontWeight.w600,
                 color: context.colors.encre,
               ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: AppSpace.md),
             for (final type in VaultItemType.values)
               // Documents : sélecteur et appareil photo d'Android.
               if (type != VaultItemType.document ||
                   VaultDocumentPlatform.isSupported) ...[
-                Divider(height: 1, thickness: 1, color: context.colors.ligne),
+                const AppDivider(),
                 InkWell(
                   onTap: () => Navigator.of(context).pop(type),
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    padding: const EdgeInsets.symmetric(vertical: AppSpace.lg),
                     child: Row(
                       children: [
                         Icon(iconFor(type), color: context.colors.bleu),
-                        const SizedBox(width: 16),
+                        const SizedBox(width: AppSpace.lg),
                         Text(
                           type.label(context.l10n),
                           style: TextStyle(
-                            fontSize: 15,
+                            fontSize: AppText.corps,
                             color: context.colors.encre,
                           ),
                         ),
@@ -446,7 +386,7 @@ class _TypeChooser extends StatelessWidget {
                   ),
                 ),
               ],
-            Divider(height: 1, thickness: 1, color: context.colors.ligne),
+            const AppDivider(),
           ],
         ),
       ),
@@ -464,25 +404,25 @@ class _DocumentSourceChooser extends StatelessWidget {
     Widget row(IconData icon, String label, bool camera) => InkWell(
       onTap: () => Navigator.of(context).pop(camera),
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 16),
+        padding: const EdgeInsets.symmetric(vertical: AppSpace.lg),
         child: Row(
           children: [
             Icon(icon, color: context.colors.bleu),
-            const SizedBox(width: 16),
+            const SizedBox(width: AppSpace.lg),
             Expanded(
               child: Text(
                 label,
-                style: TextStyle(fontSize: 15, color: context.colors.encre),
+                style: TextStyle(fontSize: AppText.corps, color: context.colors.encre),
               ),
             ),
           ],
         ),
       ),
     );
-    final line = Divider(height: 1, thickness: 1, color: context.colors.ligne);
+    final line = const AppDivider();
     return SafeArea(
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(28, 0, 28, 16),
+        padding: const EdgeInsets.fromLTRB(AppSpace.page, 0, AppSpace.page, AppSpace.lg),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -490,17 +430,17 @@ class _DocumentSourceChooser extends StatelessWidget {
             Text(
               l.vaultNewDocument,
               style: TextStyle(
-                fontSize: 22,
+                fontSize: AppText.titreSecondaire,
                 fontWeight: FontWeight.w600,
                 color: context.colors.encre,
               ),
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: AppSpace.xs),
             Text(
               l.vaultDocSourceHint,
-              style: TextStyle(fontSize: 13, color: context.colors.secondaire),
+              style: TextStyle(fontSize: AppText.detail, color: context.colors.secondaire),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: AppSpace.md),
             line,
             row(Icons.photo_camera_outlined, l.vaultDocTakePhoto, true),
             line,

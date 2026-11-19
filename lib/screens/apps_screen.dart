@@ -11,12 +11,13 @@ import '../services/weekly_report_service.dart';
 import '../theme/app_colors.dart';
 import '../utils/debug_log.dart';
 import '../widgets/app_icon.dart';
-import '../widgets/empty_state.dart';
+
 import '../widgets/loading_bar.dart';
 import '../widgets/risk_level_text.dart';
 import 'app_detail_screen.dart';
 import 'sensitive_access_screen.dart';
 import 'spyware_advice_screen.dart';
+import '../widgets/ui.dart';
 
 /// Onglet « Applications » : analyse des applications installées.
 /// StatefulWidget car il garde le résultat de l'analyse en mémoire.
@@ -173,7 +174,7 @@ class _AppsScreenState extends State<AppsScreen> with WidgetsBindingObserver {
         // AlwaysScrollable : on peut tirer même si la liste est courte.
         child: ListView(
           physics: const AlwaysScrollableScrollPhysics(),
-          padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 24),
+          padding: const EdgeInsets.symmetric(horizontal: AppSpace.page, vertical: AppSpace.xl),
           children: [
             const _PageTitle(),
             const _SensitiveAccessEntry(),
@@ -188,7 +189,7 @@ class _AppsScreenState extends State<AppsScreen> with WidgetsBindingObserver {
   Widget _page(List<Widget> children) {
     return SafeArea(
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 24),
+        padding: const EdgeInsets.symmetric(horizontal: AppSpace.page, vertical: AppSpace.xl),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -204,7 +205,9 @@ class _AppsScreenState extends State<AppsScreen> with WidgetsBindingObserver {
   Widget _emptyState() {
     final l = context.l10n;
     return EmptyState(
-      icon: Icons.apps_outlined,
+      motif: SidiBouMotif.fenetre,
+      buttonIcon: Icons.search,
+
       title: l.appsEmptyTitle,
       message: l.appsEmptyMessage,
       buttonLabel: l.appsStartScan,
@@ -231,12 +234,12 @@ class _AppsScreenState extends State<AppsScreen> with WidgetsBindingObserver {
 
     return [
       if (spyware.isNotEmpty) _SpywareBlock(apps: spyware, onTap: _openAdvice),
-      const SizedBox(height: 8),
+      const SizedBox(height: AppSpace.sm),
       Text(
         appsScanSummary(l, [for (final s in visible) s.report]),
-        style: TextStyle(fontSize: 15, color: context.colors.secondaire),
+        style: TextStyle(fontSize: AppText.corps, color: context.colors.secondaire),
       ),
-      const SizedBox(height: 16),
+      const SizedBox(height: AppSpace.lg),
       // MergeSemantics : TalkBack lit le texte avec l'interrupteur.
       MergeSemantics(
         child: Row(
@@ -244,7 +247,7 @@ class _AppsScreenState extends State<AppsScreen> with WidgetsBindingObserver {
             Expanded(
               child: Text(
                 l.appsShowSystem,
-                style: TextStyle(fontSize: 15, color: context.colors.encre),
+                style: TextStyle(fontSize: AppText.corps, color: context.colors.encre),
               ),
             ),
             Switch(
@@ -254,11 +257,11 @@ class _AppsScreenState extends State<AppsScreen> with WidgetsBindingObserver {
           ],
         ),
       ),
-      const SizedBox(height: 8),
+      const SizedBox(height: AppSpace.sm),
       // Une ligne par app, avec un séparateur fin entre deux lignes.
       for (var i = 0; i < visible.length; i++) ...[
         if (i > 0)
-          Divider(height: 1, thickness: 1, color: context.colors.ligne),
+          const AppDivider(),
         _AppTile(
           scanned: visible[i],
           onTap: () => _openDetail(visible[i]),
@@ -276,7 +279,7 @@ class _PageTitle extends StatelessWidget {
     return Text(
       context.l10n.navApps,
       style: TextStyle(
-        fontSize: 28,
+        fontSize: AppText.titre,
         fontWeight: FontWeight.w600,
         color: context.colors.encre,
       ),
@@ -295,7 +298,7 @@ class _SensitiveAccessEntry extends StatelessWidget {
     final c = context.colors;
     return Column(
       children: [
-        const SizedBox(height: 12),
+        const SizedBox(height: AppSpace.md),
         InkWell(
           onTap: () => Navigator.of(context).push(
             MaterialPageRoute<void>(
@@ -303,11 +306,11 @@ class _SensitiveAccessEntry extends StatelessWidget {
             ),
           ),
           child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 12),
+            padding: const EdgeInsets.symmetric(vertical: AppSpace.md),
             child: Row(
               children: [
                 Icon(Icons.visibility_outlined, color: c.bleu),
-                const SizedBox(width: 16),
+                const SizedBox(width: AppSpace.lg),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -315,15 +318,15 @@ class _SensitiveAccessEntry extends StatelessWidget {
                       Text(
                         l.accessEntryTitle,
                         style: TextStyle(
-                          fontSize: 16,
+                          fontSize: AppText.intitule,
                           fontWeight: FontWeight.w500,
                           color: c.encre,
                         ),
                       ),
-                      const SizedBox(height: 2),
+                      const SizedBox(height: AppSpace.xs),
                       Text(
                         l.accessEntrySubtitle,
-                        style: TextStyle(fontSize: 13, color: c.secondaire),
+                        style: TextStyle(fontSize: AppText.detail, color: c.secondaire),
                       ),
                     ],
                   ),
@@ -332,7 +335,7 @@ class _SensitiveAccessEntry extends StatelessWidget {
             ),
           ),
         ),
-        Divider(height: 1, thickness: 1, color: c.ligne),
+        const AppDivider(),
       ],
     );
   }
@@ -350,44 +353,44 @@ class _SpywareBlock extends StatelessWidget {
   Widget build(BuildContext context) {
     final l = context.l10n;
     return Padding(
-      padding: const EdgeInsets.only(top: 16, bottom: 8),
+      padding: const EdgeInsets.only(top: AppSpace.lg, bottom: AppSpace.sm),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Divider(height: 1, thickness: 1, color: context.colors.rommen),
-          const SizedBox(height: 14),
+          AppDivider(color: context.colors.rommen),
+          const SizedBox(height: AppSpace.lg),
           Text(
             l.appsSpywareFound,
             style: TextStyle(
-              fontSize: 16,
+              fontSize: AppText.intitule,
               fontWeight: FontWeight.w600,
               color: context.colors.rommen,
             ),
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: AppSpace.xs),
           Text(
             l.appsSpywareReadAdvice,
             style: TextStyle(
-              fontSize: 14,
-              color: context.colors.encre.withValues(alpha: 0.7),
+              fontSize: AppText.corps,
+              color: context.colors.secondaire,
             ),
           ),
           for (final scanned in apps)
             InkWell(
               onTap: () => onTap(scanned),
               child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 10),
+                padding: const EdgeInsets.symmetric(vertical: AppSpace.md),
                 child: Row(
                   children: [
-                    AppIcon(app: scanned.app, size: 32),
-                    const SizedBox(width: 12),
+                    AppIcon(app: scanned.app, size: AppSize.appIconSmall),
+                    const SizedBox(width: AppSpace.md),
                     Expanded(
                       child: Text(
                         scanned.app.label,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
-                          fontSize: 15,
+                          fontSize: AppText.corps,
                           color: context.colors.encre,
                         ),
                       ),
@@ -395,7 +398,7 @@ class _SpywareBlock extends StatelessWidget {
                     Text(
                       l.appsSeeAdvice,
                       style: TextStyle(
-                        fontSize: 14,
+                        fontSize: AppText.corps,
                         color: context.colors.rommen,
                       ),
                     ),
@@ -403,8 +406,8 @@ class _SpywareBlock extends StatelessWidget {
                 ),
               ),
             ),
-          const SizedBox(height: 4),
-          Divider(height: 1, thickness: 1, color: context.colors.rommen),
+          const SizedBox(height: AppSpace.xs),
+          AppDivider(color: context.colors.rommen),
         ],
       ),
     );
@@ -418,15 +421,15 @@ class _ScanProgress extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(top: 32),
+      padding: const EdgeInsets.only(top: AppSpace.xxl),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const LoadingBar(),
-          const SizedBox(height: 16),
+          const SizedBox(height: AppSpace.lg),
           Text(
             context.l10n.appsScanning,
-            style: TextStyle(fontSize: 15, color: context.colors.secondaire),
+            style: TextStyle(fontSize: AppText.corps, color: context.colors.secondaire),
           ),
         ],
       ),
@@ -448,11 +451,11 @@ class _AppTile extends StatelessWidget {
     return InkWell(
       onTap: onTap,
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 14),
+        padding: const EdgeInsets.symmetric(vertical: AppSpace.lg),
         child: Row(
           children: [
-            AppIcon(app: scanned.app, size: 40),
-            const SizedBox(width: 16),
+            AppIcon(app: scanned.app, size: AppSize.appIcon),
+            const SizedBox(width: AppSpace.lg),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -462,12 +465,12 @@ class _AppTile extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
-                      fontSize: 16,
+                      fontSize: AppText.intitule,
                       fontWeight: FontWeight.w500,
                       color: context.colors.encre,
                     ),
                   ),
-                  const SizedBox(height: 2),
+                  const SizedBox(height: AppSpace.xs),
                   Text(
                     report.level == RiskLevel.systeme
                         ? l.appsSystemApp
@@ -475,14 +478,14 @@ class _AppTile extends StatelessWidget {
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
-                      fontSize: 13,
+                      fontSize: AppText.detail,
                       color: context.colors.secondaire,
                     ),
                   ),
                 ],
               ),
             ),
-            const SizedBox(width: 12),
+            const SizedBox(width: AppSpace.md),
             RiskLevelText(level: report.level),
           ],
         ),
@@ -500,12 +503,12 @@ class _InfoMessage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 48),
+      padding: const EdgeInsets.symmetric(vertical: AppSpace.xxxl),
       child: Center(
         child: Text(
           text,
           textAlign: TextAlign.center,
-          style: TextStyle(fontSize: 16, color: context.colors.secondaire),
+          style: TextStyle(fontSize: AppText.intitule, color: context.colors.secondaire),
         ),
       ),
     );

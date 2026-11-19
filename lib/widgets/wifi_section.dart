@@ -4,6 +4,7 @@ import '../l10n/l10n.dart';
 import '../models/wifi_status.dart';
 import '../services/wifi_risk.dart';
 import '../theme/app_colors.dart';
+import 'ui.dart';
 
 /// Couleur selon le niveau du Wi-Fi.
 Color wifiLevelColor(AppColors c, WifiLevel level) => switch (level) {
@@ -34,16 +35,16 @@ class WifiSection extends StatelessWidget {
         Text(
           l.wifiSectionTitle,
           style: TextStyle(
-            fontSize: 18,
+            fontSize: AppText.section,
             fontWeight: FontWeight.w600,
             color: context.colors.encre,
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: AppSpace.sm),
         InkWell(
           onTap: report == null ? null : onTap,
           child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 16),
+            padding: const EdgeInsets.symmetric(vertical: AppSpace.lg),
             child: Row(
               children: [
                 Icon(
@@ -52,7 +53,7 @@ class WifiSection extends StatelessWidget {
                       : Icons.wifi,
                   color: color,
                 ),
-                const SizedBox(width: 16),
+                const SizedBox(width: AppSpace.lg),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -60,16 +61,16 @@ class WifiSection extends StatelessWidget {
                       Text(
                         report?.title ?? l.wifiUnavailableTitle,
                         style: TextStyle(
-                          fontSize: 16,
+                          fontSize: AppText.intitule,
                           fontWeight: FontWeight.w500,
                           color: context.colors.encre,
                         ),
                       ),
-                      const SizedBox(height: 2),
+                      const SizedBox(height: AppSpace.xs),
                       Text(
                         report?.summary ?? l.wifiUnavailableSummary,
                         style: TextStyle(
-                          fontSize: 13,
+                          fontSize: AppText.detail,
                           color: context.colors.secondaire,
                         ),
                       ),
@@ -77,7 +78,7 @@ class WifiSection extends StatelessWidget {
                   ),
                 ),
                 if (report != null) ...[
-                  const SizedBox(width: 12),
+                  const SizedBox(width: AppSpace.md),
                   Text(
                     report.level.label(l),
                     style: TextStyle(fontWeight: FontWeight.w600, color: color),
@@ -108,7 +109,7 @@ Future<void> showWifiDetails(
     isScrollControlled: true,
     builder: (context) => SafeArea(
       child: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(28, 0, 28, 24),
+        padding: const EdgeInsets.fromLTRB(AppSpace.page, 0, AppSpace.page, AppSpace.xl),
         child: _WifiDetails(
           status: status,
           report: report,
@@ -146,70 +147,70 @@ class _WifiDetails extends StatelessWidget {
         Text(
           report.level.label(l),
           style: TextStyle(
-            fontSize: 14,
+            fontSize: AppText.corps,
             fontWeight: FontWeight.w600,
             color: wifiLevelColor(context.colors, report.level),
           ),
         ),
-        const SizedBox(height: 4),
+        const SizedBox(height: AppSpace.xs),
         Text(
           report.title,
           style: TextStyle(
-            fontSize: 22,
+            fontSize: AppText.titreSecondaire,
             fontWeight: FontWeight.w600,
             color: context.colors.encre,
           ),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: AppSpace.md),
         Text(
           report.explanation,
-          style: TextStyle(fontSize: 15, color: context.colors.encre),
+          style: TextStyle(fontSize: AppText.corps, color: context.colors.encre),
         ),
         if (status.connected) ...[
-          const SizedBox(height: 20),
+          const SizedBox(height: AppSpace.xl),
           _InfoRow(
             label: l.wifiDetailProtection,
             value: status.security.label(l),
           ),
-          Divider(height: 1, thickness: 1, color: context.colors.ligne),
+          const AppDivider(),
           _InfoRow(
             label: l.wifiDetailCaptive,
             value: status.captivePortal ? l.commonYes : l.commonNo,
           ),
-          Divider(height: 1, thickness: 1, color: context.colors.ligne),
+          const AppDivider(),
           _InfoRow(label: l.wifiDetailPrivateDns, value: _dnsText(l)),
         ],
         if (report.advice.isNotEmpty) ...[
-          const SizedBox(height: 24),
+          const SizedBox(height: AppSpace.xl),
           Text(
             l.wifiOurAdvice,
             style: TextStyle(
-              fontSize: 18,
+              fontSize: AppText.section,
               fontWeight: FontWeight.w600,
               color: context.colors.encre,
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: AppSpace.sm),
           for (final tip in report.advice)
             Padding(
-              padding: const EdgeInsets.symmetric(vertical: 6),
+              padding: const EdgeInsets.symmetric(vertical: AppSpace.sm),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Padding(
-                    padding: EdgeInsets.only(top: 2),
+                    padding: EdgeInsets.only(top: AppSpace.xs),
                     child: Icon(
                       Icons.check_circle_outline,
-                      size: 18,
+                      size: AppSize.iconSmall,
                       color: context.colors.bleu,
                     ),
                   ),
-                  const SizedBox(width: 12),
+                  const SizedBox(width: AppSpace.md),
                   Expanded(
                     child: Text(
                       tip,
                       style: TextStyle(
-                        fontSize: 15,
+                        fontSize: AppText.corps,
                         color: context.colors.encre,
                       ),
                     ),
@@ -219,22 +220,18 @@ class _WifiDetails extends StatelessWidget {
             ),
         ],
         if (report.suggestPrivateDns) ...[
-          const SizedBox(height: 20),
+          const SizedBox(height: AppSpace.xl),
           SizedBox(
             width: double.infinity,
             child: FilledButton(
-              style: FilledButton.styleFrom(
-                backgroundColor: context.colors.bleu,
-                elevation: 0,
-              ),
               onPressed: onOpenPrivateDns,
               child: Text(l.wifiEnablePrivateDns),
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: AppSpace.sm),
           Text(
             l.wifiPrivateDnsHelp,
-            style: TextStyle(fontSize: 13, color: muted),
+            style: TextStyle(fontSize: AppText.detail, color: muted),
           ),
         ],
       ],
@@ -252,19 +249,19 @@ class _InfoRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 12),
+      padding: const EdgeInsets.symmetric(vertical: AppSpace.md),
       child: Row(
         children: [
           Expanded(
             child: Text(
               label,
-              style: TextStyle(fontSize: 15, color: context.colors.secondaire),
+              style: TextStyle(fontSize: AppText.corps, color: context.colors.secondaire),
             ),
           ),
           Text(
             value,
             style: TextStyle(
-              fontSize: 15,
+              fontSize: AppText.corps,
               fontWeight: FontWeight.w500,
               color: context.colors.encre,
             ),

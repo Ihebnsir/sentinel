@@ -3,8 +3,8 @@ import 'package:material_ui/material_ui.dart';
 import '../app_info.dart';
 import '../l10n/l10n.dart';
 import '../services/apps_scanner_service.dart';
-import '../theme/app_colors.dart';
 import '../widgets/text_page.dart';
+import '../widgets/ui.dart';
 
 /// Résumé du rapport docs/audit/RAPPORT_AUDIT.md (à mettre à jour avec lui).
 List<TextSection> auditSections(AppLocalizations l) => [
@@ -29,10 +29,7 @@ class AuditSummaryScreen extends StatelessWidget {
       footer: Align(
         alignment: Alignment.centerLeft,
         child: TextButton(
-          style: TextButton.styleFrom(
-            foregroundColor: context.colors.bleu,
-            padding: EdgeInsets.zero,
-          ),
+          style: inlineButtonStyle(context),
           onPressed: () => AppsScannerService().openWebPage(auditReportUrl),
           child: Text(l.auditReadFull),
         ),
