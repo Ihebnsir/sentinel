@@ -19,6 +19,15 @@ La fonctionnalité « Messages » est retirée de toute l'application et remplac
 - Bilan de la semaine : compteur « Liens vérifiés ».
 - Test Gradle : `testDebugUnitTest` dépend de `checkPlayProtectDebug`, qui fait échouer le build si le manifeste fusionné déclare un lecteur de notifications, un service d'accessibilité ou une permission SMS.
 
+### Design
+- Système de design centralisé (`lib/theme/tokens.dart`, [docs/DESIGN.md](docs/DESIGN.md)) : espacements 4-48, rayons, tailles de texte, durées d'animation ; plus aucune valeur codée en dur dans les écrans (vérifié par un test).
+- Composants communs : boutons principal et secondaire (avec indicateur de chargement), en-têtes, lignes de liste, badges de statut, états vides. Un seul bleu, y compris pour les interrupteurs ; bouton désactivé bien visible.
+- Accueil réorganisé : le score, puis les actions triées par importance, puis « Vos protections » (Wi-Fi, pare-feu, bilan).
+- Verdicts et statuts toujours en couleur + icône + texte (liens, QR code, risque des apps, Wi-Fi, santé des mots de passe).
+- États vides illustrés de dessins originaux dans l'esprit de Sidi Bou Saïd : porte bleue, fenêtre en moucharabieh, jasmin.
+- Arche du score animée en fondu, fondu entre onglets et transitions douces entre écrans, coupés si « Supprimer les animations » est actif dans Android.
+- Tests golden (accueil, liens, coffre en clair, sombre et arabe) ; captures dans le README (section « Aperçu ») et captures avant/après dans `docs/design/`.
+
 ### Retiré
 - Onglet Messages, analyse de texte des messages et modèle `phishing_model.json` embarqué (le modèle n'avait pas de vraies données tunisiennes).
 - Protection automatique : lecteur de notifications (`SentinelNotificationListener`), moteur Flutter d'arrière-plan (`BackgroundAnalyzer`), alertes « Arnaque probable » (`ScamAlertNotifier`, `AlertRelayActivity`), réglages `ProtectionSettings`, canal `background_analysis`.

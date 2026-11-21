@@ -12,3 +12,6 @@ GeneratedPluginRegistrant.java
 key.properties
 **/*.keystore
 **/*.jks
+
+# Sorties de Gradle (dossier android/build/ créé par le build)
+/build/
