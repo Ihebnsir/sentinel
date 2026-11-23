@@ -152,8 +152,9 @@ void main() {
 
   group('paiements', () {
     test('toujours un avertissement ; app proposée pour les liens', () {
+      // Cryptomonnaie : avertissement propre (1.2.0), verdict « Suspect ».
       final btc = _assess('bitcoin:bc1qxyz?amount=1');
-      expect(btc.warnings, [QrWarning.paiement]);
+      expect(btc.warnings, [QrWarning.crypto]);
       expect(btc.action, QrAction.ouvrirPaiement);
       expect(btc.actionAllowed, isTrue);
     });
@@ -170,7 +171,8 @@ void main() {
   test('chaque avertissement a un texte, dans chaque langue', () {
     for (final l in [fr, en, ar]) {
       final texts = {for (final w in QrWarning.values) w.reason(l)};
-      expect(texts, hasLength(QrWarning.values.length));
+      // paquetImite et paquetImiteStore partagent le même texte.
+      expect(texts, hasLength(QrWarning.values.length - 1));
     }
   });
 }

@@ -2746,4 +2746,316 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get weeklyLinksChecked => 'Liens vérifiés';
+
+  @override
+  String get qrKindMessaging => 'Lien de messagerie';
+
+  @override
+  String get qrKindApp => 'Installation d\'une application';
+
+  @override
+  String get qrKindContact => 'Fiche contact';
+
+  @override
+  String get qrKindEmail => 'E-mail à écrire';
+
+  @override
+  String get qrKindGeo => 'Position sur une carte';
+
+  @override
+  String get qrKindCrypto => 'Adresse de cryptomonnaie';
+
+  @override
+  String get qrKindEvent => 'Rendez-vous (calendrier)';
+
+  @override
+  String get qrMessagingApp => 'Application';
+
+  @override
+  String get qrMessagingTarget => 'Ouvre';
+
+  @override
+  String get qrTargetPerson => 'Une discussion privée';
+
+  @override
+  String get qrTargetGroup => 'Une invitation dans un groupe';
+
+  @override
+  String get qrTargetChannel => 'Une chaîne ou une page publique';
+
+  @override
+  String get qrTargetBot => 'Un robot (bot)';
+
+  @override
+  String get qrTargetShare => 'Un message à partager, sans destinataire';
+
+  @override
+  String get qrMessagingNumber => 'Numéro';
+
+  @override
+  String get qrMessagingAccount => 'Compte ou groupe';
+
+  @override
+  String get qrMessagingText => 'Message pré-rempli';
+
+  @override
+  String get qrZoneHome => 'Tunisie';
+
+  @override
+  String get qrZoneForeign => 'Étranger';
+
+  @override
+  String get qrZoneSpecial => 'International spécial';
+
+  @override
+  String qrPhoneCountry(String zone) {
+    return 'Pays : $zone';
+  }
+
+  @override
+  String get qrAppStore => 'Source';
+
+  @override
+  String get qrAppPackage => 'Identifiant du paquet';
+
+  @override
+  String get qrAppSourceApk => 'Fichier APK direct';
+
+  @override
+  String get qrAppSourceIntent => 'Lien intent:// (lance une app)';
+
+  @override
+  String get qrAppSourceUnknownSite => 'Site inconnu';
+
+  @override
+  String get qrContactName => 'Nom';
+
+  @override
+  String get qrContactOrganization => 'Organisation';
+
+  @override
+  String get qrContactPhone => 'Téléphone';
+
+  @override
+  String get qrContactEmail => 'E-mail';
+
+  @override
+  String get qrContactWebsite => 'Site';
+
+  @override
+  String get qrEmailTo => 'Destinataire';
+
+  @override
+  String get qrEmailSubject => 'Objet';
+
+  @override
+  String get qrEmailBody => 'Message';
+
+  @override
+  String get qrGeoCoordinates => 'Coordonnées';
+
+  @override
+  String get qrGeoLabel => 'Lieu';
+
+  @override
+  String get qrEventTitle => 'Titre';
+
+  @override
+  String get qrEventStart => 'Début';
+
+  @override
+  String get qrEventEnd => 'Fin';
+
+  @override
+  String get qrEventLocation => 'Lieu';
+
+  @override
+  String get qrEventDescription => 'Description';
+
+  @override
+  String get qrWarningCrypto =>
+      'N\'envoyez jamais d\'argent à une adresse de cryptomonnaie reçue par QR code d\'un inconnu : un envoi ne peut jamais être annulé.';
+
+  @override
+  String qrWarningScamText(String words) {
+    return 'Le message pré-rempli demande un code, un mot de passe ou de l\'argent ($words). Aucun service sérieux ne demande ça par message.';
+  }
+
+  @override
+  String qrWarningSpecialNumber(String code) {
+    return 'Indicatif $code : numéro international spécial (satellite ou réseau premium), souvent très surtaxé.';
+  }
+
+  @override
+  String qrWarningUnexpectedCountry(String code) {
+    return 'Indicatif $code : numéro d\'un pays inattendu. Les fausses offres d\'emploi et les faux livreurs utilisent souvent des numéros étrangers.';
+  }
+
+  @override
+  String qrWarningForeignNumber(String code) {
+    return 'Numéro étranger (indicatif $code). Vérifiez que vous connaissez bien cette personne.';
+  }
+
+  @override
+  String get qrWarningGroup =>
+      'Invitation dans un groupe : n\'importe qui peut en créer un. N\'y envoyez ni code, ni argent, ni papiers d\'identité.';
+
+  @override
+  String get qrWarningApk =>
+      'Lien direct vers un fichier d\'installation (.apk). Une appli hors Play Store peut contenir un logiciel espion. Si vous l\'installez quand même, Sentinel la vérifiera dans l\'onglet Applications.';
+
+  @override
+  String get qrWarningIntentApp =>
+      'Ce lien intent:// lance directement une application ou un écran caché. Sentinel ne l\'ouvrira pas.';
+
+  @override
+  String qrWarningPackageMod(String app) {
+    return 'Version modifiée de $app, hors boutique officielle : elle peut lire vos messages. Installez seulement l\'appli officielle.';
+  }
+
+  @override
+  String qrWarningPackageImitation(String app) {
+    return 'Ce paquet imite $app sans être le vrai : il reprend son nom pour tromper.';
+  }
+
+  @override
+  String get qrWarningPackageInvalid =>
+      'L\'identifiant du paquet n\'est pas valide : lien abîmé ou trafiqué.';
+
+  @override
+  String qrWarningPackageOfficial(String app) {
+    return 'Paquet officiel de $app.';
+  }
+
+  @override
+  String get qrWarningPackageUnknown =>
+      'Sentinel ne connaît pas cette appli. Sur la page de la boutique, vérifiez l\'éditeur, le nombre de téléchargements et les avis avant d\'installer.';
+
+  @override
+  String qrWarningThirdPartyStore(String store) {
+    return '$store distribue des APK sans le contrôle de Google : les copies piégées y sont fréquentes. Préférez le Play Store.';
+  }
+
+  @override
+  String qrWarningVendorStore(String store) {
+    return 'Boutique du fabricant ($store). Préférez le Play Store quand l\'appli y existe.';
+  }
+
+  @override
+  String qrWarningContactBrand(String brand) {
+    return 'Cette fiche se présente comme « $brand ». Les arnaqueurs créent de faux contacts « service client » : vérifiez le numéro sur le site ou l\'appli officielle avant d\'appeler.';
+  }
+
+  @override
+  String get qrWarningContactService =>
+      'Cette fiche se présente comme un service client ou une banque. Vérifiez le numéro sur le site officiel avant de l\'enregistrer.';
+
+  @override
+  String get qrTipPoster =>
+      'QR sur un parking ou une affiche ? Vérifiez qu\'il n\'est pas collé par-dessus l\'original.';
+
+  @override
+  String get qrTipSmsCode =>
+      'Un QR code ne devrait jamais mener à une page qui demande le code reçu par SMS.';
+
+  @override
+  String get qrTipParcel =>
+      'QR reçu dans un courrier ou un colis inattendu ? Méfiance : c\'est une arnaque courante.';
+
+  @override
+  String get qrTipPayment =>
+      'Avant de payer, comparez le bénéficiaire affiché avec le nom du commerçant.';
+
+  @override
+  String get qrImageButton => 'Depuis une image';
+
+  @override
+  String get qrImageSubtitle =>
+      'Capture d\'écran, photo reçue sur WhatsApp… Rien n\'est copié ni gardé.';
+
+  @override
+  String get qrImageReading => 'Lecture de l\'image…';
+
+  @override
+  String get qrImageNoQr =>
+      'Aucun QR code trouvé dans cette image. Essayez une image plus nette, où le QR code est entier.';
+
+  @override
+  String get qrImageFailed => 'Impossible de lire cette image.';
+
+  @override
+  String get qrImageTooLarge => 'Image trop grande pour être lue.';
+
+  @override
+  String get qrImageChooseTitle => 'Plusieurs QR codes dans l\'image';
+
+  @override
+  String get qrImageChooseText =>
+      'Choisissez celui à vérifier. Rien ne s\'ouvre tout seul.';
+
+  @override
+  String get qrWifiShareButton => 'Partager mon Wi-Fi';
+
+  @override
+  String get qrWifiShareSubtitle => 'Créer un QR code à montrer à vos invités';
+
+  @override
+  String get qrWifiShareIntro =>
+      'Vos invités scannent ce QR code avec l\'appareil photo pour se connecter. Rien n\'est enregistré : tout est effacé quand vous quittez cet écran.';
+
+  @override
+  String get qrWifiShareName => 'Nom du réseau';
+
+  @override
+  String get qrWifiSharePassword => 'Mot de passe';
+
+  @override
+  String get qrWifiShareSecurity => 'Protection';
+
+  @override
+  String get qrWifiShareSecurityWpa => 'WPA / WPA2 / WPA3';
+
+  @override
+  String get qrWifiShareSecurityWep => 'WEP (ancien)';
+
+  @override
+  String get qrWifiShareSecurityNone => 'Sans mot de passe';
+
+  @override
+  String get qrWifiShareHidden => 'Réseau masqué';
+
+  @override
+  String get qrWifiShareCreate => 'Créer le QR code';
+
+  @override
+  String get qrWifiShareEdit => 'Modifier';
+
+  @override
+  String get qrWifiShareShowPassword => 'Afficher le mot de passe';
+
+  @override
+  String get qrWifiShareHidePassword => 'Masquer le mot de passe';
+
+  @override
+  String get qrWifiShareErrorName => 'Saisissez le nom du réseau.';
+
+  @override
+  String get qrWifiShareErrorWpa =>
+      'Mot de passe WPA : entre 8 et 63 caractères.';
+
+  @override
+  String get qrWifiShareErrorWep =>
+      'Mot de passe WEP : 5 ou 13 caractères (ou 10 ou 26 chiffres hexadécimaux).';
+
+  @override
+  String get qrWifiShareShow =>
+      'Montrez cet écran à vos invités. Les captures d\'écran sont bloquées.';
+
+  @override
+  String get qrWifiShareFailed => 'Impossible de créer le QR code.';
+
+  @override
+  String qrWifiShareCodeLabel(String name) {
+    return 'QR code du réseau $name';
+  }
 }

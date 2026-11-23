@@ -2773,4 +2773,314 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get weeklyLinksChecked => 'روابط تم التحقق منها';
+
+  @override
+  String get qrKindMessaging => 'رابط مراسلة';
+
+  @override
+  String get qrKindApp => 'تثبيت تطبيق';
+
+  @override
+  String get qrKindContact => 'بطاقة جهة اتصال';
+
+  @override
+  String get qrKindEmail => 'بريد إلكتروني للكتابة';
+
+  @override
+  String get qrKindGeo => 'موقع على الخريطة';
+
+  @override
+  String get qrKindCrypto => 'عنوان عملة رقمية';
+
+  @override
+  String get qrKindEvent => 'موعد (تقويم)';
+
+  @override
+  String get qrMessagingApp => 'التطبيق';
+
+  @override
+  String get qrMessagingTarget => 'يفتح';
+
+  @override
+  String get qrTargetPerson => 'محادثة خاصة';
+
+  @override
+  String get qrTargetGroup => 'دعوة إلى مجموعة';
+
+  @override
+  String get qrTargetChannel => 'قناة أو صفحة عامة';
+
+  @override
+  String get qrTargetBot => 'روبوت (بوت)';
+
+  @override
+  String get qrTargetShare => 'رسالة للمشاركة، دون مستلم';
+
+  @override
+  String get qrMessagingNumber => 'الرقم';
+
+  @override
+  String get qrMessagingAccount => 'الحساب أو المجموعة';
+
+  @override
+  String get qrMessagingText => 'رسالة جاهزة';
+
+  @override
+  String get qrZoneHome => 'تونس';
+
+  @override
+  String get qrZoneForeign => 'خارج تونس';
+
+  @override
+  String get qrZoneSpecial => 'دولي خاص';
+
+  @override
+  String qrPhoneCountry(String zone) {
+    return 'البلد: $zone';
+  }
+
+  @override
+  String get qrAppStore => 'المصدر';
+
+  @override
+  String get qrAppPackage => 'معرّف الحزمة';
+
+  @override
+  String get qrAppSourceApk => 'ملف ⁦APK⁩ مباشر';
+
+  @override
+  String get qrAppSourceIntent => 'رابط ⁦intent://⁩ (يشغّل تطبيقًا)';
+
+  @override
+  String get qrAppSourceUnknownSite => 'موقع غير معروف';
+
+  @override
+  String get qrContactName => 'الاسم';
+
+  @override
+  String get qrContactOrganization => 'الجهة';
+
+  @override
+  String get qrContactPhone => 'الهاتف';
+
+  @override
+  String get qrContactEmail => 'البريد الإلكتروني';
+
+  @override
+  String get qrContactWebsite => 'الموقع';
+
+  @override
+  String get qrEmailTo => 'إلى';
+
+  @override
+  String get qrEmailSubject => 'الموضوع';
+
+  @override
+  String get qrEmailBody => 'الرسالة';
+
+  @override
+  String get qrGeoCoordinates => 'الإحداثيات';
+
+  @override
+  String get qrGeoLabel => 'المكان';
+
+  @override
+  String get qrEventTitle => 'العنوان';
+
+  @override
+  String get qrEventStart => 'البداية';
+
+  @override
+  String get qrEventEnd => 'النهاية';
+
+  @override
+  String get qrEventLocation => 'المكان';
+
+  @override
+  String get qrEventDescription => 'الوصف';
+
+  @override
+  String get qrWarningCrypto =>
+      'لا ترسل أبدًا أموالًا إلى عنوان عملة رقمية وصلك في رمز ⁦QR⁩ من شخص لا تعرفه: لا يمكن إلغاء التحويل أبدًا.';
+
+  @override
+  String qrWarningScamText(String words) {
+    return 'الرسالة الجاهزة تطلب رمزًا أو كلمة سر أو مالًا (⁨$words⁩). لا توجد خدمة جدية تطلب ذلك عبر رسالة.';
+  }
+
+  @override
+  String qrWarningSpecialNumber(String code) {
+    return 'المفتاح ⁨$code⁩: رقم دولي خاص (قمر صناعي أو شبكة مدفوعة)، غالبًا بتكلفة مرتفعة جدًا.';
+  }
+
+  @override
+  String qrWarningUnexpectedCountry(String code) {
+    return 'المفتاح ⁨$code⁩: رقم من بلد غير متوقع. عروض العمل المزيفة وموزعو الطرود المزيفون يستعملون غالبًا أرقامًا أجنبية.';
+  }
+
+  @override
+  String qrWarningForeignNumber(String code) {
+    return 'رقم أجنبي (المفتاح ⁨$code⁩). تأكد أنك تعرف هذا الشخص فعلًا.';
+  }
+
+  @override
+  String get qrWarningGroup =>
+      'دعوة إلى مجموعة: يمكن لأي شخص إنشاء مجموعة. لا ترسل فيها رموزًا ولا مالًا ولا وثائق هوية.';
+
+  @override
+  String get qrWarningApk =>
+      'رابط مباشر لملف تثبيت (⁦.apk⁩). قد يحتوي تطبيق من خارج متجر ⁦Play⁩ على برنامج تجسس. إذا ثبّته رغم ذلك، سيفحصه ⁦Sentinel⁩ في تبويب التطبيقات.';
+
+  @override
+  String get qrWarningIntentApp =>
+      'هذا الرابط ⁦intent://⁩ يشغّل تطبيقًا أو شاشة مخفية مباشرة. لن يفتحه ⁦Sentinel⁩.';
+
+  @override
+  String qrWarningPackageMod(String app) {
+    return 'نسخة معدّلة من ⁨$app⁩ خارج المتجر الرسمي: يمكنها قراءة رسائلك. ثبّت التطبيق الرسمي فقط.';
+  }
+
+  @override
+  String qrWarningPackageImitation(String app) {
+    return 'هذه الحزمة تقلّد ⁨$app⁩ دون أن تكون الأصلية: تستعمل اسمه للخداع.';
+  }
+
+  @override
+  String get qrWarningPackageInvalid =>
+      'معرّف الحزمة غير صالح: الرابط تالف أو معدّل.';
+
+  @override
+  String qrWarningPackageOfficial(String app) {
+    return 'الحزمة الرسمية لـ ⁨$app⁩.';
+  }
+
+  @override
+  String get qrWarningPackageUnknown =>
+      'لا يعرف ⁦Sentinel⁩ هذا التطبيق. في صفحة المتجر، تحقّق من المطوّر وعدد التنزيلات والتقييمات قبل التثبيت.';
+
+  @override
+  String qrWarningThirdPartyStore(String store) {
+    return '⁨$store⁩ يوزّع ملفات ⁦APK⁩ دون مراقبة ⁦Google⁩: النسخ الملغّمة شائعة فيه. فضّل متجر ⁦Play⁩.';
+  }
+
+  @override
+  String qrWarningVendorStore(String store) {
+    return 'متجر الشركة المصنّعة (⁨$store⁩). فضّل متجر ⁦Play⁩ إذا كان التطبيق متوفرًا فيه.';
+  }
+
+  @override
+  String qrWarningContactBrand(String brand) {
+    return 'هذه البطاقة تقدّم نفسها على أنها «⁨$brand⁩». المحتالون ينشئون جهات اتصال مزيفة لـ«خدمة الحرفاء»: تحقّق من الرقم في الموقع أو التطبيق الرسمي قبل الاتصال.';
+  }
+
+  @override
+  String get qrWarningContactService =>
+      'هذه البطاقة تقدّم نفسها على أنها خدمة حرفاء أو بنك. تحقّق من الرقم في الموقع الرسمي قبل حفظه.';
+
+  @override
+  String get qrTipPoster =>
+      'رمز ⁦QR⁩ في موقف سيارات أو على ملصق؟ تأكّد أنه غير ملصوق فوق الرمز الأصلي.';
+
+  @override
+  String get qrTipSmsCode =>
+      'لا يجب أبدًا أن يقودك رمز ⁦QR⁩ إلى صفحة تطلب الرمز الذي وصلك في رسالة قصيرة.';
+
+  @override
+  String get qrTipParcel =>
+      'رمز ⁦QR⁩ في رسالة أو طرد لم تكن تنتظره؟ احذر: إنها حيلة شائعة.';
+
+  @override
+  String get qrTipPayment => 'قبل الدفع، قارن اسم المستفيد الظاهر باسم التاجر.';
+
+  @override
+  String get qrImageButton => 'من صورة';
+
+  @override
+  String get qrImageSubtitle =>
+      'لقطة شاشة، صورة وصلتك على واتساب… لا يُنسخ شيء ولا يُحفظ.';
+
+  @override
+  String get qrImageReading => 'قراءة الصورة…';
+
+  @override
+  String get qrImageNoQr =>
+      'لم يُعثر على أي رمز ⁦QR⁩ في هذه الصورة. جرّب صورة أوضح يظهر فيها الرمز كاملًا.';
+
+  @override
+  String get qrImageFailed => 'تعذّرت قراءة هذه الصورة.';
+
+  @override
+  String get qrImageTooLarge => 'الصورة كبيرة جدًا ولا يمكن قراءتها.';
+
+  @override
+  String get qrImageChooseTitle => 'عدة رموز ⁦QR⁩ في الصورة';
+
+  @override
+  String get qrImageChooseText =>
+      'اختر الرمز الذي تريد فحصه. لا يُفتح شيء وحده.';
+
+  @override
+  String get qrWifiShareButton => 'مشاركة شبكة الواي فاي';
+
+  @override
+  String get qrWifiShareSubtitle => 'إنشاء رمز ⁦QR⁩ لعرضه على ضيوفك';
+
+  @override
+  String get qrWifiShareIntro =>
+      'يمسح ضيوفك رمز ⁦QR⁩ هذا بالكاميرا للاتصال. لا يُحفظ شيء: يُمحى كل شيء عند مغادرة هذه الشاشة.';
+
+  @override
+  String get qrWifiShareName => 'اسم الشبكة';
+
+  @override
+  String get qrWifiSharePassword => 'كلمة السر';
+
+  @override
+  String get qrWifiShareSecurity => 'الحماية';
+
+  @override
+  String get qrWifiShareSecurityWpa => '⁦WPA / WPA2 / WPA3⁩';
+
+  @override
+  String get qrWifiShareSecurityWep => '⁦WEP⁩ (قديم)';
+
+  @override
+  String get qrWifiShareSecurityNone => 'دون كلمة سر';
+
+  @override
+  String get qrWifiShareHidden => 'شبكة مخفية';
+
+  @override
+  String get qrWifiShareCreate => 'إنشاء رمز ⁦QR⁩';
+
+  @override
+  String get qrWifiShareEdit => 'تعديل';
+
+  @override
+  String get qrWifiShareShowPassword => 'إظهار كلمة السر';
+
+  @override
+  String get qrWifiShareHidePassword => 'إخفاء كلمة السر';
+
+  @override
+  String get qrWifiShareErrorName => 'اكتب اسم الشبكة.';
+
+  @override
+  String get qrWifiShareErrorWpa => 'كلمة سر ⁦WPA⁩: بين 8 و63 حرفًا.';
+
+  @override
+  String get qrWifiShareErrorWep =>
+      'كلمة سر ⁦WEP⁩: 5 أو 13 حرفًا (أو 10 أو 26 رقمًا ستّ عشريًا).';
+
+  @override
+  String get qrWifiShareShow =>
+      'اعرض هذه الشاشة على ضيوفك. لقطات الشاشة ممنوعة.';
+
+  @override
+  String get qrWifiShareFailed => 'تعذّر إنشاء رمز ⁦QR⁩.';
+
+  @override
+  String qrWifiShareCodeLabel(String name) {
+    return 'رمز ⁦QR⁩ لشبكة ⁨$name⁩';
+  }
 }

@@ -4564,6 +4564,546 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Liens vérifiés'**
   String get weeklyLinksChecked;
+
+  /// No description provided for @qrKindMessaging.
+  ///
+  /// In fr, this message translates to:
+  /// **'Lien de messagerie'**
+  String get qrKindMessaging;
+
+  /// No description provided for @qrKindApp.
+  ///
+  /// In fr, this message translates to:
+  /// **'Installation d\'une application'**
+  String get qrKindApp;
+
+  /// No description provided for @qrKindContact.
+  ///
+  /// In fr, this message translates to:
+  /// **'Fiche contact'**
+  String get qrKindContact;
+
+  /// No description provided for @qrKindEmail.
+  ///
+  /// In fr, this message translates to:
+  /// **'E-mail à écrire'**
+  String get qrKindEmail;
+
+  /// No description provided for @qrKindGeo.
+  ///
+  /// In fr, this message translates to:
+  /// **'Position sur une carte'**
+  String get qrKindGeo;
+
+  /// No description provided for @qrKindCrypto.
+  ///
+  /// In fr, this message translates to:
+  /// **'Adresse de cryptomonnaie'**
+  String get qrKindCrypto;
+
+  /// No description provided for @qrKindEvent.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rendez-vous (calendrier)'**
+  String get qrKindEvent;
+
+  /// No description provided for @qrMessagingApp.
+  ///
+  /// In fr, this message translates to:
+  /// **'Application'**
+  String get qrMessagingApp;
+
+  /// No description provided for @qrMessagingTarget.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ouvre'**
+  String get qrMessagingTarget;
+
+  /// No description provided for @qrTargetPerson.
+  ///
+  /// In fr, this message translates to:
+  /// **'Une discussion privée'**
+  String get qrTargetPerson;
+
+  /// No description provided for @qrTargetGroup.
+  ///
+  /// In fr, this message translates to:
+  /// **'Une invitation dans un groupe'**
+  String get qrTargetGroup;
+
+  /// No description provided for @qrTargetChannel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Une chaîne ou une page publique'**
+  String get qrTargetChannel;
+
+  /// No description provided for @qrTargetBot.
+  ///
+  /// In fr, this message translates to:
+  /// **'Un robot (bot)'**
+  String get qrTargetBot;
+
+  /// No description provided for @qrTargetShare.
+  ///
+  /// In fr, this message translates to:
+  /// **'Un message à partager, sans destinataire'**
+  String get qrTargetShare;
+
+  /// No description provided for @qrMessagingNumber.
+  ///
+  /// In fr, this message translates to:
+  /// **'Numéro'**
+  String get qrMessagingNumber;
+
+  /// No description provided for @qrMessagingAccount.
+  ///
+  /// In fr, this message translates to:
+  /// **'Compte ou groupe'**
+  String get qrMessagingAccount;
+
+  /// No description provided for @qrMessagingText.
+  ///
+  /// In fr, this message translates to:
+  /// **'Message pré-rempli'**
+  String get qrMessagingText;
+
+  /// No description provided for @qrZoneHome.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tunisie'**
+  String get qrZoneHome;
+
+  /// No description provided for @qrZoneForeign.
+  ///
+  /// In fr, this message translates to:
+  /// **'Étranger'**
+  String get qrZoneForeign;
+
+  /// No description provided for @qrZoneSpecial.
+  ///
+  /// In fr, this message translates to:
+  /// **'International spécial'**
+  String get qrZoneSpecial;
+
+  /// No description provided for @qrPhoneCountry.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pays : {zone}'**
+  String qrPhoneCountry(String zone);
+
+  /// No description provided for @qrAppStore.
+  ///
+  /// In fr, this message translates to:
+  /// **'Source'**
+  String get qrAppStore;
+
+  /// No description provided for @qrAppPackage.
+  ///
+  /// In fr, this message translates to:
+  /// **'Identifiant du paquet'**
+  String get qrAppPackage;
+
+  /// No description provided for @qrAppSourceApk.
+  ///
+  /// In fr, this message translates to:
+  /// **'Fichier APK direct'**
+  String get qrAppSourceApk;
+
+  /// No description provided for @qrAppSourceIntent.
+  ///
+  /// In fr, this message translates to:
+  /// **'Lien intent:// (lance une app)'**
+  String get qrAppSourceIntent;
+
+  /// No description provided for @qrAppSourceUnknownSite.
+  ///
+  /// In fr, this message translates to:
+  /// **'Site inconnu'**
+  String get qrAppSourceUnknownSite;
+
+  /// No description provided for @qrContactName.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nom'**
+  String get qrContactName;
+
+  /// No description provided for @qrContactOrganization.
+  ///
+  /// In fr, this message translates to:
+  /// **'Organisation'**
+  String get qrContactOrganization;
+
+  /// No description provided for @qrContactPhone.
+  ///
+  /// In fr, this message translates to:
+  /// **'Téléphone'**
+  String get qrContactPhone;
+
+  /// No description provided for @qrContactEmail.
+  ///
+  /// In fr, this message translates to:
+  /// **'E-mail'**
+  String get qrContactEmail;
+
+  /// No description provided for @qrContactWebsite.
+  ///
+  /// In fr, this message translates to:
+  /// **'Site'**
+  String get qrContactWebsite;
+
+  /// No description provided for @qrEmailTo.
+  ///
+  /// In fr, this message translates to:
+  /// **'Destinataire'**
+  String get qrEmailTo;
+
+  /// No description provided for @qrEmailSubject.
+  ///
+  /// In fr, this message translates to:
+  /// **'Objet'**
+  String get qrEmailSubject;
+
+  /// No description provided for @qrEmailBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Message'**
+  String get qrEmailBody;
+
+  /// No description provided for @qrGeoCoordinates.
+  ///
+  /// In fr, this message translates to:
+  /// **'Coordonnées'**
+  String get qrGeoCoordinates;
+
+  /// No description provided for @qrGeoLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Lieu'**
+  String get qrGeoLabel;
+
+  /// No description provided for @qrEventTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Titre'**
+  String get qrEventTitle;
+
+  /// No description provided for @qrEventStart.
+  ///
+  /// In fr, this message translates to:
+  /// **'Début'**
+  String get qrEventStart;
+
+  /// No description provided for @qrEventEnd.
+  ///
+  /// In fr, this message translates to:
+  /// **'Fin'**
+  String get qrEventEnd;
+
+  /// No description provided for @qrEventLocation.
+  ///
+  /// In fr, this message translates to:
+  /// **'Lieu'**
+  String get qrEventLocation;
+
+  /// No description provided for @qrEventDescription.
+  ///
+  /// In fr, this message translates to:
+  /// **'Description'**
+  String get qrEventDescription;
+
+  /// No description provided for @qrWarningCrypto.
+  ///
+  /// In fr, this message translates to:
+  /// **'N\'envoyez jamais d\'argent à une adresse de cryptomonnaie reçue par QR code d\'un inconnu : un envoi ne peut jamais être annulé.'**
+  String get qrWarningCrypto;
+
+  /// No description provided for @qrWarningScamText.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le message pré-rempli demande un code, un mot de passe ou de l\'argent ({words}). Aucun service sérieux ne demande ça par message.'**
+  String qrWarningScamText(String words);
+
+  /// No description provided for @qrWarningSpecialNumber.
+  ///
+  /// In fr, this message translates to:
+  /// **'Indicatif {code} : numéro international spécial (satellite ou réseau premium), souvent très surtaxé.'**
+  String qrWarningSpecialNumber(String code);
+
+  /// No description provided for @qrWarningUnexpectedCountry.
+  ///
+  /// In fr, this message translates to:
+  /// **'Indicatif {code} : numéro d\'un pays inattendu. Les fausses offres d\'emploi et les faux livreurs utilisent souvent des numéros étrangers.'**
+  String qrWarningUnexpectedCountry(String code);
+
+  /// No description provided for @qrWarningForeignNumber.
+  ///
+  /// In fr, this message translates to:
+  /// **'Numéro étranger (indicatif {code}). Vérifiez que vous connaissez bien cette personne.'**
+  String qrWarningForeignNumber(String code);
+
+  /// No description provided for @qrWarningGroup.
+  ///
+  /// In fr, this message translates to:
+  /// **'Invitation dans un groupe : n\'importe qui peut en créer un. N\'y envoyez ni code, ni argent, ni papiers d\'identité.'**
+  String get qrWarningGroup;
+
+  /// No description provided for @qrWarningApk.
+  ///
+  /// In fr, this message translates to:
+  /// **'Lien direct vers un fichier d\'installation (.apk). Une appli hors Play Store peut contenir un logiciel espion. Si vous l\'installez quand même, Sentinel la vérifiera dans l\'onglet Applications.'**
+  String get qrWarningApk;
+
+  /// No description provided for @qrWarningIntentApp.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce lien intent:// lance directement une application ou un écran caché. Sentinel ne l\'ouvrira pas.'**
+  String get qrWarningIntentApp;
+
+  /// No description provided for @qrWarningPackageMod.
+  ///
+  /// In fr, this message translates to:
+  /// **'Version modifiée de {app}, hors boutique officielle : elle peut lire vos messages. Installez seulement l\'appli officielle.'**
+  String qrWarningPackageMod(String app);
+
+  /// No description provided for @qrWarningPackageImitation.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce paquet imite {app} sans être le vrai : il reprend son nom pour tromper.'**
+  String qrWarningPackageImitation(String app);
+
+  /// No description provided for @qrWarningPackageInvalid.
+  ///
+  /// In fr, this message translates to:
+  /// **'L\'identifiant du paquet n\'est pas valide : lien abîmé ou trafiqué.'**
+  String get qrWarningPackageInvalid;
+
+  /// No description provided for @qrWarningPackageOfficial.
+  ///
+  /// In fr, this message translates to:
+  /// **'Paquet officiel de {app}.'**
+  String qrWarningPackageOfficial(String app);
+
+  /// No description provided for @qrWarningPackageUnknown.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sentinel ne connaît pas cette appli. Sur la page de la boutique, vérifiez l\'éditeur, le nombre de téléchargements et les avis avant d\'installer.'**
+  String get qrWarningPackageUnknown;
+
+  /// No description provided for @qrWarningThirdPartyStore.
+  ///
+  /// In fr, this message translates to:
+  /// **'{store} distribue des APK sans le contrôle de Google : les copies piégées y sont fréquentes. Préférez le Play Store.'**
+  String qrWarningThirdPartyStore(String store);
+
+  /// No description provided for @qrWarningVendorStore.
+  ///
+  /// In fr, this message translates to:
+  /// **'Boutique du fabricant ({store}). Préférez le Play Store quand l\'appli y existe.'**
+  String qrWarningVendorStore(String store);
+
+  /// No description provided for @qrWarningContactBrand.
+  ///
+  /// In fr, this message translates to:
+  /// **'Cette fiche se présente comme « {brand} ». Les arnaqueurs créent de faux contacts « service client » : vérifiez le numéro sur le site ou l\'appli officielle avant d\'appeler.'**
+  String qrWarningContactBrand(String brand);
+
+  /// No description provided for @qrWarningContactService.
+  ///
+  /// In fr, this message translates to:
+  /// **'Cette fiche se présente comme un service client ou une banque. Vérifiez le numéro sur le site officiel avant de l\'enregistrer.'**
+  String get qrWarningContactService;
+
+  /// No description provided for @qrTipPoster.
+  ///
+  /// In fr, this message translates to:
+  /// **'QR sur un parking ou une affiche ? Vérifiez qu\'il n\'est pas collé par-dessus l\'original.'**
+  String get qrTipPoster;
+
+  /// No description provided for @qrTipSmsCode.
+  ///
+  /// In fr, this message translates to:
+  /// **'Un QR code ne devrait jamais mener à une page qui demande le code reçu par SMS.'**
+  String get qrTipSmsCode;
+
+  /// No description provided for @qrTipParcel.
+  ///
+  /// In fr, this message translates to:
+  /// **'QR reçu dans un courrier ou un colis inattendu ? Méfiance : c\'est une arnaque courante.'**
+  String get qrTipParcel;
+
+  /// No description provided for @qrTipPayment.
+  ///
+  /// In fr, this message translates to:
+  /// **'Avant de payer, comparez le bénéficiaire affiché avec le nom du commerçant.'**
+  String get qrTipPayment;
+
+  /// No description provided for @qrImageButton.
+  ///
+  /// In fr, this message translates to:
+  /// **'Depuis une image'**
+  String get qrImageButton;
+
+  /// No description provided for @qrImageSubtitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Capture d\'écran, photo reçue sur WhatsApp… Rien n\'est copié ni gardé.'**
+  String get qrImageSubtitle;
+
+  /// No description provided for @qrImageReading.
+  ///
+  /// In fr, this message translates to:
+  /// **'Lecture de l\'image…'**
+  String get qrImageReading;
+
+  /// No description provided for @qrImageNoQr.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun QR code trouvé dans cette image. Essayez une image plus nette, où le QR code est entier.'**
+  String get qrImageNoQr;
+
+  /// No description provided for @qrImageFailed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Impossible de lire cette image.'**
+  String get qrImageFailed;
+
+  /// No description provided for @qrImageTooLarge.
+  ///
+  /// In fr, this message translates to:
+  /// **'Image trop grande pour être lue.'**
+  String get qrImageTooLarge;
+
+  /// No description provided for @qrImageChooseTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Plusieurs QR codes dans l\'image'**
+  String get qrImageChooseTitle;
+
+  /// No description provided for @qrImageChooseText.
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisissez celui à vérifier. Rien ne s\'ouvre tout seul.'**
+  String get qrImageChooseText;
+
+  /// No description provided for @qrWifiShareButton.
+  ///
+  /// In fr, this message translates to:
+  /// **'Partager mon Wi-Fi'**
+  String get qrWifiShareButton;
+
+  /// No description provided for @qrWifiShareSubtitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Créer un QR code à montrer à vos invités'**
+  String get qrWifiShareSubtitle;
+
+  /// No description provided for @qrWifiShareIntro.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vos invités scannent ce QR code avec l\'appareil photo pour se connecter. Rien n\'est enregistré : tout est effacé quand vous quittez cet écran.'**
+  String get qrWifiShareIntro;
+
+  /// No description provided for @qrWifiShareName.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nom du réseau'**
+  String get qrWifiShareName;
+
+  /// No description provided for @qrWifiSharePassword.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mot de passe'**
+  String get qrWifiSharePassword;
+
+  /// No description provided for @qrWifiShareSecurity.
+  ///
+  /// In fr, this message translates to:
+  /// **'Protection'**
+  String get qrWifiShareSecurity;
+
+  /// No description provided for @qrWifiShareSecurityWpa.
+  ///
+  /// In fr, this message translates to:
+  /// **'WPA / WPA2 / WPA3'**
+  String get qrWifiShareSecurityWpa;
+
+  /// No description provided for @qrWifiShareSecurityWep.
+  ///
+  /// In fr, this message translates to:
+  /// **'WEP (ancien)'**
+  String get qrWifiShareSecurityWep;
+
+  /// No description provided for @qrWifiShareSecurityNone.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sans mot de passe'**
+  String get qrWifiShareSecurityNone;
+
+  /// No description provided for @qrWifiShareHidden.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réseau masqué'**
+  String get qrWifiShareHidden;
+
+  /// No description provided for @qrWifiShareCreate.
+  ///
+  /// In fr, this message translates to:
+  /// **'Créer le QR code'**
+  String get qrWifiShareCreate;
+
+  /// No description provided for @qrWifiShareEdit.
+  ///
+  /// In fr, this message translates to:
+  /// **'Modifier'**
+  String get qrWifiShareEdit;
+
+  /// No description provided for @qrWifiShareShowPassword.
+  ///
+  /// In fr, this message translates to:
+  /// **'Afficher le mot de passe'**
+  String get qrWifiShareShowPassword;
+
+  /// No description provided for @qrWifiShareHidePassword.
+  ///
+  /// In fr, this message translates to:
+  /// **'Masquer le mot de passe'**
+  String get qrWifiShareHidePassword;
+
+  /// No description provided for @qrWifiShareErrorName.
+  ///
+  /// In fr, this message translates to:
+  /// **'Saisissez le nom du réseau.'**
+  String get qrWifiShareErrorName;
+
+  /// No description provided for @qrWifiShareErrorWpa.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mot de passe WPA : entre 8 et 63 caractères.'**
+  String get qrWifiShareErrorWpa;
+
+  /// No description provided for @qrWifiShareErrorWep.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mot de passe WEP : 5 ou 13 caractères (ou 10 ou 26 chiffres hexadécimaux).'**
+  String get qrWifiShareErrorWep;
+
+  /// No description provided for @qrWifiShareShow.
+  ///
+  /// In fr, this message translates to:
+  /// **'Montrez cet écran à vos invités. Les captures d\'écran sont bloquées.'**
+  String get qrWifiShareShow;
+
+  /// No description provided for @qrWifiShareFailed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Impossible de créer le QR code.'**
+  String get qrWifiShareFailed;
+
+  /// No description provided for @qrWifiShareCodeLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'QR code du réseau {name}'**
+  String qrWifiShareCodeLabel(String name);
 }
 
 class _AppLocalizationsDelegate

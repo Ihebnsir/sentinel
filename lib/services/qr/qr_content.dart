@@ -1,4 +1,10 @@
 import '../../models/wifi_status.dart';
+import 'phone_numbers.dart';
+import 'qr_apps.dart';
+import 'qr_cards.dart';
+import 'qr_messaging.dart';
+
+export 'phone_numbers.dart' show PhoneInfo, PhoneZone, parsePhone;
 
 /// Ce que contient un QR code, une fois reconnu. Calcul pur, sans Flutter.
 sealed class QrContent {
@@ -79,9 +85,130 @@ class QrPayment extends QrContent {
   final String? uri; // lien à ouvrir dans une app de paiement, sinon null
 }
 
-/// Tout le reste : texte libre, lien sans « http », e-mail…
+/// Tout le reste : texte libre, lien sans « http »…
 class QrText extends QrContent {
   const QrText(super.raw);
+}
+
+/// Les messageries reconnues.
+enum MessagingApp { whatsapp, telegram, messenger, viber }
+
+/// Avec qui la discussion s'ouvre.
+enum MessagingTarget {
+  person, // un numéro ou un compte
+  group, // invitation dans un groupe
+  channel, // chaîne ou page publique
+  bot, // robot Telegram
+  share, // « partager » un texte, sans destinataire
+}
+
+/// Un lien de messagerie (wa.me, t.me, m.me, viber://…).
+class QrMessaging extends QrContent {
+  const QrMessaging(
+    super.raw, {
+    required this.app,
+    required this.target,
+    this.phone,
+    this.handle,
+    this.text = '',
+    this.url,
+  });
+
+  final MessagingApp app;
+  final MessagingTarget target;
+  final PhoneInfo? phone; // numéro du destinataire, s'il est dans le lien
+  final String? handle; // nom du compte ou du groupe, ex : « @sentinel »
+  final String text; // message pré-rempli, souvent vide
+  final String? url; // lien https à ouvrir, null pour viber://, tg://…
+}
+
+/// D'où viendrait l'application.
+enum AppSource {
+  playStore, // play.google.com ou market://
+  apk, // fichier .apk à télécharger directement
+  intent, // intent:// (lance une app ou un écran caché)
+  vendorStore, // boutique d'un fabricant (Samsung, Huawei, Xiaomi, Amazon)
+  thirdPartyStore, // site de téléchargement d'APK (APKPure, Uptodown…)
+}
+
+/// Un lien qui mène à l'installation d'une application.
+class QrAppInstall extends QrContent {
+  const QrAppInstall(
+    super.raw, {
+    required this.source,
+    this.packageId,
+    this.store,
+    this.url,
+  });
+
+  final AppSource source;
+  final String? packageId; // ex : « com.whatsapp », s'il est dans le lien
+  final String? store; // nom de la boutique, ex : « APKPure »
+  final String? url; // lien https à ouvrir, null pour market://…
+}
+
+/// Une fiche contact (vCard ou MECARD).
+class QrContact extends QrContent {
+  const QrContact(
+    super.raw, {
+    required this.name,
+    this.organization = '',
+    this.phones = const [],
+    this.emails = const [],
+    this.url,
+  });
+
+  final String name;
+  final String organization;
+  final List<String> phones;
+  final List<String> emails;
+  final String? url; // site indiqué dans la fiche
+}
+
+/// Un e-mail prêt à écrire (mailto:, MATMSG:).
+class QrEmail extends QrContent {
+  const QrEmail(
+    super.raw, {
+    required this.address,
+    this.subject = '',
+    this.body = '',
+  });
+
+  final String address;
+  final String subject;
+  final String body;
+}
+
+/// Une position sur la carte (geo:lat,lon).
+class QrGeo extends QrContent {
+  const QrGeo(
+    super.raw, {
+    required this.latitude,
+    required this.longitude,
+    this.label = '',
+  });
+
+  final double latitude;
+  final double longitude;
+  final String label; // nom du lieu (paramètre q), souvent vide
+}
+
+/// Un rendez-vous à ajouter au calendrier (BEGIN:VEVENT).
+class QrEvent extends QrContent {
+  const QrEvent(
+    super.raw, {
+    required this.summary,
+    this.start = '',
+    this.end = '',
+    this.location = '',
+    this.description = '',
+  });
+
+  final String summary;
+  final String start; // date lisible, ex : « 2026-12-01 18:00 »
+  final String end;
+  final String location;
+  final String description;
 }
 
 /// Types de liens refusés : ils exécutent du code ou ouvrent un fichier
@@ -118,12 +245,19 @@ QrContent parseQr(String raw) {
     final uri = Uri.tryParse(text);
     // Un lien suivi d'un texte reste un message (analysé comme tel).
     if (uri != null && uri.host.isNotEmpty && !text.contains(RegExp(r'\s'))) {
-      return QrLink(raw, url: text);
+      return parseWebMessaging(raw, text, uri) ??
+          parseWebApp(raw, text, uri) ??
+          QrLink(raw, url: text);
     }
     return QrText(raw);
   }
   if (scheme == null) {
     return _parseEpc(raw, text) ?? _parseEmv(raw, text) ?? QrText(raw);
+  }
+  // intent:// qui nomme une app : montré comme une installation, verdict
+  // toujours « Dangereux » (voir qr_safety.dart).
+  if (scheme == 'intent') {
+    return parseIntentApp(raw, text) ?? QrUnsafeLink(raw, scheme: scheme);
   }
   if (unsafeSchemes.contains(scheme)) return QrUnsafeLink(raw, scheme: scheme);
   return switch (scheme) {
@@ -132,9 +266,26 @@ QrContent parseQr(String raw) {
     'sms' || 'smsto' || 'mmsto' => _parseSms(raw, text, scheme),
     'upi' => _parseUpi(raw, text),
     _ when cryptoSchemes.containsKey(scheme) => _parseCrypto(raw, text, scheme),
+    'whatsapp' || 'tg' || 'viber' || 'fb-messenger' =>
+      parseAppMessaging(raw, text, scheme) ?? QrText(raw),
+    _ when appSchemes.containsKey(scheme) =>
+      parseSchemeApp(raw, text, scheme) ?? QrText(raw),
+    'mailto' => parseMailto(raw, text) ?? QrText(raw),
+    'matmsg' => parseMatmsg(raw, text) ?? QrText(raw),
+    'geo' => parseGeo(raw, text) ?? QrText(raw),
+    'mecard' => parseMecard(raw, text) ?? QrText(raw),
+    'begin' => parseVcard(raw, text) ?? parseVevent(raw, text) ?? QrText(raw),
     _ => QrText(raw),
   };
 }
+
+/// Lit un paramètre d'une adresse (« text » dans « ?text=Bonjour »),
+/// décodé, ou null. Pour les autres fichiers de lib/services/qr.
+String? queryParameter(String query, String name) =>
+    _queryParameter(query, name);
+
+/// Décode « %20 » ; un texte mal encodé reste tel quel.
+String decodeComponent(String value) => _decode(value);
 
 // WIFI:T:WPA;S:Maison;P:secret;H:true;; — « \ » protège ; , : " et \.
 QrContent _parseWifi(String raw, String body) {
@@ -315,6 +466,8 @@ String? _queryParameter(String query, String name) {
 String _decode(String value) {
   try {
     return Uri.decodeComponent(value);
+  } on FormatException {
+    return value; // « %E0%A4 » : octets UTF-8 incomplets
   } on ArgumentError {
     return value;
   }

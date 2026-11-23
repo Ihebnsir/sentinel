@@ -161,9 +161,9 @@ void main() {
     });
   });
 
-  test('texte libre, e-mail, vide : texte', () {
+  test('texte libre, vide : texte ; e-mail reconnu (1.2.0)', () {
     expect(parseQr('Votre colis est bloqué, payez 2 DT'), isA<QrText>());
-    expect(parseQr('mailto:contact@exemple.tn'), isA<QrText>());
+    expect(parseQr('mailto:contact@exemple.tn'), isA<QrEmail>());
     expect(parseQr(''), isA<QrText>());
     expect(parseQr('   '), isA<QrText>());
   });

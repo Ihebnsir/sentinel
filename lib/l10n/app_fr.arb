@@ -1841,5 +1841,191 @@
   "weeklyLinksChecked": "Liens vérifiés",
   "@weeklyLinksChecked": {
     "description": "Ligne du bilan"
+  },
+  "qrKindMessaging": "Lien de messagerie",
+  "qrKindApp": "Installation d'une application",
+  "qrKindContact": "Fiche contact",
+  "qrKindEmail": "E-mail à écrire",
+  "qrKindGeo": "Position sur une carte",
+  "qrKindCrypto": "Adresse de cryptomonnaie",
+  "qrKindEvent": "Rendez-vous (calendrier)",
+  "qrMessagingApp": "Application",
+  "qrMessagingTarget": "Ouvre",
+  "qrTargetPerson": "Une discussion privée",
+  "qrTargetGroup": "Une invitation dans un groupe",
+  "qrTargetChannel": "Une chaîne ou une page publique",
+  "qrTargetBot": "Un robot (bot)",
+  "qrTargetShare": "Un message à partager, sans destinataire",
+  "qrMessagingNumber": "Numéro",
+  "qrMessagingAccount": "Compte ou groupe",
+  "qrMessagingText": "Message pré-rempli",
+  "qrZoneHome": "Tunisie",
+  "qrZoneForeign": "Étranger",
+  "qrZoneSpecial": "International spécial",
+  "qrPhoneCountry": "Pays : {zone}",
+  "@qrPhoneCountry": {
+    "placeholders": {
+      "zone": {
+        "type": "String",
+        "description": "Tunisie, Étranger…"
+      }
+    }
+  },
+  "qrAppStore": "Source",
+  "qrAppPackage": "Identifiant du paquet",
+  "qrAppSourceApk": "Fichier APK direct",
+  "qrAppSourceIntent": "Lien intent:// (lance une app)",
+  "qrAppSourceUnknownSite": "Site inconnu",
+  "qrContactName": "Nom",
+  "qrContactOrganization": "Organisation",
+  "qrContactPhone": "Téléphone",
+  "qrContactEmail": "E-mail",
+  "qrContactWebsite": "Site",
+  "qrEmailTo": "Destinataire",
+  "qrEmailSubject": "Objet",
+  "qrEmailBody": "Message",
+  "qrGeoCoordinates": "Coordonnées",
+  "qrGeoLabel": "Lieu",
+  "qrEventTitle": "Titre",
+  "qrEventStart": "Début",
+  "qrEventEnd": "Fin",
+  "qrEventLocation": "Lieu",
+  "qrEventDescription": "Description",
+  "qrWarningCrypto": "N'envoyez jamais d'argent à une adresse de cryptomonnaie reçue par QR code d'un inconnu : un envoi ne peut jamais être annulé.",
+  "qrWarningScamText": "Le message pré-rempli demande un code, un mot de passe ou de l'argent ({words}). Aucun service sérieux ne demande ça par message.",
+  "@qrWarningScamText": {
+    "placeholders": {
+      "words": {
+        "type": "String",
+        "description": "Mots trouvés, entre guillemets"
+      }
+    }
+  },
+  "qrWarningSpecialNumber": "Indicatif {code} : numéro international spécial (satellite ou réseau premium), souvent très surtaxé.",
+  "@qrWarningSpecialNumber": {
+    "placeholders": {
+      "code": {
+        "type": "String",
+        "description": "Indicatif, ex : +882"
+      }
+    }
+  },
+  "qrWarningUnexpectedCountry": "Indicatif {code} : numéro d'un pays inattendu. Les fausses offres d'emploi et les faux livreurs utilisent souvent des numéros étrangers.",
+  "@qrWarningUnexpectedCountry": {
+    "placeholders": {
+      "code": {
+        "type": "String",
+        "description": "Indicatif, ex : +62"
+      }
+    }
+  },
+  "qrWarningForeignNumber": "Numéro étranger (indicatif {code}). Vérifiez que vous connaissez bien cette personne.",
+  "@qrWarningForeignNumber": {
+    "placeholders": {
+      "code": {
+        "type": "String",
+        "description": "Indicatif, ex : +33"
+      }
+    }
+  },
+  "qrWarningGroup": "Invitation dans un groupe : n'importe qui peut en créer un. N'y envoyez ni code, ni argent, ni papiers d'identité.",
+  "qrWarningApk": "Lien direct vers un fichier d'installation (.apk). Une appli hors Play Store peut contenir un logiciel espion. Si vous l'installez quand même, Sentinel la vérifiera dans l'onglet Applications.",
+  "qrWarningIntentApp": "Ce lien intent:// lance directement une application ou un écran caché. Sentinel ne l'ouvrira pas.",
+  "qrWarningPackageMod": "Version modifiée de {app}, hors boutique officielle : elle peut lire vos messages. Installez seulement l'appli officielle.",
+  "@qrWarningPackageMod": {
+    "placeholders": {
+      "app": {
+        "type": "String",
+        "description": "Nom de l'app, ex : WhatsApp"
+      }
+    }
+  },
+  "qrWarningPackageImitation": "Ce paquet imite {app} sans être le vrai : il reprend son nom pour tromper.",
+  "@qrWarningPackageImitation": {
+    "placeholders": {
+      "app": {
+        "type": "String",
+        "description": "App imitée et son vrai paquet, ex : WhatsApp (com.whatsapp)"
+      }
+    }
+  },
+  "qrWarningPackageInvalid": "L'identifiant du paquet n'est pas valide : lien abîmé ou trafiqué.",
+  "qrWarningPackageOfficial": "Paquet officiel de {app}.",
+  "@qrWarningPackageOfficial": {
+    "placeholders": {
+      "app": {
+        "type": "String",
+        "description": "Nom de l'app, ex : WhatsApp"
+      }
+    }
+  },
+  "qrWarningPackageUnknown": "Sentinel ne connaît pas cette appli. Sur la page de la boutique, vérifiez l'éditeur, le nombre de téléchargements et les avis avant d'installer.",
+  "qrWarningThirdPartyStore": "{store} distribue des APK sans le contrôle de Google : les copies piégées y sont fréquentes. Préférez le Play Store.",
+  "@qrWarningThirdPartyStore": {
+    "placeholders": {
+      "store": {
+        "type": "String",
+        "description": "Nom du site, ex : APKPure"
+      }
+    }
+  },
+  "qrWarningVendorStore": "Boutique du fabricant ({store}). Préférez le Play Store quand l'appli y existe.",
+  "@qrWarningVendorStore": {
+    "placeholders": {
+      "store": {
+        "type": "String",
+        "description": "Nom de la boutique, ex : Galaxy Store"
+      }
+    }
+  },
+  "qrWarningContactBrand": "Cette fiche se présente comme « {brand} ». Les arnaqueurs créent de faux contacts « service client » : vérifiez le numéro sur le site ou l'appli officielle avant d'appeler.",
+  "@qrWarningContactBrand": {
+    "placeholders": {
+      "brand": {
+        "type": "String",
+        "description": "Marque imitée, ex : BIAT"
+      }
+    }
+  },
+  "qrWarningContactService": "Cette fiche se présente comme un service client ou une banque. Vérifiez le numéro sur le site officiel avant de l'enregistrer.",
+  "qrTipPoster": "QR sur un parking ou une affiche ? Vérifiez qu'il n'est pas collé par-dessus l'original.",
+  "qrTipSmsCode": "Un QR code ne devrait jamais mener à une page qui demande le code reçu par SMS.",
+  "qrTipParcel": "QR reçu dans un courrier ou un colis inattendu ? Méfiance : c'est une arnaque courante.",
+  "qrTipPayment": "Avant de payer, comparez le bénéficiaire affiché avec le nom du commerçant.",
+  "qrImageButton": "Depuis une image",
+  "qrImageSubtitle": "Capture d'écran, photo reçue sur WhatsApp… Rien n'est copié ni gardé.",
+  "qrImageReading": "Lecture de l'image…",
+  "qrImageNoQr": "Aucun QR code trouvé dans cette image. Essayez une image plus nette, où le QR code est entier.",
+  "qrImageFailed": "Impossible de lire cette image.",
+  "qrImageTooLarge": "Image trop grande pour être lue.",
+  "qrImageChooseTitle": "Plusieurs QR codes dans l'image",
+  "qrImageChooseText": "Choisissez celui à vérifier. Rien ne s'ouvre tout seul.",
+  "qrWifiShareButton": "Partager mon Wi-Fi",
+  "qrWifiShareSubtitle": "Créer un QR code à montrer à vos invités",
+  "qrWifiShareIntro": "Vos invités scannent ce QR code avec l'appareil photo pour se connecter. Rien n'est enregistré : tout est effacé quand vous quittez cet écran.",
+  "qrWifiShareName": "Nom du réseau",
+  "qrWifiSharePassword": "Mot de passe",
+  "qrWifiShareSecurity": "Protection",
+  "qrWifiShareSecurityWpa": "WPA / WPA2 / WPA3",
+  "qrWifiShareSecurityWep": "WEP (ancien)",
+  "qrWifiShareSecurityNone": "Sans mot de passe",
+  "qrWifiShareHidden": "Réseau masqué",
+  "qrWifiShareCreate": "Créer le QR code",
+  "qrWifiShareEdit": "Modifier",
+  "qrWifiShareShowPassword": "Afficher le mot de passe",
+  "qrWifiShareHidePassword": "Masquer le mot de passe",
+  "qrWifiShareErrorName": "Saisissez le nom du réseau.",
+  "qrWifiShareErrorWpa": "Mot de passe WPA : entre 8 et 63 caractères.",
+  "qrWifiShareErrorWep": "Mot de passe WEP : 5 ou 13 caractères (ou 10 ou 26 chiffres hexadécimaux).",
+  "qrWifiShareShow": "Montrez cet écran à vos invités. Les captures d'écran sont bloquées.",
+  "qrWifiShareFailed": "Impossible de créer le QR code.",
+  "qrWifiShareCodeLabel": "QR code du réseau {name}",
+  "@qrWifiShareCodeLabel": {
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "description": "Nom du réseau"
+      }
+    }
   }
 }
