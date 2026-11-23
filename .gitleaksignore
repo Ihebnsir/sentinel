@@ -4,3 +4,8 @@ e97662db1ec661a0f76b971cd3e7280117178d92:test/vault_slots_test.dart:generic-api-
 # Rapport MobSF (audit P1) : liste des chaînes extraites du moteur Flutter
 # (noms BoringSSL « TRUST_TOKEN », « CAMELLIA-256-CFB1 », symboles C++), pas des secrets.
 311e66ad70aca3d12bc83c96225fedab5f517705:docs/audit/mobsf/mobsf_report.json:generic-api-key:1
+# Faux secrets des tests (mot de passe Neon inventé, clé d'empreinte de test,
+# clé de récupération inventée) : signalés par gitleaks 8.21, vérifiés à la main.
+f68f14ba13749c303389f9390672715ac6f31169:backend/tests/test_db_doctor.py:generic-api-key:28
+38acea529ad6d7feb2536e112bc76273db1b3e30:backend/tests/conftest.py:generic-api-key:27
+785422bd3e7cd74f607f766dba9ef45a93a25a6a:test/accessibility_test.dart:generic-api-key:314

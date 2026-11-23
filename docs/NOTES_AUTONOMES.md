@@ -1,4 +1,6 @@
-# Notes de travail autonome
+# Journal des décisions
+
+Décisions prises pendant le développement, datées, avec leur raison. C'est un **historique** : les sections anciennes décrivent des fonctions retirées depuis (onglet Messages, modèle anti-arnaque, signalement, retirés en 1.1.0). L'état actuel est décrit dans le [README](../README.md), le [CHANGELOG](../CHANGELOG.md) et [SECURITY_DESIGN.md](SECURITY_DESIGN.md).
 
 ## Export / import chiffré du coffre (2026-10-25)
 
@@ -325,7 +327,7 @@ Limite : un candidat identique au modèle livré est quand même réexporté (no
 
 ### Blocage : émulateur indisponible
 
-- L'émulateur Pixel 8 refuse de démarrer : « x86_64 emulation currently requires hardware acceleration », hyperviseur Windows arrêté (`HypervisorPresent = False`, services `HvHost` et `vmcompute` arrêtés), pas de droits administrateur pour l'activer, et aucun téléphone branché. Je n'ai rien changé à la configuration de Windows.
+- L'émulateur Pixel 8 refuse de démarrer : « x86_64 emulation currently requires hardware acceleration », la virtualisation du poste est réservée à un autre outil, et aucun téléphone n'était branché. La configuration du poste n'a pas été modifiée.
 - **Contournement** plutôt qu'arrêt : les écrans sont rendus par le moteur de Flutter dans un test (`test/design/screens_capture_test.dart`), au format exact du Pixel 8 (1080 × 2400, densité 2,625), avec les vraies polices et un faux Android aux données fictives. Les captures « avant », « après » et celles du README en sortent.
 - Conséquences : la barre d'état (10:00, batterie pleine) est **dessinée** par le banc de capture, au lieu du mode démo Android. Le passage réel sur téléphone reste à faire à la main (voir la fin de cette section).
 - Lancer le banc : `$env:SENTINEL_CAPTURE="C:\dossier"; flutter test test/design/screens_capture_test.dart` (options dans l'en-tête du fichier). Sans cette variable, ses tests sont ignorés.
@@ -377,3 +379,17 @@ Choix faits sans demander :
 - **Commits** : un par grande partie. Les étapes intermédiaires ne compilent pas forcément seules (les textes et l'analyseur vont ensemble) ; le dernier commit est vérifié en entier.
 
 Non vérifié : l'interface n'a pas été lancée (règle : pas de `flutter run`). Le sélecteur de photos, le partage d'une image depuis WhatsApp et l'affichage du QR Wi-Fi sont à tester à la main sur un émulateur ou un téléphone.
+
+## Vitrine du dépôt pour la 1.2.0 (2026-11-23)
+
+Choix faits sans demander :
+
+- **Test réel et démo animée non faits** : aucun téléphone n'était connecté (`adb devices` vide) et aucun émulateur n'est utilisable sur ce poste. Le parcours sur appareil (sélecteur de photos, partage d'une image depuis WhatsApp, capture noire de « Partager mon Wi-Fi », arabe sombre) reste à faire à la main avant ou juste après la publication. Pas de GIF dans le README plutôt qu'un lien vide.
+- **Captures** : les 7 captures de `docs/screenshots/` datent de la 1.1.0 (après le retrait de l'onglet Messages) ; aucune ne montre cet onglet, aucune ne contient de vraie donnée (applications et entrées du coffre fictives, adresses `exemple.tn`). Une seule ajoutée : `qr-apk.png` (résultat d'un QR code menant à un `.apk`), rendue par le même banc Flutter que les autres (`test/design/screens_capture_test.dart`, scène `qr-apk`), barre d'état dessinée (10:00, batterie pleine). Les captures de `docs/design/avant` et `apres` sont aussi postérieures au retrait de Messages.
+- **README** refait en page de lancement (anglais principal, français identique) : promesse, badges (CI, dernière version via shields.io, licence, Android 7+, langues), gros bouton de téléchargement vers `releases/latest`, galerie de 7 captures, 6 fonctionnalités, vie privée en 3 points, sécurité (audit MASVS v2 : 18 constats, 15 corrigés, 3 acceptés ; empreinte du certificat ; SECURITY.md), schéma Mermaid, 5 décisions techniques, tests, « Expériences » (backend et ml, non utilisés), une phrase sur l'aide de Claude Code. Les anciennes listes détaillées (cryptographie du coffre, règles, couverture) restent dans `docs/SECURITY_DESIGN.md` et `docs/ARCHITECTURE.md`. Aucun lien interne cassé (vérifié par script, ancres comprises) ; aucune autre page ne pointait vers une ancre supprimée du README.
+- **Image d'aperçu social** : `tools/branding/make_social_preview.py` (Pillow du venv `tools/.venv`), 1280 × 640, fond nuit de l'icône, arches en filigrane, nom, promesse en anglais, captures accueil et liens. Pas de texte arabe dans l'image : Pillow de ce venv n'a pas libraqm et n'aurait pas lié les lettres.
+- **Notes de version** `docs/releases/v1.2.0.md` : français puis anglais, « remplace les versions précédentes », captures en liens `blob/v1.2.0/…?raw=true` (valides une fois le tag poussé), `À_REMPLIR` pour le SHA-256 de l'APK. CHANGELOG daté du 23/11/2026, liens de comparaison mis à jour.
+- **Ménage** : ce journal porte maintenant un en-tête qui dit qu'il s'agit d'un historique ; `docs/DEPLOIEMENT.md` est marqué « expérience » et sa section « Et l'app ? » ne décrit plus l'option `-ApiUrl` retirée en 1.1.0 ; `docs/ARCHITECTURE.md` décrit le scanner 1.2.0. Les rapports d'audit et les anciennes notes de version gardent leurs mentions de Messages : ce sont des documents datés.
+- **Gitleaks** : 8.21.2 téléchargé à part (somme de contrôle officielle vérifiée), historique complet scanné (85 commits). 3 alertes, toutes de faux secrets de tests (mot de passe Neon inventé, clé d'empreinte de test, clé de récupération inventée), ajoutées à `.gitleaksignore` avec leur explication ; nouveau scan : aucune fuite. Les autres alertes du dossier de travail sont dans des dossiers ignorés par git (`.venv`, `.audit_work`).
+- **Petit défaut vu, non corrigé** (pas un bug, la consigne interdit de toucher au code sans bug réel) : sur un `.apk` direct, l'écran affiche « Dangereux » et aussi « Absent des listes de sites dangereux de Sentinel » (raison du vérificateur de liens). C'est exact mais peut surprendre ; à revoir dans une version suivante.
+- `docs/releases/v1.1.0.md` avait une modification locale non commitée antérieure à ce travail (SHA-256 rempli, y compris dans le commentaire d'en-tête) : laissée telle quelle, hors commits.

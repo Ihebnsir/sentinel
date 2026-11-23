@@ -1,5 +1,7 @@
 # Déployer le backend (B3b) — guide pas à pas
 
+> **Expérience, non utilisée par l'app depuis la 1.1.0.** Ce guide reste valable pour faire tourner le serveur seul.
+
 [← README du backend](../backend/README.md) · [Modèle de menaces](BACKEND_THREAT_MODEL.md)
 
 Ce guide met en ligne le serveur de signalements :
@@ -259,10 +261,4 @@ Pour automatiser, deux options :
 
 ## 13. Et l'app ?
 
-Quand le serveur répond, construisez l'app avec son adresse grâce au script de release (signature et obfuscation comprises, voir [RELEASE.md](RELEASE.md)) :
-
-```powershell
-powershell -ExecutionPolicy Bypass -File tools\release\build_release.ps1 -ApiUrl https://sentinel-api-xxxx.onrender.com
-```
-
-Sans `-ApiUrl`, le script utilise `https://sentinel-api-b2gs.onrender.com`. Le bouton « Signaler ce message » apparaît alors. HTTPS est obligatoire : le script refuse `http://`.
+Depuis la 1.1.0, l'app n'appelle plus ce serveur : le bouton « Signaler ce message » a été retiré avec l'onglet Messages en 1.1.0, et `tools/release/build_release.ps1` n'a plus d'option `-ApiUrl`. Le backend reste une expérience documentée (voir [backend/README.md](../backend/README.md)). Les versions 1.0.x construites avec `-ApiUrl` sont dans l'historique Git.

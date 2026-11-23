@@ -92,6 +92,15 @@ sequenceDiagram
 
 The screen shows the verdict, "Ce lien mène en réalité à …" (the registrable domain, defanged with `[.]`), the reasons and the advice. Nothing opens without a confirmation dialog, and "Ouvrir quand même" is disabled for a dangerous link (`QrScannerService.openLink`, re-checked in Kotlin by `QrActions.isWebLink`). A shortened link is explained, never followed. Only a counter (`links_checked`) goes to the weekly summary; the link itself is never stored. QR codes use the same path (`assessQr` → `checkText`).
 
+## QR codes (1.2.0)
+
+`lib/services/qr/` is a pure analyser: `parseQr` turns the raw text into a type (link, messaging, app install, Wi-Fi, contact, e-mail, geo, crypto, event, phone, SMS, payment, text), and `assessQr` returns the verdict, the reasons and the only action allowed (always after confirmation). Kotlin only reads pixels and opens `http(s)` links:
+
+- **Camera**: `QrScanner.kt` (zxing-android-embedded), camera permission asked at scan time.
+- **Image**: `QrScanner.pickImage` opens Android's photo picker (`PickVisualMedia`, falls back to `ACTION_OPEN_DOCUMENT`); an image shared with `ACTION_SEND image/*` goes through `MainActivity.sharedImageFrom`. `QrImageReader` decodes the bitmap in memory (scaled down, then recycled) and `QrImageDecoder` (pure ZXing, JVM-tested on PNG fixtures) returns the texts. No storage permission; the image is never copied.
+- **Share my Wi-Fi**: `wifi_share.dart` builds the `WIFI:` text, `QrImageDecoder.encode` (method `encodeQr`) returns the modules, `QrCodeView` paints them under `FLAG_SECURE`.
+
+
 ## DNS firewall
 
 The DNS firewall (`android/…/firewall/`) is a local `VpnService`. The TUN interface gets private addresses (`10.111.222.1/32`, `fdc5:3a71:9e04::1/128`), a virtual DNS server (`10.111.222.2`, `fdc5:3a71:9e04::2`) and **routes to those two DNS addresses only**. Android then sends every app's system DNS queries into the TUN, while the rest of the traffic keeps using the real network directly.
