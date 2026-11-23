@@ -1,6 +1,6 @@
 /// Version affichée dans Réglages. Doit suivre `version:` de pubspec.yaml
 /// (vérifié par test/settings_screen_test.dart).
-const appVersion = '1.1.0';
+const appVersion = '1.2.0';
 
 /// Nom du paquet Android (une seule variante depuis la 1.1.0).
 const ownPackageName = 'com.iheb.sentinel';

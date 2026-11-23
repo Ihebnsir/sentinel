@@ -6,6 +6,24 @@ Le format suit [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/) et le pr
 
 ## [Non publié]
 
+## [1.2.0] - non publié
+
+Scanner de QR code amélioré (onglet Liens), toujours sans permission sensible, 100 % sur le téléphone : rien n'est envoyé, rien n'est enregistré, rien ne s'ouvre tout seul.
+
+### Ajouté
+- **QR code depuis une image** : bouton « Depuis une image » (sélecteur de photos d'Android, aucune permission de stockage ; sélecteur de documents sur les téléphones sans sélecteur de photos) et **image partagée vers Sentinel** (QR reçu sur WhatsApp, capture d'écran). Décodage ZXing sur le téléphone, comme la caméra. Plusieurs QR codes : liste à choisir ; aucun : message clair. L'image n'est jamais copiée ni gardée.
+- **Liens de messagerie** : wa.me, api.whatsapp.com, chat.whatsapp.com (groupes), chaînes WhatsApp, t.me / telegram.me, m.me, viber://, tg://. Affiche l'app, le destinataire (numéro avec indicatif mis en évidence, compte, groupe) et le message pré-rempli. « Suspect » si le message demande un code, un mot de passe ou de l'argent (mots en français, anglais, arabe et derja) ou si l'indicatif est inattendu ou spécial (+882, +979…).
+- **Installation d'applications** : Play Store et market:// (identifiant du paquet comparé aux applis connues : officiel, version modifiée, imitation), lien .apk direct (« Dangereux » par défaut, avec explication), intent://, boutiques des fabricants et sites d'APK.
+- **Autres formats** : fiche contact vCard / MECARD (alerte si le nom imite une banque, un opérateur, une appli connue ou un « service client »), mailto: et MATMSG:, geo:, adresses de cryptomonnaie (« n'envoyez jamais d'argent à une adresse reçue d'un inconnu », verdict « Suspect »), rendez-vous BEGIN:VEVENT.
+- **Conseil « quishing »** discret et différent après chaque scan à la caméra.
+- **Partager mon Wi-Fi** : nom du réseau et mot de passe saisis ou collés, QR code WIFI: affiché à l'écran (captures bloquées, rien d'enregistré, tout effacé en quittant).
+- Tests : cas réels et pièges pour chaque format, images PNG de test décodées sur ordinateur (capture d'écran, deux QR, QR inversé, penché, grande photo, arabe), tests d'écran en français et en arabe de droite à gauche, liste exacte des permissions du manifeste fusionné.
+
+### Modifié
+- Architecture : un analyseur pur (`lib/services/qr/`) transforme le contenu en type + verdict + raisons ; l'écran ne fait qu'afficher.
+- Les badges de statut passent à la ligne au lieu de déborder quand le libellé est long.
+- Un texte mal encodé dans un QR (`%E0%A4`) ne fait plus échouer l'analyse.
+
 ## [1.1.0] - 2026-11-19
 
 La fonctionnalité « Messages » est retirée de toute l'application et remplacée par un **vérificateur de liens**. Une seule variante Android : l'APK n'est plus bloqué par Google Play Protect.

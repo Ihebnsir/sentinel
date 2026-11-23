@@ -114,6 +114,26 @@ The only way the vault leaves the phone is an explicit export ("Exporter une sau
 | "Automatic protection when you tap": the DNS firewall blocks known dangerous sites even when the link is opened from another app; it can be turned on in one tap from the Links tab | `AutoProtectionRow` |
 | Clear advice for each verdict (don't open, never share codes, type the official address yourself) | `Verdict.advice` |
 
+#### 3.5.1 QR codes: camera, images and formats (1.2.0)
+
+*Goal:* hide a scam behind a QR code (sticker over a real one, image sent on WhatsApp, fake "customer service" card, fake app).
+
+**What is read in an image.** "Depuis une image" opens Android's photo picker (`PickVisualMedia`, image only); an image shared to Sentinel arrives through `ACTION_SEND image/*`. In both cases Android gives a one-off read grant on that single item: Sentinel declares **no storage or media permission** (checked on the merged manifest by `ManifestTest`). Kotlin reads the bytes into memory, decodes the pixels (scaled down to 2048 px on the long side, 3072 px for a second try), looks for QR codes with ZXing core (same library as the camera), returns only the decoded **texts** to Dart, and drops the bitmap (`recycle`). The image is never copied, written to disk, cached, logged or sent. The image address (`Uri`) stays in memory only until it is decoded.
+
+| Measure | Where |
+|---|---|
+| Photo picker on Android 11+ (system updates) or through the Google Play services module (declared, disabled service); otherwise `ACTION_OPEN_DOCUMENT`. No permission in any case | `QrScanner.pickImage`, `AndroidManifest.xml` |
+| Shared image accepted only as `content://`, and never an authority of Sentinel itself (`com.iheb.sentinel.*`): another app cannot make Sentinel read its own private files, such as vault documents (confused deputy) | `QrImageDecoder.isAcceptableUri`, `MainActivity.sharedImageFrom` |
+| Image larger than 100 megapixels refused before decoding; out-of-memory handled ("image too large"); at most 10 codes kept | `QrImageReader`, `QrImageDecoder` |
+| Pure analyser: the raw text becomes a type (link, messaging, app, Wi-Fi, contact, e-mail, geo, crypto, event, text) + verdict + reasons; the screen only displays | `lib/services/qr/` (`qr_content.dart`, `qr_safety.dart`, `qr_messaging.dart`, `qr_apps.dart`, `qr_cards.dart`) |
+| Messaging links (wa.me, api.whatsapp.com, chat.whatsapp.com, t.me, telegram.me, m.me, viber://): app, number with country code (unexpected or special international code → "Suspect"), group invitation, pre-filled text scanned for scam words in French, English, Arabic and Derja | `qr_messaging.dart`, `phone_numbers.dart`, `scam_words.dart` |
+| App installs: Play Store / `market://` package compared with `known_apps.dart` (official, known mod, look-alike); direct `.apk` link → "Dangereux" by default; `intent://` → "Dangereux"; third-party APK sites → "Suspect" | `qr_apps.dart` |
+| vCard / MECARD whose name imitates a known brand (`known_brands.json`, known apps) or a "customer service" → "Suspect"; crypto address → never send money to an address from a stranger | `qr_safety.dart` |
+| Only `http(s)` links can be opened, after confirmation (messaging and Play Store links included); `viber://`, `tg://`, `market://`, `intent://` are explained, never opened | `QrScannerService.perform`, `QrActions.isWebLink` |
+| Rotating "quishing" tip after each camera scan (in memory, nothing stored) | `QrResultScreen` |
+| "Share my Wi-Fi": the QR code is created by ZXing on the phone, `FLAG_SECURE` while shown, fields without keyboard suggestions or learning, everything cleared when leaving the screen; nothing is saved | `WifiShareScreen`, `wifi_share.dart`, `QrImageDecoder.encode` |
+| Covered by tests: real and tricky cases for each format, PNG fixtures decoded on the JVM (screenshot, two codes, inverted, rotated, large photo, Arabic, no code), French and Arabic RTL widget tests, merged-manifest permission list | `test/qr_formats_test.dart`, `test/qr_image_wifi_test.dart`, `QrImageDecoderTest.kt`, `ManifestTest.kt` |
+
 ### 3.6 Privacy toward third parties (HIBP, network observers)
 
 | Measure | Where |
@@ -240,3 +260,6 @@ These are real gaps. Some can't be fixed in this setup; others are on the roadma
 34. **App analysis reports are plain files.** They are private to the app and kept 24 h at most, but not encrypted: root access, or someone who opens Sentinel on the unlocked phone, can read which domains the analyzed app contacted. If Android kills the service during an analysis, that analysis and its report are lost. Query counts are approximate (cached answers are not seen again).
 35. **Brand rule false positives in the firewall.** See 3.9: a real site that contains a brand keyword but is not in the official list is blocked until allowlisted.
 36. ~~Report anonymization is rule-based.~~ No longer applies: scam reports were removed from the app in 1.1.0 (the `backend/` folder stays in the repository, unused).
+37. **Image decoding is best effort.** A blurry, tiny or cut QR code in a photo may not be found ("no QR code"); a QR code drawn with a logo over too many modules may fail. Decoded texts (not the image) stay in memory while the result screen is open.
+38. **Word and code lists are short.** The scam-word list, the "usual" country codes (seen from Tunisia) and the look-alike package rule are heuristics: a scam message without those words, or a new fake package name, gets "Aucun problème connu" at best. A legitimate contact card of a bank adviser is flagged "Suspect" on purpose (check the number on the official site).
+39. **Shared image grant.** Android gives the read grant with the share; Sentinel reads it at once. A sharing app that does not grant access gives "image can't be read".
