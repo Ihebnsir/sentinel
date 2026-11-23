@@ -83,11 +83,16 @@
             </intent-filter>
             <!-- Bouton « Partager » des autres apps (navigateur, SMS…) :
                  Sentinel apparaît quand on partage un lien ou du texte.
-                 L'onglet Liens y cherche le premier lien. -->
+                 L'onglet Liens y cherche le premier lien.
+                 Image partagée (QR reçu sur WhatsApp, capture d'écran) :
+                 lue en mémoire pour y trouver les QR codes, jamais copiée.
+                 L'accès à l'image est donné par l'app qui partage : aucune
+                 permission de stockage. -->
             <intent-filter>
                 <action android:name="android.intent.action.SEND"/>
                 <category android:name="android.intent.category.DEFAULT"/>
                 <data android:mimeType="text/plain"/>
+                <data android:mimeType="image/*"/>
             </intent-filter>
             <!-- Menu de sélection de texte (Copier, Coller…) de toutes les apps :
                  vérifier le lien sélectionné. Le label est le texte du menu. -->
@@ -176,6 +181,19 @@
             android:authorities="${applicationId}.vaultshare"
             android:exported="false"
             android:grantUriPermissions="true" />
+        <!-- « QR code depuis une image » : demande à Google Play d'installer
+             le sélecteur de photos sur les anciens Android (4.4 à 10).
+             Désactivé et non exporté : rien ne tourne dans Sentinel.
+             Snippet officiel : developer.android.com/training/data-storage/shared/photopicker -->
+        <service android:name="com.google.android.gms.metadata.ModuleDependencies"
+            android:enabled="false"
+            android:exported="false"
+            tools:ignore="MissingClass">
+            <intent-filter>
+                <action android:name="com.google.android.gms.metadata.MODULE_DEPENDENCIES" />
+            </intent-filter>
+            <meta-data android:name="photopicker_activity:0:required" android:value="" />
+        </service>
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
         <meta-data

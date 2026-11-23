@@ -144,7 +144,15 @@ abstract class CheckPlayProtectManifest : DefaultTask() {
                     found.joinToString("\n") { "  - $it" },
             )
         }
-        report.get().asFile.writeText("OK : aucun accès à risque pour Play Protect.\n")
+        // Liste des permissions du manifeste fusionné : ManifestTest la
+        // compare à la liste attendue (aucune permission sensible ajoutée).
+        val permissions = doc.getElementsByTagName("uses-permission").let { nodes ->
+            (0 until nodes.length).map { (nodes.item(it) as Element).getAttributeNS(ns, "name") }
+        }.distinct().sorted()
+        report.get().asFile.writeText(
+            "OK : aucun accès à risque pour Play Protect.\n" +
+                permissions.joinToString("") { "permission: $it\n" },
+        )
     }
 }
 
@@ -199,6 +207,9 @@ dependencies {
 
     // FileProvider (photo d'un document du coffre) ; version fixée plus haut.
     implementation("androidx.core:core:1.18.0")
+    // Sélecteur de photos (PickVisualMedia), déjà tiré par Flutter :
+    // QR code depuis une image, sans permission de stockage.
+    implementation("androidx.activity:activity:1.13.0")
 
     // Lecture des QR codes (Liens > Scanner un QR code). Apache 2.0.
     // Décodage ZXing sur le téléphone : ni réseau, ni modèle téléchargé.

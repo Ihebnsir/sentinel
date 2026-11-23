@@ -12,6 +12,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.provider.Settings
+import androidx.core.content.IntentCompat
 import com.iheb.sentinel.firewall.FirewallChannel
 import com.iheb.sentinel.weekly.WeeklyChannel
 import io.flutter.embedding.android.FlutterActivity
@@ -38,6 +39,10 @@ class MainActivity : FlutterActivity() {
 
     // Texte reçu au lancement, en attente que Dart le demande.
     private var initialSharedText: String? = null
+
+    // Image partagée au lancement (QR code à lire). Seulement son adresse,
+    // en mémoire : l'image n'est jamais copiée.
+    private var initialSharedImage: Uri? = null
 
     // Lancement par la tuile du pare-feu, en attente que Dart le demande.
     private var initialOpenFirewall = false
@@ -68,7 +73,8 @@ class MainActivity : FlutterActivity() {
         // savedInstanceState != null : l'app est recréée (rotation, retour
         // depuis les apps récentes…) ; le texte a déjà été traité.
         if (savedInstanceState == null && !launchedFromHistory(intent)) {
-            initialSharedText = sharedTextFrom(intent)
+            initialSharedImage = sharedImageFrom(intent)
+            if (initialSharedImage == null) initialSharedText = sharedTextFrom(intent)
             initialOpenFirewall = intent?.action == ACTION_OPEN_FIREWALL
         }
     }
@@ -80,6 +86,11 @@ class MainActivity : FlutterActivity() {
         setIntent(intent)
         if (intent.action == ACTION_OPEN_FIREWALL) {
             shareChannel?.invokeMethod("onOpenFirewall", null)
+            return
+        }
+        val image = sharedImageFrom(intent)
+        if (image != null) {
+            qrScanner?.decodeImage(image) { shareChannel?.invokeMethod("onSharedImage", it) }
             return
         }
         val text = sharedTextFrom(intent) ?: return
@@ -104,6 +115,17 @@ class MainActivity : FlutterActivity() {
                         "getInitialSharedText" -> {
                             result.success(initialSharedText)
                             initialSharedText = null
+                        }
+                        // Image partagée : décodée maintenant, puis oubliée.
+                        "getInitialSharedImage" -> {
+                            val uri = initialSharedImage
+                            initialSharedImage = null
+                            val scanner = qrScanner
+                            if (uri == null || scanner == null) {
+                                result.success(null)
+                            } else {
+                                scanner.decodeImage(uri) { result.success(it) }
+                            }
                         }
                         // Idem pour la tuile du pare-feu.
                         "getInitialOpenFirewall" -> {
@@ -232,6 +254,16 @@ class MainActivity : FlutterActivity() {
             sendText = intent.getCharSequenceExtra(Intent.EXTRA_TEXT),
             processText = intent.getCharSequenceExtra(Intent.EXTRA_PROCESS_TEXT),
         )
+    }
+
+    // Image partagée (SEND, image/*) : son adresse content://, sinon null.
+    // Refusée si elle désigne un fichier de Sentinel (QrImageDecoder).
+    private fun sharedImageFrom(intent: Intent?): Uri? {
+        if (intent?.action != Intent.ACTION_SEND) return null
+        if (intent.type?.startsWith("image/") != true) return null
+        val uri = IntentCompat.getParcelableExtra(intent, Intent.EXTRA_STREAM, Uri::class.java)
+            ?: return null
+        return uri.takeIf { QrImageDecoder.isAcceptableUri(it.scheme, it.authority, packageName) }
     }
 
     private fun launchedFromHistory(intent: Intent?): Boolean =

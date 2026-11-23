@@ -108,14 +108,71 @@ class ManifestTest {
         }
     }
 
-    @Test
-    fun `rapport du manifeste fusionne - aucun acces a risque`() {
-        // Écrit par checkPlayProtectDebug (dépendance de testDebugUnitTest),
-        // chemin transmis par build.gradle.kts.
+    // Écrit par checkPlayProtectDebug (dépendance de testDebugUnitTest),
+    // chemin transmis par build.gradle.kts.
+    private fun mergedReport(): String {
         val path = System.getProperty("sentinel.playProtectReport")
         assertTrue("lancer ./gradlew testDebugUnitTest", !path.isNullOrEmpty())
         val report = File(path!!)
         assertTrue("rapport absent : $report", report.isFile)
-        assertTrue(report.readText().startsWith("OK"))
+        return report.readText()
+    }
+
+    @Test
+    fun `rapport du manifeste fusionne - aucun acces a risque`() {
+        assertTrue(mergedReport().startsWith("OK"))
+    }
+
+    @Test
+    fun `manifeste fusionne - exactement les permissions attendues`() {
+        // Toute nouvelle permission (stockage, photos, localisation…), même
+        // ajoutée par une bibliothèque, fait échouer ce test : à justifier.
+        val permissions = mergedReport().lines()
+            .filter { it.startsWith("permission: ") }
+            .map { it.removePrefix("permission: ") }
+            .toSet()
+        val expected = setOf(
+            "ACCESS_NETWORK_STATE", "CAMERA", "FOREGROUND_SERVICE",
+            "FOREGROUND_SERVICE_SYSTEM_EXEMPTED", "INTERNET", "PACKAGE_USAGE_STATS",
+            "POST_NOTIFICATIONS", "QUERY_ALL_PACKAGES", "RECEIVE_BOOT_COMPLETED",
+            "REQUEST_DELETE_PACKAGES", "SCHEDULE_EXACT_ALARM", "USE_BIOMETRIC",
+        ).map { "android.permission.$it" }.toSet() +
+            // Permission « signature » d'AndroidX (récepteurs internes).
+            "com.iheb.sentinel.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
+        assertEquals(expected, permissions)
+    }
+
+    @Test
+    fun `QR depuis une image - aucune permission de stockage ni de photos`() {
+        val nodes = parse("src/main/AndroidManifest.xml").getElementsByTagName("uses-permission")
+        val names = (0 until nodes.length).map { (nodes.item(it) as Element).attr("name") }
+        val storage = listOf(
+            "READ_EXTERNAL_STORAGE", "WRITE_EXTERNAL_STORAGE", "MANAGE_EXTERNAL_STORAGE",
+            "READ_MEDIA_IMAGES", "READ_MEDIA_VIDEO", "READ_MEDIA_VISUAL_USER_SELECTED",
+            "ACCESS_MEDIA_LOCATION",
+        ).map { "android.permission.$it" }
+        assertTrue(names.none { it in storage })
+    }
+
+    @Test
+    fun `partage vers Sentinel - texte et images seulement`() {
+        val main = component(".MainActivity")
+        val filters = main.getElementsByTagName("intent-filter")
+        val sendTypes = (0 until filters.length).map { filters.item(it) as Element }
+            .filter { f -> actionsOf(f).contains("android.intent.action.SEND") }
+            .flatMap { f ->
+                val data = f.getElementsByTagName("data")
+                (0 until data.length).map { (data.item(it) as Element).attr("mimeType") }
+            }
+        assertEquals(listOf("image/*", "text/plain"), sendTypes.sorted())
+    }
+
+    @Test
+    fun `module du selecteur de photos - desactive et non exporte`() {
+        val services = parse("src/main/AndroidManifest.xml").getElementsByTagName("service")
+        val module = (0 until services.length).map { services.item(it) as Element }
+            .single { it.attr("name") == "com.google.android.gms.metadata.ModuleDependencies" }
+        assertEquals("false", module.attr("enabled"))
+        assertEquals("false", module.attr("exported"))
     }
 }
