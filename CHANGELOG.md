@@ -6,7 +6,7 @@ Le format suit [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/) et le pr
 
 ## [Non publié]
 
-## [1.2.0] - non publié
+## [1.2.0] - 2026-11-23
 
 Scanner de QR code amélioré (onglet Liens), toujours sans permission sensible, 100 % sur le téléphone : rien n'est envoyé, rien n'est enregistré, rien ne s'ouvre tout seul.
 
@@ -127,7 +127,8 @@ Première version publique. L'app tourne entièrement sur le téléphone, sans c
 - Sauvegarde Android désactivée pour les données de l'app.
 - CI : tests, couverture minimale de 85 %, Gitleaks, Dependabot, et pour le serveur : pytest, ruff, bandit, pip-audit et image Docker non-root.
 
-[Non publié]: https://github.com/Ihebnsir/sentinel/compare/v1.1.0...HEAD
+[Non publié]: https://github.com/Ihebnsir/sentinel/compare/v1.2.0...HEAD
+[1.2.0]: https://github.com/Ihebnsir/sentinel/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/Ihebnsir/sentinel/compare/v1.0.1...v1.1.0
 [1.0.1]: https://github.com/Ihebnsir/sentinel/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/Ihebnsir/sentinel/releases/tag/v1.0.0
