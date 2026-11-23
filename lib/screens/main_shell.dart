@@ -41,7 +41,10 @@ class _MainShellState extends State<MainShell> {
   List<Widget> get _pages => [
         const HomeScreen(),
         const AppsScreen(),
-        LinksScreen(sharedText: _share.received),
+        LinksScreen(
+          sharedText: _share.received,
+          sharedImage: _share.receivedImage,
+        ),
         widget.vaultBuilder?.call(_selectedIndex == _vaultIndex) ??
             VaultScreen(visible: _selectedIndex == _vaultIndex),
       ];
@@ -50,6 +53,7 @@ class _MainShellState extends State<MainShell> {
   void initState() {
     super.initState();
     _share.received.addListener(_showLinks);
+    _share.receivedImage.addListener(_showLinks);
     _share.firewallRequests.addListener(_showFirewall);
     _share.start();
   }
@@ -57,12 +61,13 @@ class _MainShellState extends State<MainShell> {
   @override
   void dispose() {
     _share.received.removeListener(_showLinks);
+    _share.receivedImage.removeListener(_showLinks);
     _share.firewallRequests.removeListener(_showFirewall);
     _share.dispose();
     super.dispose();
   }
 
-  // Un texte arrive : on affiche l'onglet Liens qui va le vérifier.
+  // Un texte ou une image arrive : on affiche l'onglet Liens qui va le vérifier.
   void _showLinks() {
     setState(() => _selectedIndex = _linksIndex);
   }

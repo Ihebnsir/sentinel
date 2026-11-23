@@ -1,5 +1,9 @@
 import 'package:material_ui/material_ui.dart';
 
+/// Un QR code affiché reste sombre sur clair, même en thème sombre :
+/// les appareils photo lisent mal un QR code inversé.
+const qrCodePalette = AppColors.light;
+
 /// Les couleurs de l'app, en deux palettes : claire et nuit (comme l'icône).
 /// Les écrans les lisent avec `context.colors.encre`, jamais en dur :
 /// le thème choisi (clair, sombre ou celui du téléphone) s'applique partout.

@@ -51,12 +51,15 @@ class StatusBadge extends StatelessWidget {
           children: [
             Icon(level.icon, size: AppSize.iconSmall, color: color),
             const SizedBox(width: AppSpace.xs),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: AppText.detail,
-                fontWeight: FontWeight.w600,
-                color: color,
+            // Flexible : un libellé long passe à la ligne au lieu de déborder.
+            Flexible(
+              child: Text(
+                label,
+                style: TextStyle(
+                  fontSize: AppText.detail,
+                  fontWeight: FontWeight.w600,
+                  color: color,
+                ),
               ),
             ),
           ],

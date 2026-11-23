@@ -145,6 +145,9 @@ void main() {
     testWidgets('en arabe, de droite à gauche, sans débordement', (
       tester,
     ) async {
+      // Verdict « Suspect » de la crypto (1.2.0) : écran plus long.
+      tester.view.physicalSize = const Size(1080, 4000);
+      addTearDown(tester.view.reset);
       await tester.pumpWidget(
         testApp(
           locale: const Locale('ar'),
@@ -155,7 +158,8 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      expect(find.text(ar.qrKindPayment), findsOneWidget);
+      // Cryptomonnaie : type propre depuis la 1.2.0.
+      expect(find.text(ar.qrKindCrypto), findsOneWidget);
       expect(find.text(ar.qrActionPayment), findsOneWidget);
       expect(
         Directionality.of(tester.element(find.text(ar.qrResultTitle))),

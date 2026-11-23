@@ -21,6 +21,7 @@ import '../widgets/loading_bar.dart';
 import '../widgets/verdict_section.dart';
 import 'firewall_screen.dart';
 import 'qr_result_screen.dart';
+import 'wifi_share_screen.dart';
 import '../widgets/ui.dart';
 
 /// Onglet « Liens » : l'utilisateur colle, partage ou scanne un lien ;
@@ -30,6 +31,7 @@ class LinksScreen extends StatefulWidget {
   const LinksScreen({
     super.key,
     this.sharedText,
+    this.sharedImage,
     this.checkDomain,
     this.firewall,
     this.qr,
@@ -37,6 +39,9 @@ class LinksScreen extends StatefulWidget {
 
   /// Texte reçu d'une autre app : on y cherche le premier lien.
   final ValueListenable<SharedText?>? sharedText;
+
+  /// QR codes lus dans une image partagée vers Sentinel.
+  final ValueListenable<QrImageResult?>? sharedImage;
 
   /// Remplacés dans les tests.
   final DomainChecker? checkDomain;
@@ -53,6 +58,7 @@ class _LinksScreenState extends State<LinksScreen> {
   late final QrScannerService _qr = widget.qr ?? QrScannerService();
 
   bool _scanning = false;
+  bool _readingImage = false;
   bool _checking = false;
   bool _noLink = false; // aucun lien dans le texte
   bool _failed = false; // marques connues illisibles
@@ -64,6 +70,9 @@ class _LinksScreenState extends State<LinksScreen> {
   void initState() {
     super.initState();
     widget.sharedText?.addListener(_onShared);
+    // L'onglet existe dès le lancement (IndexedStack de MainShell) : il
+    // écoute avant que la première image partagée n'arrive.
+    widget.sharedImage?.addListener(_onSharedImage);
   }
 
   @override
@@ -73,11 +82,16 @@ class _LinksScreenState extends State<LinksScreen> {
       oldWidget.sharedText?.removeListener(_onShared);
       widget.sharedText?.addListener(_onShared);
     }
+    if (oldWidget.sharedImage != widget.sharedImage) {
+      oldWidget.sharedImage?.removeListener(_onSharedImage);
+      widget.sharedImage?.addListener(_onSharedImage);
+    }
   }
 
   @override
   void dispose() {
     widget.sharedText?.removeListener(_onShared);
+    widget.sharedImage?.removeListener(_onSharedImage);
     _controller.dispose();
     super.dispose();
   }
@@ -191,12 +205,61 @@ class _LinksScreenState extends State<LinksScreen> {
     } else if (text != null) {
       await Navigator.of(context).push(
         MaterialPageRoute<void>(
-          builder: (_) =>
-              QrResultScreen(raw: text, checkDomain: widget.checkDomain),
+          builder: (_) => QrResultScreen(
+            raw: text,
+            checkDomain: widget.checkDomain,
+            fromCamera: true,
+          ),
         ),
       );
     }
   }
+
+  /// « Depuis une image » : sélecteur de photos d'Android, sans permission
+  /// de stockage. L'image est lue sur le téléphone, ni copiée ni gardée.
+  Future<void> _scanImage() async {
+    setState(() => _readingImage = true);
+    final result = await _qr.pickImage();
+    if (!mounted) return;
+    setState(() => _readingImage = false);
+    await _showImageResult(result);
+  }
+
+  // Une image arrive d'une autre app (partage) : même suite.
+  void _onSharedImage() {
+    final result = widget.sharedImage?.value;
+    if (result == null || !mounted) return;
+    _showImageResult(result);
+  }
+
+  /// Aucun QR : message clair. Un seul : son résultat. Plusieurs : la liste.
+  Future<void> _showImageResult(QrImageResult result) async {
+    final l = context.l10n;
+    final codes = result.codes;
+    final error = result.error;
+    if (error != null) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(error.message(l))));
+      return;
+    }
+    if (codes == null) return; // sélecteur fermé
+    if (codes.isEmpty) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(l.qrImageNoQr)));
+      return;
+    }
+    await Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => codes.length == 1
+            ? QrResultScreen(raw: codes.single, checkDomain: widget.checkDomain)
+            : QrChoiceScreen(codes: codes, checkDomain: widget.checkDomain),
+      ),
+    );
+  }
+
+  Future<void> _shareWifi() => Navigator.of(context).push(
+    MaterialPageRoute<void>(builder: (_) => WifiShareScreen(service: _qr)),
+  );
 
   // Pourquoi la caméra, avant la demande d'Android. true : continuer.
   Future<bool> _explainCamera() async {
@@ -275,7 +338,16 @@ class _LinksScreenState extends State<LinksScreen> {
                   ),
                 if (result != null && !_checking) ..._resultWidgets(l, result),
                 const SizedBox(height: AppSpace.xl),
-                _QrScanRow(onTap: _scanning ? null : _scanQr),
+                _QrRows(
+                  onScan: _scanning ? null : _scanQr,
+                  onImage: _readingImage ? null : _scanImage,
+                  onShareWifi: _shareWifi,
+                ),
+                if (_readingImage)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: AppSpace.md),
+                    child: LoadingBar(label: l.qrImageReading),
+                  ),
                 AutoProtectionRow(firewall: _firewall),
               ],
             ),
@@ -404,15 +476,22 @@ class _LinkField extends StatelessWidget {
   }
 }
 
-/// Ligne « Scanner un QR code », entre deux traits fins.
-class _QrScanRow extends StatelessWidget {
-  const _QrScanRow({required this.onTap});
+/// Lignes QR code : caméra, image, « Partager mon Wi-Fi », entre traits fins.
+class _QrRows extends StatelessWidget {
+  const _QrRows({
+    required this.onScan,
+    required this.onImage,
+    required this.onShareWifi,
+  });
 
-  final VoidCallback? onTap; // null pendant un scan
+  final VoidCallback? onScan; // null pendant un scan
+  final VoidCallback? onImage; // null pendant la lecture d'une image
+  final VoidCallback onShareWifi;
 
   @override
   Widget build(BuildContext context) {
     final l = context.l10n;
+    final blue = context.colors.bleu;
     return Column(
       children: [
         const AppDivider(),
@@ -420,8 +499,24 @@ class _QrScanRow extends StatelessWidget {
           icon: Icons.qr_code_scanner,
           title: l.qrScanButton,
           subtitle: l.qrScanSubtitle,
-          titleColor: context.colors.bleu,
-          onTap: onTap,
+          titleColor: blue,
+          onTap: onScan,
+        ),
+        const AppDivider(),
+        ListRow(
+          icon: Icons.image_search,
+          title: l.qrImageButton,
+          subtitle: l.qrImageSubtitle,
+          titleColor: blue,
+          onTap: onImage,
+        ),
+        const AppDivider(),
+        ListRow(
+          icon: Icons.wifi_tethering,
+          title: l.qrWifiShareButton,
+          subtitle: l.qrWifiShareSubtitle,
+          titleColor: blue,
+          onTap: onShareWifi,
         ),
         const AppDivider(),
       ],

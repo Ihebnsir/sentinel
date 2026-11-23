@@ -32,6 +32,59 @@ class QrScanResult {
   final QrScanError? error;
 }
 
+/// Pourquoi une image n'a pas pu être lue.
+enum QrImageError {
+  androidOnly,
+  failed, // image illisible ou refusée
+  tooLarge; // trop grande pour la mémoire
+
+  String message(AppLocalizations l) => switch (this) {
+    androidOnly => l.commonAndroidOnly,
+    failed => l.qrImageFailed,
+    tooLarge => l.qrImageTooLarge,
+  };
+}
+
+/// QR codes lus dans une image : liste (vide si aucun), ou erreur.
+/// Les deux à null : l'utilisateur a fermé le sélecteur.
+class QrImageResult {
+  const QrImageResult.codes(List<String> this.codes) : error = null;
+  const QrImageResult.error(QrImageError this.error) : codes = null;
+  const QrImageResult.cancelled() : codes = null, error = null;
+
+  /// Réponse de QrImageReader.kt : {"codes": [...]} ou {"error": "..."}.
+  /// Toute autre valeur : annulé (null) ou échec.
+  factory QrImageResult.fromNative(Object? answer) {
+    if (answer == null) return const QrImageResult.cancelled();
+    if (answer is! Map) return const QrImageResult.error(QrImageError.failed);
+    final codes = answer['codes'];
+    if (codes is List) {
+      return QrImageResult.codes([
+        for (final c in codes)
+          if (c is String) c,
+      ]);
+    }
+    return QrImageResult.error(
+      answer['error'] == 'TOO_LARGE'
+          ? QrImageError.tooLarge
+          : QrImageError.failed,
+    );
+  }
+
+  final List<String>? codes;
+  final QrImageError? error;
+}
+
+/// Un QR code à dessiner : [size] × [size] cases, 1 = case sombre.
+class QrMatrix {
+  const QrMatrix(this.size, this.modules);
+
+  final int size;
+  final Uint8List modules;
+
+  bool isDark(int x, int y) => modules[y * size + x] != 0;
+}
+
 /// Fait le lien avec QrScanner.kt (ZXing, tout sur le téléphone).
 class QrScannerService {
   // Même nom que dans QrScanner.kt.
@@ -75,12 +128,49 @@ class QrScannerService {
     }
   }
 
+  /// Sélecteur de photos d'Android (aucune permission de stockage), puis
+  /// lecture des QR codes de l'image sur le téléphone. L'image n'est ni
+  /// copiée ni gardée.
+  Future<QrImageResult> pickImage() async {
+    if (!isSupported) return const QrImageResult.error(QrImageError.androidOnly);
+    try {
+      return QrImageResult.fromNative(
+        await _channel.invokeMethod<Object?>('pickImage'),
+      );
+    } on MissingPluginException {
+      return const QrImageResult.error(QrImageError.androidOnly);
+    } on PlatformException {
+      return const QrImageResult.error(QrImageError.failed);
+    }
+  }
+
+  /// Crée le QR code de [text] (ZXing, sur le téléphone). null : échec.
+  Future<QrMatrix?> encode(String text) async {
+    if (!isSupported) return null;
+    try {
+      final answer = await _channel.invokeMethod<Object?>('encodeQr', {
+        'text': text,
+      });
+      if (answer is! Map) return null;
+      final size = answer['size'];
+      final modules = answer['modules'];
+      if (size is! int || modules is! Uint8List) return null;
+      if (size <= 0 || modules.length != size * size) return null;
+      return QrMatrix(size, modules);
+    } on MissingPluginException {
+      return null;
+    } on PlatformException {
+      return null;
+    }
+  }
+
   /// Lance l'action, déjà confirmée par l'utilisateur. Kotlin vérifie
   /// encore le contenu. false si refusé ou si aucune app ne sait l'ouvrir.
   Future<bool> perform(QrAssessment assessment) async {
     if (!isSupported || !assessment.actionAllowed) return false;
+    final url = assessment.openableUrl;
     final (method, arguments) = switch (assessment.content) {
-      QrLink(:final url) => ('openLink', {'url': url}),
+      _ when url != null => ('openLink', {'url': url}),
       QrPhone(:final number) => ('dial', {'number': number}),
       QrSms(:final number, :final body) => (
         'composeSms',
