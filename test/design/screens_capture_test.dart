@@ -207,6 +207,12 @@ final _scenes = <_Scene>[
     'qr-wifi',
     (_, _) async => const QrResultScreen(raw: 'WIFI:T:nopass;S:Gare;;'),
   ),
+  // QR code d'un faux WhatsApp à installer (.apk), adresse fictive.
+  _Scene(
+    'qr-apk',
+    (_, _) async =>
+        const QrResultScreen(raw: 'https://exemple.tn/WhatsApp-Gold.apk'),
+  ),
   _Scene('coffre-vide', (tester, dir) async {
     final session = VaultSession(
       storage: VaultStorage(directory: () async => dir),

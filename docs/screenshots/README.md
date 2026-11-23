@@ -1,12 +1,13 @@
 # Screenshots
 
-Shown in the "Preview" / "Aperçu" section of `README.md` and `README.fr.md`.
+Shown in the "Screenshots" / "Captures d'écran" section of `README.md` and `README.fr.md`, and used by `tools/branding/make_social_preview.py`.
 
 | File | Screen |
 |---|---|
 | `home.png` | Home: security score, actions sorted by importance, protections |
 | `apps.png` | Apps: installed apps with their risk badge |
 | `links.png` | Link checker: a "Dangerous" verdict, the real destination and the reasons |
+| `qr-apk.png` | QR code result (1.2.0): a direct `.apk` download marked "Dangerous" |
 | `vault.png` | Vault: unlocked, filled with sample entries |
 | `firewall.png` | DNS firewall: status, blocked requests, block lists |
 | `weekly.png` | Weekly report |
@@ -20,7 +21,7 @@ They are rendered by Flutter, not taken on a phone: `test/design/screens_capture
 
 ```powershell
 $env:SENTINEL_CAPTURE = "C:\path\out"
-$env:SENTINEL_CAPTURE_ONLY = "accueil,applications,liens-dangereux,coffre,pare-feu,bilan"
+$env:SENTINEL_CAPTURE_ONLY = "accueil,applications,liens-dangereux,qr-apk,coffre,pare-feu,bilan"
 $env:SENTINEL_CAPTURE_VARIANTS = "fr-clair,ar-sombre"
 flutter test test/design/screens_capture_test.dart
 ```
