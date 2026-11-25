@@ -23,6 +23,7 @@ Scanner de QR code amélioré (onglet Liens), toujours sans permission sensible,
 - Architecture : un analyseur pur (`lib/services/qr/`) transforme le contenu en type + verdict + raisons ; l'écran ne fait qu'afficher.
 - Les badges de statut passent à la ligne au lieu de déborder quand le libellé est long.
 - Un texte mal encodé dans un QR (`%E0%A4`) ne fait plus échouer l'analyse.
+- États vides : la grande arche bleue de l'icône de Sentinel remplace les dessins Sidi Bou (fenêtre en moucharabieh, porte, jasmin), en clair comme en sombre.
 
 ## [1.1.0] - 2026-11-19
 

@@ -205,7 +205,6 @@ class _AppsScreenState extends State<AppsScreen> with WidgetsBindingObserver {
   Widget _emptyState() {
     final l = context.l10n;
     return EmptyState(
-      motif: SidiBouMotif.fenetre,
       buttonIcon: Icons.search,
 
       title: l.appsEmptyTitle,

@@ -2,15 +2,14 @@ import 'package:material_ui/material_ui.dart';
 
 import '../theme/app_colors.dart';
 import '../theme/tokens.dart';
+import 'arch_icon.dart';
 import 'ui/app_buttons.dart';
-import 'ui/sidi_bou_illustration.dart';
 
-/// État vide réutilisable : petit dessin Sidi Bou, titre, explication et
+/// État vide réutilisable : grande arche de Sentinel, titre, explication et
 /// bouton principal facultatif.
 class EmptyState extends StatelessWidget {
   const EmptyState({
     super.key,
-    required this.motif,
     required this.title,
     required this.message,
     this.buttonLabel,
@@ -18,7 +17,6 @@ class EmptyState extends StatelessWidget {
     this.buttonIcon,
   });
 
-  final SidiBouMotif motif;
   final String title;
   final String message;
   final String? buttonLabel; // si null : pas de bouton
@@ -37,7 +35,14 @@ class EmptyState extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              SidiBouIllustration(motif),
+              // L'icône de l'app, en bleu du thème ; décorative.
+              ExcludeSemantics(
+                child: ArchIcon(
+                  filled: true,
+                  size: AppSize.illustration,
+                  color: context.colors.bleu,
+                ),
+              ),
               const SizedBox(height: AppSpace.xl),
               Text(
                 title,

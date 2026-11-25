@@ -8,7 +8,9 @@ import 'package:sentinel/services/breach/breach_checker.dart';
 import 'package:sentinel/services/breach/breach_consent.dart';
 import 'package:sentinel/services/vault/vault_session.dart';
 import 'package:sentinel/services/vault/vault_storage.dart';
+import 'package:sentinel/theme/app_colors.dart';
 import 'package:sentinel/theme/app_theme.dart';
+import 'package:sentinel/widgets/arch_icon.dart';
 import 'package:sentinel/widgets/score_arch.dart';
 import 'package:sentinel/widgets/ui.dart';
 
@@ -131,37 +133,38 @@ void main() {
   });
 
   group('état vide illustré', () {
-    for (final motif in SidiBouMotif.values) {
-      for (final theme in [AppTheme.light, AppTheme.dark]) {
-        testWidgets('${motif.name} (${theme.brightness.name})', (tester) async {
-          final handle = tester.ensureSemantics();
-          await tester.pumpWidget(
-            testApp(
-              theme: theme,
-              home: Scaffold(
-                body: EmptyState(
-                  motif: motif,
-                  title: 'Titre',
-                  message: 'Message',
-                  buttonLabel: 'Action',
-                  onPressed: () {},
-                ),
+    for (final theme in [AppTheme.light, AppTheme.dark]) {
+      testWidgets('arche (${theme.brightness.name})', (tester) async {
+        final handle = tester.ensureSemantics();
+        await tester.pumpWidget(
+          testApp(
+            theme: theme,
+            home: Scaffold(
+              body: EmptyState(
+                title: 'Titre',
+                message: 'Message',
+                buttonLabel: 'Action',
+                onPressed: () {},
               ),
             ),
-          );
-          expect(find.byType(SidiBouIllustration), findsOneWidget);
-          // Dessin décoratif : rien d'annoncé par TalkBack.
-          expect(
-            find.descendant(
-              of: find.byType(SidiBouIllustration),
-              matching: find.byType(CustomPaint),
-            ),
-            findsOneWidget,
-          );
-          await expectLater(tester, meetsGuideline(textContrastGuideline));
-          handle.dispose();
-        });
-      }
+          ),
+        );
+        // Grande arche pleine, en bleu du thème.
+        final arch = tester.widget<ArchIcon>(find.byType(ArchIcon));
+        expect(arch.filled, isTrue);
+        expect(arch.size, AppSize.illustration);
+        expect(arch.color, theme.extension<AppColors>()?.bleu);
+        // Dessin décoratif : rien d'annoncé par TalkBack.
+        expect(
+          find.ancestor(
+            of: find.byType(ArchIcon),
+            matching: find.byType(ExcludeSemantics),
+          ),
+          findsWidgets,
+        );
+        await expectLater(tester, meetsGuideline(textContrastGuideline));
+        handle.dispose();
+      });
     }
   });
 

@@ -205,7 +205,6 @@ class _VaultScreenState extends State<VaultScreen> {
           );
         }
         return EmptyState(
-          motif: SidiBouMotif.porte,
           title: l.vaultEmptyTitle,
           message: l.vaultEmptyMessage,
           buttonLabel: l.vaultCreate,
@@ -247,8 +246,6 @@ class _VaultScreenState extends State<VaultScreen> {
         );
       case VaultStatus.illisible:
         return EmptyState(
-          motif: SidiBouMotif.porte,
-
           title: l.vaultUnreadableTitle,
           message: l.vaultUnreadableMessage,
         );

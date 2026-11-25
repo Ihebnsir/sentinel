@@ -61,7 +61,7 @@ Graisses : `w600` titres, `w500` intitulés, normal ailleurs. Interligne du text
 
 ### Tailles (`AppSize`)
 
-Icônes 18 / 24 / 28, icône d'en-tête 48 (`iconHero`), icônes d'app 32 / 40 / 64, cible tactile 48 (`tap`), séparateur 1, barre de chargement 2, dessin d'état vide 120.
+Icônes 18 / 24 / 28, icône d'en-tête 48 (`iconHero`), icônes d'app 32 / 40 / 64, cible tactile 48 (`tap`), séparateur 1, barre de chargement 2, arche d'état vide 120.
 
 ### Mouvement (`AppMotion`)
 
@@ -93,8 +93,8 @@ Transitions : `SoftPageTransitionsBuilder` (fondu + glissement de 3 % vers le ha
 | `AppDivider` | séparateur fin entre deux lignes (rouge pour un bloc d'alerte) |
 | `StatusBadge` | statut court en pilule teintée : **icône + mot + couleur**, jamais la couleur seule |
 | `VerdictHeader` | grand verdict (liens, QR, détail d'une app) : petite arche teintée avec icône, mot en grand, phrase |
-| `EmptyState` | écran vide : dessin Sidi Bou, titre, explication, bouton principal |
-| `SidiBouIllustration` | dessins originaux : `porte` (coffre), `fenetre` (applications), `jasmin` (tout va bien) |
+| `EmptyState` | écran vide : grande arche de l'icône (`ArchIcon` pleine, bleu du thème), titre, explication, bouton principal |
+| `SidiBouIllustration` | dessin original `porte`, seulement sur l'écran de déverrouillage du coffre ; tous les états vides utilisent l'arche |
 | `InfoMessage` | phrase centrée à la place d'un contenu (analyse impossible) |
 | `LoadingBar` (`widgets/loading_bar.dart`) | chargement : barre fine bleue, annoncée par TalkBack |
 

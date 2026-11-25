@@ -14,6 +14,7 @@ import '../services/wifi_risk.dart';
 import '../services/wifi_service.dart';
 import '../theme/app_colors.dart';
 import '../widgets/action_tile.dart';
+import '../widgets/arch_icon.dart';
 import '../widgets/network_protection_section.dart';
 import '../widgets/score_arch.dart';
 import '../widgets/wifi_alert.dart';
@@ -279,14 +280,17 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       const SizedBox(height: AppSpace.section),
       SectionHeader(title: l.homeToGainPoints),
       if (actions.isEmpty)
-        // Rien à faire : un brin de jasmin en récompense.
+        // Rien à faire : l'arche de Sentinel, comme les autres états vides.
         Padding(
           padding: const EdgeInsets.symmetric(vertical: AppSpace.lg),
           child: Row(
             children: [
-              const SidiBouIllustration(
-                SidiBouMotif.jasmin,
-                size: AppSize.appIconLarge,
+              ExcludeSemantics(
+                child: ArchIcon(
+                  filled: true,
+                  size: AppSize.appIconLarge,
+                  color: context.colors.bleu,
+                ),
               ),
               const SizedBox(width: AppSpace.lg),
               Expanded(
