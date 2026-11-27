@@ -102,11 +102,13 @@ class LinkCheck {
       final reason = finding.reason(l);
       if (!reasons.contains(reason)) reasons.add(reason);
     }
-    if (reasons.isEmpty && lists?.listsAvailable == true) {
-      reasons.add(l.linkReasonNotListed);
-    }
     return reasons;
   }
+
+  /// Absent des listes et rien relevé : simple information
+  /// (l.linkNoteNotListed), jamais une raison du verdict.
+  bool get notListed =>
+      !allowed && lists?.listsAvailable == true && verdict == Verdict.rien;
 }
 
 /// Vérifie le premier lien de [text] ; null s'il n'y en a aucun.

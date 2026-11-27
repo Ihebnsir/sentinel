@@ -6,6 +6,17 @@ Le format suit [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/) et le pr
 
 ## [Non publié]
 
+## [1.2.1] - 2026-11-27
+
+Corrections vues sur un vrai téléphone.
+
+### Modifié
+- Accueil : le mot « Bonjour » est retiré (français, arabe, anglais) ; le titre remonte en haut de l'écran, l'engrenage des réglages reste à droite, aligné sur le titre.
+- Le conseil final d'un QR code suit le type de menace : installation d'appli (.apk, boutique alternative), lien de messagerie (code demandé), contact ou numéro suspect, cryptomonnaie. « Ne saisissez aucun code ni mot de passe » reste réservé aux liens web.
+
+### Corrigé
+- « Absent des listes de sites dangereux » n'est plus affiché comme une raison de danger (icône rouge) : il disparaît quand le verdict est Dangereux ou Suspect, et s'affiche sinon comme une information neutre (icône info, gris) : « Ce domaine n'est pas dans les listes de sites dangereux connus (cela ne garantit pas qu'il est sûr). »
+
 ## [1.2.0] - 2026-11-23
 
 Scanner de QR code amélioré (onglet Liens), toujours sans permission sensible, 100 % sur le téléphone : rien n'est envoyé, rien n'est enregistré, rien ne s'ouvre tout seul.

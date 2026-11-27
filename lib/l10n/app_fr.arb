@@ -56,10 +56,6 @@
   "navHome": "Accueil",
   "navApps": "Applications",
   "navVault": "Coffre",
-  "homeGreeting": "Bonjour",
-  "@homeGreeting": {
-    "description": "Salutation neutre, sans prénom (SEN-16)"
-  },
   "homeTitleFailed": "Analyse impossible",
   "homeTitleDefault": "Sécurité du téléphone",
   "homeTitleProtected": "Votre téléphone est bien protégé",
@@ -1814,9 +1810,9 @@
       }
     }
   },
-  "linkReasonNotListed": "Absent des listes de sites dangereux de Sentinel",
-  "@linkReasonNotListed": {
-    "description": "Raison quand rien de suspect"
+  "linkNoteNotListed": "Ce domaine n'est pas dans les listes de sites dangereux connus (cela ne garantit pas qu'il est sûr).",
+  "@linkNoteNotListed": {
+    "description": "Information neutre (jamais une raison) quand rien de suspect"
   },
   "verdictDangerous": "Dangereux",
   "@verdictDangerous": {
@@ -1833,6 +1829,22 @@
   "adviceNothingKnown": "Aucune vérification n'est parfaite : après avoir ouvert un lien reçu, ne donnez jamais vos codes ni vos mots de passe.",
   "@adviceNothingKnown": {
     "description": "Conseil : aucun problème connu"
+  },
+  "adviceApp": "N'installez pas cette application. Téléchargez vos applis uniquement depuis le Play Store.",
+  "@adviceApp": {
+    "description": "Conseil : installation d'appli hors Play Store (.apk, boutique alternative)"
+  },
+  "adviceMessaging": "Ne partagez jamais un code reçu par SMS, même si on vous le demande sur WhatsApp ou Telegram : il sert à voler votre compte.",
+  "@adviceMessaging": {
+    "description": "Conseil : lien de messagerie suspect (demande de code)"
+  },
+  "adviceContact": "Vérifiez ce numéro sur le site officiel avant de l'appeler.",
+  "@adviceContact": {
+    "description": "Conseil : contact ou numéro suspect"
+  },
+  "adviceCrypto": "N'envoyez jamais de cryptomonnaie à la demande d'un inconnu : un paiement en crypto ne peut pas être annulé.",
+  "@adviceCrypto": {
+    "description": "Conseil : adresse de cryptomonnaie"
   },
   "weeklyLinks": "Liens",
   "@weeklyLinks": {

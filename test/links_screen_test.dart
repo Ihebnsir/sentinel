@@ -83,7 +83,9 @@ void main() {
         find.text(fr.linksRealDestination('biat[.]com[.]tn')),
         findsOneWidget,
       );
-      expect(find.text(fr.linkReasonNotListed), findsOneWidget);
+      // Information neutre : icône info, pas l'icône du verdict.
+      expect(find.text(fr.linkNoteNotListed), findsOneWidget);
+      expect(find.byIcon(Icons.info_outline), findsOneWidget);
       // Rien ne s'ouvre tout seul.
       expect(calls, isEmpty);
 

@@ -7,7 +7,7 @@ Shown in the "Screenshots" / "Captures d'écran" section of `README.md` and `REA
 | `home.png` | Home: security score, actions sorted by importance, protections |
 | `apps.png` | Apps: installed apps with their risk badge |
 | `links.png` | Link checker: a "Dangerous" verdict, the real destination and the reasons |
-| `qr-apk.png` | QR code result (1.2.0): a direct `.apk` download marked "Dangerous" |
+| `qr-apk.png` | QR code result (1.2.1): a direct `.apk` download marked "Dangerous" |
 | `vault.png` | Vault: unlocked, filled with sample entries |
 | `firewall.png` | DNS firewall: status, blocked requests, block lists |
 | `weekly.png` | Weekly report |

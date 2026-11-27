@@ -208,16 +208,15 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Salutation, et à droite l'accès discret aux réglages.
+                // Titre, et à droite l'accès discret aux réglages.
                 Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Expanded(
-                      child: Text(
-                        l.homeGreeting,
-                        style: TextStyle(
-                          fontSize: AppText.intitule,
-                          color: context.colors.secondaire,
-                        ),
+                      // Centre la 1re ligne du titre sur l'engrenage.
+                      child: Padding(
+                        padding: const EdgeInsets.only(top: AppSpace.xs),
+                        child: PageHeader(title: _title(l, report)),
                       ),
                     ),
                     IconButton(
@@ -232,7 +231,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                     ),
                   ],
                 ),
-                PageHeader(title: _title(l, report)),
                 const SizedBox(height: AppSpace.xl),
                 // 1. Le score, 2. ce qu'il reste à faire, 3. les protections.
                 ..._content(l, status, report),

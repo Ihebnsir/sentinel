@@ -89,9 +89,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get navVault => 'Vault';
 
   @override
-  String get homeGreeting => 'Hello';
-
-  @override
   String get homeTitleFailed => 'Analysis failed';
 
   @override
@@ -2691,8 +2688,8 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get linkReasonNotListed =>
-      'Not on Sentinel\'s lists of dangerous sites';
+  String get linkNoteNotListed =>
+      'This domain isn\'t on the lists of known dangerous sites (that doesn\'t guarantee it\'s safe).';
 
   @override
   String get verdictDangerous => 'Dangerous';
@@ -2707,6 +2704,22 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get adviceNothingKnown =>
       'No check is perfect: after opening a link you received, never give your codes or passwords.';
+
+  @override
+  String get adviceApp =>
+      'Don\'t install this app. Only download your apps from the Play Store.';
+
+  @override
+  String get adviceMessaging =>
+      'Never share a code you received by SMS, even if someone asks for it on WhatsApp or Telegram: it is used to steal your account.';
+
+  @override
+  String get adviceContact =>
+      'Check this number on the official website before calling it.';
+
+  @override
+  String get adviceCrypto =>
+      'Never send cryptocurrency at a stranger\'s request: a crypto payment can\'t be reversed.';
 
   @override
   String get weeklyLinks => 'Links';

@@ -150,7 +150,9 @@ void main() {
       ]) {
         final c = _check(text);
         expect(c.verdict, Verdict.rien, reason: text);
-        expect(c.reasons(fr), [fr.linkReasonNotListed], reason: text);
+        // « Absent des listes » : information à part, jamais une raison.
+        expect(c.reasons(fr), isEmpty, reason: text);
+        expect(c.notListed, isTrue, reason: text);
       }
     });
 

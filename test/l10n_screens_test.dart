@@ -82,7 +82,6 @@ void main() {
       await _pumpHome(tester, locale);
 
       expect(_direction(tester, find.byType(HomeScreen)), TextDirection.rtl);
-      expect(find.text(ar.homeGreeting), findsOneWidget);
       expect(find.text(ar.homeTitleExposed), findsOneWidget);
       expect(find.text(ar.commonOutOf100), findsOneWidget);
       expect(find.text(ar.homeAndroidVersion('15')), findsOneWidget);
@@ -94,12 +93,15 @@ void main() {
       expect(find.text(ar.wifiOpenTitle), findsOneWidget);
       expect(find.text(ar.wifiLevelDanger), findsOneWidget);
       // Aucun reste de français.
-      expect(find.text(fr.homeGreeting), findsNothing);
+      expect(find.text('Bonjour'), findsNothing);
+      expect(find.text('مرحبًا'), findsNothing);
       expect(find.text(fr.scoreLockTitle), findsNothing);
-      // Mise en page miroir : « مرحبًا » à droite, réglages à gauche.
-      final greeting = tester.getCenter(find.text(ar.homeGreeting));
+      // Mise en page miroir : titre à droite, réglages à gauche, sur la
+      // même ligne (plus de salutation au-dessus).
+      final title = tester.getRect(find.text(ar.homeTitleExposed));
       final settings = tester.getCenter(find.byIcon(Icons.settings_outlined));
-      expect(greeting.dx, greaterThan(settings.dx));
+      expect(title.center.dx, greaterThan(settings.dx));
+      expect(settings.dy, inInclusiveRange(title.top, title.top + 42));
     });
 
     testWidgets('Liens : verdict, destination, raisons et conseil en arabe', (
@@ -135,14 +137,13 @@ void main() {
       await _pumpHome(tester, locale);
 
       expect(_direction(tester, find.byType(HomeScreen)), TextDirection.ltr);
-      expect(find.text('Hello'), findsOneWidget);
+      expect(find.text('Hello'), findsNothing);
       expect(find.text('Your phone is at risk'), findsOneWidget);
       expect(find.text('To earn points'), findsOneWidget);
       expect(find.text('Set up a screen lock'), findsOneWidget);
       expect(find.text('Open Wi-Fi'), findsOneWidget);
       expect(find.text('Android 15'), findsOneWidget);
       expect(find.text('Install the security update'), findsOneWidget);
-      expect(find.text(fr.homeGreeting), findsNothing);
     });
 
     testWidgets('Liens : verdict, destination, raisons et conseil en anglais', (

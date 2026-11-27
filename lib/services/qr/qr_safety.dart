@@ -157,6 +157,20 @@ class QrAssessment {
   };
 }
 
+/// Le conseil final, selon le type de menace. Fonction pure.
+/// « Aucun code ni mot de passe » reste réservé aux liens web.
+String qrAdvice(AppLocalizations l, QrAssessment assessment) {
+  final verdict = assessment.verdict ?? Verdict.rien;
+  if (verdict == Verdict.rien) return verdict.advice(l);
+  return switch (assessment.content) {
+    QrAppInstall() => l.adviceApp,
+    QrMessaging() => l.adviceMessaging,
+    QrContact() || QrPhone() => l.adviceContact,
+    QrPayment(kind: PaymentKind.crypto) => l.adviceCrypto,
+    _ => verdict.advice(l),
+  };
+}
+
 /// Lien web à proposer d'ouvrir (lien, messagerie ou boutique en https).
 String? openableUrlOf(QrContent content) => switch (content) {
   QrLink(:final url) => url,

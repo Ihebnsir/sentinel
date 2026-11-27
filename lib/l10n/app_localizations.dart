@@ -245,12 +245,6 @@ abstract class AppLocalizations {
   /// **'Coffre'**
   String get navVault;
 
-  /// Salutation neutre, sans prénom (SEN-16)
-  ///
-  /// In fr, this message translates to:
-  /// **'Bonjour'**
-  String get homeGreeting;
-
   /// No description provided for @homeTitleFailed.
   ///
   /// In fr, this message translates to:
@@ -4523,11 +4517,11 @@ abstract class AppLocalizations {
   /// **'Vous avez autorisé « {host} » dans le pare-feu (liste blanche) : Sentinel ne le vérifie pas.'**
   String linkReasonAllowed(String host);
 
-  /// Raison quand rien de suspect
+  /// Information neutre (jamais une raison) quand rien de suspect
   ///
   /// In fr, this message translates to:
-  /// **'Absent des listes de sites dangereux de Sentinel'**
-  String get linkReasonNotListed;
+  /// **'Ce domaine n\'est pas dans les listes de sites dangereux connus (cela ne garantit pas qu\'il est sûr).'**
+  String get linkNoteNotListed;
 
   /// Verdict le plus grave
   ///
@@ -4552,6 +4546,30 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Aucune vérification n\'est parfaite : après avoir ouvert un lien reçu, ne donnez jamais vos codes ni vos mots de passe.'**
   String get adviceNothingKnown;
+
+  /// Conseil : installation d'appli hors Play Store (.apk, boutique alternative)
+  ///
+  /// In fr, this message translates to:
+  /// **'N\'installez pas cette application. Téléchargez vos applis uniquement depuis le Play Store.'**
+  String get adviceApp;
+
+  /// Conseil : lien de messagerie suspect (demande de code)
+  ///
+  /// In fr, this message translates to:
+  /// **'Ne partagez jamais un code reçu par SMS, même si on vous le demande sur WhatsApp ou Telegram : il sert à voler votre compte.'**
+  String get adviceMessaging;
+
+  /// Conseil : contact ou numéro suspect
+  ///
+  /// In fr, this message translates to:
+  /// **'Vérifiez ce numéro sur le site officiel avant de l\'appeler.'**
+  String get adviceContact;
+
+  /// Conseil : adresse de cryptomonnaie
+  ///
+  /// In fr, this message translates to:
+  /// **'N\'envoyez jamais de cryptomonnaie à la demande d\'un inconnu : un paiement en crypto ne peut pas être annulé.'**
+  String get adviceCrypto;
 
   /// Titre de section du bilan
   ///

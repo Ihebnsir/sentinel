@@ -26,12 +26,16 @@ class VerdictSection extends StatelessWidget {
     required this.reasons,
     required this.advice,
     this.subtitle,
+    this.note,
   });
 
   final Verdict verdict;
   final String? subtitle; // ex : « Ce lien mène en réalité à site[.]xyz »
   final List<String> reasons;
   final String advice;
+
+  /// Information neutre, affichée seulement sans danger (verdict « rien »).
+  final String? note;
 
   @override
   Widget build(BuildContext context) {
@@ -69,6 +73,36 @@ class VerdictSection extends StatelessWidget {
                   child: Text(
                     reason,
                     style: TextStyle(fontSize: AppText.corps, color: c.encre),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+        // Icône info et gris : ce n'est pas une raison du verdict.
+        if (note case final note? when verdict == Verdict.rien) ...[
+          const AppDivider(),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: AppSpace.md),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(top: AppSpace.xs),
+                  child: Icon(
+                    Icons.info_outline,
+                    size: AppSize.iconSmall,
+                    color: c.secondaire,
+                  ),
+                ),
+                const SizedBox(width: AppSpace.md),
+                Expanded(
+                  child: Text(
+                    note,
+                    style: TextStyle(
+                      fontSize: AppText.corps,
+                      color: c.secondaire,
+                    ),
                   ),
                 ),
               ],

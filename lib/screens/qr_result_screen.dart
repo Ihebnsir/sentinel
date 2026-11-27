@@ -213,7 +213,8 @@ class _QrResultScreenState extends State<QrResultScreen> {
               ? null
               : l.linksRealDestination(link.realDestination),
           reasons: reasons,
-          advice: verdict.advice(l),
+          advice: qrAdvice(l, assessment),
+          note: link?.notListed == true ? l.linkNoteNotListed : null,
         )
       else
         // Pas de verdict (Wi-Fi, paiement…) : avertissements seuls.

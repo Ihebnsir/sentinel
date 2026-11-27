@@ -89,9 +89,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get navVault => 'Coffre';
 
   @override
-  String get homeGreeting => 'Bonjour';
-
-  @override
   String get homeTitleFailed => 'Analyse impossible';
 
   @override
@@ -2724,8 +2721,8 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
-  String get linkReasonNotListed =>
-      'Absent des listes de sites dangereux de Sentinel';
+  String get linkNoteNotListed =>
+      'Ce domaine n\'est pas dans les listes de sites dangereux connus (cela ne garantit pas qu\'il est sûr).';
 
   @override
   String get verdictDangerous => 'Dangereux';
@@ -2740,6 +2737,22 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get adviceNothingKnown =>
       'Aucune vérification n\'est parfaite : après avoir ouvert un lien reçu, ne donnez jamais vos codes ni vos mots de passe.';
+
+  @override
+  String get adviceApp =>
+      'N\'installez pas cette application. Téléchargez vos applis uniquement depuis le Play Store.';
+
+  @override
+  String get adviceMessaging =>
+      'Ne partagez jamais un code reçu par SMS, même si on vous le demande sur WhatsApp ou Telegram : il sert à voler votre compte.';
+
+  @override
+  String get adviceContact =>
+      'Vérifiez ce numéro sur le site officiel avant de l\'appeler.';
+
+  @override
+  String get adviceCrypto =>
+      'N\'envoyez jamais de cryptomonnaie à la demande d\'un inconnu : un paiement en crypto ne peut pas être annulé.';
 
   @override
   String get weeklyLinks => 'Liens';

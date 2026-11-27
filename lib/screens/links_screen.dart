@@ -378,6 +378,7 @@ class _LinksScreenState extends State<LinksScreen> {
           if (result.isShortener) l.linksShortenerHelp,
         ],
         advice: verdict.advice(l),
+        note: result.notListed ? l.linkNoteNotListed : null,
       ),
       const SizedBox(height: AppSpace.xl),
       // Le lien tel qu'il sera ouvert, de gauche à droite même en arabe.

@@ -89,9 +89,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get navVault => 'الخزنة';
 
   @override
-  String get homeGreeting => 'مرحبًا';
-
-  @override
   String get homeTitleFailed => 'تعذّر التحليل';
 
   @override
@@ -2751,8 +2748,8 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
-  String get linkReasonNotListed =>
-      'غير موجود في قوائم المواقع الخطيرة لدى ⁦Sentinel⁩';
+  String get linkNoteNotListed =>
+      'هذا النطاق غير موجود في قوائم المواقع الخطيرة المعروفة (وهذا لا يضمن أنه آمن).';
 
   @override
   String get verdictDangerous => 'خطير';
@@ -2767,6 +2764,22 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get adviceNothingKnown =>
       'لا يوجد تحقق مثالي: بعد فتح رابط وصلك، لا تقدّم أبدًا رموزك ولا كلمات مرورك.';
+
+  @override
+  String get adviceApp =>
+      'لا تثبّت هذا التطبيق. نزّل تطبيقاتك من ⁦Play Store⁩ فقط.';
+
+  @override
+  String get adviceMessaging =>
+      'لا تشارك أبدًا رمزًا وصلك في رسالة قصيرة، حتى لو طُلب منك على ⁦WhatsApp⁩ أو ⁦Telegram⁩: يُستعمل لسرقة حسابك.';
+
+  @override
+  String get adviceContact =>
+      'تحقّق من هذا الرقم على الموقع الرسمي قبل الاتصال به.';
+
+  @override
+  String get adviceCrypto =>
+      'لا ترسل أبدًا عملات مشفّرة بطلب من شخص لا تعرفه: لا يمكن إلغاء الدفع بالعملات المشفّرة.';
 
   @override
   String get weeklyLinks => 'الروابط';
