@@ -61,7 +61,7 @@ Fictitious data only. Rendered by Flutter at Pixel 8 size ([how](docs/screenshot
 - **Verifiable signature.** Official APKs are signed with a single release key. Check before installing:
 
   ```
-  apksigner verify --print-certs sentinel-1.2.0.apk
+  apksigner verify --print-certs sentinel-1.2.1.apk
   ```
 
   The certificate SHA-256 digest must be `ec541b88160d995808bb24a61a8968d7c3c0311b02d955cc88b92fc7d08a1030`. Anything else (for example `CN=Android Debug`) is not an official build.

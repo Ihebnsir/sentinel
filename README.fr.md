@@ -61,7 +61,7 @@ Données fictives uniquement. Écrans rendus par Flutter au format d'un Pixel 8 
 - **Signature vérifiable.** Les APK officiels sont signés avec une seule clé de publication. Vérifiez avant d'installer :
 
   ```
-  apksigner verify --print-certs sentinel-1.2.0.apk
+  apksigner verify --print-certs sentinel-1.2.1.apk
   ```
 
   L'empreinte SHA-256 du certificat doit être `ec541b88160d995808bb24a61a8968d7c3c0311b02d955cc88b92fc7d08a1030`. Toute autre empreinte (par exemple `CN=Android Debug`) n'est pas une version officielle.
